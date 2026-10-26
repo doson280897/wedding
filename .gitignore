@@ -1,1 +1,14 @@
-*.jpg
+# Ảnh gốc: chỉ lưu ở máy, KHÔNG push lên GitHub
+/assets/
+/images/
+
+# Cache, môi trường local
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+Thumbs.db
+
+# LƯU Ý: KHÔNG ignore assets-optimized/, thumbs/, images.json
+# vì GitHub Pages cần các file này.
