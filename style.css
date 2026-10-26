@@ -1,0 +1,143 @@
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#0b0e0e;color:#eadfcf;font-family:Montserrat,sans-serif;font-size:14px;line-height:1.75}a{text-decoration:none;color:inherit}button{font:inherit} .reading-progress{position:fixed;top:0;left:0;height:2px;background:#d7b985;width:0;z-index:999}.overline{font-size:11px;letter-spacing:3px;font-weight:500}.gold{color:#d7b985}.center{text-align:center}.section-title{font:500 clamp(33px,4vw,52px)/1.14 'Cormorant Garamond',serif;letter-spacing:1px;margin:12px 0 8px;text-align:center;color:#e8c797}.section-title em{font-weight:400;color:#b89a6c}.section-lead{text-align:center;color:#aeb2ad;font-size:13px;margin:0}.section-head{text-align:center;margin-bottom:42px}.section-head>.overline{margin:0}.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}.reveal.visible{opacity:1;transform:none}
+/* Cover: user's assets/hero.jpg first, demo image automatically below */
+.hero{height:min(760px,100svh);min-height:570px;position:relative;overflow:hidden;background:#191b17;color:#f5e9d6}.hero-photo{position:absolute;inset:0;background-image:url('assets/hero.jpg'),url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1800&q=85');background-position:center 40%,center 40%;background-size:cover;animation:heroZoom 23s ease-out both}.hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,11,10,.27) 0%,rgba(8,11,10,.32) 42%,rgba(8,11,10,.84) 100%)}@keyframes heroZoom{from{transform:scale(1.09)}to{transform:scale(1)}}.topbar{position:absolute;top:0;left:0;right:0;padding:22px clamp(20px,5vw,70px);display:flex;justify-content:space-between;align-items:center;z-index:2}.monogram{font:32px 'Cormorant Garamond',serif;letter-spacing:2px}.monogram span{color:#e2c18b}.top-link{font-size:10px;letter-spacing:2px;border-bottom:1px solid #c2a278;padding-bottom:5px}.hero-layout{position:relative;z-index:1;display:grid;grid-template-columns:52% 48%;height:100%;align-items:center;padding:70px clamp(24px,5vw,70px)}.hero-copy{text-align:center}.hero-copy .overline{color:#e6c697;font-size:12px}.guest-greeting{font-size:13px;color:#ead9c5;letter-spacing:1.5px;margin:12px 0}.hero-copy h1{font:500 clamp(46px,5vw,86px)/1.04 'Cormorant Garamond',serif;letter-spacing:2px;margin:8px auto;color:#efd6ac;max-width:570px}.hero-copy h1 span{display:block;font:400 48px 'Great Vibes',cursive;color:#d5b580}.fine-flourish{color:#c9ad7c;font-size:25px;line-height:1}.handwriting{font:400 clamp(23px,2.5vw,38px) 'Great Vibes',cursive;color:#f4e2d3;margin:9px 0 19px}.hero-date{font:500 13px Montserrat,sans-serif;letter-spacing:4px}.hero-date span{color:#b99a67;margin:0 9px}.hero-count-title{margin:27px 0 12px;color:#e7d4b5;font-size:10px;letter-spacing:2px}.countdown{display:flex;justify-content:center;gap:10px}.countdown>div{min-width:62px;border:1px solid #c6ae885e;border-radius:7px;background:#0007;padding:8px 10px}.countdown strong{display:block;font:400 29px/1.1 'Cormorant Garamond',serif}.countdown small{display:block;font-size:9px;letter-spacing:1px;margin-top:4px}.finished{font:23px 'Cormorant Garamond',serif}.scroll-cue{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);z-index:2;white-space:nowrap;font-size:9px;letter-spacing:3px;color:#d5c9ad}
+/* Couple editorial */
+.couple-section{position:relative;padding:70px 6% 90px;background:radial-gradient(ellipse at 50% 25%,#29312b,#0b1010 74%);overflow:hidden}.couple-section:before,.family-section:before,.events-section:before{content:'❧';position:absolute;left:-18px;top:28%;font:180px 'Great Vibes',cursive;color:#b99b6418;pointer-events:none}.couple-editorial{max-width:1280px;display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);gap:12px;margin:47px auto 0;align-items:center}.person{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:18px;align-items:center;min-width:0}.person-bride{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}.portrait-set{position:relative;height:345px}.portrait{position:absolute;overflow:hidden;background:linear-gradient(140deg,#5b695c,#272923);border:2px solid #bfa47a8c;box-shadow:0 15px 45px #000b}.portrait.large{width:78%;height:90%;top:0;left:6%;border-radius:170px 170px 10px 10px}.portrait.small{width:45%;height:49%;right:0;bottom:0;border-radius:90px 90px 8px 8px;border:4px solid #171d19;outline:1px solid #bfa47a8c}.portrait img{height:100%;width:100%;object-fit:cover;display:block}.person-copy .script{display:block;font:35px 'Great Vibes',cursive;color:#d9b98b}.person-copy h3{font:500 clamp(29px,3vw,43px) 'Cormorant Garamond',serif;color:#e7c591;letter-spacing:1px;margin:5px 0 10px}.person-copy p{font:16px/1.7 'Cormorant Garamond',serif;max-width:230px;color:#d6d0c6}.ornament{font-size:26px;color:#d5b886}.couple-divider{height:210px;display:grid;place-items:center;color:#d6ae6f;font-size:23px;border-left:1px solid #bca27565;transform:translateX(15px)}
+/* Family */
+.family-section,.events-section,.locations-section{position:relative;background:#0b0e0e;padding:74px 6%;overflow:hidden}.family-grid,.event-grid,.location-grid{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.family-card{background:linear-gradient(150deg,#192019,#101512);border:1px solid #ac92634a;text-align:center;padding:38px 22px}.family-card>span,.family-card small{font-size:10px;letter-spacing:2.5px;color:#d5b78b}.family-card h3{font:500 30px 'Cormorant Garamond',serif;margin:10px 0 18px;color:#e6c99d}.family-card p{margin:6px 0}.family-card strong{font-weight:500;color:#f1e6d5}.family-address{color:#aeb5ae;font-size:12px;min-height:45px}.mini-line{height:1px;width:65px;background:#ad9161;margin:21px auto}.family-card h4{font:37px 'Great Vibes',cursive;margin:8px 0 0;color:#e6c99d}
+/* Album floating depth, no controls */
+.album-section{position:relative;isolation:isolate;overflow:hidden;padding:74px 0 48px;background:radial-gradient(ellipse at 50% 46%,#243139 0%,#11191d 40%,#05090d 84%);border-top:1px solid #aa8b5433;border-bottom:1px solid #aa8b5433}.album-ambient{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#c9a36b16,transparent 50%);pointer-events:none}.album-header{position:relative;text-align:center;padding:0 20px}.album-eyebrow{font-size:12px;color:#d7b985;letter-spacing:4px;margin:0}.album-header h2{font:500 clamp(38px,5vw,59px) 'Cormorant Garamond',serif;margin:7px 0;color:#e8c89a}.album-header h2 em{font:40px 'Great Vibes',cursive;color:#f1d4a8}.album-header>p:last-child{color:#bfc2bf;font-size:12px;margin:0}.album-viewport{height:clamp(360px,45vw,520px);position:relative;overflow:hidden;margin-top:8px;perspective:1080px;perspective-origin:center 45%;touch-action:pan-y;cursor:grab}.album-viewport:active{cursor:grabbing}.album-viewport:focus-visible{outline:2px solid #e0c399;outline-offset:-6px}.album-space{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .22s ease-out;pointer-events:none}.album-card{width:clamp(180px,24vw,300px);height:clamp(260px,34vw,415px);position:absolute;top:50%;left:50%;margin-left:calc(clamp(180px,24vw,300px)/-2);margin-top:calc(clamp(260px,34vw,415px)/-2);padding:6px 6px 26px;border:1px solid #d0b17b68;border-radius:5px;background:#2a3030;box-shadow:0 20px 60px #000b;transform-style:preserve-3d;backface-visibility:hidden;will-change:transform,opacity;transition:transform .7s cubic-bezier(.18,.76,.2,1),opacity .4s ease;pointer-events:none}.album-card.is-main{box-shadow:0 25px 85px #000e,0 0 30px #d1b37850}.album-photo{width:100%;height:100%;object-fit:cover;display:block;border-radius:3px}.album-card-number{position:absolute;right:13px;bottom:6px;color:#d9d4cc;font-size:10px;letter-spacing:2px}.album-floor{position:absolute;left:12%;right:12%;bottom:8%;height:1px;background:linear-gradient(90deg,transparent,#cfb28188,transparent);box-shadow:0 0 35px #d2b3844a;pointer-events:none}.album-status{text-align:center;color:#ddc49c;padding:3px 20px 15px;font-size:12px}.album-status[hidden]{display:none}.album-bottom{max-width:800px;padding:0 25px;display:flex;justify-content:space-between;align-items:center;gap:15px;margin:0 auto;font-size:11px;color:#bebbb6;letter-spacing:2px}.album-count{color:#dfc99e;white-space:nowrap}.album-progress{height:2px;background:#ffffff25;width:min(800px,calc(100% - 50px));margin:13px auto}.album-progress span{display:block;height:100%;width:0;background:#d2ad76;transition:width .3s ease}
+/* Events */
+.events-section{background:radial-gradient(ellipse at center top,#20211a,#0b0e0e 66%)}.event-card{padding:32px 30px;border:1px solid #af966c67;background:linear-gradient(145deg,#181a16,#101410);box-shadow:0 20px 44px #0006}.event-label{font-size:12px;letter-spacing:2.4px;color:#d1aa70;text-align:center}.date-block{display:flex;justify-content:center;gap:18px;align-items:center;margin:19px 0}.date-icon{font-size:44px;color:#c5a575}.date-block small{display:block;font-size:11px;color:#b4ab96;letter-spacing:1px}.date-block strong{font:500 35px 'Cormorant Garamond',serif;color:#ebcd9b}.event-rule{height:1px;background:#ac906355;margin:18px 0}.event-detail{font-size:13px;margin:9px 0;color:#e1d7c9}.event-detail span{color:#dfc295;font-weight:600;margin-right:14px}.event-address,.lunar{font-size:12px;color:#a7aaa2;margin:8px 0}.map-button{display:inline-block;padding:10px 19px;border-radius:30px;border:1px solid #bea476;background:linear-gradient(140deg,#ad8b5840,#b5976335);color:#f3dec1;font-size:10px;letter-spacing:1.6px;margin-top:15px}.map-button:hover{background:#c4a16d66}
+.locations-section{background:#101512}.location-card{background:#151a17;border:1px solid #aa90614f;overflow:hidden}.location-info{padding:29px 25px;text-align:center}.location-info small{font-size:10px;letter-spacing:2px;color:#d4b681}.location-info h3{font:30px 'Cormorant Garamond',serif;color:#e4c79a;margin:8px 0}.location-info p{font-size:12px;color:#b9b6ae;margin:8px 0}.location-card iframe{width:100%;height:260px;border:0;display:block;filter:grayscale(.35)}
+.closing{min-height:350px;position:relative;display:grid;place-items:center;text-align:center;background:url('assets/ending.jpg') center/cover,url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=80') center/cover}.closing-overlay{position:absolute;inset:0;background:#070d0bd0}.closing-content{position:relative;padding:65px 20px}.closing h2{font:500 clamp(36px,5vw,57px)/1.2 'Cormorant Garamond',serif;color:#f0d2a3;margin:13px 0}.closing-names{font:44px 'Great Vibes',cursive;margin:10px 0;color:#f0dec2}.closing-names span{color:#bb996b}footer{padding:20px 6%;display:flex;justify-content:space-between;gap:10px;color:#a6a599;background:#070b09;font-size:10px;letter-spacing:2px}
+@media(max-width:1000px){.hero-layout{grid-template-columns:35% 65%}.couple-editorial{grid-template-columns:1fr;gap:15px}.couple-divider{display:none}.person{max-width:740px;width:100%;margin:0 auto}.portrait-set{height:370px}}
+@media(max-width:650px){.hero{height:90svh;min-height:620px}.hero-photo{background-position:42% center}.hero-shade{background:linear-gradient(180deg,#07100e2b,#07100e9b 60%,#07100ee6)}.hero-layout{display:flex;align-items:end;justify-content:center;padding:60px 18px 70px}.hero-copy h1{font-size:clamp(43px,12vw,62px)}.hero-copy .overline{font-size:10px}.hero-count-title{margin-top:18px}.hero-date{font-size:11px;letter-spacing:2px}.countdown>div{min-width:58px;padding:8px 7px}.countdown strong{font-size:26px}.scroll-cue{bottom:15px}.top-link{font-size:9px}.couple-section,.family-section,.events-section,.locations-section{padding:58px 17px}.couple-editorial{margin-top:29px;gap:36px}.person,.person-bride{grid-template-columns:1fr}.person-bride .person-copy{order:2}.portrait-set{height:370px;max-width:370px;margin:0 auto;width:100%}.portrait.large{width:70%;left:10%}.portrait.small{width:40%;right:4%}.person-copy{text-align:center}.person-copy p{margin:8px auto}.family-grid,.event-grid,.location-grid{grid-template-columns:1fr}.family-card{padding:32px 20px}.section-title{font-size:38px}.album-section{padding:58px 0 40px}.album-header h2{font-size:39px}.album-viewport{height:380px;perspective:780px}.album-bottom{font-size:9px;letter-spacing:1px}.album-header h2 em{font-size:35px}footer{flex-direction:column;align-items:center;text-align:center}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}}
+
+/* ============================================================
+   CINEMATIC DARK TUNING — darker surroundings, brighter photos
+   Appended overrides: keeps layout and behavior unchanged.
+   ============================================================ */
+:root {
+  --cinematic-black: #070a09;
+  --cinematic-gold: #e0c393;
+  --cinematic-cream: #f0e6d7;
+}
+body { background: var(--cinematic-black); color: var(--cinematic-cream); }
+.section-title { color: var(--cinematic-gold); text-shadow: 0 2px 24px #0008; }
+.section-lead { color: #c3beb3; }
+
+/* Keep the photo itself bright; darken only the overlay around the text. */
+.hero { background: #080b09; }
+.hero-shade {
+  background: linear-gradient(90deg,
+    rgba(4,7,7,.28) 0%,
+    rgba(4,7,7,.39) 39%,
+    rgba(3,6,6,.80) 70%,
+    rgba(3,6,6,.91) 100%);
+}
+.hero-copy h1 { color: #f0d2a2; text-shadow: 0 3px 24px #0008; }
+.hero-copy .overline, .handwriting, .guest-greeting { text-shadow: 0 2px 12px #000b; }
+.countdown>div { background: rgba(4,7,7,.64); border-color: #d7b98570; }
+
+/* Editorial portraits: dramatic dark backdrop, no filter on portraits. */
+.couple-section {
+  background:
+    radial-gradient(ellipse at 22% 35%, rgba(153,116,68,.16), transparent 30%),
+    radial-gradient(ellipse at 80% 48%, rgba(152,116,68,.12), transparent 29%),
+    linear-gradient(180deg, #090c0a 0%, #060907 56%, #0a0d0a 100%);
+}
+.couple-section:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, #0004, transparent 17%, transparent 83%, #0004);
+}
+.couple-editorial { position: relative; z-index: 1; }
+.portrait {
+  background: #1a211b;
+  border-color: #d3b17c9c;
+  box-shadow: 0 20px 55px #000c, 0 0 32px #d6a66c18;
+}
+.portrait img { filter: none; }
+.person-copy .script { color: #e2c39a; }
+.person-copy h3 { color: #f0d09f; }
+.person-copy p { color: #e2d9c9; }
+
+/* Darken the negative space while keeping gallery images untouched. */
+.album-section {
+  background:
+    radial-gradient(ellipse at 50% 46%, #1b272d 0%, #0b1217 43%, #04070a 88%);
+  border-color: #a8895638;
+}
+.album-ambient {
+  background:
+    radial-gradient(ellipse at 50% 42%, #c9a36b13, transparent 43%);
+}
+.album-card { background: #1c2425; }
+.album-photo { filter: none; }
+.album-card.is-main { box-shadow: 0 26px 92px #000f, 0 0 43px #d1b3783e; }
+.album-header h2 { color: #f0d4a5; }
+
+/* Families, events and map cards: near-black with understated gold accents. */
+.family-section,
+.events-section,
+.locations-section { background: #070a08; }
+.events-section {
+  background: radial-gradient(ellipse at 50% 0%, #1b1a13, #070a08 70%);
+}
+.locations-section { background: #090d0a; }
+.family-card,
+.event-card,
+.location-card {
+  background: linear-gradient(145deg, #141916, #0b0f0c);
+  border-color: #ba995f59;
+  box-shadow: 0 15px 36px #0007;
+}
+.family-card h3,
+.family-card h4,
+.location-info h3 { color: #efcd9a; }
+.event-detail,
+.family-card p { color: #e8dfd1; }
+.family-address,
+.event-address,
+.lunar,
+.location-info p { color: #c0bbaf; }
+.map-button { border-color: #d0ad77a8; }
+
+/* Closing image remains visible; overlay becomes gently graduated. */
+.closing-overlay {
+  background: linear-gradient(180deg,
+    rgba(4,7,6,.70), rgba(4,7,6,.79));
+}
+.closing h2 { color: #f2d6aa; }
+footer { background: #050806; color: #c5b9a4; }
+
+@media (max-width:650px) {
+  .hero-shade {
+    background: linear-gradient(180deg,
+      rgba(4,7,6,.19) 0%,
+      rgba(4,7,6,.51) 48%,
+      rgba(4,7,6,.88) 100%);
+  }
+  .couple-section:after { display: none; }
+}
+
+/* Optimized wedding assets. Regenerated by python generate_gallery.py */
+.hero-photo {
+  background-image: url('assets-optimized/hero.webp');
+  background-position: center 40%;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.closing {
+  background-image: url('assets-optimized/ending.webp');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+@media(max-width:650px) {
+  .hero-photo { background-position: 42% center; }
+}
