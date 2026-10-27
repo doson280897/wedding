@@ -3,6 +3,9 @@ name: Deploy Wedding (optimized images only)
 on:
   push:
     branches: [main]
+  workflow_run:
+    workflows: ["Add 20 wedding photos (preserve existing album)"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
