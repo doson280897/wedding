@@ -205,244 +205,9 @@
   }
 
   const musicButton = document.getElementById("musicToggle");
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  let audioContext = null;
+  const YOUTUBE_MUSIC_ID = "BunWcLGUGuQ";
+  let youtubeMusicFrame = null;
   let musicPlaying = false;
-  let musicScheduler = 0;
-  let musicStep = 0;
-  let nextNoteTime = 0;
-  let masterGain = null;
-  let reverbGain = null;
-  let dryGain = null;
-  let breathNoiseBuffer = null;
-  const activeMusicNodes = new Set();
-
-  // Original pentatonic wedding theme: airy Chinese-flute mood, not based on an existing song.
-  // MIDI notes use a D-major pentatonic palette (D E F# A B) with deliberate breathing spaces.
-  const flutePhrase = [
-    [74,1.5],[76,.5],[78,1],[81,1],[78,1.5],[76,.5],[74,2],
-    [null,.75],[69,.75],[71,.5],[74,1.5],[76,.5],[78,1],[76,1],[74,2],
-    [null,1],[74,.5],[76,.5],[78,1],[81,1],[83,1.5],[81,.5],[78,1],
-    [76,1],[78,.5],[76,.5],[74,1.5],[71,.5],[69,2],[null,1],
-    [69,.75],[74,.75],[76,.5],[78,1],[81,1.5],[78,.5],[76,1],
-    [74,1],[71,1],[69,1.5],[71,.5],[74,2],[null,1],
-    [78,.75],[81,.75],[83,.5],[86,1],[83,1],[81,1],[78,1.5],[76,.5],
-    [74,1],[76,.5],[78,.5],[76,1],[74,1],[71,1],[69,2],[null,2]
-  ];
-  const BEAT = 60 / 66;
-
-  const midiToHz = midi => 440 * Math.pow(2, (midi - 69) / 12);
-
-  function trackNode(node) {
-    activeMusicNodes.add(node);
-    node.addEventListener?.("ended", () => activeMusicNodes.delete(node), {once:true});
-    return node;
-  }
-
-  function createReverbImpulse(context) {
-    const length = Math.floor(context.sampleRate * 2.4);
-    const impulse = context.createBuffer(2, length, context.sampleRate);
-    for (let channel = 0; channel < 2; channel++) {
-      const data = impulse.getChannelData(channel);
-      for (let i = 0; i < length; i++) {
-        const decay = Math.pow(1 - i / length, 2.7);
-        data[i] = (Math.random() * 2 - 1) * decay * 0.42;
-      }
-    }
-    return impulse;
-  }
-
-  function setupMusicGraph() {
-    if (!audioContext || masterGain) return;
-
-    masterGain = audioContext.createGain();
-    masterGain.gain.value = 0.0001;
-
-    dryGain = audioContext.createGain();
-    dryGain.gain.value = 0.84;
-
-    reverbGain = audioContext.createGain();
-    reverbGain.gain.value = 0.21;
-
-    const convolver = audioContext.createConvolver();
-    convolver.buffer = createReverbImpulse(audioContext);
-
-    const gentleLowpass = audioContext.createBiquadFilter();
-    gentleLowpass.type = "lowpass";
-    gentleLowpass.frequency.value = 7200;
-    gentleLowpass.Q.value = 0.35;
-
-    dryGain.connect(gentleLowpass);
-    gentleLowpass.connect(masterGain);
-    reverbGain.connect(convolver);
-    convolver.connect(masterGain);
-    masterGain.connect(audioContext.destination);
-
-    breathNoiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 2, audioContext.sampleRate);
-    const noise = breathNoiseBuffer.getChannelData(0);
-    for (let i = 0; i < noise.length; i++) noise[i] = Math.random() * 2 - 1;
-  }
-
-  function routeInstrument(source, amount = 0.28) {
-    if (!dryGain || !reverbGain) return;
-    source.connect(dryGain);
-    const send = audioContext.createGain();
-    send.gain.value = amount;
-    source.connect(send);
-    send.connect(reverbGain);
-  }
-
-  function scheduleFlute(midi, start, durationBeats, expression = 1) {
-    if (!audioContext || midi == null) return;
-    const duration = durationBeats * BEAT;
-    const frequency = midiToHz(midi);
-    const end = start + duration;
-
-    const body = trackNode(audioContext.createOscillator());
-    body.type = "sine";
-    body.frequency.setValueAtTime(frequency, start);
-
-    const harmonic = trackNode(audioContext.createOscillator());
-    harmonic.type = "triangle";
-    harmonic.frequency.setValueAtTime(frequency * 2, start);
-
-    const bodyGain = audioContext.createGain();
-    const harmonicGain = audioContext.createGain();
-    bodyGain.gain.setValueAtTime(0.0001, start);
-    bodyGain.gain.exponentialRampToValueAtTime(0.075 * expression, start + 0.09);
-    bodyGain.gain.setValueAtTime(0.064 * expression, Math.max(start + 0.11, end - 0.18));
-    bodyGain.gain.exponentialRampToValueAtTime(0.0001, end);
-    harmonicGain.gain.setValueAtTime(0.0001, start);
-    harmonicGain.gain.exponentialRampToValueAtTime(0.012 * expression, start + 0.11);
-    harmonicGain.gain.exponentialRampToValueAtTime(0.0001, end);
-
-    const vibrato = trackNode(audioContext.createOscillator());
-    const vibratoDepth = audioContext.createGain();
-    vibrato.type = "sine";
-    vibrato.frequency.setValueAtTime(5.1, start);
-    vibratoDepth.gain.setValueAtTime(0, start);
-    vibratoDepth.gain.linearRampToValueAtTime(11, start + 0.32);
-    vibratoDepth.gain.linearRampToValueAtTime(17, Math.max(start + 0.38, end - 0.12));
-    vibrato.connect(vibratoDepth);
-    vibratoDepth.connect(body.detune);
-    vibratoDepth.connect(harmonic.detune);
-
-    // A tiny pitch scoop mimics the natural attack of a bamboo flute.
-    body.detune.setValueAtTime(-13, start);
-    body.detune.linearRampToValueAtTime(0, start + 0.075);
-
-    const fluteFilter = audioContext.createBiquadFilter();
-    fluteFilter.type = "lowpass";
-    fluteFilter.frequency.setValueAtTime(4300, start);
-    fluteFilter.Q.value = 0.6;
-
-    body.connect(bodyGain);
-    harmonic.connect(harmonicGain);
-    bodyGain.connect(fluteFilter);
-    harmonicGain.connect(fluteFilter);
-    routeInstrument(fluteFilter, 0.42);
-
-    // Breath layer: band-passed noise, very low in the mix.
-    const breath = trackNode(audioContext.createBufferSource());
-    breath.buffer = breathNoiseBuffer;
-    breath.loop = true;
-    const breathFilter = audioContext.createBiquadFilter();
-    breathFilter.type = "bandpass";
-    breathFilter.frequency.setValueAtTime(Math.min(3600, frequency * 4.7), start);
-    breathFilter.Q.value = 1.1;
-    const breathGain = audioContext.createGain();
-    breathGain.gain.setValueAtTime(0.0001, start);
-    breathGain.gain.exponentialRampToValueAtTime(0.0065 * expression, start + 0.08);
-    breathGain.gain.exponentialRampToValueAtTime(0.0001, end);
-    breath.connect(breathFilter);
-    breathFilter.connect(breathGain);
-    routeInstrument(breathGain, 0.5);
-
-    body.start(start);
-    harmonic.start(start);
-    vibrato.start(start);
-    breath.start(start);
-    const stopAt = end + 0.05;
-    body.stop(stopAt);
-    harmonic.stop(stopAt);
-    vibrato.stop(stopAt);
-    breath.stop(stopAt);
-  }
-
-  function schedulePluck(midi, start, gainValue = 0.025) {
-    if (!audioContext) return;
-    const osc = trackNode(audioContext.createOscillator());
-    const gain = audioContext.createGain();
-    const filter = audioContext.createBiquadFilter();
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(midiToHz(midi), start);
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(2200, start);
-    filter.frequency.exponentialRampToValueAtTime(650, start + 1.2);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(gainValue, start + 0.015);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 1.45);
-    osc.connect(filter);
-    filter.connect(gain);
-    routeInstrument(gain, 0.5);
-    osc.start(start);
-    osc.stop(start + 1.5);
-  }
-
-  function schedulePad(rootMidi, start, beats = 8) {
-    if (!audioContext) return;
-    const duration = beats * BEAT;
-    const padGain = audioContext.createGain();
-    const filter = audioContext.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 850;
-    padGain.gain.setValueAtTime(0.0001, start);
-    padGain.gain.exponentialRampToValueAtTime(0.012, start + 0.8);
-    padGain.gain.setValueAtTime(0.009, start + duration - 0.8);
-    padGain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-
-    [0, 7].forEach((interval, index) => {
-      const osc = trackNode(audioContext.createOscillator());
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(midiToHz(rootMidi + interval), start);
-      osc.detune.value = index ? 4 : -4;
-      osc.connect(filter);
-      osc.start(start);
-      osc.stop(start + duration + 0.05);
-    });
-    filter.connect(padGain);
-    routeInstrument(padGain, 0.7);
-  }
-
-  function scheduleMusicAhead() {
-    if (!musicPlaying || !audioContext) return;
-    const horizon = audioContext.currentTime + 0.7;
-    while (nextNoteTime < horizon) {
-      const [note, beats] = flutePhrase[musicStep % flutePhrase.length];
-      const phrasePosition = musicStep % flutePhrase.length;
-      if (note != null) {
-        const expression = phrasePosition % 9 === 0 ? 1.08 : (phrasePosition % 5 === 0 ? 0.92 : 1);
-        scheduleFlute(note, nextNoteTime, beats * 0.92, expression);
-        if (phrasePosition % 4 === 0) schedulePluck(Math.max(50, note - 24), nextNoteTime, 0.018);
-      }
-      if (phrasePosition % 16 === 0) {
-        schedulePad(50, nextNoteTime, 8);
-      } else if (phrasePosition % 16 === 8) {
-        schedulePad(47, nextNoteTime, 8);
-      }
-      nextNoteTime += beats * BEAT;
-      musicStep++;
-    }
-  }
-
-  function stopScheduledMusic() {
-    window.clearInterval(musicScheduler);
-    musicScheduler = 0;
-    for (const node of activeMusicNodes) {
-      try { node.stop(); } catch (_) {}
-    }
-    activeMusicNodes.clear();
-  }
 
   function setMusicUI() {
     if (!musicButton) return;
@@ -453,35 +218,49 @@
     if (label) label.textContent = tr(musicPlaying ? "music.on" : "music.off");
   }
 
-  if (musicButton && !AudioContextClass) {
-    musicButton.hidden = true;
-  } else {
-    musicButton?.addEventListener("click", async () => {
-      if (!audioContext) {
-        audioContext = new AudioContextClass();
-        setupMusicGraph();
-      }
-      if (!musicPlaying) {
-        await audioContext.resume();
-        musicPlaying = true;
-        musicStep = 0;
-        nextNoteTime = audioContext.currentTime + 0.09;
-        masterGain.gain.cancelScheduledValues(audioContext.currentTime);
-        masterGain.gain.setValueAtTime(Math.max(masterGain.gain.value, 0.0001), audioContext.currentTime);
-        masterGain.gain.exponentialRampToValueAtTime(0.95, audioContext.currentTime + 0.35);
-        scheduleMusicAhead();
-        musicScheduler = window.setInterval(scheduleMusicAhead, 120);
-      } else {
-        musicPlaying = false;
-        stopScheduledMusic();
-        masterGain.gain.cancelScheduledValues(audioContext.currentTime);
-        masterGain.gain.setValueAtTime(Math.max(masterGain.gain.value, 0.0001), audioContext.currentTime);
-        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.18);
-        window.setTimeout(() => audioContext?.suspend(), 220);
-      }
-      setMusicUI();
-    });
+  function createYouTubeMusicPlayer() {
+    if (youtubeMusicFrame) return youtubeMusicFrame;
+
+    const frame = document.createElement("iframe");
+    frame.id = "youtubeWeddingMusic";
+    frame.title = "Wedding music";
+    frame.width = "1";
+    frame.height = "1";
+    frame.allow = "autoplay; encrypted-media";
+    frame.setAttribute("aria-hidden", "true");
+    frame.tabIndex = -1;
+    frame.style.cssText = "position:fixed;width:1px;height:1px;left:-9999px;bottom:0;opacity:0;pointer-events:none;border:0;";
+    frame.src =
+      "https://www.youtube.com/embed/" + YOUTUBE_MUSIC_ID +
+      "?autoplay=1&loop=1&playlist=" + YOUTUBE_MUSIC_ID +
+      "&controls=0&playsinline=1&enablejsapi=1&rel=0";
+    document.body.appendChild(frame);
+    youtubeMusicFrame = frame;
+    return frame;
   }
+
+  function sendYouTubeCommand(command) {
+    if (!youtubeMusicFrame?.contentWindow) return;
+    youtubeMusicFrame.contentWindow.postMessage(JSON.stringify({
+      event: "command",
+      func: command,
+      args: []
+    }), "*");
+  }
+
+  musicButton?.addEventListener("click", () => {
+    if (!youtubeMusicFrame) {
+      musicPlaying = true;
+      createYouTubeMusicPlayer();
+    } else if (musicPlaying) {
+      musicPlaying = false;
+      sendYouTubeCommand("pauseVideo");
+    } else {
+      musicPlaying = true;
+      sendYouTubeCommand("playVideo");
+    }
+    setMusicUI();
+  });
 
   function refreshDynamicLanguage() {
     updateGuest();
