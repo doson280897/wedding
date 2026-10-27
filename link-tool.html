@@ -27,10 +27,10 @@ button.secondary,.action.secondary{background:transparent;color:#f0dfc3}
 #generated{font-size:13px;overflow-wrap:anywhere;line-height:1.6;color:#e9d9b8}
 #feedback{min-height:22px;margin:12px 0 0;color:#d9c18e}
 .note{font-size:12px;margin-bottom:0}
-.lang-switch{display:flex;justify-content:flex-end;gap:8px}.lang-switch button{background:transparent;color:#e9d9b8;padding:7px 13px;min-height:36px}.lang-switch button.active{background:#bda16e;color:#131b15}</style>
+</style>
 </head>
 <body>
-<main><div class="lang-switch"><button type="button" id="viBtn">VN</button><button type="button" id="enBtn">EN</button></div>
+<main>
 <div class="eyebrow">TỐ NGA & THÀNH SƠN · WEDDING 2026</div>
 <h1>Tạo thiệp mời riêng</h1>
 <p>Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho người nhận.</p>
@@ -81,14 +81,7 @@ function changeLanguage(language){
  else node.textContent=dictionary[language][i];
  });
  document.title=dictionary[language][0]+" | Tố Nga & Thành Sơn";
- ["vi","en"].forEach(code=>{
- const button=document.getElementById(code+"Btn");
- button.classList.toggle("active",code===language);
- button.setAttribute("aria-pressed",String(code===language));
- });
 }
-document.getElementById("viBtn").addEventListener("click",()=>changeLanguage("vi"));
-document.getElementById("enBtn").addEventListener("click",()=>changeLanguage("en"));
 changeLanguage(initialLanguage);
 
 const form=document.getElementById("generator");
@@ -107,6 +100,7 @@ form.addEventListener("submit",event=>{
  const url=new URL("index.html",base);
  url.searchParams.set("to",guest);
  url.searchParams.set("party",party);
+ url.searchParams.set("lang",currentLanguage);
  invitation=url.href;
  generated.textContent=invitation;
  preview.href=invitation;
