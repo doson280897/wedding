@@ -121,6 +121,9 @@
     const slide = document.createElement("div");
     slide.className = "album-slide";
     slide.setAttribute("aria-hidden", "true");
+    // Start offscreen slides fully hidden before their first scene render.
+    slide.style.opacity = "0";
+    slide.style.pointerEvents = "none";
 
     const card = document.createElement("div");
     card.className = "album-card";
@@ -220,12 +223,13 @@
       const abs = Math.abs(relative);
 
       if (abs > metrics.activeRange) {
-        if (!item.hidden) {
-          item.hidden = true;
-          item.slide.style.opacity = "0";
-          item.slide.style.pointerEvents = "none";
-          item.slide.setAttribute("aria-hidden", "true");
-        }
+        // Apply hidden state even on the very first render. Newly created
+        // slides already have hidden=true, so a conditional here left them
+        // visible at their untransformed default position until scrolling.
+        item.hidden = true;
+        item.slide.style.opacity = "0";
+        item.slide.style.pointerEvents = "none";
+        item.slide.setAttribute("aria-hidden", "true");
         continue;
       }
 
