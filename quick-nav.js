@@ -417,6 +417,13 @@
 
   floatingControls.forEach(installFloatingControl);
 
+  // The envelope temporarily pins the switch next to the safe area.
+  // Restore the user's saved draggable position once the envelope disappears.
+  document.addEventListener("wedding:envelopeexit", () => {
+    const languageControl = document.querySelector(".language-switch");
+    if (languageControl) restoreFloatingPosition(languageControl);
+  });
+
   window.addEventListener("resize", () => {
     floatingControls.forEach(control => {
       if (control.matches(".language-switch") && document.body.classList.contains("envelope-locked")) return;
