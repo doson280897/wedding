@@ -46,7 +46,7 @@ jobs:
               path = Path("images/original/album") / name
               if path.exists():
                   continue
-              gdown.download(id=file_id, output=str(path), quiet=False, fuzzy=True)
+              gdown.download(id=file_id, output=str(path), quiet=False)
               if not path.exists() or path.stat().st_size < 10000:
                   raise RuntimeError("Drive download failed: " + name + "; check link-sharing permissions")
       - name: Optimize with existing Python generator
