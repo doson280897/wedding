@@ -183,11 +183,19 @@ def generate_manifest():
             continue
 
         digest = hashlib.sha1(target.read_bytes()).hexdigest()[:10]
+        try:
+            with Image.open(target) as optimized:
+                width, height = optimized.size
+        except (OSError, ValueError, UnidentifiedImageError):
+            width, height = 0, 0
+
         manifest["photos"].append(
             {
                 "src": quote(target.relative_to(ROOT).as_posix(), safe="/"),
                 "name": safe_display_name(source),
                 "v": digest,
+                "width": width,
+                "height": height,
             }
         )
 

@@ -258,6 +258,17 @@
   <div class="album-bottom"><span class="album-hint" data-i18n="album.hint">← VUỐT TRÁI HOẶC PHẢI ĐỂ XEM ẢNH →</span><span class="album-count" id="albumCount" aria-live="polite">00 / 00</span></div>
   <div class="album-progress"><span id="albumProgress"></span></div>
 </section>
+
+<div class="album-lightbox" id="albumLightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Xem ảnh cưới toàn màn hình" data-i18n-aria="album.fullscreenAria">
+  <button type="button" class="album-lightbox-close" id="albumLightboxClose" aria-label="Đóng ảnh toàn màn hình" data-i18n-aria="album.closeAria">×</button>
+  <button type="button" class="album-lightbox-nav album-lightbox-prev" id="albumLightboxPrev" aria-label="Ảnh trước" data-i18n-aria="album.prevAria">‹</button>
+  <div class="album-lightbox-stage" id="albumLightboxStage">
+    <img id="albumLightboxImage" alt="" draggable="false" decoding="async">
+  </div>
+  <button type="button" class="album-lightbox-nav album-lightbox-next" id="albumLightboxNext" aria-label="Ảnh tiếp theo" data-i18n-aria="album.nextAria">›</button>
+  <div class="album-lightbox-counter" id="albumLightboxCounter" aria-live="polite">01 / 01</div>
+</div>
+
 <section class="closing"><div class="closing-overlay"></div><div class="closing-content"><p class="overline gold" data-i18n="closing.eyebrow">CẢM ƠN BẠN ĐÃ ĐẾN</p><h2 data-i18n-html="closing.title">Hẹn gặp bạn<br>trong ngày hạnh phúc</h2><p class="closing-names" id="closingNames" data-party-name-pair="closing">Thành Sơn <span>&amp;</span> Tố Nga</p></div></section>
 </main>
 <footer><span id="footerNames" data-party-name-pair="footer">© 2026 THÀNH SƠN &amp; TỐ NGA</span><span data-i18n="footer.love">GỬI TRỌN YÊU THƯƠNG ♡</span></footer>

@@ -9,6 +9,13 @@
   const editorialCaption = document.getElementById("albumEditorialCaption");
   const captionNumber = document.getElementById("albumCaptionNumber");
   const captionText = document.getElementById("albumCaptionText");
+  const lightbox = document.getElementById("albumLightbox");
+  const lightboxStage = document.getElementById("albumLightboxStage");
+  const lightboxImage = document.getElementById("albumLightboxImage");
+  const lightboxCounter = document.getElementById("albumLightboxCounter");
+  const lightboxClose = document.getElementById("albumLightboxClose");
+  const lightboxPrev = document.getElementById("albumLightboxPrev");
+  const lightboxNext = document.getElementById("albumLightboxNext");
   const tr = key => window.WeddingI18n ? window.WeddingI18n.t(key) : key;
 
   let statusKey = status?.dataset.statusKey || "album.lazy";
@@ -40,14 +47,60 @@
   let scrollEndTimer = 0;
   let mouseDrag = null;
   let recentering = false;
-  let layoutStep = 1;
-  let firstSlideCenter = 0;
+  let lastTouchTap = { time:0, index:-1 };
+  let lightboxIndex = 0;
+  let lightboxReturnFocus = null;
+  let lightboxPointer = null;
   const decodeQueue = [];
   let activeDecodes = 0;
   const MAX_DECODE_CONCURRENCY = 4;
 
   const wrap = index => ((index % photos.length) + photos.length) % photos.length;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+  function slideCenterAt(index) {
+    const slide = slides[index]?.slide;
+    return slide ? slide.offsetLeft + slide.offsetWidth / 2 : 0;
+  }
+
+  function preserveViewportAnchor(mutator) {
+    if (!slides.length || recentering) {
+      mutator();
+      return;
+    }
+    const anchorIndex = nearestSlotIndex();
+    const anchor = slides[anchorIndex]?.slide;
+    const before = anchor ? anchor.offsetLeft + anchor.offsetWidth / 2 : 0;
+    mutator();
+    const after = anchor ? anchor.offsetLeft + anchor.offsetWidth / 2 : before;
+    viewport.scrollLeft += after - before;
+  }
+
+  function applyItemRatio(item, ratio, preserve = true) {
+    if (!item?.slide || !item.card) return;
+    const safeRatio = clamp(Number(ratio) || .78, .56, 1.9);
+    item.ratio = safeRatio;
+
+    const resize = () => {
+      const cardHeight = item.card.getBoundingClientRect().height || (viewport.clientWidth < 700 ? 360 : 460);
+      const imageHeight = Math.max(150, cardHeight - 27);
+      const compact = viewport.clientWidth < 700;
+      const minWidth = compact ? Math.min(172, viewport.clientWidth * .46) : 190;
+      const maxWidth = compact ? viewport.clientWidth * .84 : Math.min(650, viewport.clientWidth * .70);
+      const width = clamp(imageHeight * safeRatio, minWidth, maxWidth);
+      item.slide.style.width = width + "px";
+    };
+
+    if (preserve) preserveViewportAnchor(resize);
+    else resize();
+  }
+
+  function refreshAdaptiveWidths() {
+    slides.forEach(item => {
+      const photo = photos[item.photoIndex];
+      applyItemRatio(item, photo?.ratio || item.ratio || .78, false);
+    });
+  }
 
   function updateEditorialCaption(animate = true) {
     if (!captionNumber || !captionText || !photos.length) return;
@@ -72,6 +125,7 @@
   document.addEventListener("wedding:languagechange", () => {
     if (status && !status.hidden) setStatus(statusKey);
     updateEditorialCaption(false);
+    if (lightbox && !lightbox.hidden) updateLightbox();
   });
 
   function createSlide(slotIndex) {
@@ -96,11 +150,50 @@
     const label = document.createElement("span");
     label.className = "album-card-number";
 
+    const item = { slide, card, img, label, photoIndex:-1, ratio:.78, tapStart:null };
+
+    img.addEventListener("load", () => {
+      if (item.photoIndex < 0 || !img.naturalWidth || !img.naturalHeight) return;
+      const ratio = img.naturalWidth / img.naturalHeight;
+      const photo = photos[item.photoIndex];
+      if (photo) photo.ratio = ratio;
+      applyItemRatio(item, ratio, true);
+      warmDecode(img);
+      requestDepthRender();
+    });
+
+    slide.addEventListener("dblclick", event => {
+      if (item.photoIndex < 0) return;
+      event.preventDefault();
+      openLightbox(item.photoIndex, slide);
+    });
+
+    slide.addEventListener("pointerdown", event => {
+      if (event.pointerType === "mouse") return;
+      item.tapStart = { x:event.clientX, y:event.clientY, time:performance.now() };
+    }, { passive:true });
+
+    slide.addEventListener("pointerup", event => {
+      if (event.pointerType === "mouse" || !item.tapStart || item.photoIndex < 0) return;
+      const start = item.tapStart;
+      item.tapStart = null;
+      const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y);
+      if (moved > 14 || performance.now() - start.time > 420) return;
+
+      const now = performance.now();
+      if (lastTouchTap.index === item.photoIndex && now - lastTouchTap.time < 330) {
+        lastTouchTap = { time:0, index:-1 };
+        openLightbox(item.photoIndex, slide);
+      } else {
+        lastTouchTap = { time:now, index:item.photoIndex };
+      }
+    }, { passive:true });
+
     card.append(img, label);
     slide.append(card);
     space.append(slide);
 
-    return { slide, card, img, label, photoIndex: -1 };
+    return item;
   }
 
   function pumpDecodeQueue() {
@@ -125,7 +218,9 @@
     const nextIndex = wrap(photoIndex);
     if (item.photoIndex === nextIndex) return;
     item.photoIndex = nextIndex;
-    item.img.src = versionedAsset(photos[nextIndex]);
+    const photo = photos[nextIndex];
+    applyItemRatio(item, photo?.ratio || .78, !recentering);
+    item.img.src = versionedAsset(photo);
     item.label.textContent = `${String(nextIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
     warmDecode(item.img);
   }
@@ -147,20 +242,28 @@
 
   function refreshLayoutMetrics() {
     if (!slides.length) return;
-    layoutStep = slides[0].slide.getBoundingClientRect().width || 1;
-    firstSlideCenter = slides[0].slide.offsetLeft + layoutStep / 2;
+    refreshAdaptiveWidths();
   }
 
   function nearestSlotIndex() {
     if (!slides.length) return centerSlot;
     const center = viewport.scrollLeft + viewport.clientWidth / 2;
-    return clamp(Math.round((center - firstSlideCenter) / layoutStep), 0, slides.length - 1);
+    let nearest = 0;
+    let best = Infinity;
+    for (let index = 0; index < slides.length; index++) {
+      const distance = Math.abs(slideCenterAt(index) - center);
+      if (distance < best) {
+        best = distance;
+        nearest = index;
+      }
+    }
+    return nearest;
   }
 
   function targetScrollLeft(slotIndex) {
     if (!slides.length) return viewport.scrollLeft;
     slotIndex = clamp(slotIndex, 0, slides.length - 1);
-    return firstSlideCenter + slotIndex * layoutStep - viewport.clientWidth / 2;
+    return slideCenterAt(slotIndex) - viewport.clientWidth / 2;
   }
 
   function scrollToSlot(slotIndex, behavior = "smooth") {
@@ -171,6 +274,7 @@
       behavior: reducedMotion ? "auto" : behavior
     });
   }
+
 
   let lastActiveStart = -1;
   let lastActiveEnd = -1;
@@ -207,21 +311,24 @@
 
     const compact = viewport.clientWidth < 700;
     const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
-    const floatingIndex = (viewportCenter - firstSlideCenter) / layoutStep;
-    const activeRadius = compact ? 4 : 5;
-
-    const start = Math.max(0, Math.floor(floatingIndex) - activeRadius);
-    const end = Math.min(slides.length - 1, Math.ceil(floatingIndex) + activeRadius);
+    const anchorIndex = nearestSlotIndex();
+    const activeRadius = compact ? 5 : 6;
+    const start = Math.max(0, anchorIndex - activeRadius);
+    const end = Math.min(slides.length - 1, anchorIndex + activeRadius);
     hideOutsideActiveZone(start, end);
+
+    const depthUnit = compact
+      ? Math.max(170, viewport.clientWidth * .52)
+      : Math.max(235, Math.min(360, viewport.clientWidth * .29));
 
     for (let index = start; index <= end; index++) {
       const item = slides[index];
-      const relative = index - floatingIndex;
+      const relative = (slideCenterAt(index) - viewportCenter) / depthUnit;
       const abs = Math.abs(relative);
 
-      if (abs > 4.6) {
+      if (abs > 4.8) {
         item.card.style.opacity = "0";
-        item.card.style.transform = "translate3d(0,34px,-220px) scale(.8)";
+        item.card.style.transform = "translate3d(0,34px,-240px) scale(.8)";
         item.card.classList.remove("is-main");
         item.slide.classList.remove("is-active-zone");
         item.slide.style.zIndex = "1";
@@ -229,17 +336,17 @@
       }
 
       const y = Math.min(abs * abs * (compact ? 7 : 9), compact ? 30 : 40);
-      const z = -Math.min(abs * abs * (compact ? 40 : 52), compact ? 190 : 250);
-      const ry = clamp(-relative * (compact ? 8 : 7), -24, 24);
-      const rz = clamp(relative * (compact ? .34 : .26), -1.25, 1.25);
-      const scale = Math.max(compact ? .84 : .86, 1 - abs * (compact ? .055 : .045));
-      const opacity = Math.max(.28, 1 - abs * .17);
+      const z = -Math.min(abs * abs * (compact ? 46 : 58), compact ? 205 : 280);
+      const ry = clamp(-relative * (compact ? 10 : 9), -32, 32);
+      const rz = clamp(relative * (compact ? .38 : .30), -1.4, 1.4);
+      const scale = Math.max(compact ? .83 : .85, 1 - abs * (compact ? .06 : .05));
+      const opacity = Math.max(.24, 1 - abs * .18);
 
       item.card.style.opacity = String(opacity);
       item.card.style.transform = `translate3d(0,${y}px,${z}px) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${scale})`;
-      item.card.classList.toggle("is-main", abs < 0.42);
+      item.card.classList.toggle("is-main", abs < .34);
       item.slide.classList.add("is-active-zone");
-      item.slide.style.zIndex = String(60 - Math.round(abs * 8));
+      item.slide.style.zIndex = String(70 - Math.round(abs * 9));
     }
   }
 
@@ -255,7 +362,10 @@
     if (!delta || !slides.length) return;
 
     recentering = true;
-    const step = layoutStep;
+    const selectedItem = slides[clamp(centerSlot + delta, 0, slides.length - 1)];
+    const beforeSelectedCenter = selectedItem
+      ? selectedItem.slide.offsetLeft + selectedItem.slide.offsetWidth / 2
+      : 0;
     const before = viewport.scrollLeft;
     const oldSnap = viewport.style.scrollSnapType;
     const oldBehavior = viewport.style.scrollBehavior;
@@ -287,9 +397,14 @@
     lastActiveStart = -1;
     lastActiveEnd = -1;
 
-    // DOM rotation moved the selected card by delta * step. Compensate that
-    // exact distance before the browser can paint a frame.
-    viewport.scrollLeft = before - delta * step;
+    refreshAdaptiveWidths();
+    const afterSelectedCenter = selectedItem
+      ? selectedItem.slide.offsetLeft + selectedItem.slide.offsetWidth / 2
+      : beforeSelectedCenter;
+
+    // Variable-width cards: compensate by the selected card's actual pixel
+    // displacement, not by a fixed step.
+    viewport.scrollLeft = before + (afterSelectedCenter - beforeSelectedCenter);
     renderDepth();
 
     requestAnimationFrame(() => {
@@ -349,6 +464,107 @@
     scrollEndTimer = window.setTimeout(finishScroll, 160);
   }
 
+  function updateLightbox() {
+    if (!photos.length || !lightboxImage || !lightboxCounter) return;
+    lightboxIndex = wrap(lightboxIndex);
+    const photo = photos[lightboxIndex];
+    lightboxImage.src = versionedAsset(photo);
+    lightboxImage.alt = tr("album.fullscreenPhotoAlt")
+      .replace("{current}", String(lightboxIndex + 1))
+      .replace("{total}", String(photos.length));
+    lightboxCounter.textContent = `${String(lightboxIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+
+    [-1, 1].forEach(delta => {
+      const neighbor = new Image();
+      neighbor.decoding = "async";
+      neighbor.src = versionedAsset(photos[wrap(lightboxIndex + delta)]);
+    });
+  }
+
+  function openLightbox(index, returnFocus = null) {
+    if (!lightbox || !photos.length) return;
+    lightboxIndex = wrap(index);
+    lightboxReturnFocus = returnFocus || document.activeElement;
+    updateLightbox();
+    lightbox.hidden = false;
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.classList.add("album-lightbox-open");
+    requestAnimationFrame(() => lightboxClose?.focus({ preventScroll:true }));
+  }
+
+  function closeLightbox() {
+    if (!lightbox || lightbox.hidden) return;
+    lightbox.hidden = true;
+    lightbox.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("album-lightbox-open");
+    lightboxPointer = null;
+    if (lightboxImage) lightboxImage.removeAttribute("src");
+    lightboxReturnFocus?.focus?.({ preventScroll:true });
+    lightboxReturnFocus = null;
+  }
+
+  function stepLightbox(delta) {
+    if (!photos.length) return;
+    lightboxIndex = wrap(lightboxIndex + delta);
+    updateLightbox();
+  }
+
+  lightboxClose?.addEventListener("click", closeLightbox);
+  lightboxPrev?.addEventListener("click", () => stepLightbox(-1));
+  lightboxNext?.addEventListener("click", () => stepLightbox(1));
+
+  lightboxStage?.addEventListener("pointerdown", event => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    lightboxPointer = { id:event.pointerId, x:event.clientX, y:event.clientY };
+    lightboxStage.setPointerCapture?.(event.pointerId);
+  });
+
+  lightboxStage?.addEventListener("pointerup", event => {
+    if (!lightboxPointer || event.pointerId !== lightboxPointer.id) return;
+    const dx = event.clientX - lightboxPointer.x;
+    const dy = event.clientY - lightboxPointer.y;
+    lightboxPointer = null;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
+    stepLightbox(dx < 0 ? 1 : -1);
+  });
+
+  lightboxStage?.addEventListener("pointercancel", () => {
+    lightboxPointer = null;
+  });
+
+  document.addEventListener("keydown", event => {
+    if (!lightbox || lightbox.hidden) return;
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeLightbox();
+      return;
+    }
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      stepLightbox(-1);
+      return;
+    }
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      stepLightbox(1);
+      return;
+    }
+    if (event.key !== "Tab") return;
+
+    const focusable = [lightboxClose, lightboxPrev, lightboxNext].filter(Boolean);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
   viewport.addEventListener("scroll", () => {
     requestDepthRender();
     if (recentering) return;
@@ -388,6 +604,7 @@
   viewport.addEventListener("lostpointercapture", endMouseDrag);
 
   viewport.addEventListener("keydown", event => {
+    if (lightbox && !lightbox.hidden) return;
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
     event.preventDefault();
     const base = nearestSlotIndex();
@@ -440,7 +657,16 @@
       const list = Array.isArray(manifest) ? manifest : manifest.photos;
       if (!Array.isArray(list)) throw new Error("Invalid manifest");
 
-      photos = list.filter(photo => photo && typeof photo.src === "string" && photo.src);
+      photos = list
+        .filter(photo => photo && typeof photo.src === "string" && photo.src)
+        .map(photo => {
+          const width = Number(photo.width);
+          const height = Number(photo.height);
+          return {
+            ...photo,
+            ratio: width > 0 && height > 0 ? width / height : Number(photo.ratio) || 0
+          };
+        });
       if (!photos.length) {
         setStatus("album.empty");
         return;
