@@ -22,7 +22,11 @@
   } else {
     document.documentElement.classList.add("party-pending");
     const partyButtons = Array.from(document.querySelectorAll("[data-party-select]"));
-    requestAnimationFrame(() => partyButtons[0]?.focus({preventScroll:true}));
+    requestAnimationFrame(() => {
+      if (!document.documentElement.classList.contains("link-tool-active")) {
+        partyButtons[0]?.focus({preventScroll:true});
+      }
+    });
 
     partyButtons.forEach(button => button.addEventListener("click", () => {
       const side = button.dataset.partySelect;
@@ -34,9 +38,9 @@
     }));
 
     document.addEventListener("keydown", event => {
-      if (!document.documentElement.classList.contains("party-pending") || event.key !== "Tab") return;
+      if (!document.documentElement.classList.contains("party-pending") || document.documentElement.classList.contains("link-tool-active") || event.key !== "Tab") return;
       const adminLink = document.querySelector(".party-admin-link");
-       const focusable = [...languageButtons, ...partyButtons, adminLink].filter(element => element && !element.disabled);
+      const focusable = [...languageButtons, ...partyButtons, adminLink].filter(element => element && !element.disabled);
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable.at(-1);
