@@ -25,8 +25,8 @@
       window.location.replace(url.href);
     }));
 
-    partySelector?.addEventListener("keydown", event => {
-      if (event.key !== "Tab") return;
+    document.addEventListener("keydown", event => {
+      if (!document.documentElement.classList.contains("party-pending") || event.key !== "Tab") return;
       const focusable = [...languageButtons, ...partyButtons].filter(button => !button.disabled);
       if (!focusable.length) return;
       const first = focusable[0];
@@ -217,7 +217,8 @@
     closeInvitation?.addEventListener("click", () => enterInvitation(false));
     skipInvitation?.addEventListener("click", () => enterInvitation(true));
 
-    intro.addEventListener("keydown", event => {
+    document.addEventListener("keydown", event => {
+      if (intro.hidden || !document.body.classList.contains("envelope-locked")) return;
       if (event.key === "Escape") {
         event.preventDefault();
         if (opened) enterInvitation(false);
