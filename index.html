@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="quick-nav.css">
 </head>
 <body>
 <div class="reading-progress" id="progress"></div>
@@ -90,5 +91,23 @@
 </main>
 <footer>© 2026 THÀNH SƠN &amp; TỐ NGA <span>MADE WITH LOVE ♡</span></footer>
 <script src="script.js" defer></script><script src="gallery.js" defer></script>
+
+<div class="wq-backdrop" id="wqBackdrop" hidden></div>
+<nav class="wq-panel" id="wqPanel" aria-label="Mục lục thiệp cưới" aria-hidden="true" inert>
+  <div class="wq-panel-top"><span class="wq-kicker">THE WEDDING INVITATION</span><button type="button" class="wq-close" id="wqClose" aria-label="Đóng mục lục">×</button></div>
+  <div class="wq-heading">Khám phá <em>thiệp cưới</em></div>
+  <p class="wq-description">Chọn phần bạn muốn xem</p>
+  <div class="wq-links">
+    <a href="#home" class="wq-link"><span class="wq-no">01</span><span>Trang đầu thiệp</span><span class="wq-arrow">↗</span></a>
+    <a href="#couple" class="wq-link"><span class="wq-no">02</span><span>Cô dâu &amp; chú rể</span><span class="wq-arrow">↗</span></a>
+    <a href="#family" class="wq-link"><span class="wq-no">03</span><span>Thông tin hai gia đình</span><span class="wq-arrow">↗</span></a>
+    <a href="#album" class="wq-link"><span class="wq-no">04</span><span>Album ảnh cưới 3D</span><span class="wq-arrow">↗</span></a>
+    <a href="#events" class="wq-link"><span class="wq-no">05</span><span>Lịch lễ &amp; tiệc cưới</span><span class="wq-arrow">↗</span></a>
+    <a href="#locations" class="wq-link"><span class="wq-no">06</span><span>Bản đồ chỉ đường</span><span class="wq-arrow">↗</span></a>
+  </div>
+  <div class="wq-footnote">THÀNH SƠN <span>♡</span> TỐ NGA</div>
+</nav>
+<button type="button" class="wq-toggle" id="wqToggle" aria-label="Mở mục lục thiệp cưới" aria-controls="wqPanel" aria-expanded="false"><span class="wq-toggle-glyph" aria-hidden="true">☷</span><span>MỤC LỤC</span></button>
+<script src="quick-nav.js" defer></script>
 </body>
 </html>
