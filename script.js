@@ -145,7 +145,7 @@
   const openInvitation = document.getElementById("openInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
   let envelopeSeen = false;
-  try { envelopeSeen = sessionStorage.getItem("wedding-envelope-seen-v2") === "1"; } catch (_) {}
+  try { envelopeSeen = sessionStorage.getItem("wedding-envelope-seen-v3") === "1"; } catch (_) {}
   if (intro && !envelopeSeen) {
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
@@ -154,14 +154,35 @@
     const closeEnvelope = () => {
       if (closing) return;
       closing = true;
-      try { sessionStorage.setItem("wedding-envelope-seen-v2","1"); } catch (_) {}
-      document.body.classList.remove("envelope-locked");
+      try { sessionStorage.setItem("wedding-envelope-seen-v3","1"); } catch (_) {}
+
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
+        document.body.classList.remove("envelope-locked");
         return;
       }
-      intro.classList.add("is-opening");
-      window.setTimeout(() => { intro.hidden = true; }, 1450);
+
+      openInvitation?.setAttribute("disabled", "");
+      skipInvitation?.setAttribute("disabled", "");
+
+      // Separate compositor phases so transform animations do not fight each other:
+      // flap -> card -> crossfade. Body stays locked until the final frame.
+      requestAnimationFrame(() => {
+        intro.classList.add("is-flap-open");
+
+        window.setTimeout(() => {
+          intro.classList.add("is-card-lifted");
+
+          window.setTimeout(() => {
+            intro.classList.add("is-leaving");
+
+            window.setTimeout(() => {
+              intro.hidden = true;
+              document.body.classList.remove("envelope-locked");
+            }, 440);
+          }, 620);
+        }, 300);
+      });
     };
     openInvitation?.addEventListener("click", closeEnvelope);
     skipInvitation?.addEventListener("click", closeEnvelope);
