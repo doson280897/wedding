@@ -102,7 +102,7 @@ test("legacy generator URL redirects to the shared in-page view", async ({ page 
   await page.goto(base + "/link-tool.html?lang=en", {
     waitUntil: "domcontentloaded",
   });
-  await expect(page).toHaveURL(/index\\.html\\?tool=links&lang=en/);
+  await expect(page).toHaveURL(/index[.]html[?]tool=links&lang=en/);
   await expect(page.locator("#linkToolScreen")).toBeVisible();
   await expect(page.locator("#linkToolTitle")).toHaveText(
     "Create a personalized invitation",
