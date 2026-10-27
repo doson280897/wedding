@@ -417,7 +417,6 @@ footer { background: #050806; color: #c5b9a4; }
 .envelope-intro.is-leaving .invitation-card{transform:translate3d(0,-9%,0) scale(.992)}
 .envelope-intro.is-leaving .envelope-inner{transform:translate3d(0,-4px,0)}
 body.envelope-locked{overflow:hidden}
-body.envelope-locked .language-switch{visibility:hidden;pointer-events:none}
 @keyframes envelopeFade{from{opacity:0;transform:translate3d(0,8px,0) scale(.995)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
 @media(max-width:650px){
   .calendar-button{margin-left:0}
@@ -453,7 +452,7 @@ body.envelope-locked .language-switch{visibility:hidden;pointer-events:none}
 
 
 /* LANGUAGE SWITCH */
-.language-switch{position:fixed;top:18px;right:20px;z-index:2101;display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #c4a56f70;border-radius:999px;background:#101512d9;color:#b8aa93;box-shadow:0 8px 30px #0007;backdrop-filter:blur(8px);font:600 10px Montserrat,sans-serif;letter-spacing:.12em}
+.language-switch{position:fixed;top:18px;right:20px;z-index:6001;display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #c4a56f70;border-radius:999px;background:#101512d9;color:#b8aa93;box-shadow:0 8px 30px #0007;backdrop-filter:blur(8px);font:600 10px Montserrat,sans-serif;letter-spacing:.12em}
 .language-option{border:0;background:transparent;color:#a99f8d;padding:3px 4px;cursor:pointer;font:600 10px Montserrat,sans-serif;letter-spacing:.12em}
 .language-option.is-active{color:#f0d2a2}
 .language-option:focus-visible{outline:2px solid #e5c78e;outline-offset:3px;border-radius:4px}
@@ -524,3 +523,8 @@ html[data-party] .location-grid{grid-template-columns:minmax(0,720px);justify-co
   .party-selector-action{padding-top:17px}
 }
 @media(prefers-reduced-motion:reduce){.party-selector-option{transition:none!important}}
+
+
+/* LANGUAGE ALWAYS AVAILABLE */
+html.party-pending body>.language-switch{visibility:visible!important;pointer-events:auto!important}
+body.envelope-locked .language-switch{visibility:visible!important;pointer-events:auto!important}

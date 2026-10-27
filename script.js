@@ -180,9 +180,7 @@
   const intro = document.getElementById("envelopeIntro");
   const openInvitation = document.getElementById("openInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
-  let envelopeSeen = false;
-  try { envelopeSeen = sessionStorage.getItem("wedding-envelope-seen-v5") === "1"; } catch (_) {}
-  if (intro && !envelopeSeen && selectedParty) {
+  if (intro && selectedParty) {
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
     window.setTimeout(() => openInvitation?.focus({preventScroll:true}), 0);
@@ -190,7 +188,6 @@
     const closeEnvelope = () => {
       if (closing) return;
       closing = true;
-      try { sessionStorage.setItem("wedding-envelope-seen-v5","1"); } catch (_) {}
 
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
@@ -225,7 +222,6 @@
     skipInvitation?.addEventListener("click", () => {
       if (closing) return;
       closing = true;
-      try { sessionStorage.setItem("wedding-envelope-seen-v5","1"); } catch (_) {}
       intro.hidden = true;
       document.body.classList.remove("envelope-locked");
     });
@@ -357,6 +353,33 @@
     }
   });
 
+  function renderPartyNameOrder() {
+    if (!selectedParty) return;
+    const brideFirst = selectedParty === "bride";
+    const pairs = {
+      envelope: brideFirst
+        ? '<span>Tố Nga</span><em>&amp;</em><span>Thành Sơn</span>'
+        : '<span>Thành Sơn</span><em>&amp;</em><span>Tố Nga</span>',
+      hero: brideFirst
+        ? 'TỐ NGA <span>&amp;</span> THÀNH SƠN'
+        : 'THÀNH SƠN <span>&amp;</span> TỐ NGA',
+      closing: brideFirst
+        ? 'Tố Nga <span>&amp;</span> Thành Sơn'
+        : 'Thành Sơn <span>&amp;</span> Tố Nga',
+      footer: brideFirst
+        ? '© 2026 TỐ NGA &amp; THÀNH SƠN'
+        : '© 2026 THÀNH SƠN &amp; TỐ NGA',
+      menu: brideFirst
+        ? 'TỐ NGA <span>♡</span> THÀNH SƠN'
+        : 'THÀNH SƠN <span>♡</span> TỐ NGA'
+    };
+
+    document.querySelectorAll("[data-party-name-pair]").forEach(node => {
+      const key = node.dataset.partyNamePair;
+      if (pairs[key]) node.innerHTML = pairs[key];
+    });
+  }
+
   function refreshPartyLabels() {
     const label = document.getElementById("heroCeremonyLabel");
     if (!label || !selectedParty) return;
@@ -365,6 +388,7 @@
 
   function refreshDynamicLanguage() {
     updateGuest();
+    renderPartyNameOrder();
     refreshPartyLabels();
     countdown();
     setMusicUI();

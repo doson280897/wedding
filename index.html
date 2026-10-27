@@ -142,7 +142,7 @@
         <div class="invitation-card-rule"></div>
         <p class="envelope-eyebrow" data-i18n="envelope.eyebrow">SAVE THE DATE</p>
         <span class="invitation-leaf" aria-hidden="true">❧</span>
-        <h2 id="envelopeTitle"><span>Tố Nga</span><em>&amp;</em><span>Thành Sơn</span></h2>
+        <h2 id="envelopeTitle" data-party-name-pair="envelope"><span>Tố Nga</span><em>&amp;</em><span>Thành Sơn</span></h2>
         <p class="envelope-date"><span data-party-date="bride">14 · 11 · 2026</span><span class="party-date-separator">—</span><span data-party-date="groom">29 · 11 · 2026</span></p>
         <div class="invitation-leaf invitation-leaf-small" aria-hidden="true">❧</div>
         <p class="envelope-invite" id="envelopeGuest" data-i18n="envelope.invite">Trân trọng kính mời</p>
@@ -172,7 +172,7 @@
     <div class="hero-copy">
       <div class="overline" id="heroCeremonyLabel" data-i18n="hero.overline">— LỄ THÀNH HÔN —</div>
       <p class="guest-greeting" id="guestName" data-i18n="hero.greeting">Trân trọng kính mời</p>
-      <h1>THÀNH SƠN <span>&amp;</span> TỐ NGA</h1>
+      <h1 id="heroNames" data-party-name-pair="hero">THÀNH SƠN <span>&amp;</span> TỐ NGA</h1>
       <div class="fine-flourish">✧</div>
       <p class="handwriting" data-i18n="hero.handwriting">Cùng nhau viết tiếp những ngày hạnh phúc...</p>
       <div class="hero-date"><span data-party-date="bride">14.11.2026</span><span class="party-date-separator">—</span><span data-party-date="groom">29.11.2026</span></div>
@@ -241,9 +241,9 @@
     <article class="event-card reveal" data-party-scope="groom"><div class="event-label" data-i18n="events.groomLabel">LỄ TÂN HÔN · NHÀ TRAI</div><div class="date-block"><div><small data-i18n="events.sunday">CHỦ NHẬT</small><strong>29.11.2026</strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.groomCeremony"><span>09:00</span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.groomReception"><span>11:00</span> Tiệc mừng tại Tư Gia Nhà Trai</div><p class="event-address" data-i18n="events.groomAddress">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><p class="lunar" data-i18n="events.groomLunar">Nhằm ngày 21 tháng 10 năm Bính Ngọ</p><a href="#map-groom" class="map-button" data-i18n="events.map">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="groom" aria-label="Lưu lễ Tân Hôn vào lịch" data-i18n="events.calendar" data-i18n-aria="events.groomCalendarAria">＋ LƯU VÀO LỊCH</button></article>
   </div>
 </section>
-<section class="closing"><div class="closing-overlay"></div><div class="closing-content"><p class="overline gold" data-i18n="closing.eyebrow">CẢM ƠN BẠN ĐÃ ĐẾN</p><h2 data-i18n-html="closing.title">Hẹn gặp bạn<br>trong ngày hạnh phúc</h2><p class="closing-names">Thành Sơn <span>&amp;</span> Tố Nga</p></div></section>
+<section class="closing"><div class="closing-overlay"></div><div class="closing-content"><p class="overline gold" data-i18n="closing.eyebrow">CẢM ƠN BẠN ĐÃ ĐẾN</p><h2 data-i18n-html="closing.title">Hẹn gặp bạn<br>trong ngày hạnh phúc</h2><p class="closing-names" id="closingNames" data-party-name-pair="closing">Thành Sơn <span>&amp;</span> Tố Nga</p></div></section>
 </main>
-<footer>© 2026 THÀNH SƠN &amp; TỐ NGA <span data-i18n="footer.love">GỬI TRỌN YÊU THƯƠNG ♡</span></footer>
+<footer><span id="footerNames" data-party-name-pair="footer">© 2026 THÀNH SƠN &amp; TỐ NGA</span><span data-i18n="footer.love">GỬI TRỌN YÊU THƯƠNG ♡</span></footer>
 <script src="i18n.js?v=__BUILD_ID__" defer></script><script src="script.js?v=__BUILD_ID__" defer></script><script src="gallery.js?v=__BUILD_ID__" defer></script>
 
 <div class="wm-backdrop" id="wmBackdrop" hidden></div>
@@ -306,7 +306,7 @@
       <a href="#wedding-gift" class="wq-link"><span class="wq-no">07</span><span data-i18n="menu.gift">Mừng cưới</span><span class="wq-arrow">↗</span></a>
     </div>
   </div>
-  <div class="wq-footnote">THÀNH SƠN <span>♡</span> TỐ NGA</div>
+  <div class="wq-footnote" id="menuNames" data-party-name-pair="menu">THÀNH SƠN <span>♡</span> TỐ NGA</div>
 </nav>
 <button class="music-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="Bật nhạc nền dịu nhẹ" title="Bật/tắt nhạc nền"><span aria-hidden="true">♫</span><span class="music-label">NHẠC: TẮT</span></button>
 <button type="button" class="wq-toggle" id="wqToggle" aria-label="Mở mục lục thiệp cưới" aria-controls="wqPanel" aria-expanded="false"><span class="wq-toggle-glyph" aria-hidden="true">☷</span><span data-i18n="menu.toggle">MỤC LỤC</span></button>
