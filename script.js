@@ -80,9 +80,19 @@
     selectedWedding = button.dataset.countdown;
     countdown();
   }));
-  countdown();
-  window.setInterval(countdown, 1000);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) countdown(); });
+  let countdownTimer = 0;
+  function scheduleCountdown() {
+    window.clearTimeout(countdownTimer);
+    countdown();
+    if (document.hidden) return;
+    const delay = 1030 - (Date.now() % 1000);
+    countdownTimer = window.setTimeout(scheduleCountdown, delay);
+  }
+  scheduleCountdown();
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) window.clearTimeout(countdownTimer);
+    else scheduleCountdown();
+  });
 
   function buildSchedule(side) {
     if (side === "bride") {
@@ -460,9 +470,19 @@
     scrollFrame = requestAnimationFrame(() => {
       scrollFrame = 0;
       const max = document.documentElement.scrollHeight - innerHeight;
-      progress.style.width = (max ? scrollY / max * 100 : 0) + "%";
+      const ratio = max ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+      progress.style.transform = "scaleX(" + ratio + ")";
     });
   }, {passive:true});
+
+  const hero = document.querySelector(".hero");
+  const heroPhoto = document.querySelector(".hero-photo");
+  if (hero && heroPhoto && "IntersectionObserver" in window) {
+    const heroAnimationObserver = new IntersectionObserver(entries => {
+      heroPhoto.style.animationPlayState = entries[0]?.isIntersecting === false ? "paused" : "running";
+    }, {threshold:0});
+    heroAnimationObserver.observe(hero);
+  }
 
   const reveal = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window) {

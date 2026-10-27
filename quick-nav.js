@@ -14,10 +14,22 @@
   const mapClose = document.getElementById("wmClose");
   let mapOpen = false;
   let mapPreviousFocus = null;
+  let mapsLoaded = false;
+
+  const ensureMapsLoaded = () => {
+    if (mapsLoaded || !mapModal) return;
+    mapsLoaded = true;
+    mapModal.querySelectorAll("iframe[data-src]").forEach(frame => {
+      frame.src = frame.dataset.src;
+      frame.removeAttribute("data-src");
+    });
+  };
+
   const setMapOpen = (value, targetId = null) => {
     if (!mapModal || !mapBackdrop || !mapClose) return;
     if (value) {
       if (!mapOpen) mapPreviousFocus = document.activeElement;
+      ensureMapsLoaded();
       mapOpen = true;
       mapModal.hidden = false;
       mapBackdrop.hidden = false;
@@ -27,7 +39,7 @@
       mapModal.querySelectorAll(".location-card").forEach(card => card.classList.toggle("wm-highlight", !!target && card === target));
       mapModal.querySelector(".wm-dialog").scrollTop = 0;
       mapClose.focus({preventScroll:true});
-      if (target) requestAnimationFrame(() => target.scrollIntoView({block:"nearest",behavior:"instant"}));
+      if (target) requestAnimationFrame(() => target.scrollIntoView({block:"nearest",behavior:"auto"}));
     } else {
       mapOpen = false;
       mapModal.hidden = true;

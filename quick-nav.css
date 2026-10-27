@@ -39,3 +39,7 @@
 .wm-dialog .location-card.wm-highlight{outline:2px solid #d7b47a;outline-offset:-2px}
 body.wm-open{overflow:hidden}
 @media(max-width:650px){.wm-modal{padding:8px}.wm-dialog{max-height:calc(100dvh - 16px)}.wm-dialog .locations-section{padding:16px 12px 24px!important}.wm-dialog .location-card iframe{height:210px}.wm-dialog .location-info{padding:18px 12px}}
+
+@media(max-width:650px){
+  .wq-backdrop,.wm-backdrop,.wm-header{backdrop-filter:none}
+}

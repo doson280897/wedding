@@ -26,9 +26,9 @@
   const RING_SIZE = 31;
   const buildId = document.querySelector('meta[name="wedding-build"]')?.content || "dev";
 
-  function versionedAsset(src) {
-    const url = new URL(src, document.baseURI);
-    url.searchParams.set("v", buildId);
+  function versionedAsset(photo) {
+    const url = new URL(photo.src, document.baseURI);
+    url.searchParams.set("v", photo.v || buildId);
     return url.href;
   }
 
@@ -40,6 +40,11 @@
   let scrollEndTimer = 0;
   let mouseDrag = null;
   let recentering = false;
+  let layoutStep = 1;
+  let firstSlideCenter = 0;
+  const decodeQueue = [];
+  let activeDecodes = 0;
+  const MAX_DECODE_CONCURRENCY = 4;
 
   const wrap = index => ((index % photos.length) + photos.length) % photos.length;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -98,22 +103,41 @@
     return { slide, card, img, label, photoIndex: -1 };
   }
 
+  function pumpDecodeQueue() {
+    while (activeDecodes < MAX_DECODE_CONCURRENCY && decodeQueue.length) {
+      const img = decodeQueue.shift();
+      if (!img?.decode || !img.isConnected) continue;
+      activeDecodes++;
+      img.decode().catch(() => {}).finally(() => {
+        activeDecodes--;
+        pumpDecodeQueue();
+      });
+    }
+  }
+
   function warmDecode(img) {
-    if (!img?.decode) return;
-    img.decode().catch(() => {});
+    if (!img?.decode || decodeQueue.includes(img)) return;
+    decodeQueue.push(img);
+    pumpDecodeQueue();
   }
 
   function setPhoto(item, photoIndex) {
     const nextIndex = wrap(photoIndex);
     if (item.photoIndex === nextIndex) return;
     item.photoIndex = nextIndex;
-    item.img.src = versionedAsset(photos[nextIndex].src);
+    item.img.src = versionedAsset(photos[nextIndex]);
     item.label.textContent = `${String(nextIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
     warmDecode(item.img);
   }
 
   function syncWindowSources() {
-    slides.forEach((item, slotIndex) => {
+    const order = [centerSlot];
+    for (let distance = 1; distance <= centerSlot; distance++) {
+      if (centerSlot - distance >= 0) order.push(centerSlot - distance);
+      if (centerSlot + distance < slides.length) order.push(centerSlot + distance);
+    }
+    order.forEach(slotIndex => {
+      const item = slides[slotIndex];
       setPhoto(item, settledIndex + slotIndex - centerSlot);
       const distance = Math.abs(slotIndex - centerSlot);
       item.img.fetchPriority = distance <= 4 ? "high" : "auto";
@@ -121,29 +145,22 @@
     });
   }
 
+  function refreshLayoutMetrics() {
+    if (!slides.length) return;
+    layoutStep = slides[0].slide.getBoundingClientRect().width || 1;
+    firstSlideCenter = slides[0].slide.offsetLeft + layoutStep / 2;
+  }
+
   function nearestSlotIndex() {
     if (!slides.length) return centerSlot;
     const center = viewport.scrollLeft + viewport.clientWidth / 2;
-    let nearest = centerSlot;
-    let best = Infinity;
-
-    for (let slotIndex = 0; slotIndex < slides.length; slotIndex++) {
-      const item = slides[slotIndex];
-      const itemCenter = item.slide.offsetLeft + item.slide.offsetWidth / 2;
-      const distance = Math.abs(itemCenter - center);
-      if (distance < best) {
-        best = distance;
-        nearest = slotIndex;
-      }
-    }
-
-    return nearest;
+    return clamp(Math.round((center - firstSlideCenter) / layoutStep), 0, slides.length - 1);
   }
 
   function targetScrollLeft(slotIndex) {
-    const item = slides[slotIndex];
-    if (!item) return viewport.scrollLeft;
-    return item.slide.offsetLeft + item.slide.offsetWidth / 2 - viewport.clientWidth / 2;
+    if (!slides.length) return viewport.scrollLeft;
+    slotIndex = clamp(slotIndex, 0, slides.length - 1);
+    return firstSlideCenter + slotIndex * layoutStep - viewport.clientWidth / 2;
   }
 
   function scrollToSlot(slotIndex, behavior = "smooth") {
@@ -189,14 +206,12 @@
     if (!slides.length) return;
 
     const compact = viewport.clientWidth < 700;
-    const step = slides[0]?.slide.offsetWidth || 1;
-    const firstCenter = slides[0].slide.offsetLeft + step / 2;
     const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
-    const floatingIndex = (viewportCenter - firstCenter) / step;
+    const floatingIndex = (viewportCenter - firstSlideCenter) / layoutStep;
+    const activeRadius = compact ? 4 : 5;
 
-    // Only 11 cards around the viewport participate in the 3D transform loop.
-    const start = Math.max(0, Math.floor(floatingIndex) - 5);
-    const end = Math.min(slides.length - 1, Math.ceil(floatingIndex) + 5);
+    const start = Math.max(0, Math.floor(floatingIndex) - activeRadius);
+    const end = Math.min(slides.length - 1, Math.ceil(floatingIndex) + activeRadius);
     hideOutsideActiveZone(start, end);
 
     for (let index = start; index <= end; index++) {
@@ -240,7 +255,7 @@
     if (!delta || !slides.length) return;
 
     recentering = true;
-    const step = slides[0].slide.offsetWidth || 1;
+    const step = layoutStep;
     const before = viewport.scrollLeft;
     const oldSnap = viewport.style.scrollSnapType;
     const oldBehavior = viewport.style.scrollBehavior;
@@ -392,11 +407,10 @@
     }
 
     syncWindowSources();
-    // Explicit decode makes a fast first flick use already-decoded thumbnails.
-    Promise.allSettled(slides.map(item => item.img.decode?.() || Promise.resolve())).catch(() => {});
     updateProgress(false);
 
     requestAnimationFrame(() => {
+      refreshLayoutMetrics();
       viewport.style.scrollBehavior = "auto";
       scrollToSlot(centerSlot, "auto");
       viewport.style.scrollBehavior = "";
@@ -409,6 +423,7 @@
   window.addEventListener("resize", () => {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => {
+      refreshLayoutMetrics();
       centerCurrentWithoutAnimation();
     }, 90);
   });
