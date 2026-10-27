@@ -7,8 +7,8 @@
   const progress = document.getElementById("albumProgress");
   const status = document.getElementById("albumStatus");
   const editorialCaption = document.getElementById("albumEditorialCaption");
-  const captionNumber = document.getElementById("albumCaptionNumber");
   const captionText = document.getElementById("albumCaptionText");
+
   const lightbox = document.getElementById("albumLightbox");
   const lightboxStage = document.getElementById("albumLightboxStage");
   const lightboxImage = document.getElementById("albumLightboxImage");
@@ -16,46 +16,36 @@
   const lightboxClose = document.getElementById("albumLightboxClose");
   const lightboxPrev = document.getElementById("albumLightboxPrev");
   const lightboxNext = document.getElementById("albumLightboxNext");
-  const tr = key => window.WeddingI18n ? window.WeddingI18n.t(key) : key;
-
-  let statusKey = status?.dataset.statusKey || "album.lazy";
-  const setStatus = key => {
-    statusKey = key;
-    if (status) {
-      status.dataset.statusKey = key;
-      status.textContent = tr(key);
-    }
-  };
 
   if (!viewport || !space) return;
 
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const RING_SIZE = 31;
   const buildId = document.querySelector('meta[name="wedding-build"]')?.content || "dev";
+  const tr = key => window.WeddingI18n ? window.WeddingI18n.t(key) : key;
 
-  function versionedAsset(photo) {
-    const url = new URL(photo.src, document.baseURI);
-    url.searchParams.set("v", photo.v || buildId);
-    return url.href;
-  }
-
+  let statusKey = status?.dataset.statusKey || "album.lazy";
   let photos = [];
-  let slides = [];
-  let centerSlot = Math.floor(RING_SIZE / 2);
-  let settledIndex = 0;
-  let scrollFrame = 0;
-  let scrollEndTimer = 0;
-  let mouseDrag = null;
-  let recentering = false;
-  let lastTouchTap = { time:0, index:-1 };
-  let lightboxIndex = 0;
-  let lightboxReturnFocus = null;
-  let lightboxPointer = null;
+  let items = [];
+  let radius = 0;
+  let slotBase = 0;
+
+  let position = 0;
+  let target = 0;
+  let velocity = 0;
+  let raf = 0;
+  let lastFrame = 0;
+  let focusedPhotoIndex = -1;
+
+  let drag = null;
   let wheelAccumulator = 0;
   let wheelLocked = false;
   let wheelUnlockTimer = 0;
-  let layoutStep = 1;
-  let firstSlideCenter = 0;
+  let lastTouchTap = { time:0, photoIndex:-1 };
+
+  let lightboxIndex = 0;
+  let lightboxReturnFocus = null;
+  let lightboxPointer = null;
+
   const decodeQueue = [];
   let activeDecodes = 0;
   const MAX_DECODE_CONCURRENCY = 4;
@@ -63,140 +53,17 @@
   const wrap = index => ((index % photos.length) + photos.length) % photos.length;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
-  function slideCenterAt(index) {
-    const slide = slides[index]?.slide;
-    return slide ? slide.offsetLeft + slide.offsetWidth / 2 : 0;
-  }
+  const setStatus = key => {
+    statusKey = key;
+    if (!status) return;
+    status.dataset.statusKey = key;
+    status.textContent = tr(key);
+  };
 
-  function applyItemRatio(item, ratio) {
-    if (!item?.card) return;
-    const safeRatio = clamp(Number(ratio) || .78, .52, 2.0);
-    item.ratio = safeRatio;
-
-    const compact = viewport.clientWidth < 700;
-    const maxPhotoH = compact
-      ? Math.min(330, viewport.clientWidth * .78)
-      : Math.min(430, viewport.clientWidth * .34);
-
-    let photoH = maxPhotoH;
-    if (safeRatio >= 1.25) photoH *= compact ? .66 : .68;
-    else if (safeRatio >= .88) photoH *= .84;
-
-    let photoW = photoH * safeRatio;
-    const maxPhotoW = compact
-      ? viewport.clientWidth * .76
-      : Math.min(520, viewport.clientWidth * .39);
-
-    if (photoW > maxPhotoW) {
-      const factor = maxPhotoW / photoW;
-      photoW *= factor;
-      photoH *= factor;
-    }
-
-    const minPhotoW = compact ? 118 : 150;
-    if (photoW < minPhotoW) {
-      const factor = minPhotoW / photoW;
-      photoW *= factor;
-      photoH *= factor;
-    }
-
-    item.card.style.width = Math.round(photoW) + "px";
-    item.card.style.height = Math.round(photoH + 25) + "px";
-  }
-
-  function refreshItemSizes() {
-    slides.forEach(item => {
-      const photo = photos[item.photoIndex];
-      applyItemRatio(item, photo?.ratio || item.ratio || .78);
-    });
-  }
-
-  function updateEditorialCaption(animate = true) {
-    if (!captionNumber || !captionText || !photos.length) return;
-    captionNumber.textContent = String(settledIndex + 1).padStart(2, "0");
-    captionText.textContent = tr("album.caption." + (settledIndex % 5));
-    if (editorialCaption && animate && !reducedMotion) {
-      editorialCaption.classList.remove("is-changing");
-      void editorialCaption.offsetWidth;
-      editorialCaption.classList.add("is-changing");
-    }
-  }
-
-  function updateProgress(animateCaption = true) {
-    if (!photos.length) return;
-    if (counter) {
-      counter.textContent = `${String(settledIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
-    }
-    if (progress) progress.style.width = `${100 * (settledIndex + 1) / photos.length}%`;
-    updateEditorialCaption(animateCaption);
-  }
-
-  document.addEventListener("wedding:languagechange", () => {
-    if (status && !status.hidden) setStatus(statusKey);
-    updateEditorialCaption(false);
-    if (lightbox && !lightbox.hidden) updateLightbox();
-  });
-
-  function createSlide(slotIndex) {
-    const slide = document.createElement("div");
-    slide.className = "album-slide";
-    slide.dataset.slot = String(slotIndex);
-    slide.setAttribute("aria-hidden", "true");
-
-    const card = document.createElement("div");
-    card.className = "album-card";
-
-    const img = document.createElement("img");
-    img.className = "album-photo";
-    img.alt = "";
-    img.draggable = false;
-    img.decoding = "async";
-    // The ring is intentionally bounded to 31 nodes, so eagerly fetching all
-    // ring images prevents blank frames during a strong native flick.
-    img.loading = "eager";
-    img.fetchPriority = Math.abs(slotIndex - centerSlot) <= 4 ? "high" : "auto";
-
-    const label = document.createElement("span");
-    label.className = "album-card-number";
-
-    const item = { slide, card, img, label, photoIndex:-1, ratio:.78, tapStart:null };
-
-    img.addEventListener("load", () => {
-      if (item.photoIndex < 0 || !img.naturalWidth || !img.naturalHeight) return;
-      const ratio = img.naturalWidth / img.naturalHeight;
-      const photo = photos[item.photoIndex];
-      if (photo) photo.ratio = ratio;
-      applyItemRatio(item, ratio);
-      warmDecode(img);
-      requestDepthRender();
-    });
-
-    slide.addEventListener("pointerdown", event => {
-      if (event.pointerType === "mouse") return;
-      item.tapStart = { x:event.clientX, y:event.clientY, time:performance.now() };
-    }, { passive:true });
-
-    slide.addEventListener("pointerup", event => {
-      if (event.pointerType === "mouse" || !item.tapStart || item.photoIndex < 0) return;
-      const start = item.tapStart;
-      item.tapStart = null;
-      const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y);
-      if (moved > 14 || performance.now() - start.time > 420) return;
-
-      const now = performance.now();
-      if (lastTouchTap.index === item.photoIndex && now - lastTouchTap.time < 330) {
-        lastTouchTap = { time:0, index:-1 };
-        openLightbox(item.photoIndex, slide);
-      } else {
-        lastTouchTap = { time:now, index:item.photoIndex };
-      }
-    }, { passive:true });
-
-    card.append(img, label);
-    slide.append(card);
-    space.append(slide);
-
-    return item;
+  function versionedAsset(photo) {
+    const url = new URL(photo.src, document.baseURI);
+    url.searchParams.set("v", photo.v || buildId);
+    return url.href;
   }
 
   function pumpDecodeQueue() {
@@ -217,280 +84,434 @@
     pumpDecodeQueue();
   }
 
-  function setPhoto(item, photoIndex) {
-    const nextIndex = wrap(photoIndex);
-    if (item.photoIndex === nextIndex) return;
-    item.photoIndex = nextIndex;
-    const photo = photos[nextIndex];
-    applyItemRatio(item, photo?.ratio || .78);
+  function applyCardSize(item, ratio) {
+    if (!item?.slide || !item?.card) return;
+
+    const safeRatio = clamp(Number(ratio) || .78, .50, 2.05);
+    item.ratio = safeRatio;
+
+    const compact = viewport.clientWidth < 700;
+    const sceneH = viewport.clientHeight || (compact ? 520 : 680);
+    let photoH = compact ? Math.min(sceneH * .61, 340) : Math.min(sceneH * .66, 475);
+
+    if (safeRatio >= 1.35) photoH *= compact ? .61 : .64;
+    else if (safeRatio >= .92) photoH *= .80;
+
+    let photoW = photoH * safeRatio;
+    const maxW = compact ? Math.min(viewport.clientWidth * .74, 320) : Math.min(viewport.clientWidth * .36, 540);
+
+    if (photoW > maxW) {
+      const factor = maxW / photoW;
+      photoW *= factor;
+      photoH *= factor;
+    }
+
+    const minW = compact ? 118 : 150;
+    if (photoW < minW) {
+      const factor = minW / photoW;
+      photoW *= factor;
+      photoH *= factor;
+    }
+
+    item.slide.style.width = Math.round(photoW) + "px";
+    item.slide.style.height = Math.round(photoH) + "px";
+  }
+
+  function setItemPhoto(item, virtualIndex) {
+    item.virtualIndex = virtualIndex;
+    const photoIndex = wrap(virtualIndex);
+    if (item.photoIndex === photoIndex) return;
+
+    item.photoIndex = photoIndex;
+    const photo = photos[photoIndex];
+    applyCardSize(item, photo?.ratio || .78);
     item.img.src = versionedAsset(photo);
-    item.label.textContent = `${String(nextIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+    item.img.fetchPriority = Math.abs(virtualIndex - Math.round(position)) <= 2 ? "high" : "auto";
     warmDecode(item.img);
   }
 
-  function syncWindowSources() {
-    const order = [centerSlot];
-    for (let distance = 1; distance <= centerSlot; distance++) {
-      if (centerSlot - distance >= 0) order.push(centerSlot - distance);
-      if (centerSlot + distance < slides.length) order.push(centerSlot + distance);
-    }
-    order.forEach(slotIndex => {
-      const item = slides[slotIndex];
-      setPhoto(item, settledIndex + slotIndex - centerSlot);
-      const distance = Math.abs(slotIndex - centerSlot);
-      item.img.fetchPriority = distance <= 4 ? "high" : "auto";
-      item.slide.dataset.slot = String(slotIndex);
+  function createItem(virtualIndex) {
+    const slide = document.createElement("div");
+    slide.className = "album-slide";
+    slide.setAttribute("aria-hidden", "true");
+
+    const card = document.createElement("div");
+    card.className = "album-card";
+
+    const img = document.createElement("img");
+    img.className = "album-photo";
+    img.alt = "";
+    img.draggable = false;
+    img.decoding = "async";
+    img.loading = "eager";
+
+    const item = { slide, card, img, virtualIndex, photoIndex:-1, ratio:.78 };
+
+    img.addEventListener("load", () => {
+      if (item.photoIndex < 0 || !img.naturalWidth || !img.naturalHeight) return;
+      const ratio = img.naturalWidth / img.naturalHeight;
+      const photo = photos[item.photoIndex];
+      if (photo) photo.ratio = ratio;
+      applyCardSize(item, ratio);
+      warmDecode(img);
+      renderScene();
     });
+
+    card.append(img);
+    slide.append(card);
+    space.append(slide);
+    setItemPhoto(item, virtualIndex);
+    return item;
   }
 
-  function refreshLayoutMetrics() {
-    if (!slides.length) return;
-    refreshItemSizes();
-    layoutStep = slides[0].slide.getBoundingClientRect().width || 1;
-    firstSlideCenter = slides[0].slide.offsetLeft + layoutStep / 2;
-  }
+  function rebuildItems() {
+    space.replaceChildren();
+    items = [];
+    if (!photos.length) return;
 
-  function nearestSlotIndex() {
-    if (!slides.length) return centerSlot;
-    const center = viewport.scrollLeft + viewport.clientWidth / 2;
-    return clamp(Math.round((center - firstSlideCenter) / layoutStep), 0, slides.length - 1);
-  }
+    radius = photos.length === 1 ? 0 : Math.min(5, Math.floor((photos.length - 1) / 2));
+    slotBase = Math.round(position);
 
-  function targetScrollLeft(slotIndex) {
-    if (!slides.length) return viewport.scrollLeft;
-    slotIndex = clamp(slotIndex, 0, slides.length - 1);
-    return firstSlideCenter + slotIndex * layoutStep - viewport.clientWidth / 2;
-  }
-
-  function scrollToSlot(slotIndex, behavior = "smooth") {
-    if (!slides.length) return;
-    slotIndex = clamp(slotIndex, 0, slides.length - 1);
-    viewport.scrollTo({
-      left: targetScrollLeft(slotIndex),
-      behavior: reducedMotion ? "auto" : behavior
-    });
-  }
-
-  let lastActiveStart = -1;
-  let lastActiveEnd = -1;
-
-  function hideOutsideActiveZone(start, end) {
-    if (lastActiveStart < 0) {
-      slides.forEach((item, index) => {
-        if (index >= start && index <= end) return;
-        item.card.style.opacity = "0";
-        item.card.style.transform = "translate3d(0,34px,-220px) scale(.8)";
-        item.card.classList.remove("is-main");
-        item.slide.classList.remove("is-active-zone");
-        item.slide.style.zIndex = "1";
-      });
-    } else {
-      for (let index = lastActiveStart; index <= lastActiveEnd; index++) {
-        if (index >= start && index <= end) continue;
-        const item = slides[index];
-        if (!item) continue;
-        item.card.style.opacity = "0";
-        item.card.style.transform = "translate3d(0,34px,-220px) scale(.8)";
-        item.card.classList.remove("is-main");
-        item.slide.classList.remove("is-active-zone");
-        item.slide.style.zIndex = "1";
-      }
-    }
-    lastActiveStart = start;
-    lastActiveEnd = end;
-  }
-
-  function renderDepth() {
-    scrollFrame = 0;
-    if (!slides.length) return;
-
-    const compact = viewport.clientWidth < 700;
-    const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
-    const floatingIndex = (viewportCenter - firstSlideCenter) / layoutStep;
-    const activeRadius = compact ? 4 : 5;
-    const start = Math.max(0, Math.floor(floatingIndex) - activeRadius);
-    const end = Math.min(slides.length - 1, Math.ceil(floatingIndex) + activeRadius);
-    hideOutsideActiveZone(start, end);
-
-    const yPattern = compact
-      ? [0,-28,32,-44,46,-18,22]
-      : [0,-58,52,-82,76,-34,40];
-    const xPattern = compact
-      ? [0,-12,14,-20,18,-8,10]
-      : [0,-30,34,-48,44,-18,20];
-    const tiltPattern = [0,-2.8,2.4,-4.3,3.8,-1.6,1.8];
-
-    for (let index = start; index <= end; index++) {
-      const item = slides[index];
-      const relative = index - floatingIndex;
-      const abs = Math.abs(relative);
-
-      if (abs > activeRadius + .35) {
-        item.card.style.opacity = "0";
-        item.card.style.transform = "translate3d(0,30px,-320px) scale(.64)";
-        item.card.classList.remove("is-main");
-        item.slide.classList.remove("is-active-zone");
-        item.slide.style.zIndex = "1";
-        continue;
-      }
-
-      const rank = Math.min(yPattern.length - 1, Math.round(abs));
-      const direction = relative < 0 ? -1 : 1;
-      const seed = Math.abs(item.photoIndex >= 0 ? item.photoIndex : index);
-      const variation = (seed % 3) - 1;
-
-      let y = yPattern[rank] + variation * (compact ? 7 : 11);
-      let x = xPattern[rank] * direction + variation * (compact ? 4 : 8);
-      let z = 120 - abs * (compact ? 88 : 105);
-      let ry = clamp(-relative * (compact ? 12 : 11), -38, 38);
-      let rz = tiltPattern[rank] * direction + variation * .65;
-      let scale = Math.max(compact ? .64 : .60, 1.04 - abs * (compact ? .12 : .11));
-      let opacity = Math.max(.20, 1 - abs * .19);
-
-      if (abs < .38) {
-        y = 0;
-        x = 0;
-        z = compact ? 150 : 190;
-        ry = -relative * 4;
-        rz = 0;
-        scale = compact ? 1.08 : 1.12;
-        opacity = 1;
-      }
-
-      item.card.style.opacity = String(opacity);
-      item.card.style.transform =
-        `translate3d(${x}px,${y}px,${z}px) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${scale})`;
-      item.card.classList.toggle("is-main", abs < .38);
-      item.slide.classList.add("is-active-zone");
-      item.slide.style.zIndex = String(90 - Math.round(abs * 12));
+    for (let offset = -radius; offset <= radius; offset++) {
+      items.push(createItem(slotBase + offset));
     }
   }
 
-  function requestDepthRender() {
-    if (scrollFrame) return;
-    scrollFrame = requestAnimationFrame(renderDepth);
-  }
+  function syncSlots(newBase) {
+    if (!items.length || newBase === slotBase) return;
 
-  // Seamless ring: rotate only off-screen edge nodes, then compensate the
-  // scroll offset by exactly the same physical distance in the SAME JS task.
-  // The centered pixels therefore never move; there is no visible "jump back".
-  function rotateRingSeamlessly(delta) {
-    if (!delta || !slides.length) return;
-
-    recentering = true;
-    const selectedItem = slides[clamp(centerSlot + delta, 0, slides.length - 1)];
-    const beforeSelectedCenter = selectedItem
-      ? selectedItem.slide.offsetLeft + selectedItem.slide.offsetWidth / 2
-      : 0;
-    const before = viewport.scrollLeft;
-    const oldSnap = viewport.style.scrollSnapType;
-    const oldBehavior = viewport.style.scrollBehavior;
-
-    viewport.style.scrollSnapType = "none";
-    viewport.style.scrollBehavior = "auto";
-
-    if (delta > 0) {
-      for (let i = 0; i < delta; i++) {
-        settledIndex = wrap(settledIndex + 1);
-        const first = slides.shift();
-        slides.push(first);
-        space.append(first.slide);
-        setPhoto(first, settledIndex + centerSlot);
-      }
-    } else {
-      for (let i = 0; i < -delta; i++) {
-        settledIndex = wrap(settledIndex - 1);
-        const last = slides.pop();
-        slides.unshift(last);
-        space.prepend(last.slide);
-        setPhoto(last, settledIndex - centerSlot);
-      }
-    }
-
-    slides.forEach((item, slotIndex) => {
-      item.slide.dataset.slot = String(slotIndex);
-    });
-    lastActiveStart = -1;
-    lastActiveEnd = -1;
-
-    refreshItemSizes();
-    layoutStep = slides[0]?.slide.getBoundingClientRect().width || layoutStep;
-    firstSlideCenter = slides[0]?.slide.offsetLeft + layoutStep / 2 || firstSlideCenter;
-    const afterSelectedCenter = selectedItem
-      ? selectedItem.slide.offsetLeft + selectedItem.slide.offsetWidth / 2
-      : beforeSelectedCenter;
-
-    // Variable-width cards: compensate by the selected card's actual pixel
-    // displacement, not by a fixed step.
-    viewport.scrollLeft = before + (afterSelectedCenter - beforeSelectedCenter);
-    renderDepth();
-
-    requestAnimationFrame(() => {
-      viewport.style.scrollSnapType = oldSnap;
-      viewport.style.scrollBehavior = oldBehavior;
-      recentering = false;
-      viewport.classList.remove("is-scrolling");
-      viewport.classList.add("is-settled");
-      renderDepth();
-    });
-  }
-
-  function centerCurrentWithoutAnimation() {
-    if (!slides.length) return;
-    recentering = true;
-    const oldSnap = viewport.style.scrollSnapType;
-    const oldBehavior = viewport.style.scrollBehavior;
-    viewport.style.scrollSnapType = "none";
-    viewport.style.scrollBehavior = "auto";
-    viewport.scrollLeft = targetScrollLeft(centerSlot);
-    renderDepth();
-    requestAnimationFrame(() => {
-      viewport.style.scrollSnapType = oldSnap;
-      viewport.style.scrollBehavior = oldBehavior;
-      recentering = false;
-      renderDepth();
-    });
-  }
-
-  function finishScroll() {
-    if (recentering || !slides.length) return;
-    window.clearTimeout(scrollEndTimer);
-
-    const slotIndex = nearestSlotIndex();
-    const target = targetScrollLeft(slotIndex);
-
-    // Mandatory snap normally lands exactly on a card. This correction only
-    // handles browsers that fire scrollend a couple of pixels early.
-    if (Math.abs(viewport.scrollLeft - target) > 2) {
-      scrollToSlot(slotIndex, "smooth");
+    if (Math.abs(newBase - slotBase) > items.length) {
+      slotBase = newBase;
+      items.forEach((item, index) => setItemPhoto(item, slotBase + index - radius));
       return;
     }
 
-    const delta = slotIndex - centerSlot;
-    if (delta) {
-      rotateRingSeamlessly(delta);
-      updateProgress(true);
-    } else {
-      viewport.classList.remove("is-scrolling");
-      viewport.classList.add("is-settled");
-      renderDepth();
+    while (slotBase < newBase) {
+      slotBase++;
+      const first = items.shift();
+      const lastVirtual = items.at(-1)?.virtualIndex ?? slotBase;
+      setItemPhoto(first, lastVirtual + 1);
+      items.push(first);
+    }
+
+    while (slotBase > newBase) {
+      slotBase--;
+      const last = items.pop();
+      const firstVirtual = items[0]?.virtualIndex ?? slotBase;
+      setItemPhoto(last, firstVirtual - 1);
+      items.unshift(last);
     }
   }
 
-  function scheduleFallbackScrollEnd() {
-    window.clearTimeout(scrollEndTimer);
-    scrollEndTimer = window.setTimeout(finishScroll, 160);
+  function updateEditorialCaption(photoIndex, animate = true) {
+    if (!captionText || photoIndex < 0) return;
+    captionText.textContent = tr("album.caption." + (photoIndex % 5));
+
+    if (editorialCaption && animate && !reducedMotion) {
+      editorialCaption.classList.remove("is-changing");
+      void editorialCaption.offsetWidth;
+      editorialCaption.classList.add("is-changing");
+    }
   }
+
+  function updateProgress(photoIndex, animateCaption = true) {
+    if (!photos.length || photoIndex < 0) return;
+
+    if (counter) {
+      counter.textContent =
+        String(photoIndex + 1).padStart(2, "0") +
+        " / " +
+        String(photos.length).padStart(2, "0");
+    }
+
+    if (progress) progress.style.width = (100 * (photoIndex + 1) / photos.length) + "%";
+    updateEditorialCaption(photoIndex, animateCaption);
+  }
+
+  function sceneMetrics() {
+    const compact = viewport.clientWidth < 700;
+    return {
+      compact,
+      width:viewport.clientWidth,
+      height:viewport.clientHeight,
+      firstX:compact ? viewport.clientWidth * .40 : viewport.clientWidth * .30,
+      nextX:compact ? viewport.clientWidth * .215 : viewport.clientWidth * .175
+    };
+  }
+
+  function renderScene() {
+    if (!items.length) return;
+
+    const nearestVirtual = Math.round(position);
+    syncSlots(nearestVirtual);
+
+    const metrics = sceneMetrics();
+    const yPattern = metrics.compact ? [0,-.18,.16,-.25,.22,-.10] : [0,-.20,.17,-.27,.23,-.11];
+
+    items.forEach(item => {
+      const relative = item.virtualIndex - position;
+      const abs = Math.abs(relative);
+      const sign = relative < 0 ? -1 : 1;
+
+      if (abs > radius + .72) {
+        item.slide.style.opacity = "0";
+        item.slide.style.pointerEvents = "none";
+        return;
+      }
+
+      const rank = Math.min(yPattern.length - 1, Math.round(abs));
+      const seed = Math.abs(item.photoIndex >= 0 ? item.photoIndex : item.virtualIndex);
+      const variation = ((seed % 5) - 2) / 2;
+
+      let x = 0;
+      if (abs > .001) {
+        x = sign * (metrics.firstX + Math.max(0, abs - 1) * metrics.nextX);
+      }
+
+      let y = yPattern[rank] * metrics.height + variation * (metrics.compact ? 9 : 16);
+      let z = metrics.compact ? 145 - abs * 118 : 210 - abs * 145;
+      let rotateY = clamp(-relative * (metrics.compact ? 13 : 12), -42, 42);
+      let rotateZ = (rank ? sign * (rank % 2 ? -2.6 : 2.2) : 0) + variation * .8;
+      let scale = Math.max(metrics.compact ? .52 : .48, 1.03 - abs * (metrics.compact ? .145 : .135));
+      let opacity = Math.max(.12, 1 - abs * .20);
+
+      if (abs < .34) {
+        x = 0;
+        y = 0;
+        z = metrics.compact ? 210 : 290;
+        rotateY = -relative * 4;
+        rotateZ = 0;
+        scale = metrics.compact ? 1.08 : 1.12;
+        opacity = 1;
+      }
+
+      const blur = abs > 2.4 ? Math.min(2.2, (abs - 2.4) * .8) : 0;
+
+      item.slide.style.opacity = String(opacity);
+      item.slide.style.zIndex = String(1000 - Math.round(abs * 90));
+      item.slide.style.pointerEvents = abs < 2.65 ? "auto" : "none";
+      item.slide.style.filter = blur ? "blur(" + blur.toFixed(2) + "px)" : "none";
+      item.slide.style.transform =
+        "translate(-50%,-50%) " +
+        "translate3d(" + x.toFixed(2) + "px," + y.toFixed(2) + "px," + z.toFixed(2) + "px) " +
+        "rotateY(" + rotateY.toFixed(2) + "deg) " +
+        "rotateZ(" + rotateZ.toFixed(2) + "deg) " +
+        "scale(" + scale.toFixed(4) + ")";
+
+      item.card.classList.toggle("is-main", abs < .34);
+      item.slide.classList.toggle("is-distant", abs > 2.2);
+      item.slide.setAttribute("aria-hidden", String(abs > 2.15));
+    });
+
+    const currentPhoto = wrap(nearestVirtual);
+    if (currentPhoto !== focusedPhotoIndex) {
+      focusedPhotoIndex = currentPhoto;
+      updateProgress(currentPhoto, true);
+    }
+  }
+
+  function tick(time) {
+    raf = 0;
+    const dt = Math.min(2, Math.max(.35, (time - (lastFrame || time - 16.7)) / 16.7));
+    lastFrame = time;
+
+    if (!drag) {
+      if (reducedMotion) {
+        position = target;
+        velocity = 0;
+      } else {
+        const distance = target - position;
+        velocity += distance * .115 * dt;
+        velocity *= Math.pow(.70, dt);
+        position += velocity * dt;
+
+        if (Math.abs(distance) < .0015 && Math.abs(velocity) < .0012) {
+          position = target;
+          velocity = 0;
+        }
+      }
+    }
+
+    renderScene();
+
+    if (drag || Math.abs(target - position) > .0015 || Math.abs(velocity) > .0012) {
+      requestSceneFrame();
+    }
+  }
+
+  function requestSceneFrame() {
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+
+  function moveToVirtual(next, immediate = false) {
+    target = next;
+    if (immediate || reducedMotion) {
+      position = target;
+      velocity = 0;
+      renderScene();
+      return;
+    }
+    requestSceneFrame();
+  }
+
+  function itemFromTarget(targetNode) {
+    const slide = targetNode?.closest?.(".album-slide");
+    return slide ? items.find(item => item.slide === slide) : null;
+  }
+
+  viewport.addEventListener("pointerdown", event => {
+    if (lightbox && !lightbox.hidden) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    const item = itemFromTarget(event.target);
+    drag = {
+      id:event.pointerId,
+      pointerType:event.pointerType,
+      item,
+      startX:event.clientX,
+      startY:event.clientY,
+      lastX:event.clientX,
+      lastTime:performance.now(),
+      velocityX:0,
+      startPosition:position,
+      moved:false
+    };
+
+    velocity = 0;
+    target = position;
+    viewport.classList.add("is-dragging");
+    viewport.setPointerCapture?.(event.pointerId);
+  });
+
+  viewport.addEventListener("pointermove", event => {
+    if (!drag || event.pointerId !== drag.id) return;
+
+    const dx = event.clientX - drag.startX;
+    const dy = event.clientY - drag.startY;
+
+    if (!drag.moved && Math.hypot(dx, dy) > 6) {
+      if (Math.abs(dy) > Math.abs(dx) * 1.15) return;
+      drag.moved = true;
+    }
+
+    if (!drag.moved) return;
+    event.preventDefault();
+
+    const now = performance.now();
+    const elapsed = Math.max(8, now - drag.lastTime);
+    drag.velocityX = (event.clientX - drag.lastX) / elapsed;
+    drag.lastX = event.clientX;
+    drag.lastTime = now;
+
+    const step = viewport.clientWidth < 700
+      ? Math.max(145, viewport.clientWidth * .43)
+      : Math.max(220, viewport.clientWidth * .22);
+
+    position = drag.startPosition - dx / step;
+    target = position;
+    renderScene();
+  }, { passive:false });
+
+  function finishDrag(event) {
+    if (!drag || (event.pointerId != null && event.pointerId !== drag.id)) return;
+
+    const state = drag;
+    drag = null;
+    viewport.classList.remove("is-dragging");
+
+    if (state.moved) {
+      const step = viewport.clientWidth < 700
+        ? Math.max(145, viewport.clientWidth * .43)
+        : Math.max(220, viewport.clientWidth * .22);
+
+      const projected = position - state.velocityX * 180 / step;
+      const maxJump = viewport.clientWidth < 700 ? 2 : 3;
+      moveToVirtual(Math.round(clamp(projected, position - maxJump, position + maxJump)));
+      return;
+    }
+
+    if (!state.item || state.item.photoIndex < 0) {
+      moveToVirtual(Math.round(position));
+      return;
+    }
+
+    if (state.pointerType === "mouse") {
+      openLightbox(state.item.photoIndex, state.item.slide);
+      return;
+    }
+
+    const now = performance.now();
+    if (lastTouchTap.photoIndex === state.item.photoIndex && now - lastTouchTap.time < 330) {
+      lastTouchTap = { time:0, photoIndex:-1 };
+      openLightbox(state.item.photoIndex, state.item.slide);
+      return;
+    }
+
+    lastTouchTap = { time:now, photoIndex:state.item.photoIndex };
+    moveToVirtual(state.item.virtualIndex);
+  }
+
+  viewport.addEventListener("pointerup", finishDrag);
+  viewport.addEventListener("pointercancel", event => {
+    if (!drag || event.pointerId !== drag.id) return;
+    drag = null;
+    viewport.classList.remove("is-dragging");
+    moveToVirtual(Math.round(position));
+  });
+
+  viewport.addEventListener("wheel", event => {
+    if (!photos.length || (lightbox && !lightbox.hidden) || event.ctrlKey) return;
+
+    const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    if (!delta) return;
+    event.preventDefault();
+
+    if (wheelLocked) return;
+    wheelAccumulator += delta;
+    if (Math.abs(wheelAccumulator) < 18) return;
+
+    const direction = wheelAccumulator > 0 ? 1 : -1;
+    wheelAccumulator = 0;
+    wheelLocked = true;
+    moveToVirtual(Math.round(target) + direction);
+
+    clearTimeout(wheelUnlockTimer);
+    wheelUnlockTimer = setTimeout(() => {
+      wheelLocked = false;
+      wheelAccumulator = 0;
+    }, 125);
+  }, { passive:false });
+
+  viewport.addEventListener("keydown", event => {
+    if (lightbox && !lightbox.hidden) return;
+
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      moveToVirtual(Math.round(target) + (event.key === "ArrowRight" ? 1 : -1));
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openLightbox(wrap(Math.round(position)), viewport);
+    }
+  });
 
   function updateLightbox() {
     if (!photos.length || !lightboxImage || !lightboxCounter) return;
+
     lightboxIndex = wrap(lightboxIndex);
     const photo = photos[lightboxIndex];
+
     lightboxImage.src = versionedAsset(photo);
     lightboxImage.alt = tr("album.fullscreenPhotoAlt")
       .replace("{current}", String(lightboxIndex + 1))
       .replace("{total}", String(photos.length));
-    lightboxCounter.textContent = `${String(lightboxIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+
+    lightboxCounter.textContent =
+      String(lightboxIndex + 1).padStart(2, "0") +
+      " / " +
+      String(photos.length).padStart(2, "0");
 
     [-1, 1].forEach(delta => {
       const neighbor = new Image();
@@ -501,9 +522,11 @@
 
   function openLightbox(index, returnFocus = null) {
     if (!lightbox || !photos.length) return;
+
     lightboxIndex = wrap(index);
     lightboxReturnFocus = returnFocus || document.activeElement;
     updateLightbox();
+
     lightbox.hidden = false;
     lightbox.setAttribute("aria-hidden", "false");
     document.body.classList.add("album-lightbox-open");
@@ -512,10 +535,12 @@
 
   function closeLightbox() {
     if (!lightbox || lightbox.hidden) return;
+
     lightbox.hidden = true;
     lightbox.setAttribute("aria-hidden", "true");
     document.body.classList.remove("album-lightbox-open");
     lightboxPointer = null;
+
     if (lightboxImage) lightboxImage.removeAttribute("src");
     lightboxReturnFocus?.focus?.({ preventScroll:true });
     lightboxReturnFocus = null;
@@ -539,9 +564,11 @@
 
   lightboxStage?.addEventListener("pointerup", event => {
     if (!lightboxPointer || event.pointerId !== lightboxPointer.id) return;
+
     const dx = event.clientX - lightboxPointer.x;
     const dy = event.clientY - lightboxPointer.y;
     lightboxPointer = null;
+
     if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
     stepLightbox(dx < 0 ? 1 : -1);
   });
@@ -571,9 +598,9 @@
     if (event.key !== "Tab") return;
 
     const focusable = [lightboxClose, lightboxPrev, lightboxNext].filter(Boolean);
-    if (!focusable.length) return;
     const first = focusable[0];
     const last = focusable.at(-1);
+
     if (event.shiftKey && document.activeElement === first) {
       event.preventDefault();
       last.focus();
@@ -583,155 +610,35 @@
     }
   });
 
-  viewport.addEventListener("scroll", () => {
-    requestDepthRender();
-    if (recentering) return;
-
-    viewport.classList.add("is-scrolling");
-    viewport.classList.remove("is-settled");
-    if (!("onscrollend" in window)) scheduleFallbackScrollEnd();
-  }, { passive: true });
-
-  if ("onscrollend" in window) {
-    viewport.addEventListener("scrollend", finishScroll, { passive: true });
-  }
-
-  // Touch stays native so iOS/Android keep kinetic scrolling.
-  // Desktop mouse distinguishes a true click on the visible card from a drag.
-  viewport.addEventListener("pointerdown", event => {
-    if (event.pointerType !== "mouse" || event.button !== 0) return;
-
-    const slideEl = event.target.closest?.(".album-slide");
-    const item = slideEl ? slides.find(entry => entry.slide === slideEl) : null;
-    const cardRect = item?.card?.getBoundingClientRect?.();
-    const hitCard = !!cardRect &&
-      event.clientX >= cardRect.left && event.clientX <= cardRect.right &&
-      event.clientY >= cardRect.top && event.clientY <= cardRect.bottom;
-
-    mouseDrag = {
-      id:event.pointerId,
-      x:event.clientX,
-      y:event.clientY,
-      left:viewport.scrollLeft,
-      moved:false,
-      item,
-      hitCard,
-      startedAt:performance.now()
-    };
-
-    viewport.classList.add("is-dragging");
-    viewport.setPointerCapture?.(event.pointerId);
+  document.addEventListener("wedding:languagechange", () => {
+    if (status && !status.hidden) setStatus(statusKey);
+    if (focusedPhotoIndex >= 0) updateEditorialCaption(focusedPhotoIndex, false);
+    if (lightbox && !lightbox.hidden) updateLightbox();
   });
-
-  viewport.addEventListener("pointermove", event => {
-    if (!mouseDrag || event.pointerId !== mouseDrag.id) return;
-    const dx = event.clientX - mouseDrag.x;
-    const dy = event.clientY - mouseDrag.y;
-    if (Math.hypot(dx, dy) > 7) mouseDrag.moved = true;
-    viewport.scrollLeft = mouseDrag.left - dx;
-  });
-
-  function endMouseDrag(event) {
-    if (!mouseDrag || (event.pointerId != null && event.pointerId !== mouseDrag.id)) return;
-
-    const drag = mouseDrag;
-    mouseDrag = null;
-    viewport.classList.remove("is-dragging");
-
-    const elapsed = performance.now() - drag.startedAt;
-    if (!drag.moved && drag.hitCard && drag.item?.photoIndex >= 0 && elapsed < 650) {
-      openLightbox(drag.item.photoIndex, drag.item.slide);
-      return;
-    }
-
-    scrollToSlot(nearestSlotIndex(), "smooth");
-  }
-
-  viewport.addEventListener("pointerup", endMouseDrag);
-  viewport.addEventListener("pointercancel", endMouseDrag);
-  viewport.addEventListener("lostpointercapture", endMouseDrag);
-
-  // Mouse wheel / trackpad: one deliberate wheel gesture advances one photo.
-  // Prevent vertical page scrolling only while the pointer is over the album.
-  viewport.addEventListener("wheel", event => {
-    if (!photos.length || (lightbox && !lightbox.hidden)) return;
-
-    const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
-      ? event.deltaX
-      : event.deltaY;
-
-    if (!dominantDelta) return;
-    event.preventDefault();
-
-    if (wheelLocked) return;
-    wheelAccumulator += dominantDelta;
-
-    if (Math.abs(wheelAccumulator) < 20) return;
-
-    const direction = wheelAccumulator > 0 ? 1 : -1;
-    wheelAccumulator = 0;
-    wheelLocked = true;
-
-    const base = nearestSlotIndex();
-    scrollToSlot(base + direction, "smooth");
-
-    window.clearTimeout(wheelUnlockTimer);
-    wheelUnlockTimer = window.setTimeout(() => {
-      wheelLocked = false;
-      wheelAccumulator = 0;
-    }, 240);
-  }, { passive:false });
-
-  viewport.addEventListener("keydown", event => {
-    if (lightbox && !lightbox.hidden) return;
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-    event.preventDefault();
-    const base = nearestSlotIndex();
-    scrollToSlot(base + (event.key === "ArrowRight" ? 1 : -1), "smooth");
-  });
-
-  function initialize() {
-    space.replaceChildren();
-    slides = [];
-    settledIndex = 0;
-
-    const slotCount = photos.length === 1 ? 1 : RING_SIZE;
-    centerSlot = Math.floor(slotCount / 2);
-
-    for (let slotIndex = 0; slotIndex < slotCount; slotIndex++) {
-      slides.push(createSlide(slotIndex));
-    }
-
-    syncWindowSources();
-    updateProgress(false);
-
-    requestAnimationFrame(() => {
-      refreshLayoutMetrics();
-      viewport.style.scrollBehavior = "auto";
-      scrollToSlot(centerSlot, "auto");
-      viewport.style.scrollBehavior = "";
-      renderDepth();
-      viewport.classList.add("is-settled");
-    });
-  }
 
   let resizeTimer = 0;
-  window.addEventListener("resize", () => {
-    window.clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(() => {
-      refreshLayoutMetrics();
-      centerCurrentWithoutAnimation();
-    }, 90);
-  });
+  addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      items.forEach(item => {
+        const photo = photos[item.photoIndex];
+        applyCardSize(item, photo?.ratio || item.ratio || .78);
+      });
+      renderScene();
+    }, 80);
+  }, { passive:true });
 
   async function start() {
     setStatus("album.loading");
+
     try {
       const manifestUrl = new URL("./images/manifest.json", document.baseURI);
       manifestUrl.searchParams.set("v", buildId);
       manifestUrl.searchParams.set("t", String(Date.now()));
-      const response = await fetch(manifestUrl, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const response = await fetch(manifestUrl, { cache:"no-store" });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+
       const manifest = await response.json();
       const list = Array.isArray(manifest) ? manifest : manifest.photos;
       if (!Array.isArray(list)) throw new Error("Invalid manifest");
@@ -743,16 +650,24 @@
           const height = Number(photo.height);
           return {
             ...photo,
-            ratio: width > 0 && height > 0 ? width / height : Number(photo.ratio) || 0
+            ratio:width > 0 && height > 0 ? width / height : Number(photo.ratio) || 0
           };
         });
+
       if (!photos.length) {
         setStatus("album.empty");
         return;
       }
 
-      initialize();
-      status.hidden = true;
+      position = 0;
+      target = 0;
+      velocity = 0;
+      focusedPhotoIndex = -1;
+
+      rebuildItems();
+      renderScene();
+      updateProgress(0, false);
+      if (status) status.hidden = true;
     } catch (error) {
       console.error(error);
       setStatus("album.error");
@@ -766,7 +681,7 @@
         lazyObserver.disconnect();
         start();
       }
-    }, { rootMargin:"1400px 0px", threshold:0 });
+    }, { rootMargin:"1200px 0px", threshold:0 });
     lazyObserver.observe(albumSection);
   } else {
     start();

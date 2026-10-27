@@ -164,7 +164,7 @@
     links.forEach(item => item.setAttribute("aria-current", String(item===link)));
   }));
 
-  // Draggable floating controls: language, music and quick navigation.
+  // Draggable floating controls: hover on desktop, two-tap activation on touch.
   const floatingControls = [
     document.querySelector(".language-switch"),
     document.getElementById("musicToggle"),
@@ -173,7 +173,8 @@
 
   const FLOAT_EDGE = 8;
   const FLOAT_IDLE_DELAY = 2600;
-  const FLOAT_STORE_KEY = "wedding:floating-controls:v1";
+  const FLOAT_STORE_KEY = "wedding:floating-controls:v2";
+  const coarsePointer = window.matchMedia("(hover: none), (pointer: coarse)");
 
   let savedFloating = {};
   try {
@@ -183,9 +184,7 @@
   }
 
   const saveFloatingPositions = () => {
-    try {
-      sessionStorage.setItem(FLOAT_STORE_KEY, JSON.stringify(savedFloating));
-    } catch (_) {}
+    try { sessionStorage.setItem(FLOAT_STORE_KEY, JSON.stringify(savedFloating)); } catch (_) {}
   };
 
   const controlKey = control => {
@@ -194,33 +193,34 @@
     return "language";
   };
 
-  const clampFloatingTop = (control, top) => {
+  const clampTop = (control, top) => {
     const rect = control.getBoundingClientRect();
-    const maxTop = Math.max(FLOAT_EDGE, window.innerHeight - rect.height - FLOAT_EDGE);
-    return Math.max(FLOAT_EDGE, Math.min(maxTop, top));
+    return Math.max(FLOAT_EDGE, Math.min(Math.max(FLOAT_EDGE, innerHeight - rect.height - FLOAT_EDGE), top));
   };
 
-  const snapFloatingToEdge = control => {
+  const edgeLeft = (control, edge) => {
+    const rect = control.getBoundingClientRect();
+    return edge === "left" ? FLOAT_EDGE : Math.max(FLOAT_EDGE, innerWidth - rect.width - FLOAT_EDGE);
+  };
+
+  const snapFloatingToEdge = (control, preserveEdge = false) => {
     if (!control.isConnected) return;
     if (control.matches(".language-switch") && document.body.classList.contains("envelope-locked")) return;
+
     const rect = control.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
 
-    const edge = rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right";
-    const top = clampFloatingTop(control, rect.top);
+    const edge = preserveEdge && (control.dataset.floatEdge === "left" || control.dataset.floatEdge === "right")
+      ? control.dataset.floatEdge
+      : (rect.left + rect.width / 2 < innerWidth / 2 ? "left" : "right");
 
-    control.style.top = top + "px";
-    control.style.bottom = "auto";
-
-    if (edge === "left") {
-      control.style.left = FLOAT_EDGE + "px";
-      control.style.right = "auto";
-    } else {
-      control.style.right = FLOAT_EDGE + "px";
-      control.style.left = "auto";
-    }
-
+    const top = clampTop(control, rect.top);
     control.dataset.floatEdge = edge;
+    control.style.right = "auto";
+    control.style.bottom = "auto";
+    control.style.left = edgeLeft(control, edge) + "px";
+    control.style.top = top + "px";
+
     savedFloating[controlKey(control)] = { edge, top };
     saveFloatingPositions();
   };
@@ -230,17 +230,11 @@
     const saved = savedFloating[controlKey(control)];
     if (!saved || (saved.edge !== "left" && saved.edge !== "right")) return;
 
-    control.style.top = clampFloatingTop(control, Number(saved.top) || FLOAT_EDGE) + "px";
-    control.style.bottom = "auto";
-
-    if (saved.edge === "left") {
-      control.style.left = FLOAT_EDGE + "px";
-      control.style.right = "auto";
-    } else {
-      control.style.right = FLOAT_EDGE + "px";
-      control.style.left = "auto";
-    }
     control.dataset.floatEdge = saved.edge;
+    control.style.right = "auto";
+    control.style.bottom = "auto";
+    control.style.top = clampTop(control, Number(saved.top) || FLOAT_EDGE) + "px";
+    control.style.left = edgeLeft(control, saved.edge) + "px";
   };
 
   const installFloatingControl = control => {
@@ -248,20 +242,44 @@
     restoreFloatingPosition(control);
 
     let idleTimer = 0;
+    let armedTimer = 0;
     let drag = null;
     let suppressClick = false;
+    let armed = false;
+
+    const setArmed = value => {
+      armed = value;
+      control.classList.toggle("is-armed", value);
+      clearTimeout(armedTimer);
+      if (value) {
+        armedTimer = setTimeout(() => {
+          armed = false;
+          control.classList.remove("is-armed");
+        }, 3200);
+      }
+    };
+
+    const resnapAfterResize = () => {
+      requestAnimationFrame(() => snapFloatingToEdge(control, true));
+      setTimeout(() => snapFloatingToEdge(control, true), 240);
+    };
 
     const wake = () => {
-      window.clearTimeout(idleTimer);
+      clearTimeout(idleTimer);
       control.classList.remove("is-idle");
+      resnapAfterResize();
+    };
+
+    const collapseNow = () => {
+      control.classList.add("is-idle");
+      setArmed(false);
+      snapFloatingToEdge(control, true);
+      setTimeout(() => snapFloatingToEdge(control, true), 240);
     };
 
     const scheduleIdle = (delay = FLOAT_IDLE_DELAY) => {
-      window.clearTimeout(idleTimer);
-      idleTimer = window.setTimeout(() => {
-        snapFloatingToEdge(control);
-        control.classList.add("is-idle");
-      }, delay);
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(collapseNow, delay);
     };
 
     const onPointerMove = event => {
@@ -272,26 +290,25 @@
 
       if (!drag.moved && Math.hypot(dx, dy) > 6) {
         drag.moved = true;
+        setArmed(false);
         control.classList.add("is-dragging");
 
         const rect = control.getBoundingClientRect();
-        control.style.left = rect.left + "px";
-        control.style.top = rect.top + "px";
         control.style.right = "auto";
         control.style.bottom = "auto";
+        control.style.left = rect.left + "px";
+        control.style.top = rect.top + "px";
       }
 
       if (!drag.moved) return;
       event.preventDefault();
 
       const rect = control.getBoundingClientRect();
-      const maxLeft = Math.max(FLOAT_EDGE, window.innerWidth - rect.width - FLOAT_EDGE);
-      const maxTop = Math.max(FLOAT_EDGE, window.innerHeight - rect.height - FLOAT_EDGE);
-      const left = Math.max(FLOAT_EDGE, Math.min(maxLeft, drag.left + dx));
-      const top = Math.max(FLOAT_EDGE, Math.min(maxTop, drag.top + dy));
+      const maxLeft = Math.max(FLOAT_EDGE, innerWidth - rect.width - FLOAT_EDGE);
+      const maxTop = Math.max(FLOAT_EDGE, innerHeight - rect.height - FLOAT_EDGE);
 
-      control.style.left = left + "px";
-      control.style.top = top + "px";
+      control.style.left = Math.max(FLOAT_EDGE, Math.min(maxLeft, drag.left + dx)) + "px";
+      control.style.top = Math.max(FLOAT_EDGE, Math.min(maxTop, drag.top + dy)) + "px";
     };
 
     const finishDrag = event => {
@@ -301,16 +318,19 @@
       drag = null;
       control.classList.remove("is-dragging");
 
-      window.removeEventListener("pointermove", onPointerMove, { capture:true });
-      window.removeEventListener("pointerup", finishDrag, { capture:true });
-      window.removeEventListener("pointercancel", finishDrag, { capture:true });
+      window.removeEventListener("pointermove", onPointerMove, true);
+      window.removeEventListener("pointerup", finishDrag, true);
+      window.removeEventListener("pointercancel", finishDrag, true);
 
       if (moved) {
         suppressClick = true;
-        window.setTimeout(() => { suppressClick = false; }, 80);
+        setTimeout(() => { suppressClick = false; }, 120);
+        snapFloatingToEdge(control, false);
+        setTimeout(() => snapFloatingToEdge(control, true), 320);
+        scheduleIdle(1050);
+      } else {
+        scheduleIdle();
       }
-
-      scheduleIdle(moved ? 1200 : FLOAT_IDLE_DELAY);
     };
 
     control.addEventListener("pointerdown", event => {
@@ -333,40 +353,47 @@
     }, { passive:true });
 
     control.addEventListener("click", event => {
-      if (!suppressClick) {
-        wake();
-        scheduleIdle();
+      if (suppressClick) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        suppressClick = false;
         return;
       }
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      suppressClick = false;
+
+      if (coarsePointer.matches) {
+        if (!armed) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          wake();
+          setArmed(true);
+          scheduleIdle(3400);
+          return;
+        }
+        setArmed(false);
+      }
+
+      wake();
+      scheduleIdle();
     }, true);
 
-    control.addEventListener("pointerenter", wake);
-    control.addEventListener("pointerleave", () => scheduleIdle());
+    control.addEventListener("pointerenter", () => {
+      if (!coarsePointer.matches) wake();
+    });
+    control.addEventListener("pointerleave", () => {
+      if (!coarsePointer.matches) scheduleIdle();
+    });
     control.addEventListener("focusin", wake);
     control.addEventListener("focusout", () => scheduleIdle());
 
-    scheduleIdle(1700);
+    scheduleIdle(1500);
   };
 
   floatingControls.forEach(installFloatingControl);
 
   window.addEventListener("resize", () => {
     floatingControls.forEach(control => {
-      const rect = control.getBoundingClientRect();
-      const top = clampFloatingTop(control, rect.top);
-      control.style.top = top + "px";
-
-      if (control.classList.contains("is-idle")) {
-        snapFloatingToEdge(control);
-      } else {
-        const maxLeft = Math.max(FLOAT_EDGE, window.innerWidth - rect.width - FLOAT_EDGE);
-        if (control.style.left && control.style.left !== "auto") {
-          control.style.left = Math.max(FLOAT_EDGE, Math.min(maxLeft, rect.left)) + "px";
-        }
-      }
+      if (control.matches(".language-switch") && document.body.classList.contains("envelope-locked")) return;
+      snapFloatingToEdge(control, true);
     });
   }, { passive:true });
 

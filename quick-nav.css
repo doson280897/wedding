@@ -72,7 +72,9 @@ body.wg-open{overflow:hidden}
     opacity .22s ease,
     background .22s ease,
     border-color .22s ease,
-    box-shadow .22s ease;
+    box-shadow .22s ease,
+    left .30s cubic-bezier(.2,.8,.2,1),
+    top .30s cubic-bezier(.2,.8,.2,1);
   touch-action:none;
   -webkit-user-select:none;
   user-select:none;
