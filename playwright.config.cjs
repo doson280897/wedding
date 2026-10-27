@@ -23,6 +23,30 @@ module.exports = defineConfig({
       use: { ...devices["iPad Mini"], browserName: "webkit" },
     },
     {
+      name: "Android tablet Chromium",
+      use: {
+        browserName: "chromium",
+        viewport: { width: 800, height: 1280 },
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 2,
+      },
+    },
+    {
+      name: "Compact Android 320px Chromium",
+      use: {
+        browserName: "chromium",
+        viewport: { width: 320, height: 568 },
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 2,
+      },
+    },
+    {
+      name: "Windows-sized desktop Firefox",
+      use: { browserName: "firefox", viewport: { width: 1366, height: 768 } },
+    },
+    {
       name: "Short landscape phone WebKit",
       use: {
         browserName: "webkit",
