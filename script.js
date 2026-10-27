@@ -246,7 +246,7 @@
   }
 
   const musicButton = document.getElementById("musicToggle");
-  const YOUTUBE_MUSIC_ID = "BunWcLGUGuQ";
+  const YOUTUBE_MUSIC_ID = selectedParty === "bride" ? "9UDP2boblXk" : "BunWcLGUGuQ";
   let youtubePlayer = null;
   let youtubePlayerReady = false;
   let youtubePlayerPromise = null;
