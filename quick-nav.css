@@ -22,3 +22,20 @@
 .wq-footnote span{color:#d4b980;padding:0 8px}
 @media(max-width:500px){.wq-toggle{right:14px;bottom:14px}.wq-panel{right:12px;bottom:75px;width:calc(100vw - 24px);padding:23px 20px}}
 @media(prefers-reduced-motion:reduce){.wq-panel,.wq-link{transition:none!important}}
+
+/* FIND YOUR WAY modal: no longer shown inline on the invitation */
+.wm-backdrop{position:fixed;inset:0;z-index:1010;background:rgba(0,0,0,.81);backdrop-filter:blur(9px)}
+.wm-backdrop[hidden],.wm-modal[hidden]{display:none!important}
+.wm-modal{position:fixed;inset:0;z-index:1011;display:grid;place-items:center;padding:clamp(10px,3vw,32px);pointer-events:none}
+.wm-dialog{position:relative;pointer-events:auto;width:min(980px,100%);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;border:1px solid #c5a36f70;border-radius:15px;background:linear-gradient(145deg,#161b17,#070b09);box-shadow:0 35px 110px #000e}
+.wm-header{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#0d120ff0;border-bottom:1px solid #c5a36f45;backdrop-filter:blur(8px)}
+.wm-close{border:0;background:transparent;color:#ebd3a9;font-size:31px;line-height:1;cursor:pointer;padding:3px 8px}
+.wm-close:hover,.wm-close:focus-visible{color:white;outline:2px solid #d6b781;outline-offset:2px}
+.wm-dialog .locations-section{padding:20px 24px 32px!important;background:transparent}
+.wm-dialog .section-head{margin-bottom:22px}
+.wm-dialog .section-title{font-size:clamp(32px,5vw,48px)}
+.wm-dialog .location-grid{gap:18px}
+.wm-dialog .location-card{scroll-margin-top:70px}
+.wm-dialog .location-card.wm-highlight{outline:2px solid #d7b47a;outline-offset:-2px}
+body.wm-open{overflow:hidden}
+@media(max-width:650px){.wm-modal{padding:8px}.wm-dialog{max-height:calc(100dvh - 16px)}.wm-dialog .locations-section{padding:16px 12px 24px!important}.wm-dialog .location-card iframe{height:210px}.wm-dialog .location-info{padding:18px 12px}}
