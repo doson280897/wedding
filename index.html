@@ -195,7 +195,7 @@
 <main>
 <section class="couple-section" id="couple">
   <p class="overline gold center" data-i18n="couple.eyebrow">HAI TRÁI TIM · MỘT HÀNH TRÌNH</p>
-  <h2 class="section-title" data-i18n-html="couple.heading">Cô dâu <em>&amp;</em> Chú rể</h2>
+  <h2 class="section-title" id="coupleHeading" data-i18n-html="couple.heading">Cô dâu <em>&amp;</em> Chú rể</h2>
   <p class="section-lead" data-i18n="couple.lead">Hai con người, một hành trình, một lời hẹn ước.</p>
   <div class="couple-editorial">
     <article class="person person-groom reveal">
@@ -218,8 +218,8 @@
 <section class="family-section" id="family">
   <div class="section-head"><p class="overline gold" data-i18n="family.eyebrow">CÙNG HAI GIA ĐÌNH</p><h2 class="section-title" data-i18n="family.title">Trân trọng báo tin vui</h2><p class="section-lead" data-i18n="family.lead">Sự hiện diện của bạn là niềm hạnh phúc của hai gia đình</p></div>
   <div class="family-grid">
-    <div class="family-card reveal"><span data-i18n="family.groomSide">NHÀ TRAI</span><h3 data-i18n="family.groomTitle">Gia đình chú rể</h3><p data-i18n-html="family.groomFather">Ông <strong>Đỗ Ngọc Thiện</strong></p><p data-i18n-html="family.groomMother">Bà <strong>Lê Thị Thanh Trang</strong></p><p class="family-address" data-i18n="family.groomAddress">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><div class="mini-line"></div><small data-i18n="family.groomRole">TRƯỞNG NAM</small><h4>Đỗ Ngọc Thành Sơn</h4></div>
-    <div class="family-card reveal"><span data-i18n="family.brideSide">NHÀ GÁI</span><h3 data-i18n="family.brideTitle">Gia đình cô dâu</h3><p data-i18n-html="family.brideFather">Ông <strong>Lữ Duy Mạnh</strong></p><p data-i18n-html="family.brideMother">Bà <strong>Nguyễn Thị Hương</strong></p><p class="family-address" data-i18n="family.brideAddress">144 Chu Văn An, Xã Krông Ana, Tỉnh Đắk Lắk</p><div class="mini-line"></div><small data-i18n="family.brideRole">ÚT NỮ</small><h4>Lữ Thị Tố Nga</h4></div>
+    <div class="family-card family-groom reveal"><span data-i18n="family.groomSide">NHÀ TRAI</span><h3 data-i18n="family.groomTitle">Gia đình chú rể</h3><p data-i18n-html="family.groomFather">Ông <strong>Đỗ Ngọc Thiện</strong></p><p data-i18n-html="family.groomMother">Bà <strong>Lê Thị Thanh Trang</strong></p><p class="family-address" data-i18n="family.groomAddress">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><div class="mini-line"></div><small data-i18n="family.groomRole">TRƯỞNG NAM</small><h4>Đỗ Ngọc Thành Sơn</h4></div>
+    <div class="family-card family-bride reveal"><span data-i18n="family.brideSide">NHÀ GÁI</span><h3 data-i18n="family.brideTitle">Gia đình cô dâu</h3><p data-i18n-html="family.brideFather">Ông <strong>Lữ Duy Mạnh</strong></p><p data-i18n-html="family.brideMother">Bà <strong>Nguyễn Thị Hương</strong></p><p class="family-address" data-i18n="family.brideAddress">144 Chu Văn An, Xã Krông Ana, Tỉnh Đắk Lắk</p><div class="mini-line"></div><small data-i18n="family.brideRole">ÚT NỮ</small><h4>Lữ Thị Tố Nga</h4></div>
   </div>
 </section>
 <section class="events-section" id="events">
@@ -303,7 +303,7 @@
     <div class="wq-group-label" data-i18n="menu.groupInvitation">THIỆP</div>
     <div class="wq-links">
       <a href="#home" class="wq-link"><span class="wq-no">01</span><span data-i18n="menu.home">Trang đầu thiệp</span><span class="wq-arrow">↗</span></a>
-      <a href="#couple" class="wq-link"><span class="wq-no">02</span><span data-i18n="menu.couple">Cô dâu &amp; chú rể</span><span class="wq-arrow">↗</span></a>
+      <a href="#couple" class="wq-link"><span class="wq-no">02</span><span id="menuCoupleLabel" data-i18n="menu.couple">Cô dâu &amp; chú rể</span><span class="wq-arrow">↗</span></a>
       <a href="#family" class="wq-link"><span class="wq-no">03</span><span data-i18n="menu.family">Thông tin hai gia đình</span><span class="wq-arrow">↗</span></a>
       <a href="#events" class="wq-link"><span class="wq-no">04</span><span data-i18n="menu.events">Lịch lễ &amp; tiệc cưới</span><span class="wq-arrow">↗</span></a>
       <a href="#album" class="wq-link"><span class="wq-no">05</span><span data-i18n="menu.album">Bộ ảnh cưới 3D</span><span class="wq-arrow">↗</span></a>

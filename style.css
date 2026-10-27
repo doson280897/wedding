@@ -538,3 +538,19 @@ html[data-party] .location-grid{grid-template-columns:minmax(0,720px);justify-co
 /* LANGUAGE ALWAYS AVAILABLE */
 html.party-pending body>.language-switch{visibility:visible!important;pointer-events:auto!important}
 body.envelope-locked .language-switch{visibility:visible!important;pointer-events:auto!important}
+
+
+/* PARTY SIDE PRIORITY
+   Vu Quy: bride / bride family first (left on desktop, top on mobile).
+   Tan Hon: groom / groom family first. */
+html[data-party="bride"] .couple-editorial .person-bride{order:1}
+html[data-party="bride"] .couple-editorial .couple-divider{order:2}
+html[data-party="bride"] .couple-editorial .person-groom{order:3}
+html[data-party="groom"] .couple-editorial .person-groom{order:1}
+html[data-party="groom"] .couple-editorial .couple-divider{order:2}
+html[data-party="groom"] .couple-editorial .person-bride{order:3}
+
+html[data-party="bride"] .family-grid .family-bride{order:1}
+html[data-party="bride"] .family-grid .family-groom{order:2}
+html[data-party="groom"] .family-grid .family-groom{order:1}
+html[data-party="groom"] .family-grid .family-bride{order:2}

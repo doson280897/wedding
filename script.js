@@ -396,9 +396,23 @@
   }
 
   function refreshPartyLabels() {
-    const label = document.getElementById("heroCeremonyLabel");
-    if (!label || !selectedParty) return;
-    label.textContent = tr(selectedParty === "bride" ? "hero.brideOverline" : "hero.groomOverline");
+    if (!selectedParty) return;
+
+    const ceremonyLabel = document.getElementById("heroCeremonyLabel");
+    if (ceremonyLabel) {
+      ceremonyLabel.textContent = tr(selectedParty === "bride" ? "hero.brideOverline" : "hero.groomOverline");
+    }
+
+    const brideFirst = selectedParty === "bride";
+    const coupleHeading = document.getElementById("coupleHeading");
+    if (coupleHeading) {
+      coupleHeading.innerHTML = tr(brideFirst ? "couple.headingBrideFirst" : "couple.headingGroomFirst");
+    }
+
+    const menuCoupleLabel = document.getElementById("menuCoupleLabel");
+    if (menuCoupleLabel) {
+      menuCoupleLabel.textContent = tr(brideFirst ? "menu.coupleBrideFirst" : "menu.coupleGroomFirst");
+    }
   }
 
   function refreshDynamicLanguage() {
