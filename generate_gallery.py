@@ -146,6 +146,14 @@ def generate_manifest():
     found = discover_album_images()
     manifest = {"total": 0, "photos": []}
     expected_targets: set[Path] = set()
+    # Preserve already-published album photos when adding new selections.
+    previous = []
+    if MANIFEST_FILE.exists():
+        try:
+            old = json.loads(MANIFEST_FILE.read_text(encoding="utf-8"))
+            previous = old if isinstance(old, list) else old.get("photos", [])
+        except (OSError, ValueError, TypeError):
+            previous = []
 
     if not found:
         existing_photos = []
@@ -199,9 +207,12 @@ def generate_manifest():
             }
         )
 
-    for stale in OPTIMIZED_ALBUM.rglob("*.webp"):
-        if stale.resolve() not in expected_targets:
-            stale.unlink(missing_ok=True)
+    # Never delete optimized photos just because their original is absent.
+    existing_src = {item["src"] for item in manifest["photos"]}
+    for item in previous:
+        if item.get("src") not in existing_src and (ROOT / item.get("src", "")).is_file():
+            manifest["photos"].append(item)
+            existing_src.add(item["src"])
 
     manifest["total"] = len(manifest["photos"])
     MANIFEST_FILE.write_text(
