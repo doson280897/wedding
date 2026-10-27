@@ -1,5 +1,8 @@
 name: Add 20 wedding photos (preserve existing album)
 on:
+  push:
+    paths:
+      - '.github/workflows/import-wedding-photos.yml'
   workflow_dispatch:
 permissions:
   contents: write
