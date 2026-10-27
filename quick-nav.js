@@ -202,6 +202,7 @@
 
   const snapFloatingToEdge = control => {
     if (!control.isConnected) return;
+    if (control.matches(".language-switch") && document.body.classList.contains("envelope-locked")) return;
     const rect = control.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
 
@@ -225,6 +226,7 @@
   };
 
   const restoreFloatingPosition = control => {
+    if (control.matches(".language-switch") && document.body.classList.contains("envelope-locked")) return;
     const saved = savedFloating[controlKey(control)];
     if (!saved || (saved.edge !== "left" && saved.edge !== "right")) return;
 
