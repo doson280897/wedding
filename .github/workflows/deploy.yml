@@ -25,6 +25,52 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Build social share preview from optimized hero
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageDraw, ImageFont, ImageOps
+
+          source = Path("assets-optimized/hero.webp")
+          if not source.exists():
+              raise SystemExit("Missing assets-optimized/hero.webp")
+
+          image = Image.open(source).convert("RGB")
+          image = ImageOps.fit(image, (1200, 630), Image.Resampling.LANCZOS, centering=(0.5, 0.42)).convert("RGBA")
+
+          overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
+          overlay_draw = ImageDraw.Draw(overlay)
+          for x in range(1200):
+              strength = max(20, int(20 + 185 * (x / 1199) ** 1.65))
+              overlay_draw.line((x, 0, x, 630), fill=(5, 8, 7, strength))
+          overlay_draw.rectangle((0, 0, 1200, 630), fill=(6, 9, 8, 28))
+          image = Image.alpha_composite(image, overlay)
+
+          draw = ImageDraw.Draw(image)
+          serif = "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf"
+          serif_bold = "/usr/share/fonts/truetype/dejavu/DejaVuSer-Bold.ttf"
+          sans = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+          small = ImageFont.truetype(sans, 24)
+          names = ImageFont.truetype(serif_bold, 58)
+          amp = ImageFont.truetype(serif, 42)
+          date = ImageFont.truetype(sans, 25)
+          gold = (238, 210, 164, 255)
+          cream = (245, 236, 221, 255)
+          muted = (211, 191, 158, 255)
+
+          left = 690
+          draw.text((left, 170), "WEDDING INVITATION", font=small, fill=muted)
+          draw.line((left, 210, 1115, 210), fill=(209, 174, 117, 150), width=1)
+          draw.text((left, 236), "THÀNH SƠN", font=names, fill=cream)
+          draw.text((left, 311), "&  TỐ NGA", font=amp, fill=gold)
+          draw.text((left, 390), "14.11.2026  —  29.11.2026", font=date, fill=muted)
+          draw.text((left, 442), "Trân trọng kính mời", font=small, fill=cream)
+
+          image.convert("RGB").save("og-preview.jpg", "JPEG", quality=88, optimize=True, progressive=True)
+          print("Created og-preview.jpg", Path("og-preview.jpg").stat().st_size, "bytes")
+          PY
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:

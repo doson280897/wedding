@@ -13,6 +13,12 @@ Website thiệp cưới phong cách **Cinematic Editorial / Dark Luxury** (đen 
 - Nút **MỤC LỤC** nổi: chọn mục để cuộn mượt đến nội dung.
 - **FIND YOUR WAY / Bản đồ chỉ đường** được **ẩn khỏi luồng trang chính**. Chỉ hiện trong popup khi chọn **Mục lục → Bản đồ chỉ đường**, hoặc bấm **XEM ĐỊA ĐIỂM** ở phần lịch cưới. Popup hiển thị địa điểm nhà trai và nhà gái, có liên kết Google Maps; đóng bằng **×**, bấm ngoài popup hoặc phím **Esc**.
 - Giao diện responsive cho điện thoại và máy tính.
+- **Phong thư mở đầu** nhẹ, chỉ xuất hiện lần đầu trong phiên; có thể bỏ qua.
+- **Countdown hai ngày cưới**: khách chuyển giữa lễ Vu Quy (14/11) và lễ Tân Hôn (29/11).
+- **Lưu ngày cưới vào lịch**: tải file ICS cho từng bên, dùng được với lịch điện thoại/Google Calendar/Outlook.
+- **Nhạc nền tùy chọn**: ambient nhẹ bằng Web Audio, chỉ phát sau khi khách chủ động bật; không cần file MP3.
+- **Lazy-load album 3D**: chỉ tải manifest và ảnh album khi khách cuộn gần tới album.
+- **Preview khi chia sẻ Zalo/Facebook**: Open Graph dùng `og-preview.jpg` 1200×630 được GitHub Actions tạo từ `assets-optimized/hero.webp`; không dùng ảnh gốc.
 
 ## Cấu trúc ảnh — chỉ push ảnh tối ưu
 
@@ -78,7 +84,7 @@ Nếu có thay đổi code, hãy `git add` thêm các file tương ứng trướ
 
 1. Vào repository → **Settings → Pages → Build and deployment**.
 2. Đặt **Source: GitHub Actions**.
-3. Push code lên nhánh `main`. Workflow `.github/workflows/deploy.yml` sẽ xuất bản **các file đã có sẵn trong repo**; workflow **không chạy Python để tạo ảnh**.
+3. Push code lên nhánh `main`. Workflow `.github/workflows/deploy.yml` xuất bản các file đã có sẵn và chỉ tạo thêm `og-preview.jpg` từ **ảnh hero WebP đã tối ưu**. Workflow **không cần ảnh gốc** và không tạo lại album.
 4. Xem trạng thái tại https://github.com/doson280897/wedding/actions và mở https://doson280897.github.io/wedding/ khi deploy thành công.
 
 Nếu ảnh báo **404**, kiểm tra các file WebP đã có trên GitHub **đúng tên và đúng thư mục** (`assets-optimized/`, `thumbs/`) và `images.json` đã được commit. Có ảnh gốc trong `assets/` nhưng thiếu `assets-optimized/` **không đủ** để website hiển thị.
@@ -87,8 +93,8 @@ Nếu ảnh báo **404**, kiểm tra các file WebP đã có trên GitHub **đú
 
 - `index.html`: nội dung thiệp, địa điểm, các mục và popup bản đồ.
 - `style.css`: giao diện chính, ảnh nền tối ưu.
-- `script.js`: hành vi chung (ví dụ: tên khách, đếm ngược).
-- `gallery.js`: album 3D lấy danh sách ảnh từ `images.json`.
+- `script.js`: tên khách, countdown 2 ngày, phong thư, lưu lịch, nhạc nền, scroll/reveal.
+- `gallery.js`: album 3D lấy danh sách ảnh từ `images.json` và chỉ khởi tạo khi khách cuộn gần tới album.
 - `quick-nav.css` và `quick-nav.js`: nút mục lục, cuộn đến mục, mở/đóng popup bản đồ.
 - `generate_gallery.py`: chạy **local** để tạo ảnh WebP và danh sách album.
 

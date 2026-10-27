@@ -141,3 +141,49 @@ footer { background: #050806; color: #c5b9a4; }
 @media(max-width:650px) {
   .hero-photo { background-position: 42% center; }
 }
+
+
+/* WEDDING EXPERIENCE ENHANCEMENTS */
+.family-section,.album-section,.events-section,.closing{content-visibility:auto;contain-intrinsic-size:800px}
+.hero-photo{will-change:transform}
+.countdown-choice{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:-3px 0 12px}
+.countdown-choice-btn{border:1px solid #b39b7057;background:#090d0c6b;color:#ddd0bc;border-radius:25px;padding:6px 12px;font:500 10px Montserrat,sans-serif;letter-spacing:.06em;cursor:pointer}
+.countdown-choice-btn.is-active{background:#b99b7042;border-color:#d9bb86;color:#fbe7c6}
+.countdown-choice-btn:focus-visible,.calendar-button:focus-visible,.music-toggle:focus-visible,.envelope-open:focus-visible,.envelope-skip:focus-visible{outline:2px solid #eccf98;outline-offset:3px}
+.calendar-button{display:inline-block;margin:15px 0 0 8px;padding:10px 15px;border:1px solid #ba9d7199;border-radius:30px;background:#0a0e0c;color:#efd8b4;font:500 10px Montserrat,sans-serif;letter-spacing:.1em;cursor:pointer}
+.calendar-button:hover{background:#b99b7035}
+.music-toggle{position:fixed;left:20px;bottom:24px;z-index:1003;border:1px solid #bfa47888;border-radius:50px;background:#171b19ed;color:#eed7ac;padding:11px 14px;display:flex;align-items:center;gap:8px;font:500 10px Montserrat,sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 10px 36px #0009;backdrop-filter:blur(7px)}
+.music-toggle[aria-pressed=true]{border-color:#e8c789;background:#343024ed;box-shadow:0 10px 36px #0009,0 0 24px #d0aa6b1e}
+.envelope-intro[hidden]{display:none!important}
+.envelope-intro{position:fixed;inset:0;z-index:2000;background:radial-gradient(ellipse at 48% 36%,#29241d,#0d100f 60%,#030606);display:grid;place-items:center;overflow-y:auto;padding:24px;text-align:center;color:#f5e8d7}
+.envelope-inner{width:min(440px,100%);padding:18px 10px 30px;animation:envelopeFade .6s ease-out both}
+.envelope-eyebrow{font:500 10px Montserrat,sans-serif;letter-spacing:.26em;color:#d7b985}
+.envelope-art{position:relative;width:min(320px,80vw);height:165px;margin:32px auto 28px;background:linear-gradient(155deg,#40362c,#1c201e);border:1px solid #b89b6f;border-radius:4px;box-shadow:0 25px 70px #000b;overflow:hidden}
+.envelope-art:before{content:"";position:absolute;inset:auto -20px -35px;top:45%;background:linear-gradient(145deg,#3d3328,#24251e);clip-path:polygon(0 100%,50% 10%,100% 100%)}
+.envelope-flap{position:absolute;inset:0;background:linear-gradient(#67523b,#372e27);clip-path:polygon(0 0,100% 0,50% 77%);filter:drop-shadow(0 5px 8px #0006)}
+.envelope-seal{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 25% 20%,#dfc79a,#a47c4c 75%);border:2px solid #f5dbae;color:#2c2117;font:500 20px 'Cormorant Garamond',serif;box-shadow:0 5px 14px #0007}
+.envelope-seal span{color:#5c3c22}
+.envelope-invite{font:14px 'Cormorant Garamond',serif;letter-spacing:.08em;color:#e2c89c}
+.envelope-inner h2{font:500 clamp(36px,8vw,54px) 'Cormorant Garamond',serif;margin:0 0 4px;line-height:1.1}
+.envelope-inner h2 em{font:38px 'Great Vibes',cursive;color:#d9ba84}
+.envelope-date{font:500 11px Montserrat,sans-serif;letter-spacing:.15em;color:#cfb891;margin:18px 0 28px}
+.envelope-open{display:block;margin:0 auto;border:1px solid #d3b079;border-radius:3px;background:#b99a69;color:#18140e;font:600 11px Montserrat,sans-serif;letter-spacing:.15em;padding:16px 31px;cursor:pointer}
+.envelope-open span{margin-left:9px}
+.envelope-skip{display:block;margin:14px auto 0;border:0;background:none;color:#bcae98;font:11px Montserrat,sans-serif;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.envelope-intro.is-opening .envelope-art{animation:openLetter .55s ease both}
+.envelope-intro.is-opening{animation:envelopeOut .65s .12s ease-in forwards}
+body.envelope-locked{overflow:hidden}
+@keyframes envelopeFade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes openLetter{to{transform:translateY(-18px) scale(1.04);opacity:.2}}
+@keyframes envelopeOut{to{opacity:0;visibility:hidden}}
+@media(max-width:650px){
+  .calendar-button{margin-left:0}
+  .music-toggle{left:14px;bottom:14px;font-size:9px;padding:11px 12px}
+  .countdown-choice-btn{font-size:9px;padding:6px 9px}
+  .envelope-art{height:150px}
+  .envelope-inner{padding-top:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .envelope-inner,.envelope-intro.is-opening,.envelope-intro.is-opening .envelope-art{animation:none!important}
+  .hero-photo{will-change:auto}
+}

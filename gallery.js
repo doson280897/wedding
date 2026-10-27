@@ -37,6 +37,8 @@
     img.alt = "";
     img.draggable = false;
     img.decoding = "async";
+    img.loading = relative === 0 ? "eager" : "lazy";
+    img.fetchPriority = relative === 0 ? "high" : "low";
     const label = document.createElement("span");
     label.className = "album-card-number";
     node.append(img, label);
@@ -154,6 +156,7 @@
   });
 
   async function start() {
+    status.textContent = "Đang tải album ảnh cưới…";
     try {
       const response = await fetch("./images.json", { cache: "no-cache" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -172,5 +175,16 @@
       status.textContent = "Không tải được images.json. Hãy chạy generate_gallery.py và mở bằng Live Server.";
     }
   }
-  start();
+  const albumSection = document.getElementById("album") || viewport;
+  if ("IntersectionObserver" in window) {
+    const lazyObserver = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        lazyObserver.disconnect();
+        start();
+      }
+    }, { rootMargin:"600px 0px", threshold:0 });
+    lazyObserver.observe(albumSection);
+  } else {
+    start();
+  }
 })();
