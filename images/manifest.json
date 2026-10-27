@@ -1,140 +1,55 @@
 {
-  "total": 27,
+  "total": 10,
   "photos": [
     {
-      "src": "images/optimized/album/DAT06639.JPG.webp",
-      "name": "DAT06639",
-      "v": "e1d13ae192"
+      "src": "images/optimized/album/2_01.jpg.webp",
+      "name": "2 01",
+      "v": "1b3f29db54"
     },
     {
-      "src": "images/optimized/album/DAT06797.JPG.webp",
-      "name": "DAT06797",
-      "v": "5e047fbe4b"
+      "src": "images/optimized/album/2_02.jpg.webp",
+      "name": "2 02",
+      "v": "a3ad733903"
     },
     {
-      "src": "images/optimized/album/DAT06819.JPG.webp",
-      "name": "DAT06819",
-      "v": "7c8e793696"
+      "src": "images/optimized/album/2_03.jpg.webp",
+      "name": "2 03",
+      "v": "df1e938079"
     },
     {
-      "src": "images/optimized/album/DAT06826.JPG.webp",
-      "name": "DAT06826",
-      "v": "4756ad0b86"
+      "src": "images/optimized/album/2_04.jpg.webp",
+      "name": "2 04",
+      "v": "96592d240c"
     },
     {
-      "src": "images/optimized/album/DAT07065.JPG.webp",
-      "name": "DAT07065",
-      "v": "79b18d827a"
+      "src": "images/optimized/album/2_05.jpg.webp",
+      "name": "2 05",
+      "v": "8747e85092"
     },
     {
-      "src": "images/optimized/album/DAT07076.JPG.webp",
-      "name": "DAT07076",
-      "v": "6921d310cb"
+      "src": "images/optimized/album/2_06.jpg.webp",
+      "name": "2 06",
+      "v": "bc6b1aecc5"
     },
     {
-      "src": "images/optimized/album/DAT07276.JPG.webp",
-      "name": "DAT07276",
-      "v": "e835b5bee1"
+      "src": "images/optimized/album/2_07.jpg.webp",
+      "name": "2 07",
+      "v": "7b09c7e247"
     },
     {
-      "src": "images/optimized/album/DAT07364.JPG.webp",
-      "name": "DAT07364",
-      "v": "25ae433fb7"
+      "src": "images/optimized/album/2_08.jpg.webp",
+      "name": "2 08",
+      "v": "f8fe413346"
     },
     {
-      "src": "images/optimized/album/DAT07463.JPG.webp",
-      "name": "DAT07463",
-      "v": "36a0047c19"
+      "src": "images/optimized/album/2_09.jpg.webp",
+      "name": "2 09",
+      "v": "0af9449984"
     },
     {
-      "src": "images/optimized/album/DAT07634.JPG.webp",
-      "name": "DAT07634",
-      "v": "d3c745bbff"
-    },
-    {
-      "src": "images/optimized/album/DAT07878.JPG.webp",
-      "name": "DAT07878",
-      "v": "a8f1dbf105"
-    },
-    {
-      "src": "images/optimized/album/DAT08030.JPG.webp",
-      "name": "DAT08030",
-      "v": "e3d7ec573f"
-    },
-    {
-      "src": "images/optimized/album/DAT08042.JPG.webp",
-      "name": "DAT08042",
-      "v": "e63c20c6c8"
-    },
-    {
-      "src": "images/optimized/album/DAT08056.JPG.webp",
-      "name": "DAT08056",
-      "v": "735284f075"
-    },
-    {
-      "src": "images/optimized/album/DAT08076.JPG.webp",
-      "name": "DAT08076",
-      "v": "c471b86b5c"
-    },
-    {
-      "src": "images/optimized/album/DAT08095.JPG.webp",
-      "name": "DAT08095",
-      "v": "02754dbbb6"
-    },
-    {
-      "src": "images/optimized/album/DAT08124.JPG.webp",
-      "name": "DAT08124",
-      "v": "8def0da891"
-    },
-    {
-      "src": "images/optimized/album/DAT08151.JPG.webp",
-      "name": "DAT08151",
-      "v": "7c6d5c868d"
-    },
-    {
-      "src": "images/optimized/album/DAT08192.JPG.webp",
-      "name": "DAT08192",
-      "v": "68cb291756"
-    },
-    {
-      "src": "images/optimized/album/DAT08437.JPG.webp",
-      "name": "DAT08437",
-      "v": "7d7cab8821"
-    },
-    {
-      "src": "images/optimized/album/DAT08472.JPG.webp",
-      "name": "DAT08472",
-      "v": "d58f4e4e35"
-    },
-    {
-      "src": "images/optimized/album/DAT08562.JPG.webp",
-      "name": "DAT08562",
-      "v": "e0e65a267c"
-    },
-    {
-      "src": "images/optimized/album/DAT08763.JPG.webp",
-      "name": "DAT08763",
-      "v": "71ade2c949"
-    },
-    {
-      "src": "images/optimized/album/DAT08880.JPG.webp",
-      "name": "DAT08880",
-      "v": "dbdc6fcaad"
-    },
-    {
-      "src": "images/optimized/album/DAT08955.JPG.webp",
-      "name": "DAT08955",
-      "v": "5e5b59daf7"
-    },
-    {
-      "src": "images/optimized/album/gate_1.JPG.webp",
-      "name": "gate 1",
-      "v": "471b8818ad"
-    },
-    {
-      "src": "images/optimized/album/gate_2.JPG.webp",
-      "name": "gate 2",
-      "v": "c15845deb6"
+      "src": "images/optimized/album/2_10.jpg.webp",
+      "name": "2 10",
+      "v": "31bf34faa3"
     }
   ]
 }
