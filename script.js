@@ -397,6 +397,11 @@
       });
     }));
 
+    // Allow a later user tap to retry after a transient YouTube/network error.
+    youtubePlayerPromise.catch(() => {
+      youtubePlayerPromise = null;
+      youtubePlayerReady = false;
+    });
     return youtubePlayerPromise;
   }
 
