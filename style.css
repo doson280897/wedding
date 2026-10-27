@@ -951,3 +951,19 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
 /* HERO TOPBAR SINGLE MONOGRAM */
 .topbar{justify-content:flex-start;padding-right:clamp(20px,5vw,70px)}
 @media(max-width:650px){.topbar{padding:15px 16px 0}}
+
+/* Keep both fullscreen photo layers in the same fixed stacking context.
+   Replacing the outgoing image must never reflow the incoming image. */
+.album-lightbox-stage > img#albumLightboxImage,
+.album-lightbox-stage > img.album-lightbox-incoming {
+  position:absolute!important;
+  left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  max-width:100%!important;
+  max-height:calc(100% - 118px)!important;
+  width:auto!important;height:auto!important;
+  object-fit:contain;
+  will-change:transform,opacity;
+}
+.album-lightbox-stage > img#albumLightboxImage{z-index:2}
+.album-lightbox-stage > img.album-lightbox-incoming{z-index:3}
