@@ -660,3 +660,129 @@ html[data-party="bride"] .family-grid .family-bride{order:1}
 html[data-party="bride"] .family-grid .family-groom{order:2}
 html[data-party="groom"] .family-grid .family-groom{order:1}
 html[data-party="groom"] .family-grid .family-bride{order:2}
+
+
+/* HERO CONTENT BELOW PHOTO — mobile/tablet */
+@media(max-width:900px){
+  .hero{
+    --hero-photo-height:min(66svh,680px);
+    height:auto;
+    min-height:0;
+    overflow:hidden;
+    background:#080b09;
+  }
+
+  .hero-photo{
+    position:relative;
+    inset:auto;
+    width:100%;
+    height:var(--hero-photo-height);
+    min-height:420px;
+    animation:none;
+    transform:none!important;
+    background-position:center center;
+  }
+
+  .hero-shade{
+    position:absolute;
+    inset:0 0 auto;
+    height:var(--hero-photo-height);
+    background:linear-gradient(
+      180deg,
+      rgba(4,7,6,.08) 0%,
+      rgba(4,7,6,.05) 62%,
+      rgba(4,7,6,.42) 100%
+    );
+    pointer-events:none;
+  }
+
+  .hero-layout{
+    position:relative;
+    z-index:2;
+    display:block;
+    height:auto;
+    padding:32px 22px 66px;
+    background:
+      radial-gradient(circle at 50% 0%,rgba(189,151,93,.12),transparent 34%),
+      linear-gradient(180deg,#101613 0%,#090d0b 100%);
+  }
+
+  .hero-spacer{display:none}
+
+  .hero-copy{
+    width:min(680px,100%);
+    margin:0 auto;
+    text-align:center;
+  }
+
+  .hero-copy h1{
+    max-width:none;
+    margin-top:8px;
+  }
+
+  .guest-greeting{
+    max-width:620px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .hero-count-title{margin-top:22px}
+
+  .scroll-cue{
+    bottom:18px;
+    z-index:3;
+  }
+}
+
+@media(max-width:650px){
+  .hero{
+    --hero-photo-height:min(58svh,520px);
+  }
+
+  .hero-photo{
+    min-height:360px;
+    background-position:center center;
+  }
+
+  .hero-layout{
+    display:block;
+    align-items:initial;
+    justify-content:initial;
+    padding:28px 16px 62px;
+  }
+
+  .hero-copy h1{
+    font-size:clamp(38px,11vw,54px);
+  }
+
+  .hero-copy h1 span{
+    font-size:40px;
+  }
+
+  .handwriting{
+    font-size:clamp(22px,7vw,31px);
+  }
+
+  .countdown{
+    gap:7px;
+  }
+
+  .countdown>div{
+    min-width:54px;
+    padding:7px 6px;
+  }
+
+  .countdown strong{
+    font-size:25px;
+  }
+}
+
+@media(max-width:390px){
+  .hero{
+    --hero-photo-height:min(54svh,470px);
+  }
+
+  .hero-photo{
+    min-height:330px;
+  }
+}
