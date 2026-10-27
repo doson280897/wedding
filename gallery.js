@@ -51,6 +51,9 @@
   let lightboxIndex = 0;
   let lightboxReturnFocus = null;
   let lightboxPointer = null;
+  let wheelAccumulator = 0;
+  let wheelLocked = false;
+  let wheelUnlockTimer = 0;
   let layoutStep = 1;
   let firstSlideCenter = 0;
   const decodeQueue = [];
@@ -166,12 +169,6 @@
       applyItemRatio(item, ratio);
       warmDecode(img);
       requestDepthRender();
-    });
-
-    slide.addEventListener("dblclick", event => {
-      if (item.photoIndex < 0) return;
-      event.preventDefault();
-      openLightbox(item.photoIndex, slide);
     });
 
     slide.addEventListener("pointerdown", event => {
@@ -599,30 +596,91 @@
     viewport.addEventListener("scrollend", finishScroll, { passive: true });
   }
 
-  // Touch stays entirely native so iOS/Android keep their own kinetic scrolling.
-  // Mouse gets drag support without a second momentum engine.
+  // Touch stays native so iOS/Android keep kinetic scrolling.
+  // Desktop mouse distinguishes a true click on the visible card from a drag.
   viewport.addEventListener("pointerdown", event => {
     if (event.pointerType !== "mouse" || event.button !== 0) return;
-    mouseDrag = { id:event.pointerId, x:event.clientX, left:viewport.scrollLeft };
+
+    const slideEl = event.target.closest?.(".album-slide");
+    const item = slideEl ? slides.find(entry => entry.slide === slideEl) : null;
+    const cardRect = item?.card?.getBoundingClientRect?.();
+    const hitCard = !!cardRect &&
+      event.clientX >= cardRect.left && event.clientX <= cardRect.right &&
+      event.clientY >= cardRect.top && event.clientY <= cardRect.bottom;
+
+    mouseDrag = {
+      id:event.pointerId,
+      x:event.clientX,
+      y:event.clientY,
+      left:viewport.scrollLeft,
+      moved:false,
+      item,
+      hitCard,
+      startedAt:performance.now()
+    };
+
     viewport.classList.add("is-dragging");
     viewport.setPointerCapture?.(event.pointerId);
   });
 
   viewport.addEventListener("pointermove", event => {
     if (!mouseDrag || event.pointerId !== mouseDrag.id) return;
-    viewport.scrollLeft = mouseDrag.left - (event.clientX - mouseDrag.x);
+    const dx = event.clientX - mouseDrag.x;
+    const dy = event.clientY - mouseDrag.y;
+    if (Math.hypot(dx, dy) > 7) mouseDrag.moved = true;
+    viewport.scrollLeft = mouseDrag.left - dx;
   });
 
   function endMouseDrag(event) {
     if (!mouseDrag || (event.pointerId != null && event.pointerId !== mouseDrag.id)) return;
+
+    const drag = mouseDrag;
     mouseDrag = null;
     viewport.classList.remove("is-dragging");
+
+    const elapsed = performance.now() - drag.startedAt;
+    if (!drag.moved && drag.hitCard && drag.item?.photoIndex >= 0 && elapsed < 650) {
+      openLightbox(drag.item.photoIndex, drag.item.slide);
+      return;
+    }
+
     scrollToSlot(nearestSlotIndex(), "smooth");
   }
 
   viewport.addEventListener("pointerup", endMouseDrag);
   viewport.addEventListener("pointercancel", endMouseDrag);
   viewport.addEventListener("lostpointercapture", endMouseDrag);
+
+  // Mouse wheel / trackpad: one deliberate wheel gesture advances one photo.
+  // Prevent vertical page scrolling only while the pointer is over the album.
+  viewport.addEventListener("wheel", event => {
+    if (!photos.length || (lightbox && !lightbox.hidden)) return;
+
+    const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+      ? event.deltaX
+      : event.deltaY;
+
+    if (!dominantDelta) return;
+    event.preventDefault();
+
+    if (wheelLocked) return;
+    wheelAccumulator += dominantDelta;
+
+    if (Math.abs(wheelAccumulator) < 20) return;
+
+    const direction = wheelAccumulator > 0 ? 1 : -1;
+    wheelAccumulator = 0;
+    wheelLocked = true;
+
+    const base = nearestSlotIndex();
+    scrollToSlot(base + direction, "smooth");
+
+    window.clearTimeout(wheelUnlockTimer);
+    wheelUnlockTimer = window.setTimeout(() => {
+      wheelLocked = false;
+      wheelAccumulator = 0;
+    }, 240);
+  }, { passive:false });
 
   viewport.addEventListener("keydown", event => {
     if (lightbox && !lightbox.hidden) return;
