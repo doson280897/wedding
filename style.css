@@ -1008,6 +1008,12 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
     display: inline-grid;
     place-items: center;
   }
+  /* Hidden options must not retain the touch-size minimum: otherwise
+     VN/EN text disappears but the pill stays expanded on phones/tablets. */
+  .language-switch.floating-control.is-idle .language-option:not(.is-active) {
+    min-width: 0;
+    min-height: 0;
+  }
   .language-switch.floating-control.is-idle .language-option.is-active {
     min-height: 28px;
     min-width: 32px;
