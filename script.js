@@ -145,7 +145,7 @@
   const openInvitation = document.getElementById("openInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
   let envelopeSeen = false;
-  try { envelopeSeen = sessionStorage.getItem("wedding-envelope-seen-v1") === "1"; } catch (_) {}
+  try { envelopeSeen = sessionStorage.getItem("wedding-envelope-seen-v2") === "1"; } catch (_) {}
   if (intro && !envelopeSeen) {
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
@@ -154,14 +154,14 @@
     const closeEnvelope = () => {
       if (closing) return;
       closing = true;
-      try { sessionStorage.setItem("wedding-envelope-seen-v1","1"); } catch (_) {}
+      try { sessionStorage.setItem("wedding-envelope-seen-v2","1"); } catch (_) {}
       document.body.classList.remove("envelope-locked");
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
         return;
       }
       intro.classList.add("is-opening");
-      window.setTimeout(() => { intro.hidden = true; }, 720);
+      window.setTimeout(() => { intro.hidden = true; }, 1450);
     };
     openInvitation?.addEventListener("click", closeEnvelope);
     skipInvitation?.addEventListener("click", closeEnvelope);

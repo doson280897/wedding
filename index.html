@@ -56,12 +56,79 @@
 </div>
 <div class="envelope-intro" id="envelopeIntro" hidden role="dialog" aria-modal="true" aria-labelledby="envelopeTitle">
   <div class="envelope-inner">
-    <p class="envelope-eyebrow" data-i18n="envelope.eyebrow">CHUYỆN TÌNH CỦA CHÚNG MÌNH · 2026</p>
-    <div class="envelope-art" aria-hidden="true"><div class="envelope-flap"></div><div class="envelope-seal">S <span>&amp;</span> N</div></div>
-    <p class="envelope-invite" id="envelopeGuest" data-i18n="envelope.invite">Trân trọng kính mời</p>
-    <h2 id="envelopeTitle">Thành Sơn <em>&amp;</em> Tố Nga</h2>
-    <p class="envelope-date">14 · 11 · 2026 &nbsp;—&nbsp; 29 · 11 · 2026</p>
-    <button type="button" id="openInvitation" class="envelope-open" data-i18n-html="envelope.open">MỞ THIỆP CƯỚI <span aria-hidden="true">↗</span></button>
+    <div class="envelope-stage">
+      <div class="envelope-shell" aria-hidden="true">
+        <div class="envelope-back"></div>
+        <div class="envelope-flap"></div>
+      </div>
+
+      <article class="invitation-card">
+        <svg class="botanical botanical-top" viewBox="0 0 180 180" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-linecap="round">
+            <path d="M18 145c42-18 66-58 80-112" stroke-width="2"/>
+            <path d="M52 117c-20-7-30-21-31-37 19 1 33 10 40 27" stroke-width="1.6"/>
+            <path d="M72 88c-17-11-22-27-18-42 18 5 29 16 32 34" stroke-width="1.6"/>
+            <path d="M94 57c-7-15-5-29 4-39 13 10 17 23 12 38" stroke-width="1.6"/>
+          </g>
+          <g fill="currentColor" opacity=".2">
+            <ellipse cx="36" cy="104" rx="14" ry="26" transform="rotate(-42 36 104)"/>
+            <ellipse cx="69" cy="69" rx="12" ry="24" transform="rotate(-26 69 69)"/>
+            <ellipse cx="101" cy="38" rx="10" ry="20" transform="rotate(12 101 38)"/>
+          </g>
+          <g class="botanical-flower">
+            <circle cx="72" cy="126" r="11" fill="#f9f6ed"/>
+            <circle cx="61" cy="121" r="10" fill="#f7f3e8"/>
+            <circle cx="62" cy="136" r="10" fill="#fbf8ef"/>
+            <circle cx="80" cy="139" r="10" fill="#f6f1e6"/>
+            <circle cx="84" cy="122" r="10" fill="#fcfaf3"/>
+            <circle cx="72" cy="130" r="4" fill="#b89b6a"/>
+          </g>
+        </svg>
+
+        <svg class="botanical botanical-bottom" viewBox="0 0 180 180" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-linecap="round">
+            <path d="M18 145c42-18 66-58 80-112" stroke-width="2"/>
+            <path d="M52 117c-20-7-30-21-31-37 19 1 33 10 40 27" stroke-width="1.6"/>
+            <path d="M72 88c-17-11-22-27-18-42 18 5 29 16 32 34" stroke-width="1.6"/>
+            <path d="M94 57c-7-15-5-29 4-39 13 10 17 23 12 38" stroke-width="1.6"/>
+          </g>
+          <g fill="currentColor" opacity=".18">
+            <ellipse cx="36" cy="104" rx="14" ry="26" transform="rotate(-42 36 104)"/>
+            <ellipse cx="69" cy="69" rx="12" ry="24" transform="rotate(-26 69 69)"/>
+            <ellipse cx="101" cy="38" rx="10" ry="20" transform="rotate(12 101 38)"/>
+          </g>
+          <g class="botanical-flower">
+            <circle cx="72" cy="126" r="11" fill="#f9f6ed"/>
+            <circle cx="61" cy="121" r="10" fill="#f7f3e8"/>
+            <circle cx="62" cy="136" r="10" fill="#fbf8ef"/>
+            <circle cx="80" cy="139" r="10" fill="#f6f1e6"/>
+            <circle cx="84" cy="122" r="10" fill="#fcfaf3"/>
+            <circle cx="72" cy="130" r="4" fill="#b89b6a"/>
+          </g>
+        </svg>
+
+        <div class="invitation-card-rule"></div>
+        <p class="envelope-eyebrow" data-i18n="envelope.eyebrow">SAVE THE DATE</p>
+        <span class="invitation-leaf" aria-hidden="true">❧</span>
+        <h2 id="envelopeTitle"><span>Tố Nga</span><em>&amp;</em><span>Thành Sơn</span></h2>
+        <p class="envelope-date">14 · 11 · 2026 <span>—</span> 29 · 11 · 2026</p>
+        <div class="invitation-leaf invitation-leaf-small" aria-hidden="true">❧</div>
+        <p class="envelope-invite" id="envelopeGuest" data-i18n="envelope.invite">Trân trọng kính mời</p>
+      </article>
+
+      <div class="envelope-front" aria-hidden="true">
+        <div class="envelope-front-left"></div>
+        <div class="envelope-front-right"></div>
+        <div class="envelope-front-bottom"></div>
+        <div class="envelope-seal">
+          <svg viewBox="0 0 42 42" aria-hidden="true">
+            <path d="M10 30c9-4 14-12 18-22M16 25c-5-2-7-6-7-10 5 0 9 3 11 7M22 18c-4-3-5-7-3-11 4 2 7 5 7 10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" id="openInvitation" class="envelope-open" data-i18n-html="envelope.open">MỞ THIỆP CƯỚI <span aria-hidden="true">→</span></button>
     <button type="button" id="skipInvitation" class="envelope-skip" data-i18n="envelope.skip">Bỏ qua</button>
   </div>
 </div>

@@ -34,7 +34,7 @@ wedding/
 
 - Thiệp cá nhân hoá bằng `?to=`.
 - VN / EN, mặc định VN.
-- Phong thư mở đầu, countdown hai ngày cưới, lưu lịch ICS.
+- Phong thư mở đầu kiểu **botanical ivory** với thiệp giấy, sage green + champagne gold, animation card trượt khỏi phong bì; countdown hai ngày cưới và lưu lịch ICS.
 - Album 3D dạng **ribbon vô hạn** dùng native momentum + scroll-snap.
 - Ring buffer cố định 31 slide, phù hợp album 100+ ảnh mà không render toàn bộ.
 - Decode album theo hàng đợi tối đa 4 ảnh song song; mobile chỉ transform vùng card gần viewport.
