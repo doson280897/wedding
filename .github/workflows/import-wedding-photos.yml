@@ -1,0 +1,61 @@
+name: Add 20 wedding photos (preserve existing album)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Download selected original photos from shared Drive
+        run: |
+          python -m pip install --quiet gdown Pillow pillow-avif-plugin
+          mkdir -p images/original/album
+          python - <<'PY'
+          import gdown
+          from pathlib import Path
+          items = [
+              ("NAK_7835.JPG", "1VnQMXrYWYQvF4QO4iavniN0afuuRW9vE"),
+              ("NAK_7529.JPG", "1-UG-tbRH-MVVUkBEW5g4Ib9PUt-peUwJ"),
+              ("NAK_7489.JPG", "1L7QGg-vOHLEwmOQCGQjNIaTgPu5wlzMJ"),
+              ("NAK_7168.JPG", "1xHEr3XhgXRcFsOuF1S1-l0SJzB9JsYrX"),
+              ("NAK_6928.JPG", "1nInl-DfUSQ5yXWMQ4nVEVK47orsSIpU0"),
+              ("NAK_7650.JPG", "1ObYUGOiohmdPwFZyAa8U8y_9IDwQ82nh"),
+              ("NAK_7333.JPG", "1YMjpLqEOFSLLYGytnxtjgilxyxOcsbkG"),
+              ("NAK_7113.JPG", "1MVPO1hFQk5wurZ90XAHHnn724Q7nacMR"),
+              ("NAK_7063.JPG", "1QwMBidExri5SrIrRwF8VLsSc7kYYCxdU"),
+              ("NAK_7053.JPG", "1apqwS2njO4m845pnOaSlngHlc8yd3SEz"),
+              ("NAK_7920.JPG", "19NMO4ZwI14uF_pchi6OUYMV2dQe9IqN3"),
+              ("NAK_7885.JPG", "1PgiE8iyZcZc5XV9ZdqlDNCa8yPSKVPED"),
+              ("NAK_7860.JPG", "1aktbc0YPzqohzE63_ebQd9C7KXra62jY"),
+              ("NAK_7745.JPG", "1z4ViNkTF6Wi7u-AvSNxxV3gF-CESthlk"),
+              ("NAK_7625.JPG", "1YYRDj8-jyB9klftt3MTGxlTq44Q8NQfp"),
+              ("NAK_7574.JPG", "1VeZffV6HoUMZTC-q2WkqM2m3ZQwEmgZc"),
+              ("NAK_7404.JPG", "1bgALABi5bLigLD7FV9_xfpH2PInD7aag"),
+              ("NAK_7379.JPG", "14-s_8uo2_3e0Vjz4kmXfzpIcZdJXffZI"),
+              ("NAK_7253.JPG", "1wO93OMjHeQrkeHaEWJDTl9bVsy1LdlQm"),
+              ("NAK_7003.JPG", "19CtoLKvD0yZFDsNAeyIMToELW0zmY_Ff"),
+          ]
+          for name, file_id in items:
+              path = Path("images/original/album") / name
+              if path.exists():
+                  continue
+              gdown.download(id=file_id, output=str(path), quiet=False, fuzzy=True)
+              if not path.exists() or path.stat().st_size < 10000:
+                  raise RuntimeError("Drive download failed: " + name + "; check link-sharing permissions")
+      - name: Optimize with existing Python generator
+        run: python generate_gallery.py
+      - name: Commit optimized WebP files and merged manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/optimized/album images/manifest.json
+          if git diff --cached --quiet; then
+            echo "No new optimized images"
+          else
+            git commit -m "Add 20 optimized wedding photos without replacing existing album"
+            git push
+          fi
