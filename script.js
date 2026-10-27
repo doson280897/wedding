@@ -44,8 +44,10 @@
   const envelopeGuest = document.getElementById("envelopeGuest");
 
   function updateGuest() {
-    const text = displayGuest ? tr("guest.prefix") + displayGuest : tr("hero.greeting");
-    if (guestNode) guestNode.textContent = text;
+    const guestLabel = displayGuest || tr("guest.default");
+    const heroTemplate = tr(selectedParty === "bride" ? "guest.heroBride" : "guest.heroGroom");
+    const heroText = heroTemplate.replace("{guest}", guestLabel);
+    if (guestNode) guestNode.textContent = heroText;
     if (envelopeGuest) envelopeGuest.textContent = displayGuest ? tr("guest.prefix") + displayGuest : tr("envelope.invite");
   }
 
