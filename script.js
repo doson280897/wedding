@@ -186,7 +186,13 @@
       });
     };
     openInvitation?.addEventListener("click", closeEnvelope);
-    skipInvitation?.addEventListener("click", closeEnvelope);
+    skipInvitation?.addEventListener("click", () => {
+      if (closing) return;
+      closing = true;
+      try { sessionStorage.setItem("wedding-envelope-seen-v4","1"); } catch (_) {}
+      intro.hidden = true;
+      document.body.classList.remove("envelope-locked");
+    });
     intro.addEventListener("keydown", event => {
       if (event.key === "Escape") { event.preventDefault(); closeEnvelope(); return; }
       if (event.key !== "Tab" || !openInvitation || !skipInvitation) return;
