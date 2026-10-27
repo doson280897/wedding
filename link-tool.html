@@ -27,10 +27,10 @@ button.secondary,.action.secondary{background:transparent;color:#f0dfc3}
 #generated{font-size:13px;overflow-wrap:anywhere;line-height:1.6;color:#e9d9b8}
 #feedback{min-height:22px;margin:12px 0 0;color:#d9c18e}
 .note{font-size:12px;margin-bottom:0}
-</style>
+.lang-switch{display:flex;justify-content:flex-end;gap:8px}.lang-switch button{background:transparent;color:#e9d9b8;padding:7px 13px;min-height:36px}.lang-switch button.active{background:#bda16e;color:#131b15}</style>
 </head>
 <body>
-<main>
+<main><div class="lang-switch"><button type="button" id="viBtn">VN</button><button type="button" id="enBtn">EN</button></div>
 <div class="eyebrow">TỐ NGA & THÀNH SƠN · WEDDING 2026</div>
 <h1>Tạo thiệp mời riêng</h1>
 <p>Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho người nhận.</p>
@@ -59,6 +59,32 @@ button.secondary,.action.secondary{background:transparent;color:#f0dfc3}
 <script>
 (() => {
 "use strict";
+
+const dictionary={
+vi:["Tạo thiệp mời riêng","Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho người nhận.","Tên khách mời","Ví dụ: Anh Minh và chị Lan","Khách tham dự","Nhà gái · Lễ Vu Quy · 14/11/2026 · Đắk Lắk","Nhà trai · Lễ Tân Hôn · 29/11/2026 · Đồng Nai","Tạo link thiệp","Link dành cho khách","Sao chép link","Chia sẻ","Xem thử thiệp","Công cụ này tạo link ngay trên thiết bị; không lưu danh sách khách. Link có tên khách trong URL, nên chỉ chia sẻ với đúng người nhận."],
+en:["Create a personalized invitation","Enter your guest's name and select the celebration. Their invitation will display a personal greeting.","Guest name","e.g. Minh and Lan","Celebration","Bride's family · November 14, 2026 · Đắk Lắk","Groom's family · November 29, 2026 · Đồng Nai","Create invitation link","Guest invitation link","Copy link","Share","Preview invitation","This tool generates links on your device without storing a guest list. Guest names appear in the URL, so share links with the intended recipients only."]
+};
+let currentLanguage="vi";
+const selectors=["h1","main>p:not(.note)","label[for=guest]","#guest","label[for=party]","option[value=bride]","option[value=groom]","button[type=submit]",".result small","#copy","#share","#preview",".note"];
+function changeLanguage(language){
+ currentLanguage=language;
+ document.documentElement.lang=language;
+ selectors.forEach((selector,i)=>{
+ const node=document.querySelector(selector);if(!node)return;
+ if(i===3)node.placeholder=dictionary[language][i];
+ else node.textContent=dictionary[language][i];
+ });
+ document.title=dictionary[language][0]+" | Tố Nga & Thành Sơn";
+ ["vi","en"].forEach(code=>{
+ const button=document.getElementById(code+"Btn");
+ button.classList.toggle("active",code===language);
+ button.setAttribute("aria-pressed",String(code===language));
+ });
+}
+document.getElementById("viBtn").addEventListener("click",()=>changeLanguage("vi"));
+document.getElementById("enBtn").addEventListener("click",()=>changeLanguage("en"));
+changeLanguage("vi");
+
 const form=document.getElementById("generator");
 const result=document.getElementById("result");
 const generated=document.getElementById("generated");
