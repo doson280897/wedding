@@ -49,7 +49,7 @@ wedding/
 
 ### Ảnh chính
 
-Mỗi lễ có thể dùng hero và ending riêng:
+Mỗi lễ dùng hero và ending riêng:
 
 ```text
 hero_bride.jpg      # Vu Quy / nhà gái
@@ -58,7 +58,7 @@ hero_groom.jpg      # Tân Hôn / nhà trai
 ending_groom.jpg
 ```
 
-Đặt ảnh gốc trong `images/original/assets/` rồi chạy generator; output tương ứng sẽ là:
+Đặt ảnh gốc trong `images/original/assets/` rồi chạy generator; output tương ứng:
 
 ```text
 images/optimized/assets/hero_bride.webp
@@ -67,18 +67,22 @@ images/optimized/assets/hero_groom.webp
 images/optimized/assets/ending_groom.webp
 ```
 
-Nếu 4 ảnh riêng chưa tồn tại, website tự fallback về `hero.webp` và `ending.webp`.
-Có thể push trực tiếp 4 file WebP tối ưu vào `images/optimized/assets/` mà không cần đổi code.
+Bốn ảnh theo lễ là asset bắt buộc của production; website không còn dùng hero/ending chung làm fallback.
 
-Các asset dùng chung hiện có:
+Các asset chân dung dùng chung:
 
 ```text
-hero.jpg
-ending.jpg
 son-1.jpg
 son-2.jpg
 nga-1.jpg
 nga-2.jpg
+```
+
+QR mừng cưới dùng cùng convention tên file:
+
+```text
+images/optimized/assets/gift-qr-bride.svg
+images/optimized/assets/gift-qr-groom.png
 ```
 
 ### Album
@@ -135,7 +139,7 @@ git push origin main
 Workflow `.github/workflows/deploy.yml`:
 
 1. Checkout source.
-2. Tạo `og-preview.jpg` từ `images/optimized/assets/hero.webp`.
+2. Tạo `og-preview.jpg` từ `images/optimized/assets/hero_bride.webp`.
 3. Stamp build ID để cache-busting CSS/JS/ảnh chính.
 4. Upload và deploy GitHub Pages.
 

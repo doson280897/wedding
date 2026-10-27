@@ -50,6 +50,14 @@
     document.documentElement.dataset.party = party;
     document.documentElement.classList.add("envelope-theme");
     if (theme) theme.setAttribute("content", "#496957");
+
+    const heroPreload = document.createElement("link");
+    heroPreload.rel = "preload";
+    heroPreload.as = "image";
+    heroPreload.type = "image/webp";
+    heroPreload.fetchPriority = "high";
+    heroPreload.href = "images/optimized/assets/hero_" + party + ".webp?v=__BUILD_ID__";
+    document.head.appendChild(heroPreload);
   } else {
     document.documentElement.classList.add("party-pending");
   }
@@ -57,7 +65,6 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="images/optimized/assets/hero.webp?v=__BUILD_ID__" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="style.css?v=__BUILD_ID__">
 <link rel="stylesheet" href="quick-nav.css?v=__BUILD_ID__">
 </head>
@@ -277,7 +284,7 @@
           <h3>LỮ THỊ TỐ NGA</h3>
           <div class="gift-account-number">8789 3224 6384 9</div>
           <div class="gift-qr-shell">
-            <img class="gift-qr" src="images/optimized/assets/bride-mb-qr.svg?v=__BUILD_ID__" width="685" height="685" decoding="async" alt="Mã QR MB mừng cưới Tố Nga">
+            <img class="gift-qr" src="images/optimized/assets/gift-qr-bride.svg?v=__BUILD_ID__" width="685" height="685" decoding="async" alt="Mã QR MB mừng cưới Tố Nga">
           </div>
           <p class="gift-hint" data-i18n="gift.hint">Quét mã bằng ứng dụng ngân hàng</p>
         </article>
@@ -286,7 +293,7 @@
           <h3>ĐỖ NGỌC THÀNH SƠN</h3>
           <div class="gift-account-number">0266 8421 401</div>
           <div class="gift-qr-shell">
-            <img class="gift-qr" src="images/optimized/assets/gift-qr.png?v=__BUILD_ID__" width="570" height="570" decoding="async" alt="Mã QR TPBank mừng cưới Thành Sơn">
+            <img class="gift-qr" src="images/optimized/assets/gift-qr-groom.png?v=__BUILD_ID__" width="570" height="570" decoding="async" alt="Mã QR TPBank mừng cưới Thành Sơn">
           </div>
           <p class="gift-hint" data-i18n="gift.hint">Quét mã bằng ứng dụng ngân hàng</p>
         </article>

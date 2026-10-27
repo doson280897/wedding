@@ -30,10 +30,8 @@ ALBUM_MAX_SIDE = 960
 ALBUM_QUALITY = 80
 
 ASSET_SIZES = {
-    "hero": 1920,
     "hero_bride": 1920,
     "hero_groom": 1920,
-    "ending": 1600,
     "ending_bride": 1600,
     "ending_groom": 1600,
     "son-1": 1000,
