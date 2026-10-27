@@ -97,3 +97,46 @@ test("short screens can scroll and avoid horizontal page overflow", async ({
   );
   expect(toolOverflow).toBeLessThanOrEqual(4);
 });
+
+test("legacy generator URL redirects to the shared in-page view", async ({ page }) => {
+  await page.goto(base + "/link-tool.html?lang=en", {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(page).toHaveURL(/index\\.html\\?tool=links&lang=en/);
+  await expect(page.locator("#linkToolScreen")).toBeVisible();
+  await expect(page.locator("#linkToolTitle")).toHaveText(
+    "Create a personalized invitation",
+  );
+  await expect(page.locator(".language-switch")).toHaveCount(1);
+});
+
+test("menu, map and gift overlays open and close on each device", async ({
+  page,
+}) => {
+  await page.goto(base + "/index.html?party=groom&to=Guest", {
+    waitUntil: "domcontentloaded",
+  });
+  await page.locator("#skipInvitation").click();
+  const menuToggle = page.locator("#wqToggle");
+  await menuToggle.click();
+  if ((await menuToggle.getAttribute("aria-expanded")) !== "true") {
+    await menuToggle.click();
+  }
+  await expect(page.locator("#wqPanel")).toHaveAttribute(
+    "aria-hidden",
+    "false",
+  );
+  await page.locator('#wqPanel a[href="#locations"]').click();
+  await expect(page.locator("#wmModal")).toBeVisible();
+  await page.locator("#wmClose").click();
+  await expect(page.locator("#wmModal")).toBeHidden();
+
+  await menuToggle.click();
+  if ((await menuToggle.getAttribute("aria-expanded")) !== "true") {
+    await menuToggle.click();
+  }
+  await page.locator('#wqPanel a[href="#wedding-gift"]').click();
+  await expect(page.locator("#wgModal")).toBeVisible();
+  await page.locator("#wgClose").click();
+  await expect(page.locator("#wgModal")).toBeHidden();
+});
