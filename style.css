@@ -401,13 +401,23 @@ footer { background: #050806; color: #c5b9a4; }
   transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
 }
 .envelope-open:hover{transform:translateY(-2px);box-shadow:0 16px 32px rgba(57,76,61,.24);background:#486050}
-.envelope-open:focus-visible,.envelope-skip:focus-visible{outline:2px solid #789174;outline-offset:4px}
+.envelope-open:focus-visible,.envelope-close:focus-visible,.envelope-skip:focus-visible{outline:2px solid #789174;outline-offset:4px}
 .envelope-open span{font-size:18px;line-height:1;margin-top:-2px}
+.envelope-close{
+  display:none;align-items:center;justify-content:center;min-width:min(260px,72vw);
+  margin:0 auto;border:1px solid #9e8c63;border-radius:999px;
+  background:linear-gradient(180deg,#647b68,#526957);color:#fffaf0;
+  box-shadow:0 12px 28px rgba(57,76,61,.18);
+  font:500 11px Montserrat,sans-serif;letter-spacing:.19em;padding:15px 28px;cursor:pointer;
+}
+.envelope-intro.is-opened .envelope-open,
+.envelope-intro.is-opened .envelope-skip{display:none}
+.envelope-intro.is-opened .envelope-close{display:inline-flex}
 .envelope-skip{
   display:block;margin:11px auto 0;border:0;background:none;color:#7d8477;
   font:10px Montserrat,sans-serif;letter-spacing:.08em;text-decoration:underline;text-underline-offset:4px;cursor:pointer;
 }
-.envelope-intro{opacity:1;transition:opacity .42s cubic-bezier(.4,0,.2,1)}
+.envelope-intro{opacity:1;transition:opacity .26s cubic-bezier(.4,0,.2,1)}
 .envelope-inner{will-change:transform,opacity}
 .envelope-intro.is-flap-open .envelope-flap{transform:translateZ(0) rotateX(174deg);opacity:.72}
 .envelope-intro.is-flap-open .envelope-seal{transform:translate3d(-50%,-58%,0) scale(.88);opacity:0}
@@ -438,7 +448,7 @@ body.envelope-locked{overflow:hidden}
   .envelope-invite{font-size:12px;max-width:90%}
   .envelope-seal{width:54px;height:54px}
   .envelope-seal svg{width:29px;height:29px}
-  .envelope-open{min-width:min(300px,82vw);padding:14px 24px;font-size:10px}
+  .envelope-open,.envelope-close{min-width:min(300px,82vw);padding:14px 24px;font-size:10px}
 }
 @media(max-width:380px){
   .envelope-stage{height:min(540px,69svh);min-height:470px}

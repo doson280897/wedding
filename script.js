@@ -181,59 +181,72 @@
 
   const intro = document.getElementById("envelopeIntro");
   const openInvitation = document.getElementById("openInvitation");
+  const closeInvitation = document.getElementById("closeInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
   if (intro && selectedParty) {
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
     window.setTimeout(() => openInvitation?.focus({preventScroll:true}), 0);
-    let closing = false;
-    const closeEnvelope = () => {
-      if (closing) return;
-      closing = true;
 
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let opened = false;
+    let leaving = false;
+
+    const enterInvitation = (instant = false) => {
+      if (leaving) return;
+      leaving = true;
+
+      if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
         document.body.classList.remove("envelope-locked");
         return;
       }
 
-      openInvitation?.setAttribute("disabled", "");
-      skipInvitation?.setAttribute("disabled", "");
+      intro.classList.add("is-leaving");
+      window.setTimeout(() => {
+        intro.hidden = true;
+        document.body.classList.remove("envelope-locked");
+      }, 260);
+    };
 
-      // Separate compositor phases so transform animations do not fight each other:
-      // flap -> card -> crossfade. Body stays locked until the final frame.
+    const openEnvelope = () => {
+      if (opened || leaving) return;
+      opened = true;
+
+      // Open flap and lift the card in the same frame: no staged delays or auto-close timer.
       requestAnimationFrame(() => {
-        intro.classList.add("is-flap-open");
-
-        window.setTimeout(() => {
-          intro.classList.add("is-card-lifted");
-
-          // Hold the lifted invitation long enough for guests to read the names and dates.
-          window.setTimeout(() => {
-            intro.classList.add("is-leaving");
-
-            window.setTimeout(() => {
-              intro.hidden = true;
-              document.body.classList.remove("envelope-locked");
-            }, 440);
-          }, 1500);
-        }, 300);
+        intro.classList.add("is-flap-open", "is-card-lifted", "is-opened");
+        openInvitation?.setAttribute("disabled", "");
+        skipInvitation?.setAttribute("disabled", "");
+        closeInvitation?.focus({preventScroll:true});
       });
     };
-    openInvitation?.addEventListener("click", closeEnvelope);
-    skipInvitation?.addEventListener("click", () => {
-      if (closing) return;
-      closing = true;
-      intro.hidden = true;
-      document.body.classList.remove("envelope-locked");
-    });
+
+    openInvitation?.addEventListener("click", openEnvelope);
+    closeInvitation?.addEventListener("click", () => enterInvitation(false));
+    skipInvitation?.addEventListener("click", () => enterInvitation(true));
+
     intro.addEventListener("keydown", event => {
-      if (event.key === "Escape") { event.preventDefault(); closeEnvelope(); return; }
-      if (event.key !== "Tab" || !openInvitation || !skipInvitation) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        if (opened) enterInvitation(false);
+        else enterInvitation(true);
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      if (opened && closeInvitation) {
+        event.preventDefault();
+        closeInvitation.focus();
+        return;
+      }
+
+      if (!openInvitation || !skipInvitation) return;
       if (event.shiftKey && document.activeElement === openInvitation) {
-        event.preventDefault(); skipInvitation.focus();
+        event.preventDefault();
+        skipInvitation.focus();
       } else if (!event.shiftKey && document.activeElement === skipInvitation) {
-        event.preventDefault(); openInvitation.focus();
+        event.preventDefault();
+        openInvitation.focus();
       }
     });
   }
