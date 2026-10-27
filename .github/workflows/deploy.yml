@@ -48,13 +48,24 @@ jobs:
           image = Image.alpha_composite(image, overlay)
 
           draw = ImageDraw.Draw(image)
-          serif = "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf"
-          serif_bold = "/usr/share/fonts/truetype/dejavu/DejaVuSer-Bold.ttf"
-          sans = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-          small = ImageFont.truetype(sans, 24)
-          names = ImageFont.truetype(serif_bold, 58)
-          amp = ImageFont.truetype(serif, 42)
-          date = ImageFont.truetype(sans, 25)
+          import subprocess
+
+          def load_font(pattern, size):
+              try:
+                  path = subprocess.check_output(
+                      ["fc-match", "-f", "%{file}", pattern],
+                      text=True
+                  ).strip()
+                  if path:
+                      return ImageFont.truetype(path, size)
+              except Exception:
+                  pass
+              return ImageFont.load_default(size=size)
+
+          small = load_font("sans", 24)
+          names = load_font("serif:style=Bold", 58)
+          amp = load_font("serif", 42)
+          date = load_font("sans", 25)
           gold = (238, 210, 164, 255)
           cream = (245, 236, 221, 255)
           muted = (211, 191, 158, 255)
