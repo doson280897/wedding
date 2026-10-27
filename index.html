@@ -69,6 +69,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=__BUILD_ID__">
 <link rel="stylesheet" href="quick-nav.css?v=__BUILD_ID__">
+<link rel="stylesheet" href="link-tool.css?v=__BUILD_ID__">
 </head>
 <body>
 <div class="reading-progress" id="progress"></div>
@@ -97,9 +98,38 @@
         <span class="party-selector-action" data-i18n="party.choose">XEM THIỆP →</span>
       </button>
     </div>
-    <a href="link-tool.html?v=__BUILD_ID__" class="party-admin-link" data-i18n="party.adminTool" data-i18n-aria="party.adminToolAria">✦ TẠO LINK THIỆP CÁ NHÂN HÓA</a>
+    <a href="?tool=links" class="party-admin-link" data-i18n="party.adminTool" data-i18n-aria="party.adminToolAria">✦ TẠO LINK THIỆP CÁ NHÂN HÓA</a>
   </div>
 </div>
+<section class="link-tool-screen" id="linkToolScreen" role="dialog" aria-modal="true" aria-labelledby="linkToolTitle" aria-hidden="true" hidden>
+  <div class="link-tool-card">
+    <button type="button" class="link-tool-back" id="linkToolBack" data-i18n="link.back" data-i18n-aria="link.backAria">← Quay lại chọn tiệc</button>
+    <p class="link-tool-eyebrow">TỐ NGA &amp; THÀNH SƠN · WEDDING 2026</p>
+    <h2 id="linkToolTitle" data-i18n="link.title">Tạo thiệp mời riêng</h2>
+    <p class="link-tool-description" data-i18n="link.description">Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho người nhận.</p>
+    <form id="linkToolForm">
+      <label for="linkToolGuest" data-i18n="link.guest">Tên khách mời</label>
+      <input id="linkToolGuest" name="guest" type="text" maxlength="100" autocomplete="off" data-i18n-placeholder="link.placeholder" placeholder="Ví dụ: Anh Minh và chị Lan" required>
+      <label for="linkToolParty" data-i18n="link.party">Khách tham dự</label>
+      <select id="linkToolParty" name="party" required>
+        <option value="bride" data-i18n="link.bride">Nhà gái · Lễ Vu Quy · 14/11/2026 · Đắk Lắk</option>
+        <option value="groom" data-i18n="link.groom">Nhà trai · Lễ Tân Hôn · 29/11/2026 · Đồng Nai</option>
+      </select>
+      <div class="link-tool-actions"><button type="submit" class="link-tool-action" data-i18n="link.create">Tạo link thiệp</button></div>
+    </form>
+    <div class="link-tool-result" id="linkToolResult" hidden aria-live="polite">
+      <small data-i18n="link.result">Link dành cho khách</small>
+      <div id="linkToolGenerated"></div>
+      <div class="link-tool-actions">
+        <button type="button" class="link-tool-action" id="linkToolCopy" data-i18n="link.copy">Sao chép link</button>
+        <button type="button" class="link-tool-action secondary" id="linkToolShare" data-i18n="link.share">Chia sẻ</button>
+        <a class="link-tool-action secondary" id="linkToolPreview" href="#" target="_blank" rel="noopener noreferrer" data-i18n="link.preview">Xem thử thiệp</a>
+      </div>
+      <p class="link-tool-feedback" id="linkToolFeedback" role="status"></p>
+    </div>
+    <p class="link-tool-note" data-i18n="link.note">Công cụ tạo link ngay trên thiết bị, không lưu danh sách khách. Tên khách xuất hiện trong URL, nên chỉ chia sẻ với đúng người nhận.</p>
+  </div>
+</section>
 <div class="envelope-intro" id="envelopeIntro" role="dialog" aria-modal="true" aria-labelledby="envelopeTitle">
   <div class="envelope-cooldown" id="envelopeCooldown" hidden role="timer" data-i18n-aria="envelope.autoCloseAria" aria-label="Tự động vào thiệp sau 5 giây">
     <svg viewBox="0 0 42 42" aria-hidden="true">
@@ -348,5 +378,6 @@
 <button class="music-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="Bật nhạc nền dịu nhẹ" title="Bật/tắt nhạc nền"><span class="music-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5.7L20 3v12.3"/><ellipse cx="6" cy="18" rx="3" ry="2.1" transform="rotate(-18 6 18)"/><ellipse cx="17" cy="15.3" rx="3" ry="2.1" transform="rotate(-18 17 15.3)"/><path d="M9 9.2 20 6.5"/></svg></span><span class="music-label">NHẠC: TẮT</span></button>
 <button type="button" class="wq-toggle" id="wqToggle" aria-label="Mở mục lục thiệp cưới" aria-controls="wqPanel" aria-expanded="false"><span class="wq-toggle-glyph" aria-hidden="true">☷</span><span data-i18n="menu.toggle">MỤC LỤC</span></button>
 <script src="quick-nav.js?v=__BUILD_ID__" defer></script>
+<script src="link-tool.js?v=__BUILD_ID__" defer></script>
 </body>
 </html>
