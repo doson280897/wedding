@@ -35,7 +35,8 @@
 
     document.addEventListener("keydown", event => {
       if (!document.documentElement.classList.contains("party-pending") || event.key !== "Tab") return;
-      const focusable = [...languageButtons, ...partyButtons].filter(button => !button.disabled);
+      const adminLink = document.querySelector(".party-admin-link");
+       const focusable = [...languageButtons, ...partyButtons, adminLink].filter(element => element && !element.disabled);
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable.at(-1);
