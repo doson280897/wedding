@@ -1,0 +1,116 @@
+/* Personalized invitation generator: a view in the existing page.
+   The wedding page owns the ONE language-switch element and its drag behavior. */
+.link-tool-screen[hidden] { display: none !important; }
+html.link-tool-active body { overflow: hidden !important; }
+html.link-tool-active #partySelector { display: none !important; }
+html.link-tool-active body > .link-tool-screen {
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+html.link-tool-active body > .language-switch {
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+.link-tool-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 5600;
+  display: grid;
+  place-items: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: max(76px, env(safe-area-inset-top) + 55px) 20px max(24px, env(safe-area-inset-bottom) + 16px);
+  background: radial-gradient(ellipse at 50% 0%, #29392f, #111714 75%);
+  color: #f1e8da;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.55;
+}
+.link-tool-card {
+  width: min(100%, 570px);
+  border: 1px solid #b99d6b70;
+  background: #171f1bf2;
+  border-radius: 22px;
+  padding: clamp(22px, 5vw, 40px);
+  box-shadow: 0 25px 80px #0007;
+}
+.link-tool-back {
+  border: 0;
+  background: transparent;
+  padding: 4px 0 9px;
+  color: #d8bc86;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.link-tool-eyebrow,
+.link-tool-result small {
+  color: #d8bc86;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.link-tool-eyebrow { margin: 14px 0 0; }
+.link-tool-card h2 {
+  margin: 12px 0;
+  font-family: Georgia, serif;
+  font-size: clamp(30px, 6vw, 42px);
+  font-weight: 400;
+  line-height: 1.2;
+}
+.link-tool-description { color: #c5c9c1; line-height: 1.65; }
+.link-tool-card label {
+  display: block;
+  margin: 22px 0 9px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.link-tool-card input,
+.link-tool-card select {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 13px;
+  border: 1px solid #788777;
+  border-radius: 10px;
+  background: #0c130f;
+  color: #fff;
+  font: inherit;
+}
+.link-tool-card input::placeholder { color: #a8b3a8; }
+.link-tool-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+.link-tool-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 45px;
+  padding: 11px 16px;
+  border: 1px solid #c5a76e;
+  border-radius: 10px;
+  background: #bda16e;
+  color: #131b15;
+  font: 600 14px system-ui, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+.link-tool-action.secondary { background: transparent; color: #f0dfc3; }
+.link-tool-action:hover { filter: brightness(1.12); }
+.link-tool-card :is(button, input, select, a):focus-visible {
+  outline: 2px solid #f4d49b;
+  outline-offset: 3px;
+}
+.link-tool-result {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #ffffff25;
+}
+.link-tool-result[hidden] { display: none; }
+#linkToolGenerated { font-size: 13px; overflow-wrap: anywhere; line-height: 1.6; color: #e9d9b8; }
+.link-tool-feedback { min-height: 22px; margin: 12px 0 0; color: #d9c18e; }
+.link-tool-feedback:empty { display: none; }
+.link-tool-note { margin-bottom: 0; color: #c5c9c1; font-size: 12px; line-height: 1.65; }
+@media (max-width: 600px) {
+  .link-tool-screen {
+    align-items: start;
+    padding: max(84px, env(safe-area-inset-top) + 58px) 15px max(22px, env(safe-area-inset-bottom) + 12px);
+  }
+}
