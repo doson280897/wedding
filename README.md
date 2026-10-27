@@ -9,7 +9,7 @@ Website thiệp cưới phong cách **Cinematic Editorial / Dark Luxury** (đen 
 - Banner mở đầu, lời mời cá nhân hóa bằng tham số `?to=` (ví dụ: `https://doson280897.github.io/wedding/?to=Nguyen%20Van%20A`).
 - Giới thiệu cô dâu **Tố Nga** và chú rể **Thành Sơn**, thông tin hai gia đình.
 - Lịch **lễ Vu Quy 14/11/2026** và **lễ Tân Hôn 29/11/2026**, đồng hồ đếm ngược.
-- **Album ảnh 3D dạng ribbon vô hạn**: dùng native horizontal momentum + `scroll-snap`; ảnh cuối nối liền ảnh đầu theo vòng tròn. Album dùng ring buffer cố định 31 slide, xoay lại các node ngoài màn hình sau mỗi lần snap nên dù có 100+ ảnh cũng không render toàn bộ album cùng lúc. JS chỉ xử lý vòng lặp/depth/3D và cập nhật caption sau khi snap; không autoplay hay fullscreen.
+- **Album ảnh 3D dạng ribbon vô hạn**: dùng native horizontal momentum + `scroll-snap`; các ảnh nối sát thành một dải liền, ảnh cuối nối ảnh đầu. Ring buffer cố định 31 slide chỉ xoay node ngoài màn hình và bù chính xác `scrollLeft` trong cùng frame, nên không có cú “giật về giữa”. Dù có 100+ ảnh cũng không render toàn bộ album cùng lúc.
 - Nút **MỤC LỤC** nổi: chọn mục để cuộn mượt đến nội dung.
 - **FIND YOUR WAY / Bản đồ chỉ đường** được **ẩn khỏi luồng trang chính**. Chỉ hiện trong popup khi chọn **Mục lục → Bản đồ chỉ đường**, hoặc bấm **XEM ĐỊA ĐIỂM** ở phần lịch cưới. Popup hiển thị địa điểm nhà trai và nhà gái, có liên kết Google Maps; đóng bằng **×**, bấm ngoài popup hoặc phím **Esc**.
 - Giao diện responsive cho điện thoại và máy tính.
@@ -20,6 +20,7 @@ Website thiệp cưới phong cách **Cinematic Editorial / Dark Luxury** (đen 
 - **Nhạc nền tùy chọn**: ambient nhẹ bằng Web Audio, chỉ phát sau khi khách chủ động bật; không cần file MP3.
 - **Lazy-load album 3D**: chỉ tải manifest khi khách cuộn gần tới album; ring buffer chỉ giữ tối đa 31 slide và ưu tiên tải các ảnh gần tâm, phù hợp khi album tăng lên 100+ ảnh.
 - **Preview khi chia sẻ Zalo/Facebook**: Open Graph dùng `og-preview.jpg` 1200×630 được GitHub Actions tạo từ `assets-optimized/hero.webp`; không dùng ảnh gốc.
+- **Cache-busting tự động**: mỗi deploy tạo `version.json` và đóng dấu commit SHA vào CSS/JS/ảnh chính; trang cũ tự phát hiện build mới và reload sang URL có `_v=` mới, còn album dùng `no-store` cho manifest.
 
 ## Cấu trúc ảnh — chỉ push ảnh tối ưu
 

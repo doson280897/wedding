@@ -82,6 +82,28 @@ jobs:
           print("Created og-preview.jpg", Path("og-preview.jpg").stat().st_size, "bytes")
           PY
 
+      - name: Stamp deployment version and bust browser cache
+        env:
+          BUILD_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          build = os.environ["BUILD_SHA"][:12]
+          for filename in ("index.html", "style.css"):
+              path = Path(filename)
+              text = path.read_text(encoding="utf-8")
+              path.write_text(text.replace("__BUILD_ID__", build), encoding="utf-8")
+
+          Path("version.json").write_text(
+              json.dumps({"build": build}, separators=(",", ":")),
+              encoding="utf-8"
+          )
+          print("Stamped deployment build:", build)
+          PY
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:

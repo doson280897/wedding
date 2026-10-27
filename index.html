@@ -2,6 +2,10 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="wedding-build" content="__BUILD_ID__">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#0b0e0e">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="vi_VN">
@@ -21,11 +25,27 @@
 <meta name="twitter:image" content="https://doson280897.github.io/wedding/og-preview.jpg">
 <meta name="description" content="Thiệp mời cưới Thành Sơn & Tố Nga — 14 & 29.11.2026">
 <title>Thành Sơn & Tố Nga | Thiệp mời cưới</title>
+<script>
+(() => {
+  const current = document.querySelector('meta[name="wedding-build"]')?.content || "";
+  fetch("./version.json?t=" + Date.now(), { cache: "no-store" })
+    .then(response => response.ok ? response.json() : null)
+    .then(data => {
+      const latest = data?.build || "";
+      if (!latest || latest === current || latest === "__BUILD_ID__") return;
+      const url = new URL(location.href);
+      if (url.searchParams.get("_v") === latest) return;
+      url.searchParams.set("_v", latest);
+      location.replace(url.href);
+    })
+    .catch(() => {});
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="assets-optimized/hero.webp" type="image/webp" fetchpriority="high">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="quick-nav.css">
+<link rel="preload" as="image" href="assets-optimized/hero.webp?v=__BUILD_ID__" type="image/webp" fetchpriority="high">
+<link rel="stylesheet" href="style.css?v=__BUILD_ID__">
+<link rel="stylesheet" href="quick-nav.css?v=__BUILD_ID__">
 </head>
 <body>
 <div class="reading-progress" id="progress"></div>
@@ -80,8 +100,8 @@
   <div class="couple-editorial">
     <article class="person person-groom reveal">
       <div class="portrait-set">
-        <div class="portrait large groom-main"><img src="assets-optimized/son-1.webp" data-demo-src="https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=760&q=80" alt="Chân dung chú rể Thành Sơn" data-i18n-alt="couple.son1Alt" loading="lazy"></div>
-        <div class="portrait small groom-secondary"><img src="assets-optimized/son-2.webp" data-demo-src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=500&q=80" alt="Ảnh chú rể Thành Sơn thứ hai" data-i18n-alt="couple.son2Alt" loading="lazy"></div>
+        <div class="portrait large groom-main"><img src="assets-optimized/son-1.webp?v=__BUILD_ID__" data-demo-src="https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=760&q=80" alt="Chân dung chú rể Thành Sơn" data-i18n-alt="couple.son1Alt" loading="lazy"></div>
+        <div class="portrait small groom-secondary"><img src="assets-optimized/son-2.webp?v=__BUILD_ID__" data-demo-src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=500&q=80" alt="Ảnh chú rể Thành Sơn thứ hai" data-i18n-alt="couple.son2Alt" loading="lazy"></div>
       </div>
       <div class="person-copy"><span class="script" data-i18n="couple.groomRole">Chú rể</span><h3>THÀNH SƠN</h3><p data-i18n="couple.groomQuote">Cảm ơn em đã xuất hiện, để những ngày bình thường cũng trở nên đặc biệt.</p><div class="ornament">♡</div></div>
     </article>
@@ -89,8 +109,8 @@
     <article class="person person-bride reveal">
       <div class="person-copy"><span class="script" data-i18n="couple.brideRole">Cô dâu</span><h3>TỐ NGA</h3><p data-i18n="couple.brideQuote">Cảm ơn anh đã luôn ở đây, cùng em đi qua những khoảnh khắc đẹp nhất của cuộc đời.</p><div class="ornament">♡</div></div>
       <div class="portrait-set">
-        <div class="portrait large bride-main"><img src="assets-optimized/nga-1.webp" data-demo-src="https://images.unsplash.com/photo-1594552072238-b8a33785b261?auto=format&fit=crop&w=760&q=80" alt="Chân dung cô dâu Tố Nga" data-i18n-alt="couple.nga1Alt" loading="lazy"></div>
-        <div class="portrait small bride-secondary"><img src="assets-optimized/nga-2.webp" data-demo-src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80" alt="Ảnh cô dâu Tố Nga thứ hai" data-i18n-alt="couple.nga2Alt" loading="lazy"></div>
+        <div class="portrait large bride-main"><img src="assets-optimized/nga-1.webp?v=__BUILD_ID__" data-demo-src="https://images.unsplash.com/photo-1594552072238-b8a33785b261?auto=format&fit=crop&w=760&q=80" alt="Chân dung cô dâu Tố Nga" data-i18n-alt="couple.nga1Alt" loading="lazy"></div>
+        <div class="portrait small bride-secondary"><img src="assets-optimized/nga-2.webp?v=__BUILD_ID__" data-demo-src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80" alt="Ảnh cô dâu Tố Nga thứ hai" data-i18n-alt="couple.nga2Alt" loading="lazy"></div>
       </div>
     </article>
   </div>
@@ -125,7 +145,7 @@
 <section class="closing"><div class="closing-overlay"></div><div class="closing-content"><p class="overline gold" data-i18n="closing.eyebrow">CẢM ƠN BẠN ĐÃ ĐẾN</p><h2 data-i18n-html="closing.title">Hẹn gặp bạn<br>trong ngày hạnh phúc</h2><p class="closing-names">Thành Sơn <span>&amp;</span> Tố Nga</p></div></section>
 </main>
 <footer>© 2026 THÀNH SƠN &amp; TỐ NGA <span data-i18n="footer.love">GỬI TRỌN YÊU THƯƠNG ♡</span></footer>
-<script src="i18n.js" defer></script><script src="script.js" defer></script><script src="gallery.js" defer></script>
+<script src="i18n.js?v=__BUILD_ID__" defer></script><script src="script.js?v=__BUILD_ID__" defer></script><script src="gallery.js?v=__BUILD_ID__" defer></script>
 
 <div class="wm-backdrop" id="wmBackdrop" hidden></div>
 <div class="wm-modal" id="wmModal" role="dialog" aria-modal="true" aria-labelledby="wmTitle" aria-hidden="true" hidden>
@@ -155,6 +175,6 @@
 </nav>
 <button class="music-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="Bật nhạc nền dịu nhẹ" title="Bật/tắt nhạc nền"><span aria-hidden="true">♫</span><span class="music-label">NHẠC: TẮT</span></button>
 <button type="button" class="wq-toggle" id="wqToggle" aria-label="Mở mục lục thiệp cưới" aria-controls="wqPanel" aria-expanded="false"><span class="wq-toggle-glyph" aria-hidden="true">☷</span><span data-i18n="menu.toggle">MỤC LỤC</span></button>
-<script src="quick-nav.js" defer></script>
+<script src="quick-nav.js?v=__BUILD_ID__" defer></script>
 </body>
 </html>

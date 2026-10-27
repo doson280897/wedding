@@ -24,6 +24,13 @@
 
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const RING_SIZE = 31;
+  const buildId = document.querySelector('meta[name="wedding-build"]')?.content || "dev";
+
+  function versionedAsset(src) {
+    const url = new URL(src, document.baseURI);
+    url.searchParams.set("v", buildId);
+    return url.href;
+  }
 
   let photos = [];
   let slides = [];
@@ -93,7 +100,7 @@
     const nextIndex = wrap(photoIndex);
     if (item.photoIndex === nextIndex) return;
     item.photoIndex = nextIndex;
-    item.img.src = photos[nextIndex].src;
+    item.img.src = versionedAsset(photos[nextIndex].src);
     item.label.textContent = `${String(nextIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
   }
 
@@ -180,36 +187,46 @@
     scrollFrame = requestAnimationFrame(renderDepth);
   }
 
-  // Rotate existing DOM nodes instead of replacing all image sources.
-  // A one-photo move only changes one off-screen edge image.
-  function rotateRing(delta) {
-    if (!delta) return;
+  // Seamless ring: rotate only off-screen edge nodes, then compensate the
+  // scroll offset by exactly the same physical distance in the SAME JS task.
+  // The centered pixels therefore never move; there is no visible "jump back".
+  function rotateRingSeamlessly(delta) {
+    if (!delta || !slides.length) return;
 
-    if (delta > 0) {
-      for (let i = 0; i < delta; i++) {
-        const first = slides.shift();
-        slides.push(first);
-        space.append(first.slide);
-      }
-    } else {
-      for (let i = 0; i < -delta; i++) {
-        const last = slides.pop();
-        slides.unshift(last);
-        space.prepend(last.slide);
-      }
-    }
-
-    syncWindowSources();
-  }
-
-  function recenterSilently() {
     recentering = true;
+    const step = slides[0].slide.offsetWidth || 1;
+    const before = viewport.scrollLeft;
     const oldSnap = viewport.style.scrollSnapType;
     const oldBehavior = viewport.style.scrollBehavior;
 
     viewport.style.scrollSnapType = "none";
     viewport.style.scrollBehavior = "auto";
-    viewport.scrollLeft = targetScrollLeft(centerSlot);
+
+    if (delta > 0) {
+      for (let i = 0; i < delta; i++) {
+        settledIndex = wrap(settledIndex + 1);
+        const first = slides.shift();
+        slides.push(first);
+        space.append(first.slide);
+        setPhoto(first, settledIndex + centerSlot);
+      }
+    } else {
+      for (let i = 0; i < -delta; i++) {
+        settledIndex = wrap(settledIndex - 1);
+        const last = slides.pop();
+        slides.unshift(last);
+        space.prepend(last.slide);
+        setPhoto(last, settledIndex - centerSlot);
+      }
+    }
+
+    slides.forEach((item, slotIndex) => {
+      item.slide.dataset.slot = String(slotIndex);
+    });
+
+    // DOM rotation moved the selected card by delta * step. Compensate that
+    // exact distance before the browser can paint a frame.
+    viewport.scrollLeft = before - delta * step;
     renderDepth();
 
     requestAnimationFrame(() => {
@@ -218,6 +235,23 @@
       recentering = false;
       viewport.classList.remove("is-scrolling");
       viewport.classList.add("is-settled");
+      renderDepth();
+    });
+  }
+
+  function centerCurrentWithoutAnimation() {
+    if (!slides.length) return;
+    recentering = true;
+    const oldSnap = viewport.style.scrollSnapType;
+    const oldBehavior = viewport.style.scrollBehavior;
+    viewport.style.scrollSnapType = "none";
+    viewport.style.scrollBehavior = "auto";
+    viewport.scrollLeft = targetScrollLeft(centerSlot);
+    renderDepth();
+    requestAnimationFrame(() => {
+      viewport.style.scrollSnapType = oldSnap;
+      viewport.style.scrollBehavior = oldBehavior;
+      recentering = false;
       renderDepth();
     });
   }
@@ -238,10 +272,8 @@
 
     const delta = slotIndex - centerSlot;
     if (delta) {
-      settledIndex = wrap(settledIndex + delta);
-      rotateRing(delta);
+      rotateRingSeamlessly(delta);
       updateProgress(true);
-      recenterSilently();
     } else {
       viewport.classList.remove("is-scrolling");
       viewport.classList.add("is-settled");
@@ -327,14 +359,17 @@
   window.addEventListener("resize", () => {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => {
-      recenterSilently();
+      centerCurrentWithoutAnimation();
     }, 90);
   });
 
   async function start() {
     setStatus("album.loading");
     try {
-      const response = await fetch("./images.json", { cache: "no-cache" });
+      const manifestUrl = new URL("./images.json", document.baseURI);
+      manifestUrl.searchParams.set("v", buildId);
+      manifestUrl.searchParams.set("t", String(Date.now()));
+      const response = await fetch(manifestUrl, { cache: "no-store" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const manifest = await response.json();
       const list = Array.isArray(manifest) ? manifest : manifest.photos;
