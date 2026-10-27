@@ -140,3 +140,24 @@ test("menu, map and gift overlays open and close on each device", async ({
   await page.locator("#wgClose").click();
   await expect(page.locator("#wgModal")).toBeHidden();
 });
+
+
+test("floating language pill really shrinks on touch and desktop", async ({ page }) => {
+  await page.goto(base + "/index.html", { waitUntil: "domcontentloaded" });
+  const control = page.locator(".language-switch");
+  await expect(control).toBeVisible();
+  await expect(control).toHaveClass(/floating-control/);
+
+  // Compare rendered layout, not just the visibility of VN/EN text.
+  await control.evaluate(node => node.classList.remove("is-idle"));
+  await page.waitForTimeout(450);
+  const expandedWidth = await control.evaluate(node => node.getBoundingClientRect().width);
+
+  await control.evaluate(node => node.classList.add("is-idle"));
+  await page.waitForTimeout(450);
+  const collapsedWidth = await control.evaluate(node => node.getBoundingClientRect().width);
+
+  expect(collapsedWidth).toBeLessThanOrEqual(48);
+  expect(expandedWidth).toBeGreaterThan(collapsedWidth + 12);
+  await expect(control.locator(".language-option.is-active")).toBeVisible();
+});
