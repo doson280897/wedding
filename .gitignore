@@ -1,8 +1,15 @@
-# Ảnh gốc: chỉ lưu ở máy, KHÔNG push lên GitHub
-/assets/
-/images/
+# Original wedding photos are local-only.
+# Keep the directory placeholders, ignore every real original image.
+/images/original/assets/*
+!/images/original/assets/.gitkeep
+/images/original/album/*
+!/images/original/album/.gitkeep
 
-# Cache, môi trường local
+# Generated only during deploy/local preview.
+/og-preview.jpg
+/version.json
+
+# Local caches / environments.
 __pycache__/
 *.py[cod]
 .venv/
@@ -10,5 +17,7 @@ venv/
 .DS_Store
 Thumbs.db
 
-# LƯU Ý: KHÔNG ignore assets-optimized/, thumbs/, images.json
-# vì GitHub Pages cần các file này.
+# Commit these generated web assets:
+# images/optimized/assets/
+# images/optimized/album/
+# images/manifest.json

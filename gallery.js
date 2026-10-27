@@ -431,7 +431,7 @@
   async function start() {
     setStatus("album.loading");
     try {
-      const manifestUrl = new URL("./images.json", document.baseURI);
+      const manifestUrl = new URL("./images/manifest.json", document.baseURI);
       manifestUrl.searchParams.set("v", buildId);
       manifestUrl.searchParams.set("t", String(Date.now()));
       const response = await fetch(manifestUrl, { cache: "no-store" });

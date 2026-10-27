@@ -32,9 +32,9 @@ jobs:
           from pathlib import Path
           from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-          source = Path("assets-optimized/hero.webp")
+          source = Path("images/optimized/assets/hero.webp")
           if not source.exists():
-              raise SystemExit("Missing assets-optimized/hero.webp")
+              raise SystemExit("Missing images/optimized/assets/hero.webp")
 
           image = Image.open(source).convert("RGB")
           image = ImageOps.fit(image, (1200, 630), Image.Resampling.LANCZOS, centering=(0.5, 0.42)).convert("RGBA")
