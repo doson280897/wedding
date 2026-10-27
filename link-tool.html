@@ -1,135 +1,24 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#121a16">
-<title>Tạo link thiệp riêng | Tố Nga & Thành Sơn</title>
-<style>
-:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-*{box-sizing:border-box}
-body{margin:0;min-height:100svh;background:radial-gradient(ellipse at 50% 0,#29392f,#111714 75%);color:#f1e8da;display:grid;place-items:center;padding:24px}
-main{width:min(100%,570px);border:1px solid #b99d6b70;background:#171f1bcf;border-radius:22px;padding:clamp(22px,5vw,40px);box-shadow:0 25px 80px #0007}
-small,.eyebrow{color:#d8bc86;letter-spacing:.16em;text-transform:uppercase;font-size:11px}
-h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(30px,6vw,42px);line-height:1.2;margin:12px 0}
-p{color:#c5c9c1;line-height:1.65}
-label{display:block;margin:22px 0 9px;font-weight:600;font-size:14px}
-input,select{width:100%;min-height:48px;padding:11px 13px;border:1px solid #788777;border-radius:10px;background:#0c130f;color:#fff;font:inherit}
-input:focus,select:focus,button:focus-visible,a:focus-visible{outline:2px solid #f4d49b;outline-offset:3px}
-input::placeholder{color:#a8b3a8}
-button,.action{display:inline-flex;align-items:center;justify-content:center;min-height:45px;padding:11px 16px;border-radius:10px;border:1px solid #c5a76e;background:#bda16e;color:#131b15;font:600 14px system-ui;cursor:pointer;text-decoration:none}
-button:hover,.action:hover{filter:brightness(1.12)}
-button.secondary,.action.secondary{background:transparent;color:#f0dfc3}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
-.result{margin-top:25px;border-top:1px solid #ffffff25;padding-top:20px}
-.result[hidden],#feedback:empty{display:none}
-#generated{font-size:13px;overflow-wrap:anywhere;line-height:1.6;color:#e9d9b8}
-#feedback{min-height:22px;margin:12px 0 0;color:#d9c18e}
-.note{font-size:12px;margin-bottom:0}
-.language-switch{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;z-index:6001;display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #c4a56f70;border-radius:999px;background:#101512d9;color:#b8aa93;box-shadow:0 8px 30px #0007;backdrop-filter:blur(8px);font:600 10px system-ui,sans-serif;letter-spacing:.12em}.language-option{border:0;background:transparent;color:#a99f8d;padding:3px 4px;cursor:pointer;font:600 10px system-ui,sans-serif;letter-spacing:.12em;min-height:auto}.language-option.is-active{color:#f0d2a2}.language-option:focus-visible{outline:2px solid #e5c78e;outline-offset:3px;border-radius:4px}
-.language-switch.floating-control{touch-action:none;user-select:none;-webkit-user-select:none;transition:top .3s,left .3s,right .3s,opacity .2s}.language-switch.is-dragging{transition:none!important;cursor:grabbing}.language-switch.is-idle{opacity:.72}.language-switch.is-idle .language-option:not(.is-active),.language-switch.is-idle span{display:none}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="refresh" content="0;url=index.html?tool=links">
+  <title>Tạo thiệp mời riêng | Tố Nga & Thành Sơn</title>
+  <script>
+    (() => {
+      // Legacy link: redirect to the ONE page that owns the language control.
+      // Existing shared links and ?lang=en continue to work.
+      const destination = new URL("index.html", location.href);
+      destination.searchParams.set("tool", "links");
+      const lang = new URLSearchParams(location.search).get("lang");
+      if (lang === "vi" || lang === "en") destination.searchParams.set("lang", lang);
+      location.replace(destination.href);
+    })();
+  </script>
 </head>
 <body>
-<div class="language-switch" role="group" aria-label="Chọn ngôn ngữ"><button type="button" class="language-option" data-lang="vi" aria-pressed="true">VN</button><span aria-hidden="true">/</span><button type="button" class="language-option" data-lang="en" aria-pressed="false">EN</button></div>
-<main>
-<div class="eyebrow">TỐ NGA & THÀNH SƠN · WEDDING 2026</div>
-<h1>Tạo thiệp mời riêng</h1>
-<p>Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho người nhận.</p>
-<form id="generator">
-<label for="guest">Tên khách mời</label>
-<input id="guest" name="guest" type="text" maxlength="100" placeholder="Ví dụ: Anh Minh và chị Lan" autocomplete="off" required>
-<label for="party">Khách tham dự</label>
-<select id="party" name="party" required>
-<option value="bride">Nhà gái · Lễ Vu Quy · 14/11/2026 · Đắk Lắk</option>
-<option value="groom">Nhà trai · Lễ Tân Hôn · 29/11/2026 · Đồng Nai</option>
-</select>
-<div class="actions"><button type="submit">Tạo link thiệp</button></div>
-</form>
-<section class="result" id="result" hidden aria-live="polite">
-<small>Link dành cho khách</small>
-<div id="generated"></div>
-<div class="actions">
-<button type="button" id="copy">Sao chép link</button>
-<button type="button" class="secondary" id="share">Chia sẻ</button>
-<a class="action secondary" id="preview" href="#" target="_blank" rel="noopener noreferrer">Xem thử thiệp</a>
-</div>
-<p id="feedback" role="status"></p>
-</section>
-<p class="note">Công cụ này tạo link ngay trên thiết bị; không lưu danh sách khách. Link có tên khách trong URL, nên chỉ chia sẻ với đúng người nhận.</p>
-</main>
-<script>
-(() => {
-"use strict";
-
-const dictionary={
-vi:["Tạo thiệp mời riêng","Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho người nhận.","Tên khách mời","Ví dụ: Anh Minh và chị Lan","Khách tham dự","Nhà gái · Lễ Vu Quy · 14/11/2026 · Đắk Lắk","Nhà trai · Lễ Tân Hôn · 29/11/2026 · Đồng Nai","Tạo link thiệp","Link dành cho khách","Sao chép link","Chia sẻ","Xem thử thiệp","Công cụ này tạo link ngay trên thiết bị; không lưu danh sách khách. Link có tên khách trong URL, nên chỉ chia sẻ với đúng người nhận."],
-en:["Create a personalized invitation","Enter your guest's name and select the celebration. Their invitation will display a personal greeting.","Guest name","e.g. Minh and Lan","Celebration","Bride's family · November 14, 2026 · Đắk Lắk","Groom's family · November 29, 2026 · Đồng Nai","Create invitation link","Guest invitation link","Copy link","Share","Preview invitation","This tool generates links on your device without storing a guest list. Guest names appear in the URL, so share links with the intended recipients only."]
-};
-let currentLanguage="vi";
-const params=new URLSearchParams(location.search);
-const requestedLanguage=params.get("lang");
-let savedLanguage="";
-try{savedLanguage=localStorage.getItem("wedding-language")||"";}catch(_){}
-const initialLanguage=["vi","en"].includes(requestedLanguage)?requestedLanguage:(savedLanguage==="en"?"en":"vi");
-const selectors=["h1","main>p:not(.note)","label[for=guest]","#guest","label[for=party]","option[value=bride]","option[value=groom]","button[type=submit]",".result small","#copy","#share","#preview",".note"];
-function changeLanguage(language){
- currentLanguage=language;
- document.documentElement.lang=language;
- document.querySelector(".language-switch").setAttribute("aria-label",language==="en"?"Choose language":"Chọn ngôn ngữ");
- document.querySelectorAll(".language-switch [data-lang]").forEach(button=>{const active=button.dataset.lang===language;button.classList.toggle("is-active",active);button.setAttribute("aria-pressed",String(active));});
- try{localStorage.setItem("wedding-language",language);}catch(_){}
- selectors.forEach((selector,i)=>{
- const node=document.querySelector(selector);if(!node)return;
- if(i===3)node.placeholder=dictionary[language][i];
- else node.textContent=dictionary[language][i];
- });
- document.title=dictionary[language][0]+" | Tố Nga & Thành Sơn";
-}
-document.querySelectorAll(".language-switch [data-lang]").forEach(button=>button.addEventListener("click",()=>changeLanguage(button.dataset.lang)));
-changeLanguage(initialLanguage);
-
-const form=document.getElementById("generator");
-const result=document.getElementById("result");
-const generated=document.getElementById("generated");
-const preview=document.getElementById("preview");
-const feedback=document.getElementById("feedback");
-const share=document.getElementById("share");
-let invitation="";
-const base=new URL("./",location.href);
-form.addEventListener("submit",event=>{
- event.preventDefault();
- const guest=document.getElementById("guest").value.replace(/\s+/g," ").trim().slice(0,100);
- const party=document.getElementById("party").value;
- if(!guest||!["bride","groom"].includes(party)){feedback.textContent="Vui lòng nhập tên khách và chọn tiệc.";return;}
- const url=new URL("index.html",base);
- url.searchParams.set("to",guest);
- url.searchParams.set("party",party);
- url.searchParams.set("lang",currentLanguage);
- invitation=url.href;
- generated.textContent=invitation;
- preview.href=invitation;
- result.hidden=false;
- feedback.textContent="";
- share.hidden=!navigator.share;
-});
-document.getElementById("copy").addEventListener("click",async()=>{
- if(!invitation)return;
- try{await navigator.clipboard.writeText(invitation);feedback.textContent="Đã sao chép link!";}
- catch(_){
-  const area=document.createElement("textarea");area.value=invitation;area.style.position="fixed";area.style.opacity="0";document.body.append(area);area.select();
-  const ok=document.execCommand("copy");area.remove();
-  feedback.textContent=ok?"Đã sao chép link!":"Không thể sao chép tự động. Hãy chọn và sao chép link phía trên.";
- }
-});
-share.addEventListener("click",async()=>{
- if(!invitation||!navigator.share)return;
- try{await navigator.share({title:"Thiệp cưới Tố Nga & Thành Sơn",url:invitation});}
- catch(error){if(error.name!=="AbortError")feedback.textContent="Không thể chia sẻ. Hãy dùng nút Sao chép link.";}
-});
-})();
-</script>
-<script src="floating-language.js?v=__BUILD_ID__" defer></script>
+  <p><a href="index.html?tool=links">Mở công cụ tạo link thiệp / Open invitation link generator</a></p>
 </body>
 </html>
