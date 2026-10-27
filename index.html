@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="theme-color" id="themeColor" content="#496957">
-<link rel="icon" href="favicon.svg?v=__BUILD_ID__" type="image/svg+xml">
+<link rel="icon" id="siteFavicon" href="favicon.svg?v=__BUILD_ID__" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="vi_VN">
 <meta property="og:site_name" content="Thiệp cưới Tố Nga · Thành Sơn">
@@ -46,7 +46,9 @@
 (() => {
   const party = new URLSearchParams(location.search).get("party");
   const theme = document.getElementById("themeColor");
+  const favicon = document.getElementById("siteFavicon");
   if (party === "bride" || party === "groom") {
+    if (favicon) favicon.href = "favicon-" + party + ".svg?v=__BUILD_ID__";
     document.documentElement.dataset.party = party;
     document.documentElement.classList.add("envelope-theme");
     if (theme) theme.setAttribute("content", "#496957");
@@ -178,7 +180,7 @@
 </div>
 <header class="hero" id="home">
   <div class="hero-photo"></div><div class="hero-shade"></div>
-  <div class="topbar"><a class="monogram" href="#home">S <span>&amp;</span> N</a><a class="top-link" href="#events" data-i18n="hero.topLink">THÔNG TIN LỄ CƯỚI ↗</a></div>
+  <div class="topbar"><a class="monogram" id="heroMonogram" href="#home">S <span>&amp;</span> N</a><a class="top-link" href="#events" data-i18n="hero.topLink">THÔNG TIN LỄ CƯỚI ↗</a></div>
   <div class="hero-layout">
     <div class="hero-spacer"></div>
     <div class="hero-copy">

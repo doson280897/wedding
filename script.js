@@ -437,6 +437,13 @@
       menuCoupleLabel.textContent = tr(brideFirst ? "menu.coupleBrideFirst" : "menu.coupleGroomFirst");
     }
 
+    const heroMonogram = document.getElementById("heroMonogram");
+    if (heroMonogram) {
+      heroMonogram.innerHTML = brideFirst
+        ? 'N <span>&amp;</span> S'
+        : 'S <span>&amp;</span> N';
+    }
+
     document.title = tr(brideFirst ? "page.titleBride" : "page.titleGroom");
   }
 
