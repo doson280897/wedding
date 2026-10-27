@@ -8,6 +8,14 @@
   const partySelector = document.getElementById("partySelector");
   const languageButtons = Array.from(document.querySelectorAll(".language-switch [data-lang]"));
 
+  // A refreshed invitation always starts at the envelope, not the browser's
+  // previously restored scroll position inside the invitation.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  const resetInvitationScroll = () => window.scrollTo({ top:0, left:0, behavior:"instant" });
+  resetInvitationScroll();
+  window.addEventListener("pageshow", resetInvitationScroll);
+
+
   if (selectedParty) {
     document.documentElement.dataset.party = selectedParty;
     document.documentElement.classList.remove("party-pending");
@@ -183,6 +191,7 @@
     setBrowserTheme("#496957");
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
+    resetInvitationScroll();
     window.setTimeout(() => openInvitation?.focus({preventScroll:true}), 0);
 
     let opened = false;
@@ -230,6 +239,7 @@
 
       if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
+        resetInvitationScroll();
         document.body.classList.remove("envelope-locked");
         document.documentElement.classList.remove("envelope-theme", "envelope-pending");
         setBrowserTheme("#0b0e0e");
@@ -239,6 +249,7 @@
       intro.classList.add("is-leaving");
       window.setTimeout(() => {
         intro.hidden = true;
+        resetInvitationScroll();
         document.body.classList.remove("envelope-locked");
         document.documentElement.classList.remove("envelope-theme", "envelope-pending");
         setBrowserTheme("#0b0e0e");
