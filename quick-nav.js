@@ -7,6 +7,43 @@
   if (!toggle || !panel || !backdrop || !closeBtn) return;
   const links = [...panel.querySelectorAll(".wq-link")];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  const mapModal = document.getElementById("wmModal");
+  const mapBackdrop = document.getElementById("wmBackdrop");
+  const mapClose = document.getElementById("wmClose");
+  let mapOpen = false;
+  let mapPreviousFocus = null;
+  const setMapOpen = (value, targetId = null) => {
+    if (!mapModal || !mapBackdrop || !mapClose) return;
+    if (value) {
+      if (!mapOpen) mapPreviousFocus = document.activeElement;
+      mapOpen = true;
+      mapModal.hidden = false;
+      mapBackdrop.hidden = false;
+      mapModal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("wm-open");
+      const target = targetId && document.getElementById(targetId);
+      mapModal.querySelectorAll(".location-card").forEach(card => card.classList.toggle("wm-highlight", !!target && card === target));
+      mapModal.querySelector(".wm-dialog").scrollTop = 0;
+      mapClose.focus({preventScroll:true});
+      if (target) requestAnimationFrame(() => target.scrollIntoView({block:"nearest",behavior:"instant"}));
+    } else {
+      mapOpen = false;
+      mapModal.hidden = true;
+      mapBackdrop.hidden = true;
+      mapModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("wm-open");
+      if (mapPreviousFocus && document.contains(mapPreviousFocus)) mapPreviousFocus.focus({preventScroll:true});
+    }
+  };
+  mapClose?.addEventListener("click", () => setMapOpen(false));
+  mapBackdrop?.addEventListener("click", () => setMapOpen(false));
+  document.querySelectorAll('a[href="#map-bride"],a[href="#map-groom"]').forEach(link => {
+    link.addEventListener("click", event => {
+      event.preventDefault();
+      setMapOpen(true, link.getAttribute("href").slice(1));
+    });
+  });
   let open = false;
   const setOpen = (value, restoreFocus = true) => {
     if (open === value) return;
@@ -25,6 +62,15 @@
   closeBtn.addEventListener("click", () => setOpen(false));
   backdrop.addEventListener("click", () => setOpen(false));
   document.addEventListener("keydown", event => {
+    if (mapOpen) {
+      if (event.key === "Escape") {event.preventDefault();setMapOpen(false);return;}
+      if (event.key === "Tab") {
+        const focusable = [mapClose, ...mapModal.querySelectorAll('a[href]')];
+        if (event.shiftKey && document.activeElement === focusable[0]) {event.preventDefault();focusable.at(-1).focus();}
+        else if (!event.shiftKey && document.activeElement === focusable.at(-1)) {event.preventDefault();focusable[0].focus();}
+      }
+      return;
+    }
     if (!open) return;
     if (event.key === "Escape") {event.preventDefault();setOpen(false);return;}
     if (event.key !== "Tab") return;
@@ -38,6 +84,7 @@
     if (!target) return;
     event.preventDefault();
     setOpen(false,false);
+    if (id === "locations") { setMapOpen(true); return; }
     history.replaceState(null,"",location.pathname+location.search+"#"+encodeURIComponent(id));
     target.scrollIntoView({behavior:reduced.matches?"auto":"smooth",block:"start"});
     links.forEach(item => item.setAttribute("aria-current", String(item===link)));
