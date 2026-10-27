@@ -201,9 +201,10 @@
     return {
       compact,
       height:viewport.clientHeight,
-      firstX:compact ? viewport.clientWidth * .40 : viewport.clientWidth * .30,
-      nextX:compact ? viewport.clientWidth * .215 : viewport.clientWidth * .175,
-      activeRange:compact ? 3.65 : 4.65
+      spacing:compact ? viewport.clientWidth * .285 : viewport.clientWidth * .235,
+      activeRange:compact ? 3.55 : 4.35,
+      centerZ:compact ? 205 : 280,
+      depthStep:compact ? 105 : 128
     };
   }
 
@@ -211,9 +212,6 @@
     if (!items.length) return;
 
     const metrics = sceneMetrics();
-    const yPattern = metrics.compact
-      ? [0,-.18,.16,-.25,.22,-.10]
-      : [0,-.20,.17,-.27,.23,-.11];
 
     for (const item of items) {
       const relative = shortestRelative(item.photoIndex, position);
@@ -230,34 +228,40 @@
       }
 
       item.hidden = false;
-      const sign = relative < 0 ? -1 : 1;
-      const rank = Math.min(yPattern.length - 1, Math.round(abs));
-      const variation = ((item.photoIndex % 5) - 2) / 2;
 
-      let x = abs < .001
-        ? 0
-        : sign * (metrics.firstX + Math.max(0, abs - 1) * metrics.nextX);
+      // Stable per-photo offsets. They never jump when the camera crosses
+      // half/integer boundaries; only the continuous relative value changes.
+      const seed = item.photoIndex + 1;
+      const floatY = Math.sin(seed * 1.73) * (metrics.compact ? 42 : 72);
+      const floatTilt = Math.sin(seed * 2.31) * 3.4;
+      const floatMix = Math.min(1, abs * .82);
 
-      let y = yPattern[rank] * metrics.height + variation * (metrics.compact ? 9 : 16);
-      let z = metrics.compact ? 145 - abs * 118 : 210 - abs * 145;
-      let rotateY = clamp(-relative * (metrics.compact ? 13 : 12), -42, 42);
-      let rotateZ = (rank ? sign * (rank % 2 ? -2.6 : 2.2) : 0) + variation * .8;
-      let scale = Math.max(metrics.compact ? .54 : .50, 1.03 - abs * (metrics.compact ? .145 : .135));
-      let opacity = Math.max(.14, 1 - abs * .20);
+      // Continuous spatial curve: neighbors stay closer to each other and
+      // accelerate outward gradually instead of jumping between discrete poses.
+      const spacingCurve = 1 + Math.min(abs, 3.5) * .055;
+      let x = relative * metrics.spacing * spacingCurve;
+      let y = floatY * floatMix;
+      let z = metrics.centerZ - abs * metrics.depthStep - abs * abs * (metrics.compact ? 8 : 11);
+      let rotateY = clamp(-relative * (metrics.compact ? 10.5 : 9.5), -34, 34);
+      let rotateZ = floatTilt * floatMix;
+      let scale = Math.max(metrics.compact ? .60 : .56, 1.07 - abs * (metrics.compact ? .125 : .115));
+      let opacity = Math.max(.16, 1 - abs * .18);
 
-      const isMain = abs < .34;
-      if (isMain) {
-        x = 0;
-        y = 0;
-        z = metrics.compact ? 210 : 290;
-        rotateY = -relative * 4;
-        rotateZ = 0;
-        scale = metrics.compact ? 1.08 : 1.12;
-        opacity = 1;
-      }
+      // Ease the focused photo into dead center without a threshold snap.
+      const focusBlend = Math.max(0, 1 - abs / .62);
+      const focusEase = focusBlend * focusBlend * (3 - 2 * focusBlend);
+      x *= 1 - focusEase;
+      y *= 1 - focusEase;
+      rotateY *= 1 - focusEase;
+      rotateZ *= 1 - focusEase;
+      z += focusEase * (metrics.compact ? 42 : 58);
+      scale += focusEase * (metrics.compact ? .035 : .045);
+      opacity += (1 - opacity) * focusEase;
+
+      const isMain = abs < .46;
 
       item.slide.style.opacity = String(opacity);
-      item.slide.style.zIndex = String(1000 - Math.round(abs * 90));
+      item.slide.style.zIndex = String(1000 - Math.round(abs * 80));
       item.slide.style.transform =
         "translate(-50%,-50%) " +
         "translate3d(" + x.toFixed(2) + "px," + y.toFixed(2) + "px," + z.toFixed(2) + "px) " +
@@ -300,7 +304,7 @@
         position = targetPosition;
       } else {
         const distance = targetPosition - position;
-        const alpha = 1 - Math.pow(.78, dt);
+        const alpha = 1 - Math.pow(.895, dt);
         position += distance * alpha;
 
         if (Math.abs(distance) < .0015) position = targetPosition;
@@ -401,7 +405,7 @@
         ? Math.max(145, viewport.clientWidth * .43)
         : Math.max(220, viewport.clientWidth * .22);
 
-      const projected = position - state.velocityX * 150 / step;
+      const projected = position - state.velocityX * 125 / step;
       const maxJump = viewport.clientWidth < 700 ? 2 : 3;
       moveTo(Math.round(clamp(projected, position - maxJump, position + maxJump)));
       return;
@@ -502,68 +506,84 @@
     });
   }
 
-  async function setLightboxImage(index) {
-    lightboxIndex = wrap(index);
-    lightboxImage.src = versionedAsset(photos[lightboxIndex]);
-    updateLightboxMeta();
-    try { await lightboxImage.decode?.(); } catch (_) {}
-    preloadLightboxNeighbors();
+  async function decodeLightboxLayer(index) {
+    const nextIndex = wrap(index);
+    const image = new Image();
+    image.className = "album-lightbox-incoming";
+    image.alt = lightboxAlt(nextIndex);
+    image.draggable = false;
+    image.decoding = "async";
+    image.src = versionedAsset(photos[nextIndex]);
+    try { await image.decode?.(); } catch (_) {}
+    return { image, index:nextIndex };
   }
 
   async function animateLightboxStep(delta) {
-    if (!photos.length || !lightboxImage || lightboxTransitioning) {
-      if (lightboxTransitioning) lightboxQueuedDelta = delta;
+    if (!photos.length || !lightboxImage) return;
+
+    if (lightboxTransitioning) {
+      lightboxQueuedDelta = delta;
       return;
     }
 
     const direction = delta > 0 ? 1 : -1;
+    const nextIndex = wrap(lightboxIndex + delta);
 
     if (reducedMotion || !lightboxImage.animate) {
-      await setLightboxImage(lightboxIndex + delta);
+      const decoded = await decodeLightboxLayer(nextIndex);
+      decoded.image.id = "albumLightboxImage";
+      lightboxImage.replaceWith(decoded.image);
+      lightboxImage = decoded.image;
+      lightboxIndex = decoded.index;
+      updateLightboxMeta();
+      preloadLightboxNeighbors();
       return;
     }
 
     lightboxTransitioning = true;
     lightboxQueuedDelta = 0;
 
-    const outgoing = lightboxImage.cloneNode(false);
-    outgoing.removeAttribute("id");
-    outgoing.alt = "";
-    outgoing.classList.add("album-lightbox-ghost");
-    outgoing.src = lightboxImage.currentSrc || lightboxImage.src;
+    // Decode first while the current photo remains fully visible.
+    const decoded = await decodeLightboxLayer(nextIndex);
+    if (!lightbox || lightbox.hidden) {
+      lightboxTransitioning = false;
+      return;
+    }
 
-    const rect = lightboxImage.getBoundingClientRect();
-    outgoing.style.width = rect.width + "px";
-    outgoing.style.height = rect.height + "px";
-    lightboxStage.append(outgoing);
+    const incoming = decoded.image;
+    lightboxStage.append(incoming);
 
-    lightboxImage.style.visibility = "hidden";
-    await setLightboxImage(lightboxIndex + delta);
-
-    lightboxImage.style.visibility = "";
-    lightboxImage.style.transform = "";
-    lightboxImage.style.opacity = "";
-
-    const outgoingAnimation = outgoing.animate([
-      { transform:"translate(-50%,-50%) translate3d(0,0,0) scale(1)", opacity:1 },
-      { transform:"translate(-50%,-50%) translate3d(" + (-direction * 8) + "vw,0,0) scale(.985)", opacity:0 }
+    const outgoingAnimation = lightboxImage.animate([
+      { transform:"translate3d(0,0,0) scale(1)" },
+      { transform:"translate3d(" + (-direction * 3.2) + "vw,0,0) scale(.992)" }
     ], {
-      duration:240,
-      easing:"cubic-bezier(.22,.7,.18,1)",
+      duration:360,
+      easing:"cubic-bezier(.22,.72,.18,1)",
       fill:"forwards"
     });
 
-    const incomingAnimation = lightboxImage.animate([
-      { transform:"translate3d(" + (direction * 7) + "vw,0,0) scale(.985)", opacity:.12 },
-      { transform:"translate3d(0,0,0) scale(1)", opacity:1 }
+    const incomingAnimation = incoming.animate([
+      { transform:"translate(-50%,-50%) translate3d(" + (direction * 6.2) + "vw,0,0) scale(.992)" },
+      { transform:"translate(-50%,-50%) translate3d(0,0,0) scale(1)" }
     ], {
-      duration:320,
+      duration:360,
       easing:"cubic-bezier(.18,.78,.18,1)",
       fill:"both"
     });
 
     await Promise.allSettled([outgoingAnimation.finished, incomingAnimation.finished]);
-    outgoing.remove();
+
+    outgoingAnimation.cancel();
+    incomingAnimation.cancel();
+
+    incoming.id = "albumLightboxImage";
+    incoming.classList.remove("album-lightbox-incoming");
+    lightboxImage.replaceWith(incoming);
+    lightboxImage = incoming;
+    lightboxIndex = decoded.index;
+    updateLightboxMeta();
+    preloadLightboxNeighbors();
+
     lightboxTransitioning = false;
 
     if (lightboxQueuedDelta) {
@@ -606,9 +626,8 @@
     lightboxTransitioning = false;
     lightboxQueuedDelta = 0;
 
-    lightboxStage?.querySelectorAll(".album-lightbox-ghost").forEach(node => node.remove());
+    lightboxStage?.querySelectorAll(".album-lightbox-incoming").forEach(node => node.remove());
     lightboxImage.style.transform = "";
-    lightboxImage.style.opacity = "";
     lightboxImage.style.visibility = "";
     lightboxImage.removeAttribute("src");
 
@@ -652,12 +671,10 @@
 
     lightboxPointer.dx = dx;
     const visualX = dx * .22;
-    const scale = Math.max(.985, 1 - Math.min(Math.abs(dx), 180) / 12000);
-    const opacity = Math.max(.72, 1 - Math.abs(dx) / 900);
+    const scale = Math.max(.99, 1 - Math.min(Math.abs(dx), 180) / 18000);
 
     lightboxImage.style.transform =
       "translate3d(" + visualX.toFixed(2) + "px,0,0) scale(" + scale.toFixed(4) + ")";
-    lightboxImage.style.opacity = String(opacity);
   }, { passive:false });
 
   lightboxStage?.addEventListener("pointerup", event => {
@@ -669,7 +686,6 @@
     lightboxPointer = null;
 
     lightboxImage.style.transform = "";
-    lightboxImage.style.opacity = "";
 
     if (horizontal && Math.abs(dx) >= 48 && Math.abs(dx) >= Math.abs(dy) * 1.1) {
       stepLightbox(dx < 0 ? 1 : -1);
@@ -678,9 +694,9 @@
 
     if (!reducedMotion && horizontal && lightboxImage.animate) {
       lightboxImage.animate([
-        { transform:"translate3d(" + (dx * .22).toFixed(2) + "px,0,0) scale(.99)", opacity:.82 },
-        { transform:"translate3d(0,0,0) scale(1)", opacity:1 }
-      ], { duration:180, easing:"cubic-bezier(.2,.75,.2,1)" });
+        { transform:"translate3d(" + (dx * .22).toFixed(2) + "px,0,0) scale(.994)" },
+        { transform:"translate3d(0,0,0) scale(1)" }
+      ], { duration:210, easing:"cubic-bezier(.2,.75,.2,1)" });
     }
   });
 
