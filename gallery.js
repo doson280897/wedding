@@ -6,6 +6,9 @@
   const counter = document.getElementById("albumCount");
   const progress = document.getElementById("albumProgress");
   const status = document.getElementById("albumStatus");
+  const editorialCaption = document.getElementById("albumEditorialCaption");
+  const captionNumber = document.getElementById("albumCaptionNumber");
+  const captionText = document.getElementById("albumCaptionText");
   const tr = key => window.WeddingI18n ? window.WeddingI18n.t(key) : key;
   let statusKey = status?.dataset.statusKey || "album.lazy";
   const setStatus = key => {
@@ -17,11 +20,12 @@
   };
   document.addEventListener("wedding:languagechange", () => {
     if (status && !status.hidden) setStatus(statusKey);
+    updateEditorialCaption(false);
   });
   if (!viewport || !space) return;
 
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const DURATION = reducedMotion ? 0 : 590;
+  const DURATION = reducedMotion ? 0 : 720;
   const TOTAL_SLOTS = 7; // -3 .. +3, edge slots are invisible buffers
   const VISIBLE_RADIUS = 2;
 
@@ -35,9 +39,21 @@
 
   const wrap = i => ((i % photos.length) + photos.length) % photos.length;
 
-  function updateProgress() {
+  function updateEditorialCaption(animate = true) {
+    if (!captionNumber || !captionText || !photos.length) return;
+    captionNumber.textContent = String(current + 1).padStart(2, "0");
+    captionText.textContent = tr("album.caption." + (current % 5));
+    if (editorialCaption && animate && !reducedMotion) {
+      editorialCaption.classList.remove("is-changing");
+      void editorialCaption.offsetWidth;
+      editorialCaption.classList.add("is-changing");
+    }
+  }
+
+  function updateProgress(animateCaption = true) {
     counter.textContent = `${String(current + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
     progress.style.width = `${100 * (current + 1) / photos.length}%`;
+    updateEditorialCaption(animateCaption);
   }
 
   function createSlot(relative) {
@@ -69,17 +85,30 @@
   function place(slot, relative, animate) {
     const abs = Math.abs(relative);
     const compact = viewport.clientWidth < 700;
-    const gap = compact ? 148 : Math.min(viewport.clientWidth * .22, 248);
-    const x = gap * relative * (1 + .12 * abs);
-    const y = relative === 0 ? -8 : Math.sign(relative) * (26 + abs * 10);
-    const z = relative === 0 ? 78 : -abs * (compact ? 110 : 145);
-    const ry = relative === 0 ? 0 : -Math.sign(relative) * Math.min(30 + abs * 14, 72);
-    slot.node.style.transition = animate ? `transform ${DURATION}ms cubic-bezier(.22,.7,.18,1), opacity ${DURATION}ms ease` : "none";
-    slot.node.style.transform = `translate3d(${x}px,${y}px,${z}px) rotateY(${ry}deg) rotateZ(${relative * 1.5}deg)`;
-    slot.node.style.opacity = abs > VISIBLE_RADIUS ? "0" : String(1 - abs * .2);
-    slot.node.style.zIndex = String(20 - abs);
+    const gap = compact ? Math.min(viewport.clientWidth * .48, 190) : Math.min(viewport.clientWidth * .255, 305);
+    const x = gap * relative * (1 + .07 * abs);
+    const y = relative === 0 ? -4 : (compact ? 11 : 16) + abs * (compact ? 6 : 9);
+    const zStep = compact ? 155 : 190;
+    const z = relative === 0 ? (compact ? 128 : 156) : -abs * zStep;
+    const ry = relative === 0 ? 0 : -Math.sign(relative) * Math.min(23 + abs * 11, 52);
+    const rz = relative === 0 ? 0 : relative * .55;
+    const scale = relative === 0 ? (compact ? 1.12 : 1.1) : abs === 1 ? .84 : abs === 2 ? .68 : .58;
+    const opacity = abs > VISIBLE_RADIUS ? 0 : abs === 0 ? 1 : abs === 1 ? .64 : .24;
+    const blur = abs === 0 ? 0 : abs === 1 ? .7 : 2.2;
+    const brightness = abs === 0 ? 1 : abs === 1 ? .78 : .58;
+
+    slot.node.style.transition = animate
+      ? `transform ${DURATION}ms cubic-bezier(.18,.78,.18,1), opacity ${DURATION}ms ease`
+      : "none";
+    slot.node.style.transform = `translate3d(${x}px,${y}px,${z}px) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${scale})`;
+    slot.node.style.opacity = String(opacity);
+    slot.node.style.zIndex = String(30 - abs);
     slot.node.style.pointerEvents = "none";
+    slot.node.style.setProperty("--album-depth-blur", blur + "px");
+    slot.node.style.setProperty("--album-depth-brightness", String(brightness));
     slot.node.classList.toggle("is-main", relative === 0);
+    slot.node.classList.toggle("is-near", abs === 1);
+    slot.node.classList.toggle("is-far", abs >= 2);
     slot.relative = relative;
   }
 
@@ -92,7 +121,7 @@
       place(slot, relative, false);
       slots.push(slot);
     }
-    updateProgress();
+    updateProgress(false);
   }
 
   // 7 physical frames: 5 visible + 2 invisible buffers.
@@ -103,7 +132,8 @@
     if (moving) { pendingDirection = direction; return; }
     moving = true;
     current = wrap(current + direction);
-    updateProgress();
+    updateProgress(true);
+    viewport.classList.add("is-dollying");
 
     slots.forEach(slot => place(slot, slot.relative - direction, true));
 
@@ -117,6 +147,7 @@
         setPhoto(far, current + freshRelative);
       }
       moving = false;
+      viewport.classList.remove("is-dollying");
       if (pendingDirection) {
         const next = pendingDirection;
         pendingDirection = 0;

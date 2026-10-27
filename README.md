@@ -9,7 +9,7 @@ Website thiệp cưới phong cách **Cinematic Editorial / Dark Luxury** (đen 
 - Banner mở đầu, lời mời cá nhân hóa bằng tham số `?to=` (ví dụ: `https://doson280897.github.io/wedding/?to=Nguyen%20Van%20A`).
 - Giới thiệu cô dâu **Tố Nga** và chú rể **Thành Sơn**, thông tin hai gia đình.
 - Lịch **lễ Vu Quy 14/11/2026** và **lễ Tân Hôn 29/11/2026**, đồng hồ đếm ngược.
-- **Album ảnh 3D**: vuốt hoặc kéo trái/phải để xem ảnh; không có nút chỉnh depth, autoplay hay fullscreen.
+- **Album ảnh 3D cinematic**: vuốt hoặc kéo trái/phải; ảnh chính tiến gần như camera dolly, ảnh phụ lùi sâu/blur nhẹ và có caption editorial; không có autoplay hay fullscreen.
 - Nút **MỤC LỤC** nổi: chọn mục để cuộn mượt đến nội dung.
 - **FIND YOUR WAY / Bản đồ chỉ đường** được **ẩn khỏi luồng trang chính**. Chỉ hiện trong popup khi chọn **Mục lục → Bản đồ chỉ đường**, hoặc bấm **XEM ĐỊA ĐIỂM** ở phần lịch cưới. Popup hiển thị địa điểm nhà trai và nhà gái, có liên kết Google Maps; đóng bằng **×**, bấm ngoài popup hoặc phím **Esc**.
 - Giao diện responsive cho điện thoại và máy tính.
