@@ -335,10 +335,16 @@
       const script = document.createElement("script");
       script.src = "https://www.youtube.com/iframe_api";
       script.async = true;
-      script.onerror = () => reject(new Error("YouTube IFrame API failed to load"));
+      script.onerror = () => {
+        script.remove();
+        reject(new Error("YouTube IFrame API failed to load"));
+      };
       document.head.appendChild(script);
     });
 
+    window.__weddingYouTubeApiPromise.catch(() => {
+      window.__weddingYouTubeApiPromise = null;
+    });
     return window.__weddingYouTubeApiPromise;
   }
 
