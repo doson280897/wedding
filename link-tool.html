@@ -65,10 +65,16 @@ vi:["Tạo thiệp mời riêng","Nhập tên khách và chọn đúng tiệc. L
 en:["Create a personalized invitation","Enter your guest's name and select the celebration. Their invitation will display a personal greeting.","Guest name","e.g. Minh and Lan","Celebration","Bride's family · November 14, 2026 · Đắk Lắk","Groom's family · November 29, 2026 · Đồng Nai","Create invitation link","Guest invitation link","Copy link","Share","Preview invitation","This tool generates links on your device without storing a guest list. Guest names appear in the URL, so share links with the intended recipients only."]
 };
 let currentLanguage="vi";
+const params=new URLSearchParams(location.search);
+const requestedLanguage=params.get("lang");
+let savedLanguage="";
+try{savedLanguage=localStorage.getItem("wedding-language")||"";}catch(_){}
+const initialLanguage=["vi","en"].includes(requestedLanguage)?requestedLanguage:(savedLanguage==="en"?"en":"vi");
 const selectors=["h1","main>p:not(.note)","label[for=guest]","#guest","label[for=party]","option[value=bride]","option[value=groom]","button[type=submit]",".result small","#copy","#share","#preview",".note"];
 function changeLanguage(language){
  currentLanguage=language;
  document.documentElement.lang=language;
+ try{localStorage.setItem("wedding-language",language);}catch(_){}
  selectors.forEach((selector,i)=>{
  const node=document.querySelector(selector);if(!node)return;
  if(i===3)node.placeholder=dictionary[language][i];
@@ -83,7 +89,7 @@ function changeLanguage(language){
 }
 document.getElementById("viBtn").addEventListener("click",()=>changeLanguage("vi"));
 document.getElementById("enBtn").addEventListener("click",()=>changeLanguage("en"));
-changeLanguage("vi");
+changeLanguage(initialLanguage);
 
 const form=document.getElementById("generator");
 const result=document.getElementById("result");
