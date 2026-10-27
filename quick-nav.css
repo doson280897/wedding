@@ -5,7 +5,7 @@
 .wq-toggle-glyph{font-size:20px;line-height:12px}
 .wq-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.63);backdrop-filter:blur(5px)}
 .wq-backdrop[hidden]{display:none}
-.wq-panel{position:fixed;right:18px;bottom:82px;z-index:1002;width:min(405px,calc(100vw - 36px));max-height:calc(100dvh - 106px);overflow-y:auto;background:linear-gradient(145deg,#292822,#121715);border:1px solid rgba(212,184,129,.38);border-radius:17px;padding:29px 26px 22px;box-shadow:0 25px 80px #000b;color:#f0e8d7;opacity:0;visibility:hidden;transform:translateY(15px) scale(.97);transition:opacity .24s,transform .24s,visibility .24s}
+.wq-panel{position:fixed;right:18px;bottom:82px;z-index:1002;width:min(405px,calc(100vw - 36px));max-height:calc(100vh - 106px);max-height:calc(100dvh - 106px);overflow-y:auto;background:linear-gradient(145deg,#292822,#121715);border:1px solid rgba(212,184,129,.38);border-radius:17px;padding:29px 26px 22px;box-shadow:0 25px 80px #000b;color:#f0e8d7;opacity:0;visibility:hidden;transform:translateY(15px) scale(.97);transition:opacity .24s,transform .24s,visibility .24s}
 .wq-panel.is-open{opacity:1;visibility:visible;transform:none}
 .wq-panel-top{display:flex;justify-content:space-between;align-items:center}
 .wq-kicker{font:500 10px Montserrat,sans-serif;letter-spacing:.2em;color:#c2aa7a}
@@ -30,7 +30,7 @@
 .wm-backdrop{position:fixed;inset:0;z-index:1010;background:rgba(0,0,0,.81);backdrop-filter:blur(9px)}
 .wm-backdrop[hidden],.wm-modal[hidden]{display:none!important}
 .wm-modal{position:fixed;inset:0;z-index:1011;display:grid;place-items:center;padding:clamp(10px,3vw,32px);pointer-events:none}
-.wm-dialog{position:relative;pointer-events:auto;width:min(980px,100%);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;border:1px solid #c5a36f70;border-radius:15px;background:linear-gradient(145deg,#161b17,#070b09);box-shadow:0 35px 110px #000e}
+.wm-dialog{position:relative;pointer-events:auto;width:min(980px,100%);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;border:1px solid #c5a36f70;border-radius:15px;background:linear-gradient(145deg,#161b17,#070b09);box-shadow:0 35px 110px #000e}
 .wm-header{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#0d120ff0;border-bottom:1px solid #c5a36f45;backdrop-filter:blur(8px)}
 .wm-close{border:0;background:transparent;color:#ebd3a9;font-size:31px;line-height:1;cursor:pointer;padding:3px 8px}
 .wm-close:hover,.wm-close:focus-visible{color:white;outline:2px solid #d6b781;outline-offset:2px}
@@ -41,7 +41,7 @@
 .wm-dialog .location-card{scroll-margin-top:70px}
 .wm-dialog .location-card.wm-highlight{outline:2px solid #d7b47a;outline-offset:-2px}
 body.wm-open{overflow:hidden}
-@media(max-width:650px){.wm-modal{padding:8px}.wm-dialog{max-height:calc(100dvh - 16px)}.wm-dialog .locations-section{padding:16px 12px 24px!important}.wm-dialog .location-card iframe{height:210px}.wm-dialog .location-info{padding:18px 12px}}
+@media(max-width:650px){.wm-modal{padding:8px}.wm-dialog{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}.wm-dialog .locations-section{padding:16px 12px 24px!important}.wm-dialog .location-card iframe{height:210px}.wm-dialog .location-info{padding:18px 12px}}
 
 @media(max-width:650px){
   .wq-backdrop,.wm-backdrop,.wm-header{backdrop-filter:none}
@@ -52,12 +52,12 @@ body.wm-open{overflow:hidden}
 .wg-backdrop{position:fixed;inset:0;z-index:1020;background:rgba(0,0,0,.82);backdrop-filter:blur(9px)}
 .wg-backdrop[hidden],.wg-modal[hidden]{display:none!important}
 .wg-modal{position:fixed;inset:0;z-index:1021;display:grid;place-items:center;padding:clamp(10px,3vw,32px);pointer-events:none}
-.wg-dialog{position:relative;pointer-events:auto;width:min(560px,100%);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;border:1px solid #c5a36f70;border-radius:17px;background:linear-gradient(145deg,#161b17,#070b09);box-shadow:0 35px 110px #000e}
+.wg-dialog{position:relative;pointer-events:auto;width:min(560px,100%);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;border:1px solid #c5a36f70;border-radius:17px;background:linear-gradient(145deg,#161b17,#070b09);box-shadow:0 35px 110px #000e}
 .wg-header{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#0d120ff0;border-bottom:1px solid #c5a36f45;backdrop-filter:blur(8px)}
 .wg-close{border:0;background:transparent;color:#ebd3a9;font-size:31px;line-height:1;cursor:pointer;padding:3px 8px}
 .wg-close:hover,.wg-close:focus-visible{color:white;outline:2px solid #d6b781;outline-offset:2px}
 body.wg-open{overflow:hidden}
-@media(max-width:650px){.wg-modal{padding:8px}.wg-dialog{max-height:calc(100dvh - 16px)}}
+@media(max-width:650px){.wg-modal{padding:8px}.wg-dialog{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}}
 @media(max-width:650px){.wg-backdrop,.wg-header{backdrop-filter:none}}
 
 
@@ -128,3 +128,7 @@ body.wg-open{overflow:hidden}
     min-width:34px;
   }
 }
+
+/* Account for notches/home indicators in Android and iOS modal dialogs. */
+.wm-dialog,.wg-dialog { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.wq-panel { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
