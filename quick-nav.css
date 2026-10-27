@@ -1,0 +1,24 @@
+
+/* Floating wedding quick navigation */
+.wq-toggle{position:fixed;right:20px;bottom:24px;z-index:1003;border:1px solid rgba(211,179,117,.65);border-radius:999px;background:#191b19;color:#e9d3a9;padding:14px 19px;font:500 11px Montserrat,sans-serif;letter-spacing:.15em;box-shadow:0 10px 40px #0009;cursor:pointer;display:flex;align-items:center;gap:10px}
+.wq-toggle:hover,.wq-toggle:focus-visible{background:#302b22;outline:2px solid #d2b780;outline-offset:3px}
+.wq-toggle-glyph{font-size:20px;line-height:12px}
+.wq-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.63);backdrop-filter:blur(5px)}
+.wq-backdrop[hidden]{display:none}
+.wq-panel{position:fixed;right:18px;bottom:82px;z-index:1002;width:min(405px,calc(100vw - 36px));max-height:calc(100dvh - 106px);overflow-y:auto;background:linear-gradient(145deg,#292822,#121715);border:1px solid rgba(212,184,129,.38);border-radius:17px;padding:29px 26px 22px;box-shadow:0 25px 80px #000b;color:#f0e8d7;opacity:0;visibility:hidden;transform:translateY(15px) scale(.97);transition:opacity .24s,transform .24s,visibility .24s}
+.wq-panel.is-open{opacity:1;visibility:visible;transform:none}
+.wq-panel-top{display:flex;justify-content:space-between;align-items:center}
+.wq-kicker{font:500 10px Montserrat,sans-serif;letter-spacing:.2em;color:#c2aa7a}
+.wq-close{border:0;background:transparent;color:#dfc99f;font-size:27px;cursor:pointer;line-height:1}
+.wq-heading{font:500 clamp(30px,5vw,39px) 'Cormorant Garamond',serif;margin:15px 0 2px}
+.wq-heading em{color:#dabf86;font-weight:400}
+.wq-description{font-size:12px;color:#beb8ad;margin:0 0 21px}
+.wq-links{display:grid;border-top:1px solid #b9a7823b}
+.wq-link{display:flex;align-items:center;gap:14px;padding:16px 2px;text-decoration:none;color:#eee4cf;border-bottom:1px solid #b9a7823b;font:400 13px Montserrat,sans-serif;transition:color .2s,padding-left .2s}
+.wq-link:hover,.wq-link:focus-visible{color:#e8c888;padding-left:7px}
+.wq-no{color:#ba9f73;font-size:10px;letter-spacing:.12em}
+.wq-arrow{margin-left:auto;color:#bca16c}
+.wq-footnote{text-align:center;font:500 10px Montserrat,sans-serif;letter-spacing:.18em;color:#ad966c;margin-top:25px}
+.wq-footnote span{color:#d4b980;padding:0 8px}
+@media(max-width:500px){.wq-toggle{right:14px;bottom:14px}.wq-panel{right:12px;bottom:75px;width:calc(100vw - 24px);padding:23px 20px}}
+@media(prefers-reduced-motion:reduce){.wq-panel,.wq-link{transition:none!important}}
