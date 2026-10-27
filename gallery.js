@@ -794,6 +794,13 @@
           };
         });
 
+      // Shuffle once per album load. Fisher–Yates avoids a fixed filename order.
+      // Keep the same array for the 3D scene, counter and lightbox.
+      for (let i = photos.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [photos[i], photos[j]] = [photos[j], photos[i]];
+      }
+
       if (!photos.length) {
         setStatus("album.empty");
         return;
