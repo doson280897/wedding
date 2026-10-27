@@ -23,13 +23,18 @@
   if (!viewport || !space) return;
 
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const RING_SIZE = 31;
+
   let photos = [];
   let slides = [];
+  let centerSlot = Math.floor(RING_SIZE / 2);
   let settledIndex = 0;
   let scrollFrame = 0;
   let scrollEndTimer = 0;
   let mouseDrag = null;
+  let recentering = false;
 
+  const wrap = index => ((index % photos.length) + photos.length) % photos.length;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
   function updateEditorialCaption(animate = true) {
@@ -57,10 +62,10 @@
     updateEditorialCaption(false);
   });
 
-  function createSlide(photo, index) {
+  function createSlide(slotIndex) {
     const slide = document.createElement("div");
     slide.className = "album-slide";
-    slide.dataset.index = String(index);
+    slide.dataset.slot = String(slotIndex);
     slide.setAttribute("aria-hidden", "true");
 
     const card = document.createElement("div");
@@ -68,51 +73,69 @@
 
     const img = document.createElement("img");
     img.className = "album-photo";
-    img.src = photo.src;
     img.alt = "";
     img.draggable = false;
     img.decoding = "async";
-    // Album is initialized before it enters view, so eager loading the optimized
-    // thumbnails avoids decode/fetch hitches during a fast native fling.
-    img.loading = "eager";
-    img.fetchPriority = index < 4 ? "high" : "auto";
+    img.loading = Math.abs(slotIndex - centerSlot) <= 6 ? "eager" : "lazy";
+    img.fetchPriority = Math.abs(slotIndex - centerSlot) <= 3 ? "high" : "low";
 
     const label = document.createElement("span");
     label.className = "album-card-number";
-    label.textContent = `${String(index + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
 
     card.append(img, label);
     slide.append(card);
     space.append(slide);
-    return { slide, card, img, index };
+
+    return { slide, card, img, photoIndex: -1 };
   }
 
-  function nearestIndex() {
-    if (!slides.length) return 0;
+  function setPhoto(item, photoIndex) {
+    const nextIndex = wrap(photoIndex);
+    if (item.photoIndex === nextIndex) return;
+    item.photoIndex = nextIndex;
+    item.img.src = photos[nextIndex].src;
+    item.label.textContent = `${String(nextIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+  }
+
+  function syncWindowSources() {
+    slides.forEach((item, slotIndex) => {
+      setPhoto(item, settledIndex + slotIndex - centerSlot);
+      const distance = Math.abs(slotIndex - centerSlot);
+      item.img.fetchPriority = distance <= 3 ? "high" : "low";
+      item.slide.dataset.slot = String(slotIndex);
+    });
+  }
+
+  function nearestSlotIndex() {
+    if (!slides.length) return centerSlot;
     const center = viewport.scrollLeft + viewport.clientWidth / 2;
-    let nearest = 0;
+    let nearest = centerSlot;
     let best = Infinity;
-    for (const item of slides) {
+
+    for (let slotIndex = 0; slotIndex < slides.length; slotIndex++) {
+      const item = slides[slotIndex];
       const itemCenter = item.slide.offsetLeft + item.slide.offsetWidth / 2;
       const distance = Math.abs(itemCenter - center);
       if (distance < best) {
         best = distance;
-        nearest = item.index;
+        nearest = slotIndex;
       }
     }
+
     return nearest;
   }
 
-  function targetScrollLeft(index) {
-    const item = slides[index];
+  function targetScrollLeft(slotIndex) {
+    const item = slides[slotIndex];
     if (!item) return viewport.scrollLeft;
     return item.slide.offsetLeft + item.slide.offsetWidth / 2 - viewport.clientWidth / 2;
   }
 
-  function scrollToIndex(index, behavior = "smooth") {
-    index = clamp(index, 0, slides.length - 1);
+  function scrollToSlot(slotIndex, behavior = "smooth") {
+    if (!slides.length) return;
+    slotIndex = clamp(slotIndex, 0, slides.length - 1);
     viewport.scrollTo({
-      left: targetScrollLeft(index),
+      left: targetScrollLeft(slotIndex),
       behavior: reducedMotion ? "auto" : behavior
     });
   }
@@ -132,7 +155,8 @@
 
       if (abs > 4.2) {
         item.card.style.opacity = "0";
-        item.card.style.transform = `translate3d(0,36px,-240px) scale(.78)`;
+        item.card.style.transform = "translate3d(0,36px,-240px) scale(.78)";
+        item.card.classList.remove("is-main");
         item.slide.style.zIndex = "1";
         continue;
       }
@@ -146,6 +170,7 @@
 
       item.card.style.opacity = String(opacity);
       item.card.style.transform = `translate3d(0,${y}px,${z}px) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${scale})`;
+      item.card.classList.toggle("is-main", abs < 0.42);
       item.slide.style.zIndex = String(60 - Math.round(abs * 8));
     }
   }
@@ -155,40 +180,86 @@
     scrollFrame = requestAnimationFrame(renderDepth);
   }
 
-  function finishScroll() {
-    window.clearTimeout(scrollEndTimer);
-    const index = nearestIndex();
-    const target = targetScrollLeft(index);
+  // Rotate existing DOM nodes instead of replacing all image sources.
+  // A one-photo move only changes one off-screen edge image.
+  function rotateRing(delta) {
+    if (!delta) return;
 
-    // CSS scroll-snap is mandatory; this is only a small safety correction for
-    // engines that report scroll-end a fraction before the final snap pixel.
+    if (delta > 0) {
+      for (let i = 0; i < delta; i++) {
+        const first = slides.shift();
+        slides.push(first);
+        space.append(first.slide);
+      }
+    } else {
+      for (let i = 0; i < -delta; i++) {
+        const last = slides.pop();
+        slides.unshift(last);
+        space.prepend(last.slide);
+      }
+    }
+
+    syncWindowSources();
+  }
+
+  function recenterSilently() {
+    recentering = true;
+    const oldSnap = viewport.style.scrollSnapType;
+    const oldBehavior = viewport.style.scrollBehavior;
+
+    viewport.style.scrollSnapType = "none";
+    viewport.style.scrollBehavior = "auto";
+    viewport.scrollLeft = targetScrollLeft(centerSlot);
+    renderDepth();
+
+    requestAnimationFrame(() => {
+      viewport.style.scrollSnapType = oldSnap;
+      viewport.style.scrollBehavior = oldBehavior;
+      recentering = false;
+      viewport.classList.remove("is-scrolling");
+      viewport.classList.add("is-settled");
+      renderDepth();
+    });
+  }
+
+  function finishScroll() {
+    if (recentering || !slides.length) return;
+    window.clearTimeout(scrollEndTimer);
+
+    const slotIndex = nearestSlotIndex();
+    const target = targetScrollLeft(slotIndex);
+
+    // Mandatory snap normally lands exactly on a card. This correction only
+    // handles browsers that fire scrollend a couple of pixels early.
     if (Math.abs(viewport.scrollLeft - target) > 2) {
-      scrollToIndex(index, "smooth");
+      scrollToSlot(slotIndex, "smooth");
       return;
     }
 
-    if (index !== settledIndex) {
-      settledIndex = index;
+    const delta = slotIndex - centerSlot;
+    if (delta) {
+      settledIndex = wrap(settledIndex + delta);
+      rotateRing(delta);
       updateProgress(true);
+      recenterSilently();
+    } else {
+      viewport.classList.remove("is-scrolling");
+      viewport.classList.add("is-settled");
+      renderDepth();
     }
-
-    slides.forEach((item, itemIndex) => {
-      item.card.classList.toggle("is-main", itemIndex === settledIndex);
-    });
-    viewport.classList.remove("is-scrolling");
-    viewport.classList.add("is-settled");
-    requestDepthRender();
   }
 
   function scheduleFallbackScrollEnd() {
     window.clearTimeout(scrollEndTimer);
-    scrollEndTimer = window.setTimeout(finishScroll, 150);
+    scrollEndTimer = window.setTimeout(finishScroll, 160);
   }
 
   viewport.addEventListener("scroll", () => {
+    requestDepthRender();
+    if (recentering) return;
+
     viewport.classList.add("is-scrolling");
     viewport.classList.remove("is-settled");
-    requestDepthRender();
     if (!("onscrollend" in window)) scheduleFallbackScrollEnd();
   }, { passive: true });
 
@@ -196,8 +267,8 @@
     viewport.addEventListener("scrollend", finishScroll, { passive: true });
   }
 
-  // Touch uses native scrolling/momentum. Mouse still gets click-and-drag,
-  // but without a second custom physics engine.
+  // Touch stays entirely native so iOS/Android keep their own kinetic scrolling.
+  // Mouse gets drag support without a second momentum engine.
   viewport.addEventListener("pointerdown", event => {
     if (event.pointerType !== "mouse" || event.button !== 0) return;
     mouseDrag = { id:event.pointerId, x:event.clientX, left:viewport.scrollLeft };
@@ -214,7 +285,7 @@
     if (!mouseDrag || (event.pointerId != null && event.pointerId !== mouseDrag.id)) return;
     mouseDrag = null;
     viewport.classList.remove("is-dragging");
-    scrollToIndex(nearestIndex(), "smooth");
+    scrollToSlot(nearestSlotIndex(), "smooth");
   }
 
   viewport.addEventListener("pointerup", endMouseDrag);
@@ -224,20 +295,30 @@
   viewport.addEventListener("keydown", event => {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
     event.preventDefault();
-    const base = nearestIndex();
-    scrollToIndex(base + (event.key === "ArrowRight" ? 1 : -1), "smooth");
+    const base = nearestSlotIndex();
+    scrollToSlot(base + (event.key === "ArrowRight" ? 1 : -1), "smooth");
   });
 
   function initialize() {
     space.replaceChildren();
-    slides = photos.map(createSlide);
+    slides = [];
     settledIndex = 0;
+
+    const slotCount = photos.length === 1 ? 1 : RING_SIZE;
+    centerSlot = Math.floor(slotCount / 2);
+
+    for (let slotIndex = 0; slotIndex < slotCount; slotIndex++) {
+      slides.push(createSlide(slotIndex));
+    }
+
+    syncWindowSources();
     updateProgress(false);
 
     requestAnimationFrame(() => {
-      scrollToIndex(0, "auto");
+      viewport.style.scrollBehavior = "auto";
+      scrollToSlot(centerSlot, "auto");
+      viewport.style.scrollBehavior = "";
       renderDepth();
-      slides[0]?.card.classList.add("is-main");
       viewport.classList.add("is-settled");
     });
   }
@@ -246,9 +327,8 @@
   window.addEventListener("resize", () => {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => {
-      scrollToIndex(settledIndex, "auto");
-      renderDepth();
-    }, 80);
+      recenterSilently();
+    }, 90);
   });
 
   async function start() {
