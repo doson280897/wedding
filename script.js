@@ -145,7 +145,7 @@
   const openInvitation = document.getElementById("openInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
   let envelopeSeen = false;
-  try { envelopeSeen = sessionStorage.getItem("wedding-envelope-seen-v4") === "1"; } catch (_) {}
+  try { envelopeSeen = sessionStorage.getItem("wedding-envelope-seen-v5") === "1"; } catch (_) {}
   if (intro && !envelopeSeen) {
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
@@ -154,7 +154,7 @@
     const closeEnvelope = () => {
       if (closing) return;
       closing = true;
-      try { sessionStorage.setItem("wedding-envelope-seen-v4","1"); } catch (_) {}
+      try { sessionStorage.setItem("wedding-envelope-seen-v5","1"); } catch (_) {}
 
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
@@ -181,7 +181,7 @@
               intro.hidden = true;
               document.body.classList.remove("envelope-locked");
             }, 440);
-          }, 2200);
+          }, 1500);
         }, 300);
       });
     };
@@ -189,7 +189,7 @@
     skipInvitation?.addEventListener("click", () => {
       if (closing) return;
       closing = true;
-      try { sessionStorage.setItem("wedding-envelope-seen-v4","1"); } catch (_) {}
+      try { sessionStorage.setItem("wedding-envelope-seen-v5","1"); } catch (_) {}
       intro.hidden = true;
       document.body.classList.remove("envelope-locked");
     });
@@ -206,7 +206,9 @@
 
   const musicButton = document.getElementById("musicToggle");
   const YOUTUBE_MUSIC_ID = "BunWcLGUGuQ";
-  let youtubeMusicFrame = null;
+  let youtubePlayer = null;
+  let youtubePlayerReady = false;
+  let youtubePlayerPromise = null;
   let musicPlaying = false;
 
   function setMusicUI() {
@@ -218,48 +220,105 @@
     if (label) label.textContent = tr(musicPlaying ? "music.on" : "music.off");
   }
 
-  function createYouTubeMusicPlayer() {
-    if (youtubeMusicFrame) return youtubeMusicFrame;
+  function loadYouTubeIframeAPI() {
+    if (window.YT?.Player) return Promise.resolve(window.YT);
+    if (window.__weddingYouTubeApiPromise) return window.__weddingYouTubeApiPromise;
 
-    const frame = document.createElement("iframe");
-    frame.id = "youtubeWeddingMusic";
-    frame.title = "Wedding music";
-    frame.width = "1";
-    frame.height = "1";
-    frame.allow = "autoplay; encrypted-media";
-    frame.setAttribute("aria-hidden", "true");
-    frame.tabIndex = -1;
-    frame.style.cssText = "position:fixed;width:1px;height:1px;left:-9999px;bottom:0;opacity:0;pointer-events:none;border:0;";
-    frame.src =
-      "https://www.youtube.com/embed/" + YOUTUBE_MUSIC_ID +
-      "?autoplay=1&loop=1&playlist=" + YOUTUBE_MUSIC_ID +
-      "&controls=0&playsinline=1&enablejsapi=1&rel=0";
-    document.body.appendChild(frame);
-    youtubeMusicFrame = frame;
-    return frame;
+    window.__weddingYouTubeApiPromise = new Promise((resolve, reject) => {
+      const previousReady = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        try { previousReady?.(); } catch (_) {}
+        resolve(window.YT);
+      };
+
+      const existing = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+      if (existing) return;
+
+      const script = document.createElement("script");
+      script.src = "https://www.youtube.com/iframe_api";
+      script.async = true;
+      script.onerror = () => reject(new Error("YouTube IFrame API failed to load"));
+      document.head.appendChild(script);
+    });
+
+    return window.__weddingYouTubeApiPromise;
   }
 
-  function sendYouTubeCommand(command) {
-    if (!youtubeMusicFrame?.contentWindow) return;
-    youtubeMusicFrame.contentWindow.postMessage(JSON.stringify({
-      event: "command",
-      func: command,
-      args: []
-    }), "*");
+  function initYouTubeMusicPlayer() {
+    if (youtubePlayerPromise) return youtubePlayerPromise;
+
+    youtubePlayerPromise = loadYouTubeIframeAPI().then(() => new Promise((resolve, reject) => {
+      let host = document.getElementById("youtubeWeddingMusic");
+      if (!host) {
+        host = document.createElement("div");
+        host.id = "youtubeWeddingMusic";
+        host.setAttribute("aria-hidden", "true");
+        host.style.cssText =
+          "position:fixed;width:2px;height:2px;left:-9999px;bottom:0;opacity:.01;pointer-events:none;overflow:hidden;";
+        document.body.appendChild(host);
+      }
+
+      youtubePlayer = new window.YT.Player(host, {
+        width: "2",
+        height: "2",
+        videoId: YOUTUBE_MUSIC_ID,
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          loop: 1,
+          playlist: YOUTUBE_MUSIC_ID,
+          playsinline: 1,
+          rel: 0,
+          origin: window.location.origin
+        },
+        events: {
+          onReady: event => {
+            youtubePlayerReady = true;
+            try { event.target.setVolume(70); } catch (_) {}
+            resolve(event.target);
+          },
+          onStateChange: event => {
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              musicPlaying = true;
+            } else if (
+              event.data === window.YT.PlayerState.PAUSED ||
+              event.data === window.YT.PlayerState.ENDED
+            ) {
+              musicPlaying = false;
+            }
+            setMusicUI();
+          },
+          onError: error => {
+            musicPlaying = false;
+            setMusicUI();
+            reject(new Error("YouTube player error " + error.data));
+          }
+        }
+      });
+    }));
+
+    return youtubePlayerPromise;
   }
+
+  // Preload the YouTube player without autoplay. On Safari this keeps the actual
+  // playVideo() call inside a later user tap instead of creating the iframe after the tap.
+  initYouTubeMusicPlayer().catch(() => {});
 
   musicButton?.addEventListener("click", () => {
-    if (!youtubeMusicFrame) {
-      musicPlaying = true;
-      createYouTubeMusicPlayer();
-    } else if (musicPlaying) {
-      musicPlaying = false;
-      sendYouTubeCommand("pauseVideo");
-    } else {
-      musicPlaying = true;
-      sendYouTubeCommand("playVideo");
+    if (!youtubePlayerReady || !youtubePlayer) {
+      // Do not show a false "playing" state. The player is already preloading;
+      // a second tap after it is ready will start playback under Safari's gesture policy.
+      initYouTubeMusicPlayer().catch(() => {});
+      return;
     }
-    setMusicUI();
+
+    if (musicPlaying) {
+      youtubePlayer.pauseVideo();
+    } else {
+      youtubePlayer.playVideo();
+    }
   });
 
   function refreshDynamicLanguage() {
