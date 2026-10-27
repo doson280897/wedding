@@ -132,3 +132,17 @@ body.wg-open{overflow:hidden}
 /* Account for notches/home indicators in Android and iOS modal dialogs. */
 .wm-dialog,.wg-dialog { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .wq-panel { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+
+/* Keep modal close buttons clear of the always-floating VN/EN control. */
+@media (max-width: 700px) {
+  .wm-header, .wg-header {
+    padding-right: max(76px, calc(env(safe-area-inset-right) + 66px));
+  }
+  .wm-close, .wg-close {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+}
