@@ -172,10 +172,13 @@
   });
 
   const intro = document.getElementById("envelopeIntro");
+  const themeColor = document.getElementById("themeColor");
+  const setBrowserTheme = color => themeColor?.setAttribute("content", color);
   const openInvitation = document.getElementById("openInvitation");
   const closeInvitation = document.getElementById("closeInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
   if (intro && selectedParty) {
+    setBrowserTheme("#496957");
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
     window.setTimeout(() => openInvitation?.focus({preventScroll:true}), 0);
@@ -190,6 +193,7 @@
       if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
         document.body.classList.remove("envelope-locked");
+        setBrowserTheme("#0b0e0e");
         return;
       }
 
@@ -197,6 +201,7 @@
       window.setTimeout(() => {
         intro.hidden = true;
         document.body.classList.remove("envelope-locked");
+        setBrowserTheme("#0b0e0e");
       }, 260);
     };
 
