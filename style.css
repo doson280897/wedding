@@ -979,3 +979,51 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
 .party-admin-link{display:inline-flex;align-items:center;justify-content:center;margin-top:24px;padding:11px 17px;border:1px solid rgba(213,184,133,.55);border-radius:999px;color:#e6c895;font:600 10px Montserrat,sans-serif;letter-spacing:.13em;text-decoration:none;transition:background .2s,border-color .2s}
 .party-admin-link:hover{background:rgba(197,165,117,.13);border-color:#e6c895}
 .party-admin-link:focus-visible{outline:2px solid #e6c895;outline-offset:4px}
+
+/* Cross-device safeguards: short/landscape phones, browser chrome and notches. */
+.party-selector {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-height: 650px) {
+  .party-selector {
+    align-items: start;
+  }
+  .party-selector-card {
+    margin-block: auto;
+  }
+  .envelope-intro {
+    align-items: start;
+  }
+  .envelope-inner {
+    margin-block: auto;
+  }
+}
+@media (hover: none) and (pointer: coarse) {
+  .language-option {
+    min-width: 36px;
+    min-height: 36px;
+    display: inline-grid;
+    place-items: center;
+  }
+  .language-switch.floating-control.is-idle .language-option.is-active {
+    min-height: 28px;
+    min-width: 32px;
+  }
+}
+@supports not (height: 100svh) {
+  .hero { height: min(760px, 100vh); }
+  .album-lightbox-stage { height: 100vh; }
+  @media (max-width: 700px) {
+    .hero { height: 90vh; }
+    .envelope-stage { height: min(590px, 72vh); }
+  }
+  @media (max-width: 900px) {
+    .hero { --hero-photo-height: min(66vh, 680px); height: auto; }
+  }
+  @media (max-width: 650px) {
+    .hero { --hero-photo-height: min(58vh, 520px); }
+  }
+}
