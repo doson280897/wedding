@@ -357,8 +357,15 @@
     }
   });
 
+  function refreshPartyLabels() {
+    const label = document.getElementById("heroCeremonyLabel");
+    if (!label || !selectedParty) return;
+    label.textContent = tr(selectedParty === "bride" ? "hero.brideOverline" : "hero.groomOverline");
+  }
+
   function refreshDynamicLanguage() {
     updateGuest();
+    refreshPartyLabels();
     countdown();
     setMusicUI();
   }
