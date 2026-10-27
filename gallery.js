@@ -852,15 +852,39 @@
   }
 
   const albumSection = document.getElementById("album") || viewport;
+  let albumStarted = false;
+  let lazyObserver = null;
+  const ensureAlbumStarted = () => {
+    if (albumStarted) return;
+    albumStarted = true;
+    lazyObserver?.disconnect();
+    window.removeEventListener("scroll", checkAlbumVisibility);
+    window.removeEventListener("resize", checkAlbumVisibility);
+    start();
+  };
+
+  // WebKit (especially iOS emulation and some embedded WebViews) may delay
+  // IntersectionObserver after programmatic scrolling. Keep a passive fallback.
+  function checkAlbumVisibility() {
+    if (albumStarted || document.documentElement.classList.contains("party-pending")) return;
+    const rect = albumSection.getBoundingClientRect();
+    if (rect.top < innerHeight + 1000 && rect.bottom > -600) ensureAlbumStarted();
+  }
+
   if ("IntersectionObserver" in window) {
-    const lazyObserver = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) {
-        lazyObserver.disconnect();
-        start();
-      }
+    lazyObserver = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) ensureAlbumStarted();
     }, { rootMargin:"1200px 0px", threshold:0 });
     lazyObserver.observe(albumSection);
+    window.addEventListener("scroll", checkAlbumVisibility, { passive:true });
+    window.addEventListener("resize", checkAlbumVisibility, { passive:true });
+    viewport.addEventListener("focus", ensureAlbumStarted, { once:true });
+    viewport.addEventListener("pointerdown", ensureAlbumStarted, { once:true });
+    checkAlbumVisibility();
+    // Last-resort fallback: the album is small enough to initialize after
+    // the invitation has settled, without loading all photos at once.
+    if (document.documentElement.dataset.party) window.setTimeout(ensureAlbumStarted, 2500);
   } else {
-    start();
+    ensureAlbumStarted();
   }
 })();
