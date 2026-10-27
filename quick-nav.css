@@ -63,12 +63,11 @@ body.wg-open{overflow:hidden}
 
 /* Draggable / auto-collapsing menu control */
 .wq-toggle.floating-control{
-  max-width:220px;
+  min-width:38px;
+  overflow:hidden;
   transition:
-    width .22s ease,
-    max-width .22s ease,
-    padding .22s ease,
-    gap .22s ease,
+    padding .26s cubic-bezier(.2,.75,.2,1),
+    gap .26s cubic-bezier(.2,.75,.2,1),
     opacity .22s ease,
     background .22s ease,
     border-color .22s ease,
@@ -80,11 +79,20 @@ body.wg-open{overflow:hidden}
   user-select:none;
 }
 
+.wq-toggle.floating-control > span[data-i18n]{
+  display:inline-block;
+  max-width:150px;
+  opacity:1;
+  overflow:hidden;
+  white-space:nowrap;
+  transition:
+    max-width .28s cubic-bezier(.2,.75,.2,1),
+    opacity .18s ease;
+}
+
 .wq-toggle.floating-control.is-idle{
-  width:38px;
   height:38px;
   min-width:38px;
-  max-width:38px;
   padding:0;
   gap:0;
   justify-content:center;
@@ -93,7 +101,8 @@ body.wg-open{overflow:hidden}
 }
 
 .wq-toggle.floating-control.is-idle > span[data-i18n]{
-  display:none;
+  max-width:0;
+  opacity:0;
 }
 
 .wq-toggle.floating-control.is-idle .wq-toggle-glyph{
@@ -111,12 +120,11 @@ body.wg-open{overflow:hidden}
   .wq-toggle.floating-control{
     right:8px;
     bottom:12px;
+    min-width:34px;
   }
 
   .wq-toggle.floating-control.is-idle{
-    width:34px;
     height:34px;
     min-width:34px;
-    max-width:34px;
   }
 }
