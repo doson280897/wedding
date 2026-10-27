@@ -198,9 +198,18 @@
     return Math.max(FLOAT_EDGE, Math.min(Math.max(FLOAT_EDGE, innerHeight - rect.height - FLOAT_EDGE), top));
   };
 
-  const edgeLeft = (control, edge) => {
-    const rect = control.getBoundingClientRect();
-    return edge === "left" ? FLOAT_EDGE : Math.max(FLOAT_EDGE, innerWidth - rect.width - FLOAT_EDGE);
+  const setEdgeAnchor = (control, edge, top) => {
+    control.dataset.floatEdge = edge;
+    control.style.top = clampTop(control, top) + "px";
+    control.style.bottom = "auto";
+
+    if (edge === "left") {
+      control.style.left = FLOAT_EDGE + "px";
+      control.style.right = "auto";
+    } else {
+      control.style.right = FLOAT_EDGE + "px";
+      control.style.left = "auto";
+    }
   };
 
   const snapFloatingToEdge = (control, preserveEdge = false) => {
@@ -215,26 +224,49 @@
       : (rect.left + rect.width / 2 < innerWidth / 2 ? "left" : "right");
 
     const top = clampTop(control, rect.top);
-    control.dataset.floatEdge = edge;
-    control.style.right = "auto";
-    control.style.bottom = "auto";
-    control.style.left = edgeLeft(control, edge) + "px";
-    control.style.top = top + "px";
+    setEdgeAnchor(control, edge, top);
 
     savedFloating[controlKey(control)] = { edge, top };
     saveFloatingPositions();
   };
 
+  const glideFloatingToEdge = control => {
+    if (!control.isConnected) return;
+
+    const rect = control.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const edge = rect.left + rect.width / 2 < innerWidth / 2 ? "left" : "right";
+    const top = clampTop(control, rect.top);
+    const targetLeft = edge === "left"
+      ? FLOAT_EDGE
+      : Math.max(FLOAT_EDGE, innerWidth - rect.width - FLOAT_EDGE);
+
+    control.dataset.floatEdge = edge;
+    control.style.right = "auto";
+    control.style.bottom = "auto";
+    control.style.top = top + "px";
+    control.style.left = targetLeft + "px";
+
+    savedFloating[controlKey(control)] = { edge, top };
+    saveFloatingPositions();
+
+    // Once the glide finishes, convert the pixel position to a true edge
+    // anchor. Later expansion therefore grows inward instead of off-screen.
+    setTimeout(() => {
+      if (!control.isConnected || control.classList.contains("is-dragging")) return;
+      if (control.dataset.floatEdge !== edge) return;
+      setEdgeAnchor(control, edge, top);
+    }, 330);
+  };
+
   const restoreFloatingPosition = control => {
     if (control.matches(".language-switch") && document.body.classList.contains("envelope-locked")) return;
+
     const saved = savedFloating[controlKey(control)];
     if (!saved || (saved.edge !== "left" && saved.edge !== "right")) return;
 
-    control.dataset.floatEdge = saved.edge;
-    control.style.right = "auto";
-    control.style.bottom = "auto";
-    control.style.top = clampTop(control, Number(saved.top) || FLOAT_EDGE) + "px";
-    control.style.left = edgeLeft(control, saved.edge) + "px";
+    setEdgeAnchor(control, saved.edge, Number(saved.top) || FLOAT_EDGE);
   };
 
   const installFloatingControl = control => {
@@ -260,22 +292,15 @@
       }
     };
 
-    const resnapAfterResize = () => {
-      requestAnimationFrame(() => snapFloatingToEdge(control, true));
-      setTimeout(() => snapFloatingToEdge(control, true), 240);
-    };
-
     const wake = () => {
       clearTimeout(idleTimer);
       control.classList.remove("is-idle");
-      resnapAfterResize();
     };
 
     const collapseNow = () => {
-      control.classList.add("is-idle");
       setArmed(false);
       snapFloatingToEdge(control, true);
-      setTimeout(() => snapFloatingToEdge(control, true), 240);
+      control.classList.add("is-idle");
     };
 
     const scheduleIdle = (delay = FLOAT_IDLE_DELAY) => {
@@ -327,8 +352,7 @@
       if (moved) {
         suppressClick = true;
         setTimeout(() => { suppressClick = false; }, 120);
-        snapFloatingToEdge(control, false);
-        setTimeout(() => snapFloatingToEdge(control, true), 320);
+        glideFloatingToEdge(control);
         scheduleIdle(1050);
       } else {
         scheduleIdle();
