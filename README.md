@@ -49,7 +49,28 @@ wedding/
 
 ### Ảnh chính
 
-Đặt ảnh gốc vào `images/original/assets/`:
+Mỗi lễ có thể dùng hero và ending riêng:
+
+```text
+hero_bride.jpg      # Vu Quy / nhà gái
+ending_bride.jpg
+hero_groom.jpg      # Tân Hôn / nhà trai
+ending_groom.jpg
+```
+
+Đặt ảnh gốc trong `images/original/assets/` rồi chạy generator; output tương ứng sẽ là:
+
+```text
+images/optimized/assets/hero_bride.webp
+images/optimized/assets/ending_bride.webp
+images/optimized/assets/hero_groom.webp
+images/optimized/assets/ending_groom.webp
+```
+
+Nếu 4 ảnh riêng chưa tồn tại, website tự fallback về `hero.webp` và `ending.webp`.
+Có thể push trực tiếp 4 file WebP tối ưu vào `images/optimized/assets/` mà không cần đổi code.
+
+Các asset dùng chung hiện có:
 
 ```text
 hero.jpg

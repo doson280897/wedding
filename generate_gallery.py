@@ -31,7 +31,11 @@ ALBUM_QUALITY = 80
 
 ASSET_SIZES = {
     "hero": 1920,
+    "hero_bride": 1920,
+    "hero_groom": 1920,
     "ending": 1600,
+    "ending_bride": 1600,
+    "ending_groom": 1600,
     "son-1": 1000,
     "son-2": 900,
     "nga-1": 1000,
@@ -126,7 +130,7 @@ def optimize_assets():
         try:
             with Image.open(source) as original:
                 image = prepare_rgb(original, max_side)
-                quality = 80 if name in ("hero", "ending") else 82
+                quality = 80 if name.startswith(("hero", "ending")) else 82
                 image.save(target, "WEBP", quality=quality, method=6)
             print(
                 f"Asset: {source.name} -> "
