@@ -37,8 +37,7 @@ jobs:
             .github/workflows/deploy.yml \
             .github/workflows/import-wedding-photos.yml \
             .github/workflows/format-source.yml \
-            .prettierrc.json README.md images/manifest.json \
-            favicon.svg favicon-bride.svg favicon-groom.svg
+            .prettierrc.json README.md images/manifest.json
           black generate_gallery.py
 
       - name: Validate JavaScript and Python syntax
