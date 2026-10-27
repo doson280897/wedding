@@ -418,7 +418,9 @@
 
   // Preload the YouTube player without autoplay. On Safari this keeps the actual
   // playVideo() call inside a later user tap instead of creating the iframe after the tap.
-  initYouTubeMusicPlayer().catch(() => {});
+  // Avoid network requests, iframes and CPU work on the admin landing/tool screens.
+  // For guests, preload after a celebration has been selected to improve Safari playback.
+  if (selectedParty) initYouTubeMusicPlayer().catch(() => {});
 
   musicButton?.addEventListener("click", () => {
     if (!youtubePlayerReady || !youtubePlayer) {
