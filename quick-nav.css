@@ -13,6 +13,9 @@
 .wq-heading{font:500 clamp(30px,5vw,39px) 'Cormorant Garamond',serif;margin:15px 0 2px}
 .wq-heading em{color:#dabf86;font-weight:400}
 .wq-description{font-size:12px;color:#beb8ad;margin:0 0 21px}
+.wq-menu-group+.wq-menu-group{margin-top:19px}
+.wq-group-label{margin:0 0 8px;font:600 9px Montserrat,sans-serif;letter-spacing:.22em;color:#8f846f}
+.wq-menu-group-popup .wq-group-label{color:#c2aa7a}
 .wq-links{display:grid;border-top:1px solid #b9a7823b}
 .wq-link{display:flex;align-items:center;gap:14px;padding:16px 2px;text-decoration:none;color:#eee4cf;border-bottom:1px solid #b9a7823b;font:400 13px Montserrat,sans-serif;transition:color .2s,padding-left .2s}
 .wq-link:hover,.wq-link:focus-visible{color:#e8c888;padding-left:7px}
@@ -43,3 +46,16 @@ body.wm-open{overflow:hidden}
 @media(max-width:650px){
   .wq-backdrop,.wm-backdrop,.wm-header{backdrop-filter:none}
 }
+
+
+/* WEDDING GIFT modal */
+.wg-backdrop{position:fixed;inset:0;z-index:1020;background:rgba(0,0,0,.82);backdrop-filter:blur(9px)}
+.wg-backdrop[hidden],.wg-modal[hidden]{display:none!important}
+.wg-modal{position:fixed;inset:0;z-index:1021;display:grid;place-items:center;padding:clamp(10px,3vw,32px);pointer-events:none}
+.wg-dialog{position:relative;pointer-events:auto;width:min(560px,100%);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;border:1px solid #c5a36f70;border-radius:17px;background:linear-gradient(145deg,#161b17,#070b09);box-shadow:0 35px 110px #000e}
+.wg-header{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#0d120ff0;border-bottom:1px solid #c5a36f45;backdrop-filter:blur(8px)}
+.wg-close{border:0;background:transparent;color:#ebd3a9;font-size:31px;line-height:1;cursor:pointer;padding:3px 8px}
+.wg-close:hover,.wg-close:focus-visible{color:white;outline:2px solid #d6b781;outline-offset:2px}
+body.wg-open{overflow:hidden}
+@media(max-width:650px){.wg-modal{padding:8px}.wg-dialog{max-height:calc(100dvh - 16px)}}
+@media(max-width:650px){.wg-backdrop,.wg-header{backdrop-filter:none}}

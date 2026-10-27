@@ -15,6 +15,12 @@
   let mapOpen = false;
   let mapPreviousFocus = null;
 
+  const giftModal = document.getElementById("wgModal");
+  const giftBackdrop = document.getElementById("wgBackdrop");
+  const giftClose = document.getElementById("wgClose");
+  let giftOpen = false;
+  let giftPreviousFocus = null;
+
   const ensureMapsLoaded = targetId => {
     if (!mapModal) return;
     const target = targetId && document.getElementById(targetId);
@@ -59,6 +65,30 @@
       setMapOpen(true, link.getAttribute("href").slice(1));
     });
   });
+
+  const setGiftOpen = value => {
+    if (!giftModal || !giftBackdrop || !giftClose) return;
+    if (value) {
+      giftPreviousFocus = panel.contains(document.activeElement) ? toggle : document.activeElement;
+      giftOpen = true;
+      giftModal.hidden = false;
+      giftBackdrop.hidden = false;
+      giftModal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("wg-open");
+      giftClose.focus({preventScroll:true});
+    } else {
+      giftOpen = false;
+      giftModal.hidden = true;
+      giftBackdrop.hidden = true;
+      giftModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("wg-open");
+      if (giftPreviousFocus && document.contains(giftPreviousFocus)) giftPreviousFocus.focus({preventScroll:true});
+      else toggle.focus({preventScroll:true});
+    }
+  };
+  giftClose?.addEventListener("click", () => setGiftOpen(false));
+  giftBackdrop?.addEventListener("click", () => setGiftOpen(false));
+
   let open = false;
   const setOpen = (value, restoreFocus = true) => {
     if (open === value) return;
@@ -77,6 +107,15 @@
   closeBtn.addEventListener("click", () => setOpen(false));
   backdrop.addEventListener("click", () => setOpen(false));
   document.addEventListener("keydown", event => {
+    if (giftOpen) {
+      if (event.key === "Escape") {event.preventDefault();setGiftOpen(false);return;}
+      if (event.key === "Tab") {
+        const focusable = [giftClose, ...giftModal.querySelectorAll('a[href]')];
+        if (event.shiftKey && document.activeElement === focusable[0]) {event.preventDefault();focusable.at(-1).focus();}
+        else if (!event.shiftKey && document.activeElement === focusable.at(-1)) {event.preventDefault();focusable[0].focus();}
+      }
+      return;
+    }
     if (mapOpen) {
       if (event.key === "Escape") {event.preventDefault();setMapOpen(false);return;}
       if (event.key === "Tab") {
@@ -106,6 +145,7 @@
     event.preventDefault();
     setOpen(false,false);
     if (id === "locations") { setMapOpen(true); return; }
+    if (id === "wedding-gift") { setGiftOpen(true); return; }
     history.replaceState(null,"",location.pathname+location.search+"#"+encodeURIComponent(id));
     target.scrollIntoView({behavior:reduced.matches?"auto":"smooth",block:"start"});
     links.forEach(item => item.setAttribute("aria-current", String(item===link)));
