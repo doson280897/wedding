@@ -464,3 +464,18 @@ body.envelope-locked .language-switch{visibility:hidden;pointer-events:none}
   .topbar{padding-right:90px}
   .top-link{display:none}
 }
+
+
+/* WEDDING GIFT */
+.gift-section{padding:110px 6vw 120px;background:linear-gradient(180deg,#111713 0%,#0b100d 100%);position:relative;overflow:hidden}
+.gift-section:before{content:"";position:absolute;inset:auto 50% 0;width:min(760px,90vw);height:380px;transform:translateX(-50%);background:radial-gradient(ellipse at center,#b8945530 0%,transparent 68%);pointer-events:none}
+.gift-grid{width:min(980px,100%);margin:48px auto 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;position:relative}
+.gift-card{min-height:280px;padding:38px 32px;border:1px solid #c5a57548;border-radius:22px;background:linear-gradient(145deg,#171d18e8,#0d120fef);box-shadow:0 24px 60px #0005;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gift-role{font:600 10px Montserrat,sans-serif;letter-spacing:.22em;color:#c5a575}
+.gift-card h3{margin:13px 0 24px;font-family:"Cormorant Garamond",serif;font-size:clamp(25px,3vw,36px);font-weight:500;letter-spacing:.03em;color:#f2e4cd}
+.gift-placeholder{width:min(260px,100%);min-height:118px;border:1px dashed #c5a57555;border-radius:16px;display:grid;place-items:center;padding:20px;color:#a99f8d;font:500 11px Montserrat,sans-serif;letter-spacing:.08em;line-height:1.7}
+@media(max-width:650px){
+  .gift-section{padding:84px 18px 92px}
+  .gift-grid{grid-template-columns:1fr;gap:16px;margin-top:34px}
+  .gift-card{min-height:235px;padding:30px 22px}
+}
