@@ -3,7 +3,7 @@
 .link-tool-screen[hidden] { display: none !important; }
 html.link-tool-active body { overflow: hidden !important; }
 html.link-tool-active #partySelector { display: none !important; }
-html.link-tool-active body > .link-tool-screen {
+html.link-tool-active body > #linkToolScreen {
   visibility: visible !important;
   pointer-events: auto !important;
 }
