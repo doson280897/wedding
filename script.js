@@ -248,6 +248,7 @@
         document.body.classList.remove("envelope-locked");
         document.documentElement.classList.remove("envelope-theme", "envelope-pending");
         setBrowserTheme("#0b0e0e");
+        document.dispatchEvent(new Event("wedding:envelopeexit"));
         return;
       }
 
@@ -258,6 +259,7 @@
         document.body.classList.remove("envelope-locked");
         document.documentElement.classList.remove("envelope-theme", "envelope-pending");
         setBrowserTheme("#0b0e0e");
+        document.dispatchEvent(new Event("wedding:envelopeexit"));
       }, 260);
     };
 
