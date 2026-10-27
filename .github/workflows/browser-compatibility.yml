@@ -9,6 +9,7 @@ on:
       - "*.js"
       - "*.css"
       - "tests/**"
+      - "playwright.config.cjs"
       - ".github/workflows/browser-compatibility.yml"
   workflow_dispatch:
 
