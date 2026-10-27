@@ -161,8 +161,8 @@ footer { background: #050806; color: #c5b9a4; }
 .envelope-art{position:relative;width:min(320px,80vw);height:165px;margin:32px auto 28px;background:linear-gradient(155deg,#40362c,#1c201e);border:1px solid #b89b6f;border-radius:4px;box-shadow:0 25px 70px #000b;overflow:hidden}
 .envelope-art:before{content:"";position:absolute;inset:auto -20px -35px;top:45%;background:linear-gradient(145deg,#3d3328,#24251e);clip-path:polygon(0 100%,50% 10%,100% 100%)}
 .envelope-flap{position:absolute;inset:0;background:linear-gradient(#67523b,#372e27);clip-path:polygon(0 0,100% 0,50% 77%);filter:drop-shadow(0 5px 8px #0006)}
-.envelope-seal{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 25% 20%,#dfc79a,#a47c4c 75%);border:2px solid #f5dbae;color:#2c2117;font:500 20px 'Cormorant Garamond',serif;box-shadow:0 5px 14px #0007}
-.envelope-seal span{color:#5c3c22}
+.envelope-seal{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;flex-wrap:nowrap;overflow:hidden;background:radial-gradient(circle at 25% 20%,#dfc79a,#a47c4c 75%);border:2px solid #f5dbae;color:#2c2117;font:500 21px/1 'Cormorant Garamond',serif;letter-spacing:.01em;box-shadow:0 5px 14px #0007}
+.envelope-seal span{color:#5c3c22;display:inline-block;line-height:1}
 .envelope-invite{font:14px 'Cormorant Garamond',serif;letter-spacing:.08em;color:#e2c89c}
 .envelope-inner h2{font:500 clamp(30px,5.4vw,56px) 'Cormorant Garamond',serif;margin:6px auto 8px;line-height:1.02;letter-spacing:.01em;white-space:nowrap}
 .envelope-inner h2 em{font:inherit;color:#d9ba84}
