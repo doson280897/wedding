@@ -59,3 +59,62 @@ body.wm-open{overflow:hidden}
 body.wg-open{overflow:hidden}
 @media(max-width:650px){.wg-modal{padding:8px}.wg-dialog{max-height:calc(100dvh - 16px)}}
 @media(max-width:650px){.wg-backdrop,.wg-header{backdrop-filter:none}}
+
+
+/* Draggable / auto-collapsing menu control */
+.wq-toggle.floating-control{
+  max-width:220px;
+  transition:
+    width .22s ease,
+    max-width .22s ease,
+    padding .22s ease,
+    gap .22s ease,
+    opacity .22s ease,
+    background .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+.wq-toggle.floating-control.is-idle{
+  width:38px;
+  height:38px;
+  min-width:38px;
+  max-width:38px;
+  padding:0;
+  gap:0;
+  justify-content:center;
+  border-radius:50%;
+  opacity:.78;
+}
+
+.wq-toggle.floating-control.is-idle > span[data-i18n]{
+  display:none;
+}
+
+.wq-toggle.floating-control.is-idle .wq-toggle-glyph{
+  font-size:18px;
+  line-height:1;
+}
+
+.wq-toggle.floating-control.is-dragging{
+  transition:none!important;
+  cursor:grabbing!important;
+  opacity:.96;
+}
+
+@media(max-width:650px){
+  .wq-toggle.floating-control{
+    right:8px;
+    bottom:12px;
+  }
+
+  .wq-toggle.floating-control.is-idle{
+    width:34px;
+    height:34px;
+    min-width:34px;
+    max-width:34px;
+  }
+}

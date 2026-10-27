@@ -163,4 +163,209 @@
     target.scrollIntoView({behavior:reduced.matches?"auto":"smooth",block:"start"});
     links.forEach(item => item.setAttribute("aria-current", String(item===link)));
   }));
+
+  // Draggable floating controls: language, music and quick navigation.
+  const floatingControls = [
+    document.querySelector(".language-switch"),
+    document.getElementById("musicToggle"),
+    toggle
+  ].filter(Boolean);
+
+  const FLOAT_EDGE = 8;
+  const FLOAT_IDLE_DELAY = 2600;
+  const FLOAT_STORE_KEY = "wedding:floating-controls:v1";
+
+  let savedFloating = {};
+  try {
+    savedFloating = JSON.parse(sessionStorage.getItem(FLOAT_STORE_KEY) || "{}") || {};
+  } catch (_) {
+    savedFloating = {};
+  }
+
+  const saveFloatingPositions = () => {
+    try {
+      sessionStorage.setItem(FLOAT_STORE_KEY, JSON.stringify(savedFloating));
+    } catch (_) {}
+  };
+
+  const controlKey = control => {
+    if (control === toggle) return "menu";
+    if (control.id === "musicToggle") return "music";
+    return "language";
+  };
+
+  const clampFloatingTop = (control, top) => {
+    const rect = control.getBoundingClientRect();
+    const maxTop = Math.max(FLOAT_EDGE, window.innerHeight - rect.height - FLOAT_EDGE);
+    return Math.max(FLOAT_EDGE, Math.min(maxTop, top));
+  };
+
+  const snapFloatingToEdge = control => {
+    if (!control.isConnected) return;
+    const rect = control.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const edge = rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right";
+    const top = clampFloatingTop(control, rect.top);
+
+    control.style.top = top + "px";
+    control.style.bottom = "auto";
+
+    if (edge === "left") {
+      control.style.left = FLOAT_EDGE + "px";
+      control.style.right = "auto";
+    } else {
+      control.style.right = FLOAT_EDGE + "px";
+      control.style.left = "auto";
+    }
+
+    control.dataset.floatEdge = edge;
+    savedFloating[controlKey(control)] = { edge, top };
+    saveFloatingPositions();
+  };
+
+  const restoreFloatingPosition = control => {
+    const saved = savedFloating[controlKey(control)];
+    if (!saved || (saved.edge !== "left" && saved.edge !== "right")) return;
+
+    control.style.top = clampFloatingTop(control, Number(saved.top) || FLOAT_EDGE) + "px";
+    control.style.bottom = "auto";
+
+    if (saved.edge === "left") {
+      control.style.left = FLOAT_EDGE + "px";
+      control.style.right = "auto";
+    } else {
+      control.style.right = FLOAT_EDGE + "px";
+      control.style.left = "auto";
+    }
+    control.dataset.floatEdge = saved.edge;
+  };
+
+  const installFloatingControl = control => {
+    control.classList.add("floating-control");
+    restoreFloatingPosition(control);
+
+    let idleTimer = 0;
+    let drag = null;
+    let suppressClick = false;
+
+    const wake = () => {
+      window.clearTimeout(idleTimer);
+      control.classList.remove("is-idle");
+    };
+
+    const scheduleIdle = (delay = FLOAT_IDLE_DELAY) => {
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        snapFloatingToEdge(control);
+        control.classList.add("is-idle");
+      }, delay);
+    };
+
+    const onPointerMove = event => {
+      if (!drag || event.pointerId !== drag.id) return;
+
+      const dx = event.clientX - drag.startX;
+      const dy = event.clientY - drag.startY;
+
+      if (!drag.moved && Math.hypot(dx, dy) > 6) {
+        drag.moved = true;
+        control.classList.add("is-dragging");
+
+        const rect = control.getBoundingClientRect();
+        control.style.left = rect.left + "px";
+        control.style.top = rect.top + "px";
+        control.style.right = "auto";
+        control.style.bottom = "auto";
+      }
+
+      if (!drag.moved) return;
+      event.preventDefault();
+
+      const rect = control.getBoundingClientRect();
+      const maxLeft = Math.max(FLOAT_EDGE, window.innerWidth - rect.width - FLOAT_EDGE);
+      const maxTop = Math.max(FLOAT_EDGE, window.innerHeight - rect.height - FLOAT_EDGE);
+      const left = Math.max(FLOAT_EDGE, Math.min(maxLeft, drag.left + dx));
+      const top = Math.max(FLOAT_EDGE, Math.min(maxTop, drag.top + dy));
+
+      control.style.left = left + "px";
+      control.style.top = top + "px";
+    };
+
+    const finishDrag = event => {
+      if (!drag || (event.pointerId != null && event.pointerId !== drag.id)) return;
+
+      const moved = drag.moved;
+      drag = null;
+      control.classList.remove("is-dragging");
+
+      window.removeEventListener("pointermove", onPointerMove, { capture:true });
+      window.removeEventListener("pointerup", finishDrag, { capture:true });
+      window.removeEventListener("pointercancel", finishDrag, { capture:true });
+
+      if (moved) {
+        suppressClick = true;
+        window.setTimeout(() => { suppressClick = false; }, 80);
+      }
+
+      scheduleIdle(moved ? 1200 : FLOAT_IDLE_DELAY);
+    };
+
+    control.addEventListener("pointerdown", event => {
+      if (event.button != null && event.button !== 0) return;
+      wake();
+
+      const rect = control.getBoundingClientRect();
+      drag = {
+        id:event.pointerId,
+        startX:event.clientX,
+        startY:event.clientY,
+        left:rect.left,
+        top:rect.top,
+        moved:false
+      };
+
+      window.addEventListener("pointermove", onPointerMove, { capture:true, passive:false });
+      window.addEventListener("pointerup", finishDrag, { capture:true });
+      window.addEventListener("pointercancel", finishDrag, { capture:true });
+    }, { passive:true });
+
+    control.addEventListener("click", event => {
+      if (!suppressClick) {
+        wake();
+        scheduleIdle();
+        return;
+      }
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      suppressClick = false;
+    }, true);
+
+    control.addEventListener("pointerenter", wake);
+    control.addEventListener("pointerleave", () => scheduleIdle());
+    control.addEventListener("focusin", wake);
+    control.addEventListener("focusout", () => scheduleIdle());
+
+    scheduleIdle(1700);
+  };
+
+  floatingControls.forEach(installFloatingControl);
+
+  window.addEventListener("resize", () => {
+    floatingControls.forEach(control => {
+      const rect = control.getBoundingClientRect();
+      const top = clampFloatingTop(control, rect.top);
+      control.style.top = top + "px";
+
+      if (control.classList.contains("is-idle")) {
+        snapFloatingToEdge(control);
+      } else {
+        const maxLeft = Math.max(FLOAT_EDGE, window.innerWidth - rect.width - FLOAT_EDGE);
+        if (control.style.left && control.style.left !== "auto") {
+          control.style.left = Math.max(FLOAT_EDGE, Math.min(maxLeft, rect.left)) + "px";
+        }
+      }
+    });
+  }, { passive:true });
+
 })();
