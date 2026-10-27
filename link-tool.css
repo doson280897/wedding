@@ -75,6 +75,7 @@ html.link-tool-active body > .language-switch {
   background: #0c130f;
   color: #fff;
   font: inherit;
+  font-size: 16px; /* Prevent automatic Safari zoom on input focus. */
 }
 .link-tool-card input::placeholder { color: #a8b3a8; }
 .link-tool-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
@@ -114,4 +115,14 @@ html.link-tool-active body > .language-switch {
     align-items: start;
     padding: max(84px, env(safe-area-inset-top) + 58px) 15px max(22px, env(safe-area-inset-bottom) + 12px);
   }
+}
+
+/* Scroll the form independently while the iOS/Android on-screen keyboard is open. */
+.link-tool-screen {
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-top: max(60px, env(safe-area-inset-top));
+}
+@media (hover: none) and (pointer: coarse) {
+  .link-tool-back { min-height: 44px; }
+  .link-tool-action { min-height: 46px; }
 }
