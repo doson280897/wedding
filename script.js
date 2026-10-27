@@ -1,53 +1,66 @@
 (() => {
   "use strict";
-
+  const i18n = window.WeddingI18n;
+  const tr = key => i18n ? i18n.t(key) : key;
   const params = new URLSearchParams(window.location.search);
   const rawGuest = params.get("to");
   const displayGuest = rawGuest ? rawGuest.replace(/[_+]/g, " ").trim().slice(0, 100) : "";
   const guestNode = document.getElementById("guestName");
   const envelopeGuest = document.getElementById("envelopeGuest");
-  if (displayGuest) {
-    if (guestNode) guestNode.textContent = "Trân trọng kính mời " + displayGuest;
-    if (envelopeGuest) envelopeGuest.textContent = "Trân trọng kính mời " + displayGuest;
+
+  function updateGuest() {
+    const text = displayGuest ? tr("guest.prefix") + displayGuest : tr("hero.greeting");
+    if (guestNode) guestNode.textContent = text;
+    if (envelopeGuest) envelopeGuest.textContent = displayGuest ? tr("guest.prefix") + displayGuest : tr("envelope.invite");
   }
 
   const weddingDates = {
     bride: {
       time: new Date("2026-11-14T09:00:00+07:00").getTime(),
-      title: "ĐẾM NGƯỢC ĐẾN LỄ VU QUY",
-      label: "Lễ Vu Quy nhà gái"
+      titleKey: "countdown.brideTitle",
+      ariaKey: "countdown.brideAria"
     },
     groom: {
       time: new Date("2026-11-29T09:00:00+07:00").getTime(),
-      title: "ĐẾM NGƯỢC ĐẾN LỄ TÂN HÔN",
-      label: "Lễ Tân Hôn nhà trai"
+      titleKey: "countdown.groomTitle",
+      ariaKey: "countdown.groomAria"
     }
   };
   const timer = document.getElementById("timer");
   const countdownTitle = document.getElementById("countdownTitle");
   const countdownButtons = Array.from(document.querySelectorAll("[data-countdown]"));
   let selectedWedding = Date.now() < weddingDates.bride.time ? "bride" : "groom";
-  let countdownInterval = 0;
 
   function ensureTimerBoxes() {
-    if (!timer || document.getElementById("days")) return;
-    const labels = [["days","NGÀY"],["hours","GIỜ"],["minutes","PHÚT"],["seconds","GIÂY"]];
-    timer.innerHTML = labels.map(([id,label]) => '<div><strong id="' + id + '">00</strong><small>' + label + '</small></div>').join("");
+    if (!timer) return;
+    const units = [
+      ["days","countdown.days"],
+      ["hours","countdown.hours"],
+      ["minutes","countdown.minutes"],
+      ["seconds","countdown.seconds"]
+    ];
+    if (!document.getElementById("days")) {
+      timer.innerHTML = units.map(item => '<div><strong id="' + item[0] + '">00</strong><small></small></div>').join("");
+    }
+    units.forEach(item => {
+      const node = document.querySelector("#" + item[0] + " + small");
+      if (node) node.textContent = tr(item[1]);
+    });
   }
 
   function countdown() {
     if (!timer) return;
     const wedding = weddingDates[selectedWedding];
     const remain = Math.max(0, wedding.time - Date.now());
-    if (countdownTitle) countdownTitle.textContent = wedding.title;
-    timer.setAttribute("aria-label", "Đếm ngược đến " + wedding.label);
+    if (countdownTitle) countdownTitle.textContent = tr(wedding.titleKey);
+    timer.setAttribute("aria-label", tr(wedding.ariaKey));
     countdownButtons.forEach(button => {
       const active = button.dataset.countdown === selectedWedding;
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-pressed", String(active));
     });
     if (!remain) {
-      timer.innerHTML = '<p class="finished">Ngày vui đã đến ♡</p>';
+      timer.innerHTML = '<p class="finished">' + tr("countdown.finished") + '</p>';
       return;
     }
     ensureTimerBoxes();
@@ -68,32 +81,32 @@
     countdown();
   }));
   countdown();
-  countdownInterval = window.setInterval(countdown, 1000);
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) countdown();
-  });
+  window.setInterval(countdown, 1000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) countdown(); });
 
-  const schedules = {
-    bride: {
-      filename: "le-vu-quy-thanh-son-to-nga.ics",
-      events: [
-        { title:"Lễ Vu Quy · Thành Sơn & Tố Nga", start:"20261114T020000Z", end:"20261114T030000Z", place:"144 Chu Văn An, Krông Ana, Đắk Lắk", note:"09:00 · Hôn lễ tại tư gia nhà gái" },
-        { title:"Tiệc Vu Quy · Thành Sơn & Tố Nga", start:"20261114T040000Z", end:"20261114T060000Z", place:"Nhà Hàng Hương Lan, 24 Hùng Vương, Krông Ana, Đắk Lắk", note:"11:00 · Tiệc mừng" }
-      ]
-    },
-    groom: {
-      filename: "le-tan-hon-thanh-son-to-nga.ics",
-      events: [
-        { title:"Lễ Tân Hôn · Thành Sơn & Tố Nga", start:"20261129T020000Z", end:"20261129T030000Z", place:"Ấp Cao Cang, Xã Định Quán, Đồng Nai", note:"09:00 · Hôn lễ tại tư gia nhà trai" },
-        { title:"Tiệc Tân Hôn · Thành Sơn & Tố Nga", start:"20261129T040000Z", end:"20261129T060000Z", place:"Ấp Cao Cang, Xã Định Quán, Đồng Nai", note:"11:00 · Tiệc mừng tại tư gia" }
-      ]
+  function buildSchedule(side) {
+    if (side === "bride") {
+      return {
+        filename: tr("calendar.brideFile"),
+        events: [
+          {title:tr("calendar.brideCeremonyTitle"),start:"20261114T020000Z",end:"20261114T030000Z",place:tr("calendar.brideCeremonyPlace"),note:tr("calendar.brideCeremonyNote")},
+          {title:tr("calendar.brideReceptionTitle"),start:"20261114T040000Z",end:"20261114T060000Z",place:tr("calendar.brideReceptionPlace"),note:tr("calendar.brideReceptionNote")}
+        ]
+      };
     }
-  };
+    return {
+      filename: tr("calendar.groomFile"),
+      events: [
+        {title:tr("calendar.groomCeremonyTitle"),start:"20261129T020000Z",end:"20261129T030000Z",place:tr("calendar.groomPlace"),note:tr("calendar.groomCeremonyNote")},
+        {title:tr("calendar.groomReceptionTitle"),start:"20261129T040000Z",end:"20261129T060000Z",place:tr("calendar.groomPlace"),note:tr("calendar.groomReceptionNote")}
+      ]
+    };
+  }
+
   const escapeICS = value => value.replace(/\\/g,"\\\\").replace(/\r?\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;");
   document.querySelectorAll("[data-calendar]").forEach(button => {
     button.addEventListener("click", () => {
-      const schedule = schedules[button.dataset.calendar];
-      if (!schedule) return;
+      const schedule = buildSchedule(button.dataset.calendar);
       const timestamp = new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
       const body = schedule.events.map((event,index) => [
         "BEGIN:VEVENT",
@@ -102,7 +115,7 @@
         "DTSTART:" + event.start,
         "DTEND:" + event.end,
         "SUMMARY:" + escapeICS(event.title),
-        "DESCRIPTION:" + escapeICS(event.note + " (Giờ Việt Nam GMT+7)"),
+        "DESCRIPTION:" + escapeICS(event.note + " (" + tr("calendar.timezone") + ")"),
         "LOCATION:" + escapeICS(event.place),
         "END:VEVENT"
       ].join("\r\n")).join("\r\n");
@@ -183,12 +196,13 @@
     if (index % 4 === 0) softTone(melody[index] / 2, 0, 0.009);
   }
 
-  function setMusicUI(playing) {
+  function setMusicUI() {
     if (!musicButton) return;
-    musicButton.setAttribute("aria-pressed", String(playing));
-    musicButton.setAttribute("aria-label", playing ? "Tắt nhạc nền" : "Bật nhạc nền dịu nhẹ");
+    musicButton.setAttribute("aria-pressed", String(musicPlaying));
+    musicButton.setAttribute("aria-label", tr(musicPlaying ? "music.disableAria" : "music.enableAria"));
+    musicButton.setAttribute("title", tr("music.title"));
     const label = musicButton.querySelector(".music-label");
-    if (label) label.textContent = playing ? "NHẠC: BẬT" : "NHẠC: TẮT";
+    if (label) label.textContent = tr(musicPlaying ? "music.on" : "music.off");
   }
 
   if (musicButton && !AudioContextClass) {
@@ -199,18 +213,25 @@
       if (!musicPlaying) {
         await audioContext.resume();
         musicPlaying = true;
-        setMusicUI(true);
         musicTick();
         musicTimer = window.setInterval(musicTick, 1250);
       } else {
         musicPlaying = false;
-        setMusicUI(false);
         window.clearInterval(musicTimer);
         musicTimer = 0;
         await audioContext.suspend();
       }
+      setMusicUI();
     });
   }
+
+  function refreshDynamicLanguage() {
+    updateGuest();
+    countdown();
+    setMusicUI();
+  }
+  document.addEventListener("wedding:languagechange", refreshDynamicLanguage);
+  refreshDynamicLanguage();
 
   const progress = document.getElementById("progress");
   let scrollFrame = 0;

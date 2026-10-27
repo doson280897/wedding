@@ -6,6 +6,18 @@
   const counter = document.getElementById("albumCount");
   const progress = document.getElementById("albumProgress");
   const status = document.getElementById("albumStatus");
+  const tr = key => window.WeddingI18n ? window.WeddingI18n.t(key) : key;
+  let statusKey = status?.dataset.statusKey || "album.lazy";
+  const setStatus = key => {
+    statusKey = key;
+    if (status) {
+      status.dataset.statusKey = key;
+      status.textContent = tr(key);
+    }
+  };
+  document.addEventListener("wedding:languagechange", () => {
+    if (status && !status.hidden) setStatus(statusKey);
+  });
   if (!viewport || !space) return;
 
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -156,7 +168,7 @@
   });
 
   async function start() {
-    status.textContent = "Đang tải album ảnh cưới…";
+    setStatus("album.loading");
     try {
       const response = await fetch("./images.json", { cache: "no-cache" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -165,14 +177,14 @@
       if (!Array.isArray(list)) throw new Error("Invalid manifest");
       photos = list.filter(p => p && typeof p.src === "string" && p.src);
       if (!photos.length) {
-        status.textContent = "Chưa có ảnh. Hãy chạy generate_gallery.py sau khi thêm ảnh vào images/.";
+        setStatus("album.empty");
         return;
       }
       initialize();
       status.hidden = true;
     } catch (error) {
       console.error(error);
-      status.textContent = "Không tải được images.json. Hãy chạy generate_gallery.py và mở bằng Live Server.";
+      setStatus("album.error");
     }
   }
   const albumSection = document.getElementById("album") || viewport;

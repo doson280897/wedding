@@ -7,6 +7,7 @@
   if (!toggle || !panel || !backdrop || !closeBtn) return;
   const links = [...panel.querySelectorAll(".wq-link")];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const tr = key => window.WeddingI18n ? window.WeddingI18n.t(key) : key;
 
   const mapModal = document.getElementById("wmModal");
   const mapBackdrop = document.getElementById("wmBackdrop");
@@ -53,7 +54,7 @@
     panel.setAttribute("aria-hidden", String(!value));
     panel.inert = !value;
     toggle.setAttribute("aria-expanded", String(value));
-    toggle.setAttribute("aria-label", value ? "Đóng mục lục thiệp cưới" : "Mở mục lục thiệp cưới");
+    toggle.setAttribute("aria-label", tr(value ? "menu.closeAria" : "menu.openAria"));
     document.body.classList.toggle("wq-menu-open", value);
     if (value) closeBtn.focus({preventScroll:true});
     else if (restoreFocus) toggle.focus({preventScroll:true});
@@ -78,6 +79,12 @@
     if(event.shiftKey && document.activeElement===focusable[0]){event.preventDefault();focusable.at(-1).focus();}
     else if(!event.shiftKey && document.activeElement===focusable.at(-1)){event.preventDefault();focusable[0].focus();}
   });
+  const refreshLanguage = () => {
+    toggle.setAttribute("aria-label", tr(open ? "menu.closeAria" : "menu.openAria"));
+  };
+  document.addEventListener("wedding:languagechange", refreshLanguage);
+  refreshLanguage();
+
   links.forEach(link => link.addEventListener("click", event => {
     const id = link.getAttribute("href")?.slice(1);
     const target = id && document.getElementById(id);

@@ -20,7 +20,7 @@
 <meta name="twitter:description" content="Trân trọng kính mời bạn cùng chung vui ngày hạnh phúc • 14 &amp; 29.11.2026">
 <meta name="twitter:image" content="https://doson280897.github.io/wedding/og-preview.jpg">
 <meta name="description" content="Thiệp mời cưới Thành Sơn & Tố Nga — 14 & 29.11.2026">
-<title>Thành Sơn & Tố Nga | Wedding Invitation</title>
+<title>Thành Sơn & Tố Nga | Thiệp mời cưới</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets-optimized/hero.webp" type="image/webp" fetchpriority="high">
@@ -29,35 +29,40 @@
 </head>
 <body>
 <div class="reading-progress" id="progress"></div>
+<div class="language-switch" role="group" aria-label="Chọn ngôn ngữ" data-i18n-aria="language.label">
+  <button type="button" class="language-option is-active" data-lang="vi" aria-pressed="true">VN</button>
+  <span aria-hidden="true">/</span>
+  <button type="button" class="language-option" data-lang="en" aria-pressed="false">EN</button>
+</div>
 <div class="envelope-intro" id="envelopeIntro" hidden role="dialog" aria-modal="true" aria-labelledby="envelopeTitle">
   <div class="envelope-inner">
-    <p class="envelope-eyebrow">A LOVE STORY · 2026</p>
+    <p class="envelope-eyebrow" data-i18n="envelope.eyebrow">CHUYỆN TÌNH CỦA CHÚNG MÌNH · 2026</p>
     <div class="envelope-art" aria-hidden="true"><div class="envelope-flap"></div><div class="envelope-seal">S <span>&amp;</span> N</div></div>
-    <p class="envelope-invite" id="envelopeGuest">Trân trọng kính mời</p>
+    <p class="envelope-invite" id="envelopeGuest" data-i18n="envelope.invite">Trân trọng kính mời</p>
     <h2 id="envelopeTitle">Thành Sơn <em>&amp;</em> Tố Nga</h2>
     <p class="envelope-date">14 · 11 · 2026 &nbsp;—&nbsp; 29 · 11 · 2026</p>
-    <button type="button" id="openInvitation" class="envelope-open">MỞ THIỆP CƯỚI <span aria-hidden="true">↗</span></button>
-    <button type="button" id="skipInvitation" class="envelope-skip">Bỏ qua</button>
+    <button type="button" id="openInvitation" class="envelope-open" data-i18n-html="envelope.open">MỞ THIỆP CƯỚI <span aria-hidden="true">↗</span></button>
+    <button type="button" id="skipInvitation" class="envelope-skip" data-i18n="envelope.skip">Bỏ qua</button>
   </div>
 </div>
 <header class="hero" id="home">
   <div class="hero-photo"></div><div class="hero-shade"></div>
-  <div class="topbar"><a class="monogram" href="#home">S <span>&</span> N</a><a class="top-link" href="#events">THÔNG TIN LỄ CƯỚI ↗</a></div>
+  <div class="topbar"><a class="monogram" href="#home">S <span>&amp;</span> N</a><a class="top-link" href="#events" data-i18n="hero.topLink">THÔNG TIN LỄ CƯỚI ↗</a></div>
   <div class="hero-layout">
     <div class="hero-spacer"></div>
     <div class="hero-copy">
-      <div class="overline">— LỄ THÀNH HÔN —</div>
-      <p class="guest-greeting" id="guestName">Trân trọng kính mời</p>
+      <div class="overline" data-i18n="hero.overline">— LỄ THÀNH HÔN —</div>
+      <p class="guest-greeting" id="guestName" data-i18n="hero.greeting">Trân trọng kính mời</p>
       <h1>THÀNH SƠN <span>&amp;</span> TỐ NGA</h1>
       <div class="fine-flourish">✧</div>
-      <p class="handwriting">Cùng nhau viết tiếp những ngày hạnh phúc...</p>
+      <p class="handwriting" data-i18n="hero.handwriting">Cùng nhau viết tiếp những ngày hạnh phúc...</p>
       <div class="hero-date">14.11.2026 <span>—</span> 29.11.2026</div>
       <div class="hero-count-title" id="countdownTitle">ĐẾM NGƯỢC ĐẾN LỄ VU QUY</div>
-      <div class="countdown-choice" role="group" aria-label="Chọn ngày cưới để đếm ngược">
-        <button type="button" class="countdown-choice-btn is-active" data-countdown="bride" aria-pressed="true">14.11 · Nhà gái</button>
-        <button type="button" class="countdown-choice-btn" data-countdown="groom" aria-pressed="false">29.11 · Nhà trai</button>
+      <div class="countdown-choice" role="group" aria-label="Chọn ngày cưới để đếm ngược" data-i18n-aria="hero.countdownGroupAria">
+        <button type="button" class="countdown-choice-btn is-active" data-countdown="bride" aria-pressed="true" data-i18n="hero.brideOption">14.11 · Nhà gái</button>
+        <button type="button" class="countdown-choice-btn" data-countdown="groom" aria-pressed="false" data-i18n="hero.groomOption">29.11 · Nhà trai</button>
       </div>
-      <div class="countdown" id="timer" aria-label="Đếm ngược đến tiệc Vu Quy">
+      <div class="countdown" id="timer" aria-label="Đếm ngược đến lễ Vu Quy">
         <div><strong id="days">00</strong><small>NGÀY</small></div>
         <div><strong id="hours">00</strong><small>GIỜ</small></div>
         <div><strong id="minutes">00</strong><small>PHÚT</small></div>
@@ -65,87 +70,86 @@
       </div>
     </div>
   </div>
-  <a class="scroll-cue" href="#couple">SCROLL TO EXPLORE ↓</a>
+  <a class="scroll-cue" href="#couple" data-i18n="hero.scroll">CUỘN ĐỂ KHÁM PHÁ ↓</a>
 </header>
 <main>
 <section class="couple-section" id="couple">
-  <p class="overline gold center">TWO SOULS · ONE STORY</p>
-  <h2 class="section-title">The Bride <em>&amp;</em> Groom</h2>
-  <p class="section-lead">Hai con người, một hành trình, một lời hẹn ước.</p>
+  <p class="overline gold center" data-i18n="couple.eyebrow">HAI TRÁI TIM · MỘT HÀNH TRÌNH</p>
+  <h2 class="section-title" data-i18n-html="couple.heading">Cô dâu <em>&amp;</em> Chú rể</h2>
+  <p class="section-lead" data-i18n="couple.lead">Hai con người, một hành trình, một lời hẹn ước.</p>
   <div class="couple-editorial">
     <article class="person person-groom reveal">
       <div class="portrait-set">
-        <div class="portrait large groom-main"><img src="assets-optimized/son-1.webp" data-demo-src="https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=760&q=80" alt="Chân dung chú rể Thành Sơn" loading="lazy"></div>
-        <div class="portrait small groom-secondary"><img src="assets-optimized/son-2.webp" data-demo-src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=500&q=80" alt="Ảnh chú rể Thành Sơn thứ hai" loading="lazy"></div>
+        <div class="portrait large groom-main"><img src="assets-optimized/son-1.webp" data-demo-src="https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=760&q=80" alt="Chân dung chú rể Thành Sơn" data-i18n-alt="couple.son1Alt" loading="lazy"></div>
+        <div class="portrait small groom-secondary"><img src="assets-optimized/son-2.webp" data-demo-src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=500&q=80" alt="Ảnh chú rể Thành Sơn thứ hai" data-i18n-alt="couple.son2Alt" loading="lazy"></div>
       </div>
-      <div class="person-copy"><span class="script">Chú rể</span><h3>THÀNH SƠN</h3><p>Cảm ơn em đã xuất hiện, để những ngày bình thường cũng trở nên đặc biệt.</p><div class="ornament">♡</div></div>
+      <div class="person-copy"><span class="script" data-i18n="couple.groomRole">Chú rể</span><h3>THÀNH SƠN</h3><p data-i18n="couple.groomQuote">Cảm ơn em đã xuất hiện, để những ngày bình thường cũng trở nên đặc biệt.</p><div class="ornament">♡</div></div>
     </article>
     <div class="couple-divider"><span>✧</span></div>
     <article class="person person-bride reveal">
-      <div class="person-copy"><span class="script">Cô dâu</span><h3>TỐ NGA</h3><p>Cảm ơn anh đã luôn ở đây, cùng em đi qua những khoảnh khắc đẹp nhất của cuộc đời.</p><div class="ornament">♡</div></div>
+      <div class="person-copy"><span class="script" data-i18n="couple.brideRole">Cô dâu</span><h3>TỐ NGA</h3><p data-i18n="couple.brideQuote">Cảm ơn anh đã luôn ở đây, cùng em đi qua những khoảnh khắc đẹp nhất của cuộc đời.</p><div class="ornament">♡</div></div>
       <div class="portrait-set">
-        <div class="portrait large bride-main"><img src="assets-optimized/nga-1.webp" data-demo-src="https://images.unsplash.com/photo-1594552072238-b8a33785b261?auto=format&fit=crop&w=760&q=80" alt="Chân dung cô dâu Tố Nga" loading="lazy"></div>
-        <div class="portrait small bride-secondary"><img src="assets-optimized/nga-2.webp" data-demo-src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80" alt="Ảnh cô dâu Tố Nga thứ hai" loading="lazy"></div>
+        <div class="portrait large bride-main"><img src="assets-optimized/nga-1.webp" data-demo-src="https://images.unsplash.com/photo-1594552072238-b8a33785b261?auto=format&fit=crop&w=760&q=80" alt="Chân dung cô dâu Tố Nga" data-i18n-alt="couple.nga1Alt" loading="lazy"></div>
+        <div class="portrait small bride-secondary"><img src="assets-optimized/nga-2.webp" data-demo-src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80" alt="Ảnh cô dâu Tố Nga thứ hai" data-i18n-alt="couple.nga2Alt" loading="lazy"></div>
       </div>
     </article>
   </div>
 </section>
 <section class="family-section" id="family">
-  <div class="section-head"><p class="overline gold">WITH OUR FAMILIES</p><h2 class="section-title">Trân trọng báo tin vui</h2><p class="section-lead">Sự hiện diện của bạn là niềm hạnh phúc của hai gia đình</p></div>
+  <div class="section-head"><p class="overline gold" data-i18n="family.eyebrow">CÙNG HAI GIA ĐÌNH</p><h2 class="section-title" data-i18n="family.title">Trân trọng báo tin vui</h2><p class="section-lead" data-i18n="family.lead">Sự hiện diện của bạn là niềm hạnh phúc của hai gia đình</p></div>
   <div class="family-grid">
-    <div class="family-card reveal"><span>NHÀ TRAI</span><h3>Gia đình chú rể</h3><p>Ông <strong>Đỗ Ngọc Thiện</strong></p><p>Bà <strong>Lê Thị Thanh Trang</strong></p><p class="family-address">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><div class="mini-line"></div><small>TRƯỞNG NAM</small><h4>Đỗ Ngọc Thành Sơn</h4></div>
-    <div class="family-card reveal"><span>NHÀ GÁI</span><h3>Gia đình cô dâu</h3><p>Ông <strong>Lữ Duy Mạnh</strong></p><p>Bà <strong>Nguyễn Thị Hương</strong></p><p class="family-address">144 Chu Văn An, Xã Krông Ana, Tỉnh Đắk Lắk</p><div class="mini-line"></div><small>ÚT NỮ</small><h4>Lữ Thị Tố Nga</h4></div>
+    <div class="family-card reveal"><span data-i18n="family.groomSide">NHÀ TRAI</span><h3 data-i18n="family.groomTitle">Gia đình chú rể</h3><p data-i18n-html="family.groomFather">Ông <strong>Đỗ Ngọc Thiện</strong></p><p data-i18n-html="family.groomMother">Bà <strong>Lê Thị Thanh Trang</strong></p><p class="family-address" data-i18n="family.groomAddress">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><div class="mini-line"></div><small data-i18n="family.groomRole">TRƯỞNG NAM</small><h4>Đỗ Ngọc Thành Sơn</h4></div>
+    <div class="family-card reveal"><span data-i18n="family.brideSide">NHÀ GÁI</span><h3 data-i18n="family.brideTitle">Gia đình cô dâu</h3><p data-i18n-html="family.brideFather">Ông <strong>Lữ Duy Mạnh</strong></p><p data-i18n-html="family.brideMother">Bà <strong>Nguyễn Thị Hương</strong></p><p class="family-address" data-i18n="family.brideAddress">144 Chu Văn An, Xã Krông Ana, Tỉnh Đắk Lắk</p><div class="mini-line"></div><small data-i18n="family.brideRole">ÚT NỮ</small><h4>Lữ Thị Tố Nga</h4></div>
   </div>
 </section>
-<section class="album-section" id="album" aria-label="Album ảnh cưới 3D">
+<section class="album-section" id="album" aria-label="Bộ ảnh cưới 3D" data-i18n-aria="album.sectionAria">
   <div class="album-ambient"></div>
-  <div class="album-header"><p class="album-eyebrow">OUR WEDDING ALBUM</p><h2>Khoảnh khắc <em>yêu thương</em></h2><p>Những thước phim đẹp nhất của chúng mình</p></div>
-  <div class="album-viewport" id="albumViewport" tabindex="0" aria-label="Album 3D: vuốt hoặc kéo trái phải để chuyển ảnh"><div class="album-space" id="albumSpace"></div><div class="album-floor"></div></div>
-  <div class="album-status" id="albumStatus" role="status">Cuộn đến album để xem những khoảnh khắc của chúng mình…</div>
-  <div class="album-bottom"><span class="album-hint">← VUỐT TRÁI HOẶC PHẢI ĐỂ XEM ẢNH →</span><span class="album-count" id="albumCount" aria-live="polite">00 / 00</span></div>
+  <div class="album-header"><p class="album-eyebrow" data-i18n="album.eyebrow">BỘ ẢNH CƯỚI</p><h2 data-i18n-html="album.heading">Khoảnh khắc <em>yêu thương</em></h2><p data-i18n="album.lead">Những thước phim đẹp nhất của chúng mình</p></div>
+  <div class="album-viewport" id="albumViewport" tabindex="0" aria-label="Bộ ảnh 3D: vuốt hoặc kéo trái phải để chuyển ảnh" data-i18n-aria="album.viewportAria"><div class="album-space" id="albumSpace"></div><div class="album-floor"></div></div>
+  <div class="album-status" id="albumStatus" role="status" data-status-key="album.lazy">Cuộn đến bộ ảnh để xem những khoảnh khắc của chúng mình…</div>
+  <div class="album-bottom"><span class="album-hint" data-i18n="album.hint">← VUỐT TRÁI HOẶC PHẢI ĐỂ XEM ẢNH →</span><span class="album-count" id="albumCount" aria-live="polite">00 / 00</span></div>
   <div class="album-progress"><span id="albumProgress"></span></div>
 </section>
 <section class="events-section" id="events">
-  <div class="section-head"><p class="overline gold">SAVE OUR DATES</p><h2 class="section-title">Thông tin lễ cưới</h2><p class="section-lead">Hân hạnh đón tiếp bạn trong ngày vui trọng đại</p></div>
+  <div class="section-head"><p class="overline gold" data-i18n="events.eyebrow">LƯU NGÀY HẠNH PHÚC</p><h2 class="section-title" data-i18n="events.title">Thông tin lễ cưới</h2><p class="section-lead" data-i18n="events.lead">Hân hạnh đón tiếp bạn trong ngày vui trọng đại</p></div>
   <div class="event-grid">
-    <article class="event-card reveal"><div class="event-label">LỄ VU QUY · NHÀ GÁI</div><div class="date-block"><div class="date-icon">▦</div><div><small>THỨ BẢY</small><strong>14.11.2026</strong></div></div><div class="event-rule"></div><div class="event-detail"><span>09:00</span> Hôn lễ tại tư gia</div><div class="event-detail"><span>11:00</span> Tiệc mừng tại Nhà Hàng Hương Lan</div><p class="event-address">24 Hùng Vương, Krông Ana, Đắk Lắk</p><p class="lunar">Nhằm ngày 06 tháng 10 năm Bính Ngọ</p><a href="#map-bride" class="map-button">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="bride" aria-label="Lưu lễ Vu Quy vào lịch">＋ LƯU VÀO LỊCH</button></article>
-    <article class="event-card reveal"><div class="event-label">LỄ TÂN HÔN · NHÀ TRAI</div><div class="date-block"><div class="date-icon">▦</div><div><small>CHỦ NHẬT</small><strong>29.11.2026</strong></div></div><div class="event-rule"></div><div class="event-detail"><span>09:00</span> Hôn lễ tại tư gia</div><div class="event-detail"><span>11:00</span> Tiệc mừng tại Tư Gia Nhà Trai</div><p class="event-address">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><p class="lunar">Nhằm ngày 21 tháng 10 năm Bính Ngọ</p><a href="#map-groom" class="map-button">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="groom" aria-label="Lưu lễ Tân Hôn vào lịch">＋ LƯU VÀO LỊCH</button></article>
+    <article class="event-card reveal"><div class="event-label" data-i18n="events.brideLabel">LỄ VU QUY · NHÀ GÁI</div><div class="date-block"><div class="date-icon">▦</div><div><small data-i18n="events.saturday">THỨ BẢY</small><strong>14.11.2026</strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.brideCeremony"><span>09:00</span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.brideReception"><span>11:00</span> Tiệc mừng tại Nhà Hàng Hương Lan</div><p class="event-address" data-i18n="events.brideAddress">24 Hùng Vương, Krông Ana, Đắk Lắk</p><p class="lunar" data-i18n="events.brideLunar">Nhằm ngày 06 tháng 10 năm Bính Ngọ</p><a href="#map-bride" class="map-button" data-i18n="events.map">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="bride" aria-label="Lưu lễ Vu Quy vào lịch" data-i18n="events.calendar" data-i18n-aria="events.brideCalendarAria">＋ LƯU VÀO LỊCH</button></article>
+    <article class="event-card reveal"><div class="event-label" data-i18n="events.groomLabel">LỄ TÂN HÔN · NHÀ TRAI</div><div class="date-block"><div class="date-icon">▦</div><div><small data-i18n="events.sunday">CHỦ NHẬT</small><strong>29.11.2026</strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.groomCeremony"><span>09:00</span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.groomReception"><span>11:00</span> Tiệc mừng tại Tư Gia Nhà Trai</div><p class="event-address" data-i18n="events.groomAddress">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><p class="lunar" data-i18n="events.groomLunar">Nhằm ngày 21 tháng 10 năm Bính Ngọ</p><a href="#map-groom" class="map-button" data-i18n="events.map">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="groom" aria-label="Lưu lễ Tân Hôn vào lịch" data-i18n="events.calendar" data-i18n-aria="events.groomCalendarAria">＋ LƯU VÀO LỊCH</button></article>
   </div>
 </section>
-<section class="closing"><div class="closing-overlay"></div><div class="closing-content"><p class="overline gold">THANK YOU FOR BEING HERE</p><h2>Hẹn gặp bạn<br>trong ngày hạnh phúc</h2><p class="closing-names">Thành Sơn <span>&amp;</span> Tố Nga</p></div></section>
+<section class="closing"><div class="closing-overlay"></div><div class="closing-content"><p class="overline gold" data-i18n="closing.eyebrow">CẢM ƠN BẠN ĐÃ ĐẾN</p><h2 data-i18n-html="closing.title">Hẹn gặp bạn<br>trong ngày hạnh phúc</h2><p class="closing-names">Thành Sơn <span>&amp;</span> Tố Nga</p></div></section>
 </main>
-<footer>© 2026 THÀNH SƠN &amp; TỐ NGA <span>MADE WITH LOVE ♡</span></footer>
-<script src="script.js" defer></script><script src="gallery.js" defer></script>
+<footer>© 2026 THÀNH SƠN &amp; TỐ NGA <span data-i18n="footer.love">GỬI TRỌN YÊU THƯƠNG ♡</span></footer>
+<script src="i18n.js" defer></script><script src="script.js" defer></script><script src="gallery.js" defer></script>
 
 <div class="wm-backdrop" id="wmBackdrop" hidden></div>
 <div class="wm-modal" id="wmModal" role="dialog" aria-modal="true" aria-labelledby="wmTitle" aria-hidden="true" hidden>
-<div class="wm-dialog"><div class="wm-header"><span class="wq-kicker">FIND YOUR WAY</span><button type="button" class="wm-close" id="wmClose" aria-label="Đóng bản đồ">×</button></div>
+<div class="wm-dialog"><div class="wm-header"><span class="wq-kicker" data-i18n="map.eyebrow">CHỈ ĐƯỜNG</span><button type="button" class="wm-close" id="wmClose" aria-label="Đóng bản đồ" data-i18n-aria="map.closeAria">×</button></div>
 <section class="locations-section" id="locations">
-  <div class="section-head"><p class="overline gold">FIND YOUR WAY</p><h2 class="section-title" id="wmTitle">Hẹn gặp bạn tại đây</h2></div>
+  <div class="section-head"><p class="overline gold" data-i18n="map.eyebrow">CHỈ ĐƯỜNG</p><h2 class="section-title" id="wmTitle" data-i18n="map.title">Hẹn gặp bạn tại đây</h2></div>
   <div class="location-grid">
-    <article id="map-bride" class="location-card"><div class="location-info"><small>NHÀ GÁI · 14/11/2026</small><h3>Nhà Hàng Hương Lan</h3><p>24 Hùng Vương, Krông Ana, Đắk Lắk</p><a href="https://www.google.com/maps/search/?api=1&query=Nhà+Hàng+Hương+Lan+24+Hùng+Vương+Krông+Ana+Đắk+Lắk" target="_blank" rel="noopener noreferrer" class="map-button">MỞ GOOGLE MAPS ↗</a></div><iframe title="Bản đồ nhà gái" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"></iframe></article>
-    <article id="map-groom" class="location-card"><div class="location-info"><small>NHÀ TRAI · 29/11/2026</small><h3>Tư Gia Nhà Trai</h3><p>Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><a href="https://www.google.com/maps/place/11%C2%B009'48.2%22N+107%C2%B023'24.5%22E/@11.163395,107.3875511,17z/" target="_blank" rel="noopener noreferrer" class="map-button">MỞ GOOGLE MAPS ↗</a></div><iframe title="Bản đồ nhà trai" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=11.163389,107.390139&z=16&output=embed"></iframe></article>
+    <article id="map-bride" class="location-card"><div class="location-info"><small data-i18n="map.brideLabel">NHÀ GÁI · 14/11/2026</small><h3 data-i18n="map.brideTitle">Nhà Hàng Hương Lan</h3><p data-i18n="map.brideAddress">24 Hùng Vương, Krông Ana, Đắk Lắk</p><a href="https://www.google.com/maps/search/?api=1&query=Nhà+Hàng+Hương+Lan+24+Hùng+Vương+Krông+Ana+Đắk+Lắk" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div><iframe title="Bản đồ nhà gái" data-i18n-title="map.brideFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"></iframe></article>
+    <article id="map-groom" class="location-card"><div class="location-info"><small data-i18n="map.groomLabel">NHÀ TRAI · 29/11/2026</small><h3 data-i18n="map.groomTitle">Tư Gia Nhà Trai</h3><p data-i18n="map.groomAddress">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><a href="https://www.google.com/maps/place/11%C2%B009'48.2%22N+107%C2%B023'24.5%22E/@11.163395,107.3875511,17z/" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div><iframe title="Bản đồ nhà trai" data-i18n-title="map.groomFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=11.163389,107.390139&z=16&output=embed"></iframe></article>
   </div>
 </section>
-
 </div></div>
 <div class="wq-backdrop" id="wqBackdrop" hidden></div>
-<nav class="wq-panel" id="wqPanel" aria-label="Mục lục thiệp cưới" aria-hidden="true" inert>
-  <div class="wq-panel-top"><span class="wq-kicker">THE WEDDING INVITATION</span><button type="button" class="wq-close" id="wqClose" aria-label="Đóng mục lục">×</button></div>
-  <div class="wq-heading">Khám phá <em>thiệp cưới</em></div>
-  <p class="wq-description">Chọn phần bạn muốn xem</p>
+<nav class="wq-panel" id="wqPanel" aria-label="Mục lục thiệp cưới" data-i18n-aria="menu.navAria" aria-hidden="true" inert>
+  <div class="wq-panel-top"><span class="wq-kicker" data-i18n="menu.kicker">THIỆP MỜI LỄ THÀNH HÔN</span><button type="button" class="wq-close" id="wqClose" aria-label="Đóng mục lục" data-i18n-aria="menu.closeAria">×</button></div>
+  <div class="wq-heading" data-i18n-html="menu.heading">Khám phá <em>thiệp cưới</em></div>
+  <p class="wq-description" data-i18n="menu.description">Chọn phần bạn muốn xem</p>
   <div class="wq-links">
-    <a href="#home" class="wq-link"><span class="wq-no">01</span><span>Trang đầu thiệp</span><span class="wq-arrow">↗</span></a>
-    <a href="#couple" class="wq-link"><span class="wq-no">02</span><span>Cô dâu &amp; chú rể</span><span class="wq-arrow">↗</span></a>
-    <a href="#family" class="wq-link"><span class="wq-no">03</span><span>Thông tin hai gia đình</span><span class="wq-arrow">↗</span></a>
-    <a href="#album" class="wq-link"><span class="wq-no">04</span><span>Album ảnh cưới 3D</span><span class="wq-arrow">↗</span></a>
-    <a href="#events" class="wq-link"><span class="wq-no">05</span><span>Lịch lễ &amp; tiệc cưới</span><span class="wq-arrow">↗</span></a>
-    <a href="#locations" class="wq-link"><span class="wq-no">06</span><span>Bản đồ chỉ đường</span><span class="wq-arrow">↗</span></a>
+    <a href="#home" class="wq-link"><span class="wq-no">01</span><span data-i18n="menu.home">Trang đầu thiệp</span><span class="wq-arrow">↗</span></a>
+    <a href="#couple" class="wq-link"><span class="wq-no">02</span><span data-i18n="menu.couple">Cô dâu &amp; chú rể</span><span class="wq-arrow">↗</span></a>
+    <a href="#family" class="wq-link"><span class="wq-no">03</span><span data-i18n="menu.family">Thông tin hai gia đình</span><span class="wq-arrow">↗</span></a>
+    <a href="#album" class="wq-link"><span class="wq-no">04</span><span data-i18n="menu.album">Bộ ảnh cưới 3D</span><span class="wq-arrow">↗</span></a>
+    <a href="#events" class="wq-link"><span class="wq-no">05</span><span data-i18n="menu.events">Lịch lễ &amp; tiệc cưới</span><span class="wq-arrow">↗</span></a>
+    <a href="#locations" class="wq-link"><span class="wq-no">06</span><span data-i18n="menu.map">Bản đồ chỉ đường</span><span class="wq-arrow">↗</span></a>
   </div>
   <div class="wq-footnote">THÀNH SƠN <span>♡</span> TỐ NGA</div>
 </nav>
 <button class="music-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="Bật nhạc nền dịu nhẹ" title="Bật/tắt nhạc nền"><span aria-hidden="true">♫</span><span class="music-label">NHẠC: TẮT</span></button>
-<button type="button" class="wq-toggle" id="wqToggle" aria-label="Mở mục lục thiệp cưới" aria-controls="wqPanel" aria-expanded="false"><span class="wq-toggle-glyph" aria-hidden="true">☷</span><span>MỤC LỤC</span></button>
+<button type="button" class="wq-toggle" id="wqToggle" aria-label="Mở mục lục thiệp cưới" aria-controls="wqPanel" aria-expanded="false"><span class="wq-toggle-glyph" aria-hidden="true">☷</span><span data-i18n="menu.toggle">MỤC LỤC</span></button>
 <script src="quick-nav.js" defer></script>
 </body>
 </html>

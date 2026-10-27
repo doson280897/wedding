@@ -13,6 +13,7 @@ Website thiệp cưới phong cách **Cinematic Editorial / Dark Luxury** (đen 
 - Nút **MỤC LỤC** nổi: chọn mục để cuộn mượt đến nội dung.
 - **FIND YOUR WAY / Bản đồ chỉ đường** được **ẩn khỏi luồng trang chính**. Chỉ hiện trong popup khi chọn **Mục lục → Bản đồ chỉ đường**, hoặc bấm **XEM ĐỊA ĐIỂM** ở phần lịch cưới. Popup hiển thị địa điểm nhà trai và nhà gái, có liên kết Google Maps; đóng bằng **×**, bấm ngoài popup hoặc phím **Esc**.
 - Giao diện responsive cho điện thoại và máy tính.
+- **VN / EN**: mặc định là tiếng Việt. Chế độ VN dùng toàn bộ nội dung tiếng Việt; khi chuyển sang EN, toàn bộ giao diện và nội dung động chuyển sang tiếng Anh. Lựa chọn được lưu trên trình duyệt.
 - **Phong thư mở đầu** nhẹ, chỉ xuất hiện lần đầu trong phiên; có thể bỏ qua.
 - **Countdown hai ngày cưới**: khách chuyển giữa lễ Vu Quy (14/11) và lễ Tân Hôn (29/11).
 - **Lưu ngày cưới vào lịch**: tải file ICS cho từng bên, dùng được với lịch điện thoại/Google Calendar/Outlook.
@@ -93,6 +94,7 @@ Nếu ảnh báo **404**, kiểm tra các file WebP đã có trên GitHub **đú
 
 - `index.html`: nội dung thiệp, địa điểm, các mục và popup bản đồ.
 - `style.css`: giao diện chính, ảnh nền tối ưu.
+- `i18n.js`: từ điển VN/EN, chuyển ngôn ngữ và lưu lựa chọn.
 - `script.js`: tên khách, countdown 2 ngày, phong thư, lưu lịch, nhạc nền, scroll/reveal.
 - `gallery.js`: album 3D lấy danh sách ảnh từ `images.json` và chỉ khởi tạo khi khách cuộn gần tới album.
 - `quick-nav.css` và `quick-nav.js`: nút mục lục, cuộn đến mục, mở/đóng popup bản đồ.
