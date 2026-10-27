@@ -27,9 +27,11 @@ button.secondary,.action.secondary{background:transparent;color:#f0dfc3}
 #generated{font-size:13px;overflow-wrap:anywhere;line-height:1.6;color:#e9d9b8}
 #feedback{min-height:22px;margin:12px 0 0;color:#d9c18e}
 .note{font-size:12px;margin-bottom:0}
+.language-switch{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;z-index:6001;display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #c4a56f70;border-radius:999px;background:#101512d9;color:#b8aa93;box-shadow:0 8px 30px #0007;backdrop-filter:blur(8px);font:600 10px system-ui,sans-serif;letter-spacing:.12em}.language-option{border:0;background:transparent;color:#a99f8d;padding:3px 4px;cursor:pointer;font:600 10px system-ui,sans-serif;letter-spacing:.12em;min-height:auto}.language-option.is-active{color:#f0d2a2}.language-option:focus-visible{outline:2px solid #e5c78e;outline-offset:3px;border-radius:4px}
 </style>
 </head>
 <body>
+<div class="language-switch" role="group" aria-label="Chọn ngôn ngữ"><button type="button" class="language-option" data-lang="vi" aria-pressed="true">VN</button><span aria-hidden="true">/</span><button type="button" class="language-option" data-lang="en" aria-pressed="false">EN</button></div>
 <main>
 <div class="eyebrow">TỐ NGA & THÀNH SƠN · WEDDING 2026</div>
 <h1>Tạo thiệp mời riêng</h1>
@@ -74,6 +76,8 @@ const selectors=["h1","main>p:not(.note)","label[for=guest]","#guest","label[for
 function changeLanguage(language){
  currentLanguage=language;
  document.documentElement.lang=language;
+ document.querySelector(".language-switch").setAttribute("aria-label",language==="en"?"Choose language":"Chọn ngôn ngữ");
+ document.querySelectorAll(".language-switch [data-lang]").forEach(button=>{const active=button.dataset.lang===language;button.classList.toggle("is-active",active);button.setAttribute("aria-pressed",String(active));});
  try{localStorage.setItem("wedding-language",language);}catch(_){}
  selectors.forEach((selector,i)=>{
  const node=document.querySelector(selector);if(!node)return;
@@ -82,6 +86,7 @@ function changeLanguage(language){
  });
  document.title=dictionary[language][0]+" | Tố Nga & Thành Sơn";
 }
+document.querySelectorAll(".language-switch [data-lang]").forEach(button=>button.addEventListener("click",()=>changeLanguage(button.dataset.lang)));
 changeLanguage(initialLanguage);
 
 const form=document.getElementById("generator");
