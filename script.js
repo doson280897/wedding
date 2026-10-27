@@ -518,10 +518,4 @@
     reveal.forEach(node => node.classList.add("visible"));
   }
 
-  document.querySelectorAll("img[data-demo-src]").forEach(img => {
-    img.addEventListener("error", function fallback() {
-      img.removeEventListener("error", fallback);
-      img.src = img.dataset.demoSrc;
-    });
-  });
 })();

@@ -14,12 +14,14 @@
   const mapClose = document.getElementById("wmClose");
   let mapOpen = false;
   let mapPreviousFocus = null;
-  let mapsLoaded = false;
 
-  const ensureMapsLoaded = () => {
-    if (mapsLoaded || !mapModal) return;
-    mapsLoaded = true;
-    mapModal.querySelectorAll("iframe[data-src]").forEach(frame => {
+  const ensureMapsLoaded = targetId => {
+    if (!mapModal) return;
+    const target = targetId && document.getElementById(targetId);
+    const frames = target
+      ? [target.querySelector("iframe[data-src]")].filter(Boolean)
+      : [...mapModal.querySelectorAll("iframe[data-src]")];
+    frames.forEach(frame => {
       frame.src = frame.dataset.src;
       frame.removeAttribute("data-src");
     });
@@ -29,7 +31,7 @@
     if (!mapModal || !mapBackdrop || !mapClose) return;
     if (value) {
       if (!mapOpen) mapPreviousFocus = document.activeElement;
-      ensureMapsLoaded();
+      ensureMapsLoaded(targetId);
       mapOpen = true;
       mapModal.hidden = false;
       mapBackdrop.hidden = false;
