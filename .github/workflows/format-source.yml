@@ -1,6 +1,9 @@
 name: Format source code
 
 on:
+  push:
+    paths:
+      - .github/workflows/format-source.yml
   workflow_dispatch:
 
 permissions:
