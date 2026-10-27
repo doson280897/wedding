@@ -246,6 +246,7 @@
     let drag = null;
     let suppressClick = false;
     let armed = false;
+    let tapStartedIdle = false;
 
     const setArmed = value => {
       armed = value;
@@ -290,6 +291,7 @@
 
       if (!drag.moved && Math.hypot(dx, dy) > 6) {
         drag.moved = true;
+        tapStartedIdle = false;
         setArmed(false);
         control.classList.add("is-dragging");
 
@@ -335,6 +337,7 @@
 
     control.addEventListener("pointerdown", event => {
       if (event.button != null && event.button !== 0) return;
+      tapStartedIdle = control.classList.contains("is-idle");
       wake();
 
       const rect = control.getBoundingClientRect();
@@ -360,18 +363,18 @@
         return;
       }
 
-      if (coarsePointer.matches) {
-        if (!armed) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          wake();
-          setArmed(true);
-          scheduleIdle(3400);
-          return;
-        }
-        setArmed(false);
+      if (coarsePointer.matches && tapStartedIdle) {
+        tapStartedIdle = false;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        wake();
+        setArmed(true);
+        scheduleIdle(3400);
+        return;
       }
 
+      tapStartedIdle = false;
+      setArmed(false);
       wake();
       scheduleIdle();
     }, true);
