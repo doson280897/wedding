@@ -33,13 +33,15 @@ wedding/
 ## Tính năng chính
 
 - Thiệp cá nhân hoá bằng `?to=`.
-- VN / EN, mặc định VN.
-- Phong thư mở đầu kiểu **botanical ivory** với thiệp giấy, sage green + champagne gold, animation card trượt khỏi phong bì; countdown hai ngày cưới và lưu lịch ICS.
+- Tách đúng tiệc bằng `?party=bride` (Lễ Vu Quy) hoặc `?party=groom` (Lễ Tân Hôn); thiếu `party` sẽ hiện màn chọn tiệc.
+- VN / EN luôn khả dụng từ màn chọn tiệc, phong bì và trong thiệp.
+- Phong thư mở đầu kiểu **botanical ivory**; mỗi lần reload đều mở lại từ đầu.
+- Countdown, lịch ICS, bản đồ, thứ tự cô dâu/chú rể và QR mừng cưới đều bám theo `party`.
 - Album 3D dạng **ribbon vô hạn** dùng native momentum + scroll-snap.
 - Ring buffer cố định 31 slide, phù hợp album 100+ ảnh mà không render toàn bộ.
 - Decode album theo hàng đợi tối đa 4 ảnh song song; mobile chỉ transform vùng card gần viewport.
 - Google Maps chỉ tải khi mở popup.
-- Nhạc nền Web Audio tuỳ chọn.
+- Nhạc nền YouTube IFrame API tuỳ chọn, không autoplay.
 - Cache-busting theo commit SHA khi deploy.
 - Open Graph preview được GitHub Actions tạo từ hero tối ưu.
 
@@ -132,4 +134,6 @@ Workflow không cần ảnh gốc.
 
 - `version.json` và `og-preview.jpg` được tạo lúc deploy, không commit.
 - Nếu ảnh 404, kiểm tra `images/optimized/` và `images/manifest.json`.
-- Để gửi thiệp có tên riêng, dùng `?to=` với tên đã URL-encode.
+- Link Vu Quy mẫu: `?to=Anh+Minh&party=bride`.
+- Link Tân Hôn mẫu: `?to=Anh+Minh&party=groom`.
+- Open Graph dùng preview chung cho cả hai lễ; title trong trình duyệt mới đổi theo `party`.

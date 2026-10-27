@@ -6,6 +6,7 @@
   const partyParam = params.get("party");
   const selectedParty = partyParam === "bride" || partyParam === "groom" ? partyParam : null;
   const partySelector = document.getElementById("partySelector");
+  const languageButtons = Array.from(document.querySelectorAll(".language-switch [data-lang]"));
 
   if (selectedParty) {
     document.documentElement.dataset.party = selectedParty;
@@ -25,9 +26,11 @@
     }));
 
     partySelector?.addEventListener("keydown", event => {
-      if (event.key !== "Tab" || partyButtons.length < 2) return;
-      const first = partyButtons[0];
-      const last = partyButtons.at(-1);
+      if (event.key !== "Tab") return;
+      const focusable = [...languageButtons, ...partyButtons].filter(button => !button.disabled);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable.at(-1);
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
@@ -65,8 +68,7 @@
   };
   const timer = document.getElementById("timer");
   const countdownTitle = document.getElementById("countdownTitle");
-  const countdownButtons = Array.from(document.querySelectorAll("[data-countdown]"));
-  let selectedWedding = selectedParty || (Date.now() < weddingDates.bride.time ? "bride" : "groom");
+  const selectedWedding = selectedParty || (Date.now() < weddingDates.bride.time ? "bride" : "groom");
 
   function ensureTimerBoxes() {
     if (!timer) return;
@@ -91,11 +93,6 @@
     const remain = Math.max(0, wedding.time - Date.now());
     if (countdownTitle) countdownTitle.textContent = tr(wedding.titleKey);
     timer.setAttribute("aria-label", tr(wedding.ariaKey));
-    countdownButtons.forEach(button => {
-      const active = button.dataset.countdown === selectedWedding;
-      button.classList.toggle("is-active", active);
-      button.setAttribute("aria-pressed", String(active));
-    });
     if (!remain) {
       timer.innerHTML = '<p class="finished">' + tr("countdown.finished") + '</p>';
       return;
@@ -113,11 +110,6 @@
     });
   }
 
-  countdownButtons.forEach(button => button.addEventListener("click", () => {
-    if (selectedParty) return;
-    selectedWedding = button.dataset.countdown;
-    countdown();
-  }));
   let countdownTimer = 0;
   function scheduleCountdown() {
     window.clearTimeout(countdownTimer);
@@ -234,19 +226,20 @@
       }
       if (event.key !== "Tab") return;
 
-      if (opened && closeInvitation) {
-        event.preventDefault();
-        closeInvitation.focus();
-        return;
-      }
+      const envelopeActions = opened
+        ? [closeInvitation]
+        : [openInvitation, skipInvitation];
+      const focusable = [...languageButtons, ...envelopeActions].filter(button => button && !button.disabled);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable.at(-1);
 
-      if (!openInvitation || !skipInvitation) return;
-      if (event.shiftKey && document.activeElement === openInvitation) {
+      if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
-        skipInvitation.focus();
-      } else if (!event.shiftKey && document.activeElement === skipInvitation) {
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
         event.preventDefault();
-        openInvitation.focus();
+        first.focus();
       }
     });
   }
@@ -368,6 +361,28 @@
     }
   });
 
+  function applyPartyDomOrder() {
+    if (!selectedParty) return;
+    const brideFirst = selectedParty === "bride";
+
+    const couple = document.querySelector(".couple-editorial");
+    const bride = couple?.querySelector(".person-bride");
+    const groom = couple?.querySelector(".person-groom");
+    const divider = couple?.querySelector(".couple-divider");
+    if (couple && bride && groom && divider) {
+      couple.append(...(brideFirst ? [bride, divider, groom] : [groom, divider, bride]));
+    }
+
+    const family = document.querySelector(".family-grid");
+    const brideFamily = family?.querySelector(".family-bride");
+    const groomFamily = family?.querySelector(".family-groom");
+    if (family && brideFamily && groomFamily) {
+      family.append(...(brideFirst ? [brideFamily, groomFamily] : [groomFamily, brideFamily]));
+    }
+  }
+
+  applyPartyDomOrder();
+
   function renderPartyNameOrder() {
     if (!selectedParty) return;
     const brideFirst = selectedParty === "bride";
@@ -413,6 +428,8 @@
     if (menuCoupleLabel) {
       menuCoupleLabel.textContent = tr(brideFirst ? "menu.coupleBrideFirst" : "menu.coupleGroomFirst");
     }
+
+    document.title = tr(brideFirst ? "page.titleBride" : "page.titleGroom");
   }
 
   function refreshDynamicLanguage() {
@@ -441,7 +458,9 @@
   const heroPhoto = document.querySelector(".hero-photo");
   if (hero && heroPhoto && "IntersectionObserver" in window) {
     const heroAnimationObserver = new IntersectionObserver(entries => {
-      heroPhoto.style.animationPlayState = entries[0]?.isIntersecting === false ? "paused" : "running";
+      const visible = entries[0]?.isIntersecting !== false;
+      heroPhoto.style.animationPlayState = visible ? "running" : "paused";
+      heroPhoto.style.willChange = visible ? "transform" : "auto";
     }, {threshold:0});
     heroAnimationObserver.observe(hero);
   }

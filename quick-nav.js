@@ -8,6 +8,7 @@
   const links = [...panel.querySelectorAll(".wq-link")];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const tr = key => window.WeddingI18n ? window.WeddingI18n.t(key) : key;
+  const languageButtons = [...document.querySelectorAll(".language-switch [data-lang]")];
 
   const mapModal = document.getElementById("wmModal");
   const mapBackdrop = document.getElementById("wmBackdrop");
@@ -20,6 +21,20 @@
   const giftClose = document.getElementById("wgClose");
   let giftOpen = false;
   let giftPreviousFocus = null;
+
+  const trapFocus = (event, focusable) => {
+    const items = focusable.filter(node => node && !node.disabled && !node.hidden);
+    if (!items.length) return;
+    const first = items[0];
+    const last = items.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   const ensureMapsLoaded = targetId => {
     if (!mapModal) return;
@@ -110,27 +125,21 @@
     if (giftOpen) {
       if (event.key === "Escape") {event.preventDefault();setGiftOpen(false);return;}
       if (event.key === "Tab") {
-        const focusable = [giftClose, ...giftModal.querySelectorAll('a[href]')];
-        if (event.shiftKey && document.activeElement === focusable[0]) {event.preventDefault();focusable.at(-1).focus();}
-        else if (!event.shiftKey && document.activeElement === focusable.at(-1)) {event.preventDefault();focusable[0].focus();}
+        trapFocus(event, [giftClose, ...giftModal.querySelectorAll('a[href]'), ...languageButtons]);
       }
       return;
     }
     if (mapOpen) {
       if (event.key === "Escape") {event.preventDefault();setMapOpen(false);return;}
       if (event.key === "Tab") {
-        const focusable = [mapClose, ...mapModal.querySelectorAll('a[href]')];
-        if (event.shiftKey && document.activeElement === focusable[0]) {event.preventDefault();focusable.at(-1).focus();}
-        else if (!event.shiftKey && document.activeElement === focusable.at(-1)) {event.preventDefault();focusable[0].focus();}
+        trapFocus(event, [mapClose, ...mapModal.querySelectorAll('a[href]'), ...languageButtons]);
       }
       return;
     }
     if (!open) return;
     if (event.key === "Escape") {event.preventDefault();setOpen(false);return;}
     if (event.key !== "Tab") return;
-    const focusable = [closeBtn, ...links];
-    if(event.shiftKey && document.activeElement===focusable[0]){event.preventDefault();focusable.at(-1).focus();}
-    else if(!event.shiftKey && document.activeElement===focusable.at(-1)){event.preventDefault();focusable[0].focus();}
+    trapFocus(event, [closeBtn, ...links, ...languageButtons]);
   });
   const refreshLanguage = () => {
     toggle.setAttribute("aria-label", tr(open ? "menu.closeAria" : "menu.openAria"));
