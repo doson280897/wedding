@@ -1,0 +1,58 @@
+name: Format source code
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install formatters
+        run: |
+          npm install --no-save --no-package-lock prettier@3.6.2
+          python -m pip install black==25.9.0
+
+      - name: Format web source, config and documentation
+        run: |
+          ./node_modules/.bin/prettier --write \
+            index.html link-tool.html \
+            style.css quick-nav.css \
+            script.js quick-nav.js gallery.js i18n.js \
+            .github/workflows/deploy.yml \
+            .github/workflows/import-wedding-photos.yml \
+            .github/workflows/format-source.yml \
+            .prettierrc.json README.md images/manifest.json \
+            favicon.svg favicon-bride.svg favicon-groom.svg
+          black generate_gallery.py
+
+      - name: Validate JavaScript and Python syntax
+        run: |
+          node --check script.js
+          node --check quick-nav.js
+          node --check gallery.js
+          node --check i18n.js
+          python -m py_compile generate_gallery.py
+          python -m json.tool images/manifest.json > /dev/null
+
+      - name: Commit formatted source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html link-tool.html style.css quick-nav.css script.js quick-nav.js gallery.js i18n.js generate_gallery.py .github/workflows .prettierrc.json README.md images/manifest.json favicon.svg favicon-bride.svg favicon-groom.svg
+          if ! git diff --cached --quiet; then
+            git commit -m "style: format source with Prettier and Black"
+            git push
+          fi
