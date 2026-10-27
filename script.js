@@ -145,7 +145,7 @@
   const openInvitation = document.getElementById("openInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
   let envelopeSeen = false;
-  try { envelopeSeen = sessionStorage.getItem("wedding-envelope-seen-v3") === "1"; } catch (_) {}
+  try { envelopeSeen = sessionStorage.getItem("wedding-envelope-seen-v4") === "1"; } catch (_) {}
   if (intro && !envelopeSeen) {
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
@@ -154,7 +154,7 @@
     const closeEnvelope = () => {
       if (closing) return;
       closing = true;
-      try { sessionStorage.setItem("wedding-envelope-seen-v3","1"); } catch (_) {}
+      try { sessionStorage.setItem("wedding-envelope-seen-v4","1"); } catch (_) {}
 
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
@@ -173,6 +173,7 @@
         window.setTimeout(() => {
           intro.classList.add("is-card-lifted");
 
+          // Hold the lifted invitation long enough for guests to read the names and dates.
           window.setTimeout(() => {
             intro.classList.add("is-leaving");
 
@@ -180,7 +181,7 @@
               intro.hidden = true;
               document.body.classList.remove("envelope-locked");
             }, 440);
-          }, 620);
+          }, 2200);
         }, 300);
       });
     };
