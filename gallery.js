@@ -93,7 +93,7 @@
     slide.append(card);
     space.append(slide);
 
-    return { slide, card, img, photoIndex: -1 };
+    return { slide, card, img, label, photoIndex: -1 };
   }
 
   function setPhoto(item, photoIndex) {
