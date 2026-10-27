@@ -50,7 +50,7 @@
   if (party === "bride" || party === "groom") {
     if (favicon) favicon.href = "favicon-" + party + ".svg?v=__BUILD_ID__";
     document.documentElement.dataset.party = party;
-    document.documentElement.classList.add("envelope-theme");
+    document.documentElement.classList.add("envelope-theme", "envelope-pending");
     if (theme) theme.setAttribute("content", "#496957");
 
     const heroPreload = document.createElement("link");
@@ -99,7 +99,14 @@
     </div>
   </div>
 </div>
-<div class="envelope-intro" id="envelopeIntro" hidden role="dialog" aria-modal="true" aria-labelledby="envelopeTitle">
+<div class="envelope-intro" id="envelopeIntro" role="dialog" aria-modal="true" aria-labelledby="envelopeTitle">
+  <div class="envelope-cooldown" id="envelopeCooldown" hidden role="timer" data-i18n-aria="envelope.autoCloseAria" aria-label="Tự động vào thiệp sau 5 giây">
+    <svg viewBox="0 0 42 42" aria-hidden="true">
+      <circle class="envelope-cooldown-track" cx="21" cy="21" r="15.9155"></circle>
+      <circle class="envelope-cooldown-progress" cx="21" cy="21" r="15.9155"></circle>
+    </svg>
+    <span id="envelopeCooldownValue" aria-hidden="true">5</span>
+  </div>
   <div class="envelope-inner">
     <div class="envelope-stage">
       <div class="envelope-shell" aria-hidden="true">

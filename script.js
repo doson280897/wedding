@@ -177,6 +177,8 @@
   const openInvitation = document.getElementById("openInvitation");
   const closeInvitation = document.getElementById("closeInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
+  const envelopeCooldown = document.getElementById("envelopeCooldown");
+  const envelopeCooldownValue = document.getElementById("envelopeCooldownValue");
   if (intro && selectedParty) {
     setBrowserTheme("#496957");
     intro.hidden = false;
@@ -185,15 +187,51 @@
 
     let opened = false;
     let leaving = false;
+    let autoCloseTimer = 0;
+    let cooldownTickTimer = 0;
+
+    const stopAutoClose = () => {
+      window.clearTimeout(autoCloseTimer);
+      window.clearInterval(cooldownTickTimer);
+      autoCloseTimer = 0;
+      cooldownTickTimer = 0;
+      envelopeCooldown?.classList.remove("is-active");
+      if (envelopeCooldown) envelopeCooldown.hidden = true;
+    };
+
+    const startAutoClose = () => {
+      if (!envelopeCooldown || !envelopeCooldownValue) return;
+      stopAutoClose();
+
+      const duration = 5000;
+      const startedAt = performance.now();
+      envelopeCooldown.hidden = false;
+      envelopeCooldownValue.textContent = "5";
+      // Force a fresh CSS animation in case the intro is reopened during development.
+      void envelopeCooldown.offsetWidth;
+      envelopeCooldown.classList.add("is-active");
+
+      cooldownTickTimer = window.setInterval(() => {
+        const elapsed = performance.now() - startedAt;
+        const remaining = Math.max(0, Math.ceil((duration - elapsed) / 1000));
+        envelopeCooldownValue.textContent = String(remaining);
+      }, 100);
+
+      autoCloseTimer = window.setTimeout(() => {
+        envelopeCooldownValue.textContent = "0";
+        enterInvitation(false);
+      }, duration);
+    };
 
     const enterInvitation = (instant = false) => {
       if (leaving) return;
       leaving = true;
+      stopAutoClose();
 
       if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
         document.body.classList.remove("envelope-locked");
-        document.documentElement.classList.remove("envelope-theme");
+        document.documentElement.classList.remove("envelope-theme", "envelope-pending");
         setBrowserTheme("#0b0e0e");
         return;
       }
@@ -202,7 +240,7 @@
       window.setTimeout(() => {
         intro.hidden = true;
         document.body.classList.remove("envelope-locked");
-        document.documentElement.classList.remove("envelope-theme");
+        document.documentElement.classList.remove("envelope-theme", "envelope-pending");
         setBrowserTheme("#0b0e0e");
       }, 260);
     };
@@ -216,6 +254,7 @@
         intro.classList.add("is-flap-open", "is-card-lifted", "is-opened");
         openInvitation?.setAttribute("disabled", "");
         skipInvitation?.setAttribute("disabled", "");
+        startAutoClose();
         closeInvitation?.focus({preventScroll:true});
       });
     };
