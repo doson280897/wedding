@@ -974,3 +974,8 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
 .music-toggle[aria-pressed="true"] .music-icon svg{filter:drop-shadow(0 0 5px #e9c99166);animation:musicIconSway 2.4s ease-in-out infinite}
 @keyframes musicIconSway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
 @media(prefers-reduced-motion:reduce){.music-toggle[aria-pressed="true"] .music-icon svg{animation:none}}
+
+/* Admin invitation-link entry, visible only on the unselected party screen. */
+.party-admin-link{display:inline-flex;align-items:center;justify-content:center;margin-top:24px;padding:11px 17px;border:1px solid rgba(213,184,133,.55);border-radius:999px;color:#e6c895;font:600 10px Montserrat,sans-serif;letter-spacing:.13em;text-decoration:none;transition:background .2s,border-color .2s}
+.party-admin-link:hover{background:rgba(197,165,117,.13);border-color:#e6c895}
+.party-admin-link:focus-visible{outline:2px solid #e6c895;outline-offset:4px}
