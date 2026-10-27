@@ -201,10 +201,12 @@
     return {
       compact,
       height:viewport.clientHeight,
-      spacing:compact ? viewport.clientWidth * .285 : viewport.clientWidth * .235,
-      activeRange:compact ? 3.55 : 4.35,
-      centerZ:compact ? 205 : 280,
-      depthStep:compact ? 105 : 128
+      // Wider than a carousel: neighbors live in the surrounding 3D space,
+      // not in a tight horizontal row.
+      spacing:compact ? viewport.clientWidth * .34 : viewport.clientWidth * .285,
+      activeRange:compact ? 3.25 : 4.10,
+      centerZ:compact ? 235 : 325,
+      depthStep:compact ? 132 : 164
     };
   }
 
@@ -232,20 +234,23 @@
       // Stable per-photo offsets. They never jump when the camera crosses
       // half/integer boundaries; only the continuous relative value changes.
       const seed = item.photoIndex + 1;
-      const floatY = Math.sin(seed * 1.73) * (metrics.compact ? 42 : 72);
-      const floatTilt = Math.sin(seed * 2.31) * 3.4;
-      const floatMix = Math.min(1, abs * .82);
+      const floatY = Math.sin(seed * 1.73) * (metrics.compact ? 62 : 104);
+      const floatTilt = Math.sin(seed * 2.31) * 5.2;
+      const floatMix = Math.min(1, abs * .90);
 
       // Continuous spatial curve: neighbors stay closer to each other and
       // accelerate outward gradually instead of jumping between discrete poses.
-      const spacingCurve = 1 + Math.min(abs, 3.5) * .055;
+      const spacingCurve = 1 + Math.min(abs, 3.5) * .085;
       let x = relative * metrics.spacing * spacingCurve;
       let y = floatY * floatMix;
-      let z = metrics.centerZ - abs * metrics.depthStep - abs * abs * (metrics.compact ? 8 : 11);
-      let rotateY = clamp(-relative * (metrics.compact ? 10.5 : 9.5), -34, 34);
+      let z = metrics.centerZ - abs * metrics.depthStep - abs * abs * (metrics.compact ? 12 : 17);
+      let rotateY = clamp(-relative * (metrics.compact ? 12.5 : 11.5), -42, 42);
       let rotateZ = floatTilt * floatMix;
-      let scale = Math.max(metrics.compact ? .60 : .56, 1.07 - abs * (metrics.compact ? .125 : .115));
-      let opacity = Math.max(.16, 1 - abs * .18);
+
+      // Demo-3 hierarchy: the current photo owns the light.
+      // Neighbors become much smaller/darker as they fall back in depth.
+      let scale = Math.max(metrics.compact ? .46 : .42, 1.04 - abs * (metrics.compact ? .17 : .19));
+      let opacity = Math.max(.10, Math.pow(.58, abs));
 
       // Ease the focused photo into dead center without a threshold snap.
       const focusBlend = Math.max(0, 1 - abs / .62);
@@ -254,8 +259,8 @@
       y *= 1 - focusEase;
       rotateY *= 1 - focusEase;
       rotateZ *= 1 - focusEase;
-      z += focusEase * (metrics.compact ? 42 : 58);
-      scale += focusEase * (metrics.compact ? .035 : .045);
+      z += focusEase * (metrics.compact ? 62 : 88);
+      scale += focusEase * (metrics.compact ? .085 : .105);
       opacity += (1 - opacity) * focusEase;
 
       const isMain = abs < .46;
