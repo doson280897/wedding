@@ -559,8 +559,8 @@
     lightboxStage.append(incoming);
 
     const outgoingAnimation = lightboxImage.animate([
-      { transform:"translate3d(0,0,0) scale(1)" },
-      { transform:"translate3d(" + (-direction * 3.2) + "vw,0,0) scale(.992)" }
+      { transform:"translate(-50%,-50%) translate3d(0,0,0) scale(1)", opacity:1 },
+      { transform:"translate(-50%,-50%) translate3d(" + (-direction * 3.2) + "vw,0,0) scale(.992)", opacity:0 }
     ], {
       duration:360,
       easing:"cubic-bezier(.22,.72,.18,1)",
@@ -568,8 +568,8 @@
     });
 
     const incomingAnimation = incoming.animate([
-      { transform:"translate(-50%,-50%) translate3d(" + (direction * 6.2) + "vw,0,0) scale(.992)" },
-      { transform:"translate(-50%,-50%) translate3d(0,0,0) scale(1)" }
+      { transform:"translate(-50%,-50%) translate3d(" + (direction * 6.2) + "vw,0,0) scale(.992)", opacity:.65 },
+      { transform:"translate(-50%,-50%) translate3d(0,0,0) scale(1)", opacity:1 }
     ], {
       duration:360,
       easing:"cubic-bezier(.18,.78,.18,1)",
@@ -578,6 +578,10 @@
 
     await Promise.allSettled([outgoingAnimation.finished, incomingAnimation.finished]);
 
+    // Commit the incoming layer's final pose before cancelling WAAPI effects.
+    // Both layers are absolutely positioned, so removing the old one cannot
+    // reflow the stage or make the new photo drop vertically.
+    incoming.style.transform = "translate(-50%,-50%) translate3d(0,0,0) scale(1)";
     outgoingAnimation.cancel();
     incomingAnimation.cancel();
 
@@ -613,8 +617,8 @@
 
     if (!reducedMotion && lightboxImage.animate) {
       lightboxImage.animate([
-        { transform:"scale(.975)", opacity:0 },
-        { transform:"scale(1)", opacity:1 }
+        { transform:"translate(-50%,-50%) scale(.975)", opacity:0 },
+        { transform:"translate(-50%,-50%) scale(1)", opacity:1 }
       ], { duration:280, easing:"cubic-bezier(.2,.75,.2,1)" });
     }
 
@@ -679,7 +683,7 @@
     const scale = Math.max(.99, 1 - Math.min(Math.abs(dx), 180) / 18000);
 
     lightboxImage.style.transform =
-      "translate3d(" + visualX.toFixed(2) + "px,0,0) scale(" + scale.toFixed(4) + ")";
+      "translate(-50%,-50%) translate3d(" + visualX.toFixed(2) + "px,0,0) scale(" + scale.toFixed(4) + ")";
   }, { passive:false });
 
   lightboxStage?.addEventListener("pointerup", event => {
@@ -699,8 +703,8 @@
 
     if (!reducedMotion && horizontal && lightboxImage.animate) {
       lightboxImage.animate([
-        { transform:"translate3d(" + (dx * .22).toFixed(2) + "px,0,0) scale(.994)" },
-        { transform:"translate3d(0,0,0) scale(1)" }
+        { transform:"translate(-50%,-50%) translate3d(" + (dx * .22).toFixed(2) + "px,0,0) scale(.994)" },
+        { transform:"translate(-50%,-50%) translate3d(0,0,0) scale(1)" }
       ], { duration:210, easing:"cubic-bezier(.2,.75,.2,1)" });
     }
   });
