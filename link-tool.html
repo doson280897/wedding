@@ -28,6 +28,7 @@ button.secondary,.action.secondary{background:transparent;color:#f0dfc3}
 #feedback{min-height:22px;margin:12px 0 0;color:#d9c18e}
 .note{font-size:12px;margin-bottom:0}
 .language-switch{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;z-index:6001;display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #c4a56f70;border-radius:999px;background:#101512d9;color:#b8aa93;box-shadow:0 8px 30px #0007;backdrop-filter:blur(8px);font:600 10px system-ui,sans-serif;letter-spacing:.12em}.language-option{border:0;background:transparent;color:#a99f8d;padding:3px 4px;cursor:pointer;font:600 10px system-ui,sans-serif;letter-spacing:.12em;min-height:auto}.language-option.is-active{color:#f0d2a2}.language-option:focus-visible{outline:2px solid #e5c78e;outline-offset:3px;border-radius:4px}
+.language-switch.floating-control{touch-action:none;user-select:none;-webkit-user-select:none;transition:top .3s,left .3s,right .3s,opacity .2s}.language-switch.is-dragging{transition:none!important;cursor:grabbing}.language-switch.is-idle{opacity:.72}.language-switch.is-idle .language-option:not(.is-active),.language-switch.is-idle span{display:none}
 </style>
 </head>
 <body>
@@ -129,5 +130,6 @@ share.addEventListener("click",async()=>{
 });
 })();
 </script>
+<script src="floating-language.js?v=__BUILD_ID__" defer></script>
 </body>
 </html>
