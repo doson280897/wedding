@@ -3,6 +3,41 @@
   const i18n = window.WeddingI18n;
   const tr = key => i18n ? i18n.t(key) : key;
   const params = new URLSearchParams(window.location.search);
+  const partyParam = params.get("party");
+  const selectedParty = partyParam === "bride" || partyParam === "groom" ? partyParam : null;
+  const partySelector = document.getElementById("partySelector");
+
+  if (selectedParty) {
+    document.documentElement.dataset.party = selectedParty;
+    document.documentElement.classList.remove("party-pending");
+  } else {
+    document.documentElement.classList.add("party-pending");
+    const partyButtons = Array.from(document.querySelectorAll("[data-party-select]"));
+    requestAnimationFrame(() => partyButtons[0]?.focus({preventScroll:true}));
+
+    partyButtons.forEach(button => button.addEventListener("click", () => {
+      const side = button.dataset.partySelect;
+      if (side !== "bride" && side !== "groom") return;
+      const url = new URL(window.location.href);
+      url.searchParams.set("party", side);
+      url.hash = "";
+      window.location.replace(url.href);
+    }));
+
+    partySelector?.addEventListener("keydown", event => {
+      if (event.key !== "Tab" || partyButtons.length < 2) return;
+      const first = partyButtons[0];
+      const last = partyButtons.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+
   const rawGuest = params.get("to");
   const displayGuest = rawGuest ? rawGuest.replace(/[_+]/g, " ").trim().slice(0, 100) : "";
   const guestNode = document.getElementById("guestName");
@@ -29,7 +64,7 @@
   const timer = document.getElementById("timer");
   const countdownTitle = document.getElementById("countdownTitle");
   const countdownButtons = Array.from(document.querySelectorAll("[data-countdown]"));
-  let selectedWedding = Date.now() < weddingDates.bride.time ? "bride" : "groom";
+  let selectedWedding = selectedParty || (Date.now() < weddingDates.bride.time ? "bride" : "groom");
 
   function ensureTimerBoxes() {
     if (!timer) return;
@@ -77,6 +112,7 @@
   }
 
   countdownButtons.forEach(button => button.addEventListener("click", () => {
+    if (selectedParty) return;
     selectedWedding = button.dataset.countdown;
     countdown();
   }));
@@ -146,7 +182,7 @@
   const skipInvitation = document.getElementById("skipInvitation");
   let envelopeSeen = false;
   try { envelopeSeen = sessionStorage.getItem("wedding-envelope-seen-v5") === "1"; } catch (_) {}
-  if (intro && !envelopeSeen) {
+  if (intro && !envelopeSeen && selectedParty) {
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
     window.setTimeout(() => openInvitation?.focus({preventScroll:true}), 0);

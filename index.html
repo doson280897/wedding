@@ -41,6 +41,16 @@
     .catch(() => {});
 })();
 </script>
+<script>
+(() => {
+  const party = new URLSearchParams(location.search).get("party");
+  if (party === "bride" || party === "groom") {
+    document.documentElement.dataset.party = party;
+  } else {
+    document.documentElement.classList.add("party-pending");
+  }
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/optimized/assets/hero.webp?v=__BUILD_ID__" type="image/webp" fetchpriority="high">
@@ -53,6 +63,28 @@
   <button type="button" class="language-option is-active" data-lang="vi" aria-pressed="true">VN</button>
   <span aria-hidden="true">/</span>
   <button type="button" class="language-option" data-lang="en" aria-pressed="false">EN</button>
+</div>
+<div class="party-selector" id="partySelector" role="dialog" aria-modal="true" aria-labelledby="partySelectorTitle" aria-describedby="partySelectorLead">
+  <div class="party-selector-backdrop" aria-hidden="true"></div>
+  <div class="party-selector-card">
+    <p class="party-selector-kicker" data-i18n="party.eyebrow">CHỌN TIỆC CƯỚI</p>
+    <h2 id="partySelectorTitle" data-i18n="party.title">Bạn tham dự tiệc nào?</h2>
+    <p id="partySelectorLead" data-i18n="party.lead">Chọn đúng tiệc để xem thời gian và địa điểm dành cho bạn.</p>
+    <div class="party-selector-options">
+      <button type="button" class="party-selector-option" data-party-select="bride">
+        <span class="party-selector-role" data-i18n="party.brideRole">NHÀ GÁI · LỄ VU QUY</span>
+        <strong data-i18n="party.brideDate">14.11.2026</strong>
+        <small data-i18n="party.bridePlace">Krông Ana, Đắk Lắk</small>
+        <span class="party-selector-action" data-i18n="party.choose">XEM THIỆP →</span>
+      </button>
+      <button type="button" class="party-selector-option" data-party-select="groom">
+        <span class="party-selector-role" data-i18n="party.groomRole">NHÀ TRAI · LỄ TÂN HÔN</span>
+        <strong data-i18n="party.groomDate">29.11.2026</strong>
+        <small data-i18n="party.groomPlace">Định Quán, Đồng Nai</small>
+        <span class="party-selector-action" data-i18n="party.choose">XEM THIỆP →</span>
+      </button>
+    </div>
+  </div>
 </div>
 <div class="envelope-intro" id="envelopeIntro" hidden role="dialog" aria-modal="true" aria-labelledby="envelopeTitle">
   <div class="envelope-inner">
@@ -111,7 +143,7 @@
         <p class="envelope-eyebrow" data-i18n="envelope.eyebrow">SAVE THE DATE</p>
         <span class="invitation-leaf" aria-hidden="true">❧</span>
         <h2 id="envelopeTitle"><span>Tố Nga</span><em>&amp;</em><span>Thành Sơn</span></h2>
-        <p class="envelope-date">14 · 11 · 2026 <span>—</span> 29 · 11 · 2026</p>
+        <p class="envelope-date"><span data-party-date="bride">14 · 11 · 2026</span><span class="party-date-separator">—</span><span data-party-date="groom">29 · 11 · 2026</span></p>
         <div class="invitation-leaf invitation-leaf-small" aria-hidden="true">❧</div>
         <p class="envelope-invite" id="envelopeGuest" data-i18n="envelope.invite">Trân trọng kính mời</p>
       </article>
@@ -143,7 +175,7 @@
       <h1>THÀNH SƠN <span>&amp;</span> TỐ NGA</h1>
       <div class="fine-flourish">✧</div>
       <p class="handwriting" data-i18n="hero.handwriting">Cùng nhau viết tiếp những ngày hạnh phúc...</p>
-      <div class="hero-date">14.11.2026 <span>—</span> 29.11.2026</div>
+      <div class="hero-date"><span data-party-date="bride">14.11.2026</span><span class="party-date-separator">—</span><span data-party-date="groom">29.11.2026</span></div>
       <div class="hero-count-title" id="countdownTitle">ĐẾM NGƯỢC ĐẾN LỄ VU QUY</div>
       <div class="countdown-choice" role="group" aria-label="Chọn ngày cưới để đếm ngược" data-i18n-aria="hero.countdownGroupAria">
         <button type="button" class="countdown-choice-btn is-active" data-countdown="bride" aria-pressed="true" data-i18n="hero.brideOption">14.11 · Nhà gái</button>
@@ -205,8 +237,8 @@
 <section class="events-section" id="events">
   <div class="section-head"><p class="overline gold" data-i18n="events.eyebrow">LƯU NGÀY HẠNH PHÚC</p><h2 class="section-title" data-i18n="events.title">Thông tin lễ cưới</h2><p class="section-lead" data-i18n="events.lead">Hân hạnh đón tiếp bạn trong ngày vui trọng đại</p></div>
   <div class="event-grid">
-    <article class="event-card reveal"><div class="event-label" data-i18n="events.brideLabel">LỄ VU QUY · NHÀ GÁI</div><div class="date-block"><div><small data-i18n="events.saturday">THỨ BẢY</small><strong>14.11.2026</strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.brideCeremony"><span>09:00</span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.brideReception"><span>11:00</span> Tiệc mừng tại Nhà Hàng Hương Lan</div><p class="event-address" data-i18n="events.brideAddress">24 Hùng Vương, Krông Ana, Đắk Lắk</p><p class="lunar" data-i18n="events.brideLunar">Nhằm ngày 06 tháng 10 năm Bính Ngọ</p><a href="#map-bride" class="map-button" data-i18n="events.map">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="bride" aria-label="Lưu lễ Vu Quy vào lịch" data-i18n="events.calendar" data-i18n-aria="events.brideCalendarAria">＋ LƯU VÀO LỊCH</button></article>
-    <article class="event-card reveal"><div class="event-label" data-i18n="events.groomLabel">LỄ TÂN HÔN · NHÀ TRAI</div><div class="date-block"><div><small data-i18n="events.sunday">CHỦ NHẬT</small><strong>29.11.2026</strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.groomCeremony"><span>09:00</span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.groomReception"><span>11:00</span> Tiệc mừng tại Tư Gia Nhà Trai</div><p class="event-address" data-i18n="events.groomAddress">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><p class="lunar" data-i18n="events.groomLunar">Nhằm ngày 21 tháng 10 năm Bính Ngọ</p><a href="#map-groom" class="map-button" data-i18n="events.map">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="groom" aria-label="Lưu lễ Tân Hôn vào lịch" data-i18n="events.calendar" data-i18n-aria="events.groomCalendarAria">＋ LƯU VÀO LỊCH</button></article>
+    <article class="event-card reveal" data-party-scope="bride"><div class="event-label" data-i18n="events.brideLabel">LỄ VU QUY · NHÀ GÁI</div><div class="date-block"><div><small data-i18n="events.saturday">THỨ BẢY</small><strong>14.11.2026</strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.brideCeremony"><span>09:00</span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.brideReception"><span>11:00</span> Tiệc mừng tại Nhà Hàng Hương Lan</div><p class="event-address" data-i18n="events.brideAddress">24 Hùng Vương, Krông Ana, Đắk Lắk</p><p class="lunar" data-i18n="events.brideLunar">Nhằm ngày 06 tháng 10 năm Bính Ngọ</p><a href="#map-bride" class="map-button" data-i18n="events.map">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="bride" aria-label="Lưu lễ Vu Quy vào lịch" data-i18n="events.calendar" data-i18n-aria="events.brideCalendarAria">＋ LƯU VÀO LỊCH</button></article>
+    <article class="event-card reveal" data-party-scope="groom"><div class="event-label" data-i18n="events.groomLabel">LỄ TÂN HÔN · NHÀ TRAI</div><div class="date-block"><div><small data-i18n="events.sunday">CHỦ NHẬT</small><strong>29.11.2026</strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.groomCeremony"><span>09:00</span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.groomReception"><span>11:00</span> Tiệc mừng tại Tư Gia Nhà Trai</div><p class="event-address" data-i18n="events.groomAddress">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><p class="lunar" data-i18n="events.groomLunar">Nhằm ngày 21 tháng 10 năm Bính Ngọ</p><a href="#map-groom" class="map-button" data-i18n="events.map">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="groom" aria-label="Lưu lễ Tân Hôn vào lịch" data-i18n="events.calendar" data-i18n-aria="events.groomCalendarAria">＋ LƯU VÀO LỊCH</button></article>
   </div>
 </section>
 <section class="closing"><div class="closing-overlay"></div><div class="closing-content"><p class="overline gold" data-i18n="closing.eyebrow">CẢM ƠN BẠN ĐÃ ĐẾN</p><h2 data-i18n-html="closing.title">Hẹn gặp bạn<br>trong ngày hạnh phúc</h2><p class="closing-names">Thành Sơn <span>&amp;</span> Tố Nga</p></div></section>
@@ -220,8 +252,8 @@
 <section class="locations-section" id="locations">
   <div class="section-head"><p class="overline gold" data-i18n="map.eyebrow">CHỈ ĐƯỜNG</p><h2 class="section-title" id="wmTitle" data-i18n="map.title">Hẹn gặp bạn tại đây</h2></div>
   <div class="location-grid">
-    <article id="map-bride" class="location-card"><div class="location-info"><small data-i18n="map.brideLabel">NHÀ GÁI · 14/11/2026</small><h3 data-i18n="map.brideTitle">Nhà Hàng Hương Lan</h3><p data-i18n="map.brideAddress">24 Hùng Vương, Krông Ana, Đắk Lắk</p><a href="https://www.google.com/maps/search/?api=1&query=Nhà+Hàng+Hương+Lan+24+Hùng+Vương+Krông+Ana+Đắk+Lắk" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div><iframe title="Bản đồ nhà gái" tabindex="-1" data-i18n-title="map.brideFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-src="https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"></iframe></article>
-    <article id="map-groom" class="location-card"><div class="location-info"><small data-i18n="map.groomLabel">NHÀ TRAI · 29/11/2026</small><h3 data-i18n="map.groomTitle">Tư Gia Nhà Trai</h3><p data-i18n="map.groomAddress">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><a href="https://www.google.com/maps/place/11%C2%B009'48.2%22N+107%C2%B023'24.5%22E/@11.163395,107.3875511,17z/" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div><iframe title="Bản đồ nhà trai" tabindex="-1" data-i18n-title="map.groomFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-src="https://maps.google.com/maps?q=11.163389,107.390139&z=16&output=embed"></iframe></article>
+    <article id="map-bride" class="location-card" data-party-scope="bride"><div class="location-info"><small data-i18n="map.brideLabel">NHÀ GÁI · 14/11/2026</small><h3 data-i18n="map.brideTitle">Nhà Hàng Hương Lan</h3><p data-i18n="map.brideAddress">24 Hùng Vương, Krông Ana, Đắk Lắk</p><a href="https://www.google.com/maps/search/?api=1&query=Nhà+Hàng+Hương+Lan+24+Hùng+Vương+Krông+Ana+Đắk+Lắk" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div><iframe title="Bản đồ nhà gái" tabindex="-1" data-i18n-title="map.brideFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-src="https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"></iframe></article>
+    <article id="map-groom" class="location-card" data-party-scope="groom"><div class="location-info"><small data-i18n="map.groomLabel">NHÀ TRAI · 29/11/2026</small><h3 data-i18n="map.groomTitle">Tư Gia Nhà Trai</h3><p data-i18n="map.groomAddress">Ấp Cao Cang, Xã Định Quán, Thành phố Đồng Nai</p><a href="https://www.google.com/maps/place/11%C2%B009'48.2%22N+107%C2%B023'24.5%22E/@11.163395,107.3875511,17z/" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div><iframe title="Bản đồ nhà trai" tabindex="-1" data-i18n-title="map.groomFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-src="https://maps.google.com/maps?q=11.163389,107.390139&z=16&output=embed"></iframe></article>
   </div>
 </section>
 </div></div>

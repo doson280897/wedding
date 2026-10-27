@@ -484,3 +484,43 @@ body.envelope-locked .language-switch{visibility:hidden;pointer-events:none}
   .gift-card{padding:20px 14px 18px}
   .gift-qr-shell{width:min(330px,100%)}
 }
+
+
+/* PARTY ROUTING */
+html.party-pending body{overflow:hidden;background:#080c0a}
+html.party-pending body> :not(#partySelector){visibility:hidden}
+.party-selector{display:none;position:fixed;inset:0;z-index:5000;place-items:center;padding:20px;color:#f1e6d4}
+html.party-pending .party-selector{display:grid;visibility:visible}
+.party-selector-backdrop{position:absolute;inset:0;background:
+  radial-gradient(circle at 50% 22%,rgba(184,150,91,.18),transparent 34%),
+  linear-gradient(160deg,#151c17 0%,#080c0a 58%,#050806 100%)}
+.party-selector-card{position:relative;width:min(760px,100%);padding:44px 38px 38px;border:1px solid rgba(197,165,117,.44);border-radius:24px;background:linear-gradient(145deg,rgba(24,31,25,.97),rgba(10,14,11,.98));box-shadow:0 34px 100px #000c;text-align:center}
+.party-selector-kicker{margin:0 0 10px;color:#c5a575;font:600 10px Montserrat,sans-serif;letter-spacing:.24em}
+.party-selector-card h2{margin:0;color:#f2e6d2;font:500 clamp(34px,6vw,54px) "Cormorant Garamond",serif}
+.party-selector-card>p:not(.party-selector-kicker){max-width:520px;margin:10px auto 30px;color:#afa89b;font-size:13px;line-height:1.7}
+.party-selector-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.party-selector-option{appearance:none;min-height:210px;padding:26px 22px;border:1px solid rgba(197,165,117,.34);border-radius:18px;background:linear-gradient(145deg,#171e19,#0f1411);color:#f0e4d0;cursor:pointer;text-align:left;display:flex;flex-direction:column;transition:transform .22s ease,border-color .22s ease,background .22s ease}
+.party-selector-option:hover{transform:translateY(-3px);border-color:#d2b378;background:linear-gradient(145deg,#202820,#111713)}
+.party-selector-option:focus-visible{outline:2px solid #e5c78e;outline-offset:4px}
+.party-selector-role{color:#c5a575;font:600 9px Montserrat,sans-serif;letter-spacing:.18em}
+.party-selector-option strong{margin:14px 0 7px;font:500 34px "Cormorant Garamond",serif;letter-spacing:.03em}
+.party-selector-option small{color:#aaa497;font:400 11px Montserrat,sans-serif;line-height:1.6}
+.party-selector-action{margin-top:auto;padding-top:26px;color:#dfc28c;font:600 10px Montserrat,sans-serif;letter-spacing:.16em}
+html[data-party="bride"] [data-party-scope="groom"],
+html[data-party="groom"] [data-party-scope="bride"],
+html[data-party="bride"] [data-party-date="groom"],
+html[data-party="groom"] [data-party-date="bride"]{display:none!important}
+html[data-party] .party-date-separator,
+html[data-party] .countdown-choice{display:none!important}
+html[data-party] .event-grid,
+html[data-party] .location-grid{grid-template-columns:minmax(0,720px);justify-content:center}
+@media(max-width:650px){
+  .party-selector{padding:12px}
+  .party-selector-card{padding:32px 18px 22px;border-radius:19px}
+  .party-selector-card>p:not(.party-selector-kicker){margin-bottom:22px;font-size:12px}
+  .party-selector-options{grid-template-columns:1fr;gap:12px}
+  .party-selector-option{min-height:154px;padding:20px 18px}
+  .party-selector-option strong{font-size:30px;margin-top:10px}
+  .party-selector-action{padding-top:17px}
+}
+@media(prefers-reduced-motion:reduce){.party-selector-option{transition:none!important}}

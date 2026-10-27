@@ -144,7 +144,11 @@
     if (!target) return;
     event.preventDefault();
     setOpen(false,false);
-    if (id === "locations") { setMapOpen(true); return; }
+    if (id === "locations") {
+      const activeParty = document.documentElement.dataset.party;
+      setMapOpen(true, activeParty === "bride" || activeParty === "groom" ? "map-" + activeParty : null);
+      return;
+    }
     if (id === "wedding-gift") { setGiftOpen(true); return; }
     history.replaceState(null,"",location.pathname+location.search+"#"+encodeURIComponent(id));
     target.scrollIntoView({behavior:reduced.matches?"auto":"smooth",block:"start"});
