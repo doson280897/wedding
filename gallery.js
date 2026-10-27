@@ -46,6 +46,8 @@
   let lightboxPointer = null;
   let lightboxTransitioning = false;
   let lightboxQueuedDelta = 0;
+  // Invalidate late decodes/animations when a viewer closes or reopens the lightbox.
+  let lightboxGeneration = 0;
 
   const decodeQueue = [];
   let activeDecodes = 0;
@@ -546,29 +548,33 @@
       return;
     }
 
+    const generation = lightboxGeneration;
     const direction = delta > 0 ? 1 : -1;
     const nextIndex = wrap(lightboxIndex + delta);
+    lightboxTransitioning = true;
+    lightboxQueuedDelta = 0;
 
     if (reducedMotion || !lightboxImage.animate) {
       const decoded = await decodeLightboxLayer(nextIndex);
+      if (generation !== lightboxGeneration || lightbox.hidden) return;
       decoded.image.id = "albumLightboxImage";
       lightboxImage.replaceWith(decoded.image);
       lightboxImage = decoded.image;
       lightboxIndex = decoded.index;
       updateLightboxMeta();
       preloadLightboxNeighbors();
+      lightboxTransitioning = false;
+      if (lightboxQueuedDelta) {
+        const queued = lightboxQueuedDelta;
+        lightboxQueuedDelta = 0;
+        animateLightboxStep(queued);
+      }
       return;
     }
-
-    lightboxTransitioning = true;
-    lightboxQueuedDelta = 0;
 
     // Decode first while the current photo remains fully visible.
     const decoded = await decodeLightboxLayer(nextIndex);
-    if (!lightbox || lightbox.hidden) {
-      lightboxTransitioning = false;
-      return;
-    }
+    if (generation !== lightboxGeneration || lightbox.hidden) return;
 
     const incoming = decoded.image;
     lightboxStage.append(incoming);
@@ -592,6 +598,12 @@
     });
 
     await Promise.allSettled([outgoingAnimation.finished, incomingAnimation.finished]);
+    if (generation !== lightboxGeneration || lightbox.hidden) {
+      outgoingAnimation.cancel();
+      incomingAnimation.cancel();
+      incoming.remove();
+      return;
+    }
 
     // Commit the incoming layer's final pose before cancelling WAAPI effects.
     // Both layers are absolutely positioned, so removing the old one cannot
@@ -620,6 +632,9 @@
   function openLightbox(index, returnFocus = null) {
     if (!lightbox || !photos.length || !lightboxImage) return;
 
+    lightboxGeneration++;
+    lightboxTransitioning = false;
+    lightboxQueuedDelta = 0;
     lightboxReturnFocus = returnFocus || document.activeElement;
     lightboxIndex = wrap(index);
     lightboxImage.src = versionedAsset(photos[lightboxIndex]);
@@ -643,6 +658,7 @@
   function closeLightbox() {
     if (!lightbox || lightbox.hidden) return;
 
+    lightboxGeneration++;
     lightbox.hidden = true;
     lightbox.setAttribute("aria-hidden", "true");
     document.body.classList.remove("album-lightbox-open");
@@ -650,6 +666,9 @@
     lightboxTransitioning = false;
     lightboxQueuedDelta = 0;
 
+    lightboxStage?.querySelectorAll("img").forEach(node => {
+      node.getAnimations?.().forEach(animation => animation.cancel());
+    });
     lightboxStage?.querySelectorAll(".album-lightbox-incoming").forEach(node => node.remove());
     lightboxImage.style.transform = "";
     lightboxImage.style.visibility = "";
