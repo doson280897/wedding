@@ -49,7 +49,9 @@
 
   const decodeQueue = [];
   let activeDecodes = 0;
-  const MAX_DECODE_CONCURRENCY = 4;
+  // Limit simultaneous image decodes on phones to avoid GPU/memory spikes.
+  const MAX_DECODE_CONCURRENCY = matchMedia("(max-width: 700px), (pointer: coarse)").matches ? 2 : 4;
+  const SAVE_DATA = Boolean(navigator.connection?.saveData);
 
   const wrap = index => ((index % photos.length) + photos.length) % photos.length;
 
@@ -133,8 +135,9 @@
     img.alt = "";
     img.draggable = false;
     img.decoding = "async";
+    // Images are loaded on demand in renderScene; hidden cards do not occupy memory.
     img.loading = "eager";
-    img.fetchPriority = photoIndex <= 2 || photoIndex >= photos.length - 2 ? "high" : "auto";
+    img.fetchPriority = "auto";
 
     const item = {
       slide,
@@ -158,13 +161,16 @@
       requestSceneFrame();
     });
 
-    img.src = versionedAsset(photo);
-    warmDecode(img);
-
     card.append(img);
     slide.append(card);
     space.append(slide);
     return item;
+  }
+
+  function ensureItemLoaded(item, relativeDistance) {
+    if (item.img.hasAttribute("src")) return;
+    item.img.fetchPriority = relativeDistance < 1.7 ? "high" : "low";
+    item.img.src = versionedAsset(photos[item.photoIndex]);
   }
 
   function shortestRelative(photoIndex, cameraPosition) {
@@ -221,6 +227,11 @@
     for (const item of items) {
       const relative = shortestRelative(item.photoIndex, position);
       const abs = Math.abs(relative);
+
+      // Prefetch cards close to the camera, but not all 30 photos at once.
+      if (abs <= metrics.activeRange + (SAVE_DATA ? .25 : 1.5)) {
+        ensureItemLoaded(item, abs);
+      }
 
       if (abs > metrics.activeRange) {
         // Apply hidden state even on the very first render. Newly created
