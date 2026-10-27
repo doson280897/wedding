@@ -193,6 +193,7 @@
       if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
         document.body.classList.remove("envelope-locked");
+        document.documentElement.classList.remove("envelope-theme");
         setBrowserTheme("#0b0e0e");
         return;
       }
@@ -201,6 +202,7 @@
       window.setTimeout(() => {
         intro.hidden = true;
         document.body.classList.remove("envelope-locked");
+        document.documentElement.classList.remove("envelope-theme");
         setBrowserTheme("#0b0e0e");
       }, 260);
     };

@@ -271,6 +271,12 @@ footer { background: #050806; color: #c5b9a4; }
 }
 
 
+/* ANDROID EDGE-TO-EDGE ENVELOPE THEME */
+html.envelope-theme,
+html.envelope-theme body{
+  background-color:#496957;
+}
+
 /* WEDDING EXPERIENCE ENHANCEMENTS */
 .couple-section,.family-section,.album-section,.events-section,.closing{content-visibility:auto;contain-intrinsic-size:800px}
 
