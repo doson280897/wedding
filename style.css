@@ -967,3 +967,10 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
 }
 .album-lightbox-stage > img#albumLightboxImage{z-index:2}
 .album-lightbox-stage > img.album-lightbox-incoming{z-index:3}
+
+/* Refined gold music emblem, with a gentle playing-state glow. */
+.music-toggle .music-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 20px;width:20px;height:20px;color:#e9c991;filter:drop-shadow(0 1px 4px #d6a75b22)}
+.music-toggle .music-icon svg{display:block;width:20px;height:20px;overflow:visible;transition:transform .3s ease,filter .3s ease}
+.music-toggle[aria-pressed="true"] .music-icon svg{filter:drop-shadow(0 0 5px #e9c99166);animation:musicIconSway 2.4s ease-in-out infinite}
+@keyframes musicIconSway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@media(prefers-reduced-motion:reduce){.music-toggle[aria-pressed="true"] .music-icon svg{animation:none}}
