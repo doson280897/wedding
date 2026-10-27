@@ -51,6 +51,8 @@
   let lightboxIndex = 0;
   let lightboxReturnFocus = null;
   let lightboxPointer = null;
+  let layoutStep = 1;
+  let firstSlideCenter = 0;
   const decodeQueue = [];
   let activeDecodes = 0;
   const MAX_DECODE_CONCURRENCY = 4;
@@ -63,42 +65,46 @@
     return slide ? slide.offsetLeft + slide.offsetWidth / 2 : 0;
   }
 
-  function preserveViewportAnchor(mutator) {
-    if (!slides.length || recentering) {
-      mutator();
-      return;
-    }
-    const anchorIndex = nearestSlotIndex();
-    const anchor = slides[anchorIndex]?.slide;
-    const before = anchor ? anchor.offsetLeft + anchor.offsetWidth / 2 : 0;
-    mutator();
-    const after = anchor ? anchor.offsetLeft + anchor.offsetWidth / 2 : before;
-    viewport.scrollLeft += after - before;
-  }
-
-  function applyItemRatio(item, ratio, preserve = true) {
-    if (!item?.slide || !item.card) return;
-    const safeRatio = clamp(Number(ratio) || .78, .56, 1.9);
+  function applyItemRatio(item, ratio) {
+    if (!item?.card) return;
+    const safeRatio = clamp(Number(ratio) || .78, .52, 2.0);
     item.ratio = safeRatio;
 
-    const resize = () => {
-      const cardHeight = item.card.getBoundingClientRect().height || (viewport.clientWidth < 700 ? 360 : 460);
-      const imageHeight = Math.max(150, cardHeight - 27);
-      const compact = viewport.clientWidth < 700;
-      const minWidth = compact ? Math.min(172, viewport.clientWidth * .46) : 190;
-      const maxWidth = compact ? viewport.clientWidth * .84 : Math.min(650, viewport.clientWidth * .70);
-      const width = clamp(imageHeight * safeRatio, minWidth, maxWidth);
-      item.slide.style.width = width + "px";
-    };
+    const compact = viewport.clientWidth < 700;
+    const maxPhotoH = compact
+      ? Math.min(330, viewport.clientWidth * .78)
+      : Math.min(430, viewport.clientWidth * .34);
 
-    if (preserve) preserveViewportAnchor(resize);
-    else resize();
+    let photoH = maxPhotoH;
+    if (safeRatio >= 1.25) photoH *= compact ? .66 : .68;
+    else if (safeRatio >= .88) photoH *= .84;
+
+    let photoW = photoH * safeRatio;
+    const maxPhotoW = compact
+      ? viewport.clientWidth * .76
+      : Math.min(520, viewport.clientWidth * .39);
+
+    if (photoW > maxPhotoW) {
+      const factor = maxPhotoW / photoW;
+      photoW *= factor;
+      photoH *= factor;
+    }
+
+    const minPhotoW = compact ? 118 : 150;
+    if (photoW < minPhotoW) {
+      const factor = minPhotoW / photoW;
+      photoW *= factor;
+      photoH *= factor;
+    }
+
+    item.card.style.width = Math.round(photoW) + "px";
+    item.card.style.height = Math.round(photoH + 25) + "px";
   }
 
-  function refreshAdaptiveWidths() {
+  function refreshItemSizes() {
     slides.forEach(item => {
       const photo = photos[item.photoIndex];
-      applyItemRatio(item, photo?.ratio || item.ratio || .78, false);
+      applyItemRatio(item, photo?.ratio || item.ratio || .78);
     });
   }
 
@@ -157,7 +163,7 @@
       const ratio = img.naturalWidth / img.naturalHeight;
       const photo = photos[item.photoIndex];
       if (photo) photo.ratio = ratio;
-      applyItemRatio(item, ratio, true);
+      applyItemRatio(item, ratio);
       warmDecode(img);
       requestDepthRender();
     });
@@ -219,7 +225,7 @@
     if (item.photoIndex === nextIndex) return;
     item.photoIndex = nextIndex;
     const photo = photos[nextIndex];
-    applyItemRatio(item, photo?.ratio || .78, !recentering);
+    applyItemRatio(item, photo?.ratio || .78);
     item.img.src = versionedAsset(photo);
     item.label.textContent = `${String(nextIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
     warmDecode(item.img);
@@ -242,28 +248,21 @@
 
   function refreshLayoutMetrics() {
     if (!slides.length) return;
-    refreshAdaptiveWidths();
+    refreshItemSizes();
+    layoutStep = slides[0].slide.getBoundingClientRect().width || 1;
+    firstSlideCenter = slides[0].slide.offsetLeft + layoutStep / 2;
   }
 
   function nearestSlotIndex() {
     if (!slides.length) return centerSlot;
     const center = viewport.scrollLeft + viewport.clientWidth / 2;
-    let nearest = 0;
-    let best = Infinity;
-    for (let index = 0; index < slides.length; index++) {
-      const distance = Math.abs(slideCenterAt(index) - center);
-      if (distance < best) {
-        best = distance;
-        nearest = index;
-      }
-    }
-    return nearest;
+    return clamp(Math.round((center - firstSlideCenter) / layoutStep), 0, slides.length - 1);
   }
 
   function targetScrollLeft(slotIndex) {
     if (!slides.length) return viewport.scrollLeft;
     slotIndex = clamp(slotIndex, 0, slides.length - 1);
-    return slideCenterAt(slotIndex) - viewport.clientWidth / 2;
+    return firstSlideCenter + slotIndex * layoutStep - viewport.clientWidth / 2;
   }
 
   function scrollToSlot(slotIndex, behavior = "smooth") {
@@ -274,7 +273,6 @@
       behavior: reducedMotion ? "auto" : behavior
     });
   }
-
 
   let lastActiveStart = -1;
   let lastActiveEnd = -1;
@@ -311,42 +309,63 @@
 
     const compact = viewport.clientWidth < 700;
     const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
-    const anchorIndex = nearestSlotIndex();
-    const activeRadius = compact ? 5 : 6;
-    const start = Math.max(0, anchorIndex - activeRadius);
-    const end = Math.min(slides.length - 1, anchorIndex + activeRadius);
+    const floatingIndex = (viewportCenter - firstSlideCenter) / layoutStep;
+    const activeRadius = compact ? 4 : 5;
+    const start = Math.max(0, Math.floor(floatingIndex) - activeRadius);
+    const end = Math.min(slides.length - 1, Math.ceil(floatingIndex) + activeRadius);
     hideOutsideActiveZone(start, end);
 
-    const depthUnit = compact
-      ? Math.max(170, viewport.clientWidth * .52)
-      : Math.max(235, Math.min(360, viewport.clientWidth * .29));
+    const yPattern = compact
+      ? [0,-28,32,-44,46,-18,22]
+      : [0,-58,52,-82,76,-34,40];
+    const xPattern = compact
+      ? [0,-12,14,-20,18,-8,10]
+      : [0,-30,34,-48,44,-18,20];
+    const tiltPattern = [0,-2.8,2.4,-4.3,3.8,-1.6,1.8];
 
     for (let index = start; index <= end; index++) {
       const item = slides[index];
-      const relative = (slideCenterAt(index) - viewportCenter) / depthUnit;
+      const relative = index - floatingIndex;
       const abs = Math.abs(relative);
 
-      if (abs > 4.8) {
+      if (abs > activeRadius + .35) {
         item.card.style.opacity = "0";
-        item.card.style.transform = "translate3d(0,34px,-240px) scale(.8)";
+        item.card.style.transform = "translate3d(0,30px,-320px) scale(.64)";
         item.card.classList.remove("is-main");
         item.slide.classList.remove("is-active-zone");
         item.slide.style.zIndex = "1";
         continue;
       }
 
-      const y = Math.min(abs * abs * (compact ? 7 : 9), compact ? 30 : 40);
-      const z = -Math.min(abs * abs * (compact ? 46 : 58), compact ? 205 : 280);
-      const ry = clamp(-relative * (compact ? 10 : 9), -32, 32);
-      const rz = clamp(relative * (compact ? .38 : .30), -1.4, 1.4);
-      const scale = Math.max(compact ? .83 : .85, 1 - abs * (compact ? .06 : .05));
-      const opacity = Math.max(.24, 1 - abs * .18);
+      const rank = Math.min(yPattern.length - 1, Math.round(abs));
+      const direction = relative < 0 ? -1 : 1;
+      const seed = Math.abs(item.photoIndex >= 0 ? item.photoIndex : index);
+      const variation = (seed % 3) - 1;
+
+      let y = yPattern[rank] + variation * (compact ? 7 : 11);
+      let x = xPattern[rank] * direction + variation * (compact ? 4 : 8);
+      let z = 120 - abs * (compact ? 88 : 105);
+      let ry = clamp(-relative * (compact ? 12 : 11), -38, 38);
+      let rz = tiltPattern[rank] * direction + variation * .65;
+      let scale = Math.max(compact ? .64 : .60, 1.04 - abs * (compact ? .12 : .11));
+      let opacity = Math.max(.20, 1 - abs * .19);
+
+      if (abs < .38) {
+        y = 0;
+        x = 0;
+        z = compact ? 150 : 190;
+        ry = -relative * 4;
+        rz = 0;
+        scale = compact ? 1.08 : 1.12;
+        opacity = 1;
+      }
 
       item.card.style.opacity = String(opacity);
-      item.card.style.transform = `translate3d(0,${y}px,${z}px) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${scale})`;
-      item.card.classList.toggle("is-main", abs < .34);
+      item.card.style.transform =
+        `translate3d(${x}px,${y}px,${z}px) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${scale})`;
+      item.card.classList.toggle("is-main", abs < .38);
       item.slide.classList.add("is-active-zone");
-      item.slide.style.zIndex = String(70 - Math.round(abs * 9));
+      item.slide.style.zIndex = String(90 - Math.round(abs * 12));
     }
   }
 
@@ -397,7 +416,9 @@
     lastActiveStart = -1;
     lastActiveEnd = -1;
 
-    refreshAdaptiveWidths();
+    refreshItemSizes();
+    layoutStep = slides[0]?.slide.getBoundingClientRect().width || layoutStep;
+    firstSlideCenter = slides[0]?.slide.offsetLeft + layoutStep / 2 || firstSlideCenter;
     const afterSelectedCenter = selectedItem
       ? selectedItem.slide.offsetLeft + selectedItem.slide.offsetWidth / 2
       : beforeSelectedCenter;
