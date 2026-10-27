@@ -3,7 +3,7 @@
 .link-tool-screen[hidden] { display: none !important; }
 html.link-tool-active body { overflow: hidden !important; }
 html.link-tool-active #partySelector { display: none !important; }
-html.link-tool-active body > #linkToolScreen {
+html.link-tool-active body > #linkToolScreen.link-tool-screen {
   visibility: visible !important;
   pointer-events: auto !important;
 }
@@ -103,7 +103,8 @@ html.link-tool-active body > .language-switch {
   padding-top: 20px;
   border-top: 1px solid #ffffff25;
 }
-.link-tool-result[hidden] { display: none; }
+.link-tool-result[hidden],
+#linkToolShare[hidden] { display: none !important; }
 #linkToolGenerated { font-size: 13px; overflow-wrap: anywhere; line-height: 1.6; color: #e9d9b8; }
 .link-tool-feedback { min-height: 22px; margin: 12px 0 0; color: #d9c18e; }
 .link-tool-feedback:empty { display: none; }
