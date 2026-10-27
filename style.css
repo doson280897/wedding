@@ -86,9 +86,9 @@
   box-shadow:0 20px 60px #000b;
   transform-style:preserve-3d;
   backface-visibility:hidden;
-  will-change:transform,opacity;
   pointer-events:none;
 }
+.album-slide.is-active-zone .album-card{will-change:transform,opacity}
 .album-card.is-main{border-color:#e0bf899e;box-shadow:0 34px 104px #000f,0 0 50px #d1b37840}
 .album-photo{width:100%;height:calc(100% - 27px);object-fit:cover;display:block;border-radius:0;transform:translateZ(0)}
 .album-card-number{position:absolute;right:13px;bottom:6px;color:#d9d4cc;font-size:9px;letter-spacing:2px;opacity:.72}

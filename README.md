@@ -18,7 +18,7 @@ Website thiệp cưới phong cách **Cinematic Editorial / Dark Luxury** (đen 
 - **Countdown hai ngày cưới**: khách chuyển giữa lễ Vu Quy (14/11) và lễ Tân Hôn (29/11).
 - **Lưu ngày cưới vào lịch**: tải file ICS cho từng bên, dùng được với lịch điện thoại/Google Calendar/Outlook.
 - **Nhạc nền tùy chọn**: ambient nhẹ bằng Web Audio, chỉ phát sau khi khách chủ động bật; không cần file MP3.
-- **Lazy-load album 3D**: chỉ tải manifest khi khách cuộn gần tới album; ring buffer chỉ giữ tối đa 31 slide và ưu tiên tải các ảnh gần tâm, phù hợp khi album tăng lên 100+ ảnh.
+- **Album preload có giới hạn**: manifest được tải sớm khi khách tiến gần album; tối đa 31 ảnh trong ring được fetch/decode trước để flick nhanh không gặp ảnh trắng. Sau mỗi lần xoay ring, chỉ node mép mới được đổi source và decode trước ở ngoài màn hình; 100+ ảnh vẫn không bị tải/render toàn bộ cùng lúc.
 - **Preview khi chia sẻ Zalo/Facebook**: Open Graph dùng `og-preview.jpg` 1200×630 được GitHub Actions tạo từ `assets-optimized/hero.webp`; không dùng ảnh gốc.
 - **Cache-busting tự động**: mỗi deploy tạo `version.json` và đóng dấu commit SHA vào CSS/JS/ảnh chính; trang cũ tự phát hiện build mới và reload sang URL có `_v=` mới, còn album dùng `no-store` cho manifest.
 

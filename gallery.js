@@ -83,8 +83,10 @@
     img.alt = "";
     img.draggable = false;
     img.decoding = "async";
-    img.loading = Math.abs(slotIndex - centerSlot) <= 6 ? "eager" : "lazy";
-    img.fetchPriority = Math.abs(slotIndex - centerSlot) <= 3 ? "high" : "low";
+    // The ring is intentionally bounded to 31 nodes, so eagerly fetching all
+    // ring images prevents blank frames during a strong native flick.
+    img.loading = "eager";
+    img.fetchPriority = Math.abs(slotIndex - centerSlot) <= 4 ? "high" : "auto";
 
     const label = document.createElement("span");
     label.className = "album-card-number";
@@ -96,19 +98,25 @@
     return { slide, card, img, label, photoIndex: -1 };
   }
 
+  function warmDecode(img) {
+    if (!img?.decode) return;
+    img.decode().catch(() => {});
+  }
+
   function setPhoto(item, photoIndex) {
     const nextIndex = wrap(photoIndex);
     if (item.photoIndex === nextIndex) return;
     item.photoIndex = nextIndex;
     item.img.src = versionedAsset(photos[nextIndex].src);
     item.label.textContent = `${String(nextIndex + 1).padStart(2, "0")} / ${String(photos.length).padStart(2, "0")}`;
+    warmDecode(item.img);
   }
 
   function syncWindowSources() {
     slides.forEach((item, slotIndex) => {
       setPhoto(item, settledIndex + slotIndex - centerSlot);
       const distance = Math.abs(slotIndex - centerSlot);
-      item.img.fetchPriority = distance <= 3 ? "high" : "low";
+      item.img.fetchPriority = distance <= 4 ? "high" : "auto";
       item.slide.dataset.slot = String(slotIndex);
     });
   }
@@ -147,37 +155,75 @@
     });
   }
 
+  let lastActiveStart = -1;
+  let lastActiveEnd = -1;
+
+  function hideOutsideActiveZone(start, end) {
+    if (lastActiveStart < 0) {
+      slides.forEach((item, index) => {
+        if (index >= start && index <= end) return;
+        item.card.style.opacity = "0";
+        item.card.style.transform = "translate3d(0,34px,-220px) scale(.8)";
+        item.card.classList.remove("is-main");
+        item.slide.classList.remove("is-active-zone");
+        item.slide.style.zIndex = "1";
+      });
+    } else {
+      for (let index = lastActiveStart; index <= lastActiveEnd; index++) {
+        if (index >= start && index <= end) continue;
+        const item = slides[index];
+        if (!item) continue;
+        item.card.style.opacity = "0";
+        item.card.style.transform = "translate3d(0,34px,-220px) scale(.8)";
+        item.card.classList.remove("is-main");
+        item.slide.classList.remove("is-active-zone");
+        item.slide.style.zIndex = "1";
+      }
+    }
+    lastActiveStart = start;
+    lastActiveEnd = end;
+  }
+
   function renderDepth() {
     scrollFrame = 0;
     if (!slides.length) return;
 
-    const center = viewport.scrollLeft + viewport.clientWidth / 2;
     const compact = viewport.clientWidth < 700;
     const step = slides[0]?.slide.offsetWidth || 1;
+    const firstCenter = slides[0].slide.offsetLeft + step / 2;
+    const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
+    const floatingIndex = (viewportCenter - firstCenter) / step;
 
-    for (const item of slides) {
-      const itemCenter = item.slide.offsetLeft + item.slide.offsetWidth / 2;
-      const relative = (itemCenter - center) / step;
+    // Only 11 cards around the viewport participate in the 3D transform loop.
+    const start = Math.max(0, Math.floor(floatingIndex) - 5);
+    const end = Math.min(slides.length - 1, Math.ceil(floatingIndex) + 5);
+    hideOutsideActiveZone(start, end);
+
+    for (let index = start; index <= end; index++) {
+      const item = slides[index];
+      const relative = index - floatingIndex;
       const abs = Math.abs(relative);
 
-      if (abs > 4.2) {
+      if (abs > 4.6) {
         item.card.style.opacity = "0";
-        item.card.style.transform = "translate3d(0,36px,-240px) scale(.78)";
+        item.card.style.transform = "translate3d(0,34px,-220px) scale(.8)";
         item.card.classList.remove("is-main");
+        item.slide.classList.remove("is-active-zone");
         item.slide.style.zIndex = "1";
         continue;
       }
 
-      const y = Math.min(abs * abs * (compact ? 8 : 10), compact ? 34 : 44);
-      const z = -Math.min(abs * abs * (compact ? 46 : 58), compact ? 210 : 280);
-      const ry = clamp(-relative * (compact ? 9 : 8), -28, 28);
-      const rz = clamp(relative * (compact ? .42 : .32), -1.6, 1.6);
-      const scale = Math.max(compact ? .82 : .84, 1 - abs * (compact ? .065 : .055));
-      const opacity = Math.max(.22, 1 - abs * .19);
+      const y = Math.min(abs * abs * (compact ? 7 : 9), compact ? 30 : 40);
+      const z = -Math.min(abs * abs * (compact ? 40 : 52), compact ? 190 : 250);
+      const ry = clamp(-relative * (compact ? 8 : 7), -24, 24);
+      const rz = clamp(relative * (compact ? .34 : .26), -1.25, 1.25);
+      const scale = Math.max(compact ? .84 : .86, 1 - abs * (compact ? .055 : .045));
+      const opacity = Math.max(.28, 1 - abs * .17);
 
       item.card.style.opacity = String(opacity);
       item.card.style.transform = `translate3d(0,${y}px,${z}px) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${scale})`;
       item.card.classList.toggle("is-main", abs < 0.42);
+      item.slide.classList.add("is-active-zone");
       item.slide.style.zIndex = String(60 - Math.round(abs * 8));
     }
   }
@@ -223,6 +269,8 @@
     slides.forEach((item, slotIndex) => {
       item.slide.dataset.slot = String(slotIndex);
     });
+    lastActiveStart = -1;
+    lastActiveEnd = -1;
 
     // DOM rotation moved the selected card by delta * step. Compensate that
     // exact distance before the browser can paint a frame.
@@ -344,6 +392,8 @@
     }
 
     syncWindowSources();
+    // Explicit decode makes a fast first flick use already-decoded thumbnails.
+    Promise.allSettled(slides.map(item => item.img.decode?.() || Promise.resolve())).catch(() => {});
     updateProgress(false);
 
     requestAnimationFrame(() => {
@@ -396,7 +446,7 @@
         lazyObserver.disconnect();
         start();
       }
-    }, { rootMargin:"700px 0px", threshold:0 });
+    }, { rootMargin:"1400px 0px", threshold:0 });
     lazyObserver.observe(albumSection);
   } else {
     start();
