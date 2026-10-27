@@ -85,17 +85,17 @@
   function place(slot, relative, animate) {
     const abs = Math.abs(relative);
     const compact = viewport.clientWidth < 700;
-    const gap = compact ? Math.min(viewport.clientWidth * .48, 190) : Math.min(viewport.clientWidth * .255, 305);
-    const x = gap * relative * (1 + .07 * abs);
-    const y = relative === 0 ? -4 : (compact ? 11 : 16) + abs * (compact ? 6 : 9);
-    const zStep = compact ? 155 : 190;
-    const z = relative === 0 ? (compact ? 128 : 156) : -abs * zStep;
-    const ry = relative === 0 ? 0 : -Math.sign(relative) * Math.min(23 + abs * 11, 52);
-    const rz = relative === 0 ? 0 : relative * .55;
-    const scale = relative === 0 ? (compact ? 1.12 : 1.1) : abs === 1 ? .84 : abs === 2 ? .68 : .58;
-    const opacity = abs > VISIBLE_RADIUS ? 0 : abs === 0 ? 1 : abs === 1 ? .64 : .24;
-    const blur = abs === 0 ? 0 : abs === 1 ? .7 : 2.2;
-    const brightness = abs === 0 ? 1 : abs === 1 ? .78 : .58;
+    const gap = compact ? Math.min(viewport.clientWidth * .43, 168) : Math.min(viewport.clientWidth * .255, 305);
+    const x = gap * relative * (1 + (compact ? .035 : .07) * abs);
+    const y = relative === 0 ? -4 : (compact ? 7 : 16) + abs * (compact ? 4 : 9);
+    const zStep = compact ? 92 : 190;
+    const z = relative === 0 ? (compact ? 72 : 156) : -abs * zStep;
+    const ry = relative === 0 ? 0 : -Math.sign(relative) * Math.min((compact ? 18 : 23) + abs * (compact ? 9 : 11), compact ? 40 : 52);
+    const rz = relative === 0 ? 0 : relative * (compact ? .35 : .55);
+    const scale = relative === 0 ? (compact ? 1.055 : 1.1) : abs === 1 ? (compact ? .86 : .84) : abs === 2 ? (compact ? .7 : .68) : .58;
+    const opacity = abs > VISIBLE_RADIUS ? 0 : abs === 0 ? 1 : abs === 1 ? (compact ? .82 : .64) : (compact ? .3 : .24);
+    const blur = abs === 0 ? 0 : abs === 1 ? (compact ? .35 : .7) : 2.2;
+    const brightness = abs === 0 ? 1 : abs === 1 ? (compact ? .9 : .78) : .58;
 
     slot.node.style.transition = animate
       ? `transform ${DURATION}ms cubic-bezier(.18,.78,.18,1), opacity ${DURATION}ms ease`

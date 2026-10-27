@@ -46,8 +46,8 @@
   .album-header h2{font-size:39px}
   .album-header h2 em{font-size:35px}
   .album-viewport{height:470px;perspective:900px;margin-top:6px}
-  .album-card{width:min(70vw,315px);height:min(100vw,450px);margin-left:calc(min(70vw,315px)/-2);margin-top:calc(min(100vw,450px)/-2);padding:6px 6px 27px}
-  .album-viewport:before,.album-viewport:after{width:14vw}
+  .album-card{width:min(64vw,292px);height:min(94vw,430px);margin-left:calc(min(64vw,292px)/-2);margin-top:calc(min(94vw,430px)/-2);padding:6px 6px 27px}
+  .album-viewport:before,.album-viewport:after{width:7vw}
   .album-editorial-caption{gap:9px;padding:0 15px;font-size:9px;letter-spacing:.17em}
   .album-caption-rule{width:28px}
   .album-caption-text{min-width:104px}
@@ -55,7 +55,7 @@
 }
 @media(max-width:390px){
   .album-viewport{height:440px}
-  .album-card{width:min(72vw,286px);height:min(103vw,410px);margin-left:calc(min(72vw,286px)/-2);margin-top:calc(min(103vw,410px)/-2)}
+  .album-card{width:min(65vw,260px);height:min(96vw,390px);margin-left:calc(min(65vw,260px)/-2);margin-top:calc(min(96vw,390px)/-2)}
 }
 @media(prefers-reduced-motion:reduce){
   .album-editorial-caption.is-changing{animation:none!important}
@@ -131,7 +131,6 @@ body { background: var(--cinematic-black); color: var(--cinematic-cream); }
     radial-gradient(ellipse at 50% 42%, #c9a36b13, transparent 43%);
 }
 .album-card { background: #1c2425; }
-.album-photo { filter: none; }
 .album-card.is-main { box-shadow: 0 26px 92px #000f, 0 0 43px #d1b3783e; }
 .album-header h2 { color: #f0d4a5; }
 
