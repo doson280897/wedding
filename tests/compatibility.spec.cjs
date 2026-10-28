@@ -118,6 +118,8 @@ test("menu, map and gift overlays open and close on each device @smoke", async (
   });
   await page.locator("#skipInvitation").click();
   const menuToggle = page.locator("#wqToggle");
+  // Even a collapsed idle Menu must open on the FIRST touch on phones.
+  await menuToggle.evaluate(node => node.classList.add("is-idle"));
   await menuToggle.click();
   if ((await menuToggle.getAttribute("aria-expanded")) !== "true") {
     await menuToggle.click();
