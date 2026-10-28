@@ -92,19 +92,13 @@ test("one shared floating language control and one data script", () => {
   assert.equal((html.match(/src="wedding-info[.]js/g) || []).length, 1);
 });
 
-test("album Drive imports are declared only in wedding-info.js", () => {
-  const importer = read(".github/workflows/import-wedding-photos.yml");
-  assert.ok(importer.includes("gallery"), "Album importer must read gallery configuration");
-  assert.ok(importer.includes("workflow_dispatch"), "Manual import trigger required");
-  assert.ok(!/^  push:/m.test(importer), "Updating the workflow must not auto-import old photos");
+test("gallery configuration has no Drive imports or remote dependencies", () => {
   assert.ok(["append", "replace"].includes(info.gallery.mode));
+  assert.ok(!Object.hasOwn(info.gallery, "imports"), "Remove obsolete Drive photo IDs");
   const imageGenerator = read("generate_gallery.py");
   assert.ok(imageGenerator.includes('ALBUM_MODE == "replace"'));
   assert.ok(imageGenerator.includes('ALBUM_MODE == "append"'));
-  assert.ok(Array.isArray(info.gallery.imports));
-  for (const item of info.gallery.imports) {
-    assert.match(item.name, /^[\w. -]+\.(jpg|jpeg|png|webp|avif)$/i);
-    assert.match(item.fileId, /^[\w-]{20,}$/);
-    assert.ok(!importer.includes(item.fileId), "Google Drive IDs must not be hardcoded in workflow");
-  }
+  assert.ok(!fs.existsSync(path.join(root, ".github/workflows/import-wedding-photos.yml")));
+  const deploy = read(".github/workflows/deploy.yml");
+  assert.ok(!deploy.includes("Import wedding album from config"));
 });
