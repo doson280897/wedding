@@ -32,6 +32,9 @@ def read_wedding_info() -> dict:
 
 WEDDING_INFO = read_wedding_info()
 MANIFEST_FILE = ROOT / WEDDING_INFO.get("gallery", {}).get("manifest", "images/manifest.json")
+ALBUM_MODE = WEDDING_INFO.get("gallery", {}).get("mode", "append")
+if ALBUM_MODE not in ("append", "replace"):
+    raise ValueError("gallery.mode phải là append hoặc replace")
 
 SUPPORTED_EXTENSIONS = {
     ".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif", ".bmp", ".tif", ".tiff"
@@ -163,7 +166,7 @@ def generate_manifest():
     expected_targets: set[Path] = set()
     # Preserve already-published album photos when adding new selections.
     previous = []
-    if MANIFEST_FILE.exists():
+    if ALBUM_MODE == "append" and MANIFEST_FILE.exists():
         try:
             old = json.loads(MANIFEST_FILE.read_text(encoding="utf-8"))
             previous = old if isinstance(old, list) else old.get("photos", [])
@@ -171,6 +174,15 @@ def generate_manifest():
             previous = []
 
     if not found:
+        if ALBUM_MODE == "replace":
+            # A new couple must never inherit the previous couple's album.
+            MANIFEST_FILE.parent.mkdir(parents=True, exist_ok=True)
+            MANIFEST_FILE.write_text(
+                json.dumps(manifest, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            print("Replace mode: no current photos; published album is empty.")
+            return
         existing_photos = []
         if MANIFEST_FILE.exists():
             try:
@@ -230,6 +242,7 @@ def generate_manifest():
             existing_src.add(item["src"])
 
     manifest["total"] = len(manifest["photos"])
+    MANIFEST_FILE.parent.mkdir(parents=True, exist_ok=True)
     MANIFEST_FILE.write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2),
         encoding="utf-8",
