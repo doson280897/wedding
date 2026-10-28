@@ -241,6 +241,9 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   const url = base + "/index.html?party=bride&to=ReloadGuest&lang=vi";
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeVisible();
+  await expect(page.locator(".invitation-card")).toBeHidden();
+  await expect(page.locator("#envelopeStageHit")).toBeVisible();
+  await expect(page.locator(".envelope-seal")).toBeVisible();
 
   // The seal emits one burst; the exit flash bridges into the hero.
   // They must never replay on F5 in the same tab.
@@ -256,6 +259,8 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   expect(foil).toBeGreaterThanOrEqual(4);
   expect(foil).toBeLessThanOrEqual(12);
   await expect(page.locator("#closeInvitation")).toBeVisible();
+  await expect(page.locator(".invitation-card")).toBeVisible();
+  await expect(page.locator("#envelopeStageHit")).toBeHidden();
   expect(await page.locator(".invitation-card").evaluate(node =>
     getComputedStyle(node).animationName
   )).toContain("luxInvitationFlight");
@@ -290,8 +295,10 @@ test("reduced motion opens the envelope without particles or flash", async ({ pa
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(base + "/index.html?party=groom&to=QuietGuest", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeVisible();
-  await page.locator("#openInvitation").click();
+  await expect(page.locator(".invitation-card")).toBeHidden();
+  await page.locator("#envelopeStageHit").click();
   await expect(page.locator("#closeInvitation")).toBeVisible();
+  await expect(page.locator(".invitation-card")).toBeVisible();
   await expect(page.locator("#envelopeBurst")).toBeHidden();
   await expect(page.locator(".envelope-burst-particle")).toHaveCount(0);
   await page.locator("#closeInvitation").click();

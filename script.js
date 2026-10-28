@@ -255,6 +255,7 @@
     if (!document.body.classList.contains("envelope-locked")) setContentBrowserTheme();
   });
   const openInvitation = document.getElementById("openInvitation");
+  const envelopeStageHit = document.getElementById("envelopeStageHit");
   const closeInvitation = document.getElementById("closeInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
   const envelopeBurst = document.getElementById("envelopeBurst");
@@ -453,6 +454,7 @@
       if (opened || leaving) return;
       opened = true;
       openInvitation?.setAttribute("disabled", "");
+      envelopeStageHit?.setAttribute("disabled", "");
       skipInvitation?.setAttribute("disabled", "");
 
       const releaseEnvelope = () => {
@@ -466,9 +468,15 @@
         };
         burstFromSeal(center);
         releaseFloatingPetals(center);
-        intro.classList.add("is-flap-open", "is-card-lifted", "is-opened");
-        startAutoClose();
-        closeInvitation?.focus({preventScroll:true});
+        // First unfold the paper flap. Only then let the card slide out.
+        // Prevents the letter appearing on top of a still sealed envelope.
+        intro.classList.add("is-flap-open");
+        window.setTimeout(() => {
+          if (leaving) return;
+          intro.classList.add("is-card-lifted", "is-opened");
+          startAutoClose();
+          closeInvitation?.focus({preventScroll:true});
+        }, prefersReducedMotion() ? 0 : 160);
       };
       if (prefersReducedMotion()) {
         releaseEnvelope();
@@ -481,6 +489,7 @@
     };
 
     openInvitation?.addEventListener("click", openEnvelope);
+    envelopeStageHit?.addEventListener("click", openEnvelope);
     closeInvitation?.addEventListener("click", () => enterInvitation(false));
     skipInvitation?.addEventListener("click", () => enterInvitation(true));
 
@@ -496,7 +505,7 @@
 
       const envelopeActions = opened
         ? [closeInvitation]
-        : [openInvitation, skipInvitation];
+        : [envelopeStageHit, openInvitation, skipInvitation];
       const settingsTrigger = document.getElementById("settingsTrigger");
       const settingsPanel = document.getElementById("settingsPanel");
       const paletteButtons = settingsPanel?.hidden

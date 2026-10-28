@@ -1366,23 +1366,22 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 @media(prefers-reduced-motion:no-preference){
   .envelope-intro.is-card-lifted:not(.is-leaving) .invitation-card{
     transform-origin:50% 70%;
-    animation:luxInvitationFlight 1100ms cubic-bezier(.18,.69,.2,1) both;
+    animation:luxInvitationFlight 850ms cubic-bezier(.18,.69,.2,1) both;
     transition:none;
   }
 }
 @keyframes luxInvitationFlight{
-  0%{transform:translate3d(0,16%,0) rotateX(0) rotateY(0) scale(1)}
-  32%{transform:translate3d(0,-10%,50px) rotateX(4deg) rotateY(-3deg) scale(1.045)}
-  65%{transform:translate3d(0,-19%,90px) rotateX(0) rotateY(2deg) scale(1.075)}
-  87%{transform:translate3d(0,-10%,15px) rotateX(-1deg) rotateY(0) scale(.995)}
-  100%{transform:translate3d(0,-12%,0) rotateX(0) rotateY(0) scale(1)}
+  0%{opacity:0;transform:translate3d(0,34%,0) rotateX(0) scale(.96)}
+  30%{opacity:1;transform:translate3d(0,0,18px) rotateX(2deg) scale(1)}
+  66%{opacity:1;transform:translate3d(0,-17%,36px) rotateX(0) scale(1.025)}
+  100%{opacity:1;transform:translate3d(0,-12%,0) rotateX(0) scale(1)}
 }
 @media(max-width:650px){
   @keyframes luxInvitationFlight{
-    0%{transform:translate3d(0,15%,0) rotateX(0) scale(1)}
-    38%{transform:translate3d(0,-8%,28px) rotateX(2deg) scale(1.022)}
-    68%{transform:translate3d(0,-16%,42px) rotateX(0) scale(1.038)}
-    100%{transform:translate3d(0,-12%,0) rotateX(0) scale(1)}
+    0%{opacity:0;transform:translate3d(0,34%,0) rotateX(0) scale(.96)}
+    34%{opacity:1;transform:translate3d(0,0,12px) rotateX(1deg) scale(1)}
+    70%{opacity:1;transform:translate3d(0,-15%,20px) rotateX(0) scale(1.015)}
+    100%{opacity:1;transform:translate3d(0,-12%,0) rotateX(0) scale(1)}
   }
 }
 @media(prefers-reduced-motion:reduce){
@@ -1536,4 +1535,36 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 @media(max-width:650px){
   .envelope-burst-rays{display:none}
   .invitation-portal-ring{box-shadow:none}
+}
+
+
+/* SEALED ENVELOPE — until opened, the letter is completely inside.
+   No card artwork or personalized names bleed through the wax-sealed flap. */
+.envelope-intro:not(.is-card-lifted) .invitation-card{
+  visibility:hidden;
+  opacity:0;
+  transform:translate3d(0,34%,0) scale(.96);
+  transition:none;
+}
+.envelope-intro.is-card-lifted .invitation-card{
+  visibility:visible;
+  opacity:1;
+}
+.envelope-stage-hit{
+  position:absolute;inset:0;z-index:8;
+  width:100%;height:100%;margin:0;padding:0;
+  border:0;background:transparent;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.envelope-stage-hit:focus-visible{
+  outline:2px solid #a68b5c;outline-offset:5px;border-radius:5px;
+}
+.envelope-intro.is-flap-open .envelope-stage-hit{display:none}
+@media(prefers-reduced-motion:reduce){
+  .envelope-intro:not(.is-card-lifted) .invitation-card{
+    visibility:hidden!important;opacity:0!important;
+  }
+  .envelope-intro.is-card-lifted .invitation-card{
+    visibility:visible!important;opacity:1!important;
+  }
 }
