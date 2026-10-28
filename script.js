@@ -619,19 +619,31 @@
     if (youtubePlayerPromise) return youtubePlayerPromise;
 
     youtubePlayerPromise = loadYouTubeIframeAPI().then(() => new Promise((resolve, reject) => {
+      let readySettled = false;
+      const readyTimeout = setTimeout(() => {
+        if (readySettled) return;
+        readySettled = true;
+        youtubePlayerReady = false;
+        try { youtubePlayer?.destroy?.(); } catch (_) {}
+        youtubePlayer = null;
+        reject(new Error("YouTube player readiness timeout"));
+      }, 12000);
+
       let host = document.getElementById("youtubeWeddingMusic");
       if (!host) {
         host = document.createElement("div");
         host.id = "youtubeWeddingMusic";
         host.setAttribute("aria-hidden", "true");
         host.style.cssText =
-          "position:fixed;width:2px;height:2px;left:-9999px;bottom:0;opacity:.01;pointer-events:none;overflow:hidden;";
+          "position:fixed;width:200px;height:200px;left:-9999px;bottom:0;opacity:.01;pointer-events:none;overflow:hidden;";
         document.body.appendChild(host);
       }
 
       youtubePlayer = new window.YT.Player(host, {
-        width: "2",
-        height: "2",
+        // YouTube requires a player iframe of at least 200px; a 2×2 iframe
+        // can fail to initialize or report state on mobile Safari.
+        width: "200",
+        height: "200",
         videoId: YOUTUBE_MUSIC_ID,
         playerVars: {
           autoplay: 0,
@@ -646,6 +658,9 @@
         },
         events: {
           onReady: event => {
+            if (readySettled) return;
+            readySettled = true;
+            clearTimeout(readyTimeout);
             youtubePlayerReady = true;
             try { event.target.setVolume(70); } catch (_) {}
             resolve(event.target);
@@ -676,7 +691,11 @@
           },
           onError: error => {
             failMusicAttempt(musicRequestId);
-            reject(new Error("YouTube player error " + error.data));
+            if (!readySettled) {
+              readySettled = true;
+              clearTimeout(readyTimeout);
+              reject(new Error("YouTube player error " + error.data));
+            }
           }
         }
       });
