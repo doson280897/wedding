@@ -1013,7 +1013,7 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   transition:opacity 1.2s cubic-bezier(.22,.72,.2,1),
              transform 1.35s cubic-bezier(.22,.72,.2,1);
 }
-.moonlight-gate__dust{position:absolute;inset:0;pointer-events:none}
+.moonlight-gate__dust{position:absolute;inset:0;z-index:2;pointer-events:none}
 .moonlight-gate__spark{
   position:absolute;left:var(--sx);top:var(--sy);
   width:var(--size);height:var(--size);border-radius:50%;opacity:0;
@@ -1028,59 +1028,14 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   60%{opacity:.22;transform:scale(.72)}
   79%{opacity:.92;transform:scale(1.18)}
 }
-.moonlight-gate__meteor{
-  /* The moving head and its layered SVG tail travel as one, without the
-     old uniformly glowing rectangular streak. */
-  position:absolute;z-index:1;left:77%;top:-5%;
-  width:clamp(175px,27vw,335px);height:48px;opacity:0;
+.moonlight-gate__meteor-canvas{
+  position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;
   pointer-events:none;
-  --meteor-start-x:26vw;--meteor-start-y:-18svh;
-  --meteor-end-x:-108vw;--meteor-end-y:132svh;
-  --meteor-angle:-40deg;
-  transform-origin:8px 50%;
-  will-change:transform,opacity;
 }
-.moonlight-gate__meteor-art{
-  display:block;width:100%;height:100%;overflow:visible;
-  transform-origin:2.2% 50%;
-}
-.moonlight-gate__meteor--second{
-  left:90%;top:-4%;width:clamp(135px,21vw,255px);height:44px;
-  --meteor-start-x:23vw;--meteor-start-y:-21svh;
-  --meteor-end-x:-112vw;--meteor-end-y:132svh;
-  opacity:0;
-  filter:brightness(.86);
-}
-.moonlight-gate.is-opening .moonlight-gate__meteor--first{
-  animation:gateMeteorFall 3.5s linear .45s both;
-}
-.moonlight-gate.is-opening .moonlight-gate__meteor--second{
-  animation:gateMeteorFall 3.65s linear 1.35s both;
-}
-.moonlight-gate.is-opening .moonlight-gate__meteor--first .moonlight-gate__meteor-art{
-  animation:gateMeteorTrail 3.5s ease-out .45s both;
-}
-.moonlight-gate.is-opening .moonlight-gate__meteor--second .moonlight-gate__meteor-art{
-  animation:gateMeteorTrail 3.65s ease-out 1.35s both;
-}
-/* The narrow luminous core briefly grows, then trails off organically.
-   The diffuse glow and sparse side filaments share the same fade. */
-@keyframes gateMeteorTrail{
-  0%{opacity:0;transform:scaleX(.18)}
-  13%{opacity:1;transform:scaleX(.46)}
-  38%{opacity:1;transform:scaleX(1)}
-  77%{opacity:.88;transform:scaleX(.82)}
-  100%{opacity:0;transform:scaleX(.2)}
-}
-/* The head enters above the top-right and leaves below the bottom edge. */
-@keyframes gateMeteorFall{
-  0%{opacity:0;transform:translate3d(var(--meteor-start-x),var(--meteor-start-y),0) rotate(var(--meteor-angle))}
-  9%{opacity:.95}
-  89%{opacity:.86}
-  100%{opacity:0;transform:translate3d(var(--meteor-end-x),var(--meteor-end-y),0) rotate(var(--meteor-angle))}
-}
+/* Streaks are rendered from the star's previous positions in world space,
+   never rotated separately from the motion vector. */
 .moonlight-gate__butterfly{
-  position:absolute;left:var(--bx);top:var(--by);
+  position:absolute;z-index:3;left:var(--bx);top:var(--by);
   width:clamp(26px,3.7vw,46px);aspect-ratio:64/52;opacity:0;
   color:#f0cd8c;pointer-events:none;
 }
@@ -1116,9 +1071,8 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 @keyframes gateWingRight{from{transform:scaleX(1.04)}to{transform:scaleX(.72)}}
 html[data-theme="light"] .moonlight-gate__magic{filter:brightness(.76) sepia(.16)}
 @media(max-width:650px){
-  .moonlight-gate__butterfly--three,.moonlight-gate__meteor--second{display:none}
+  .moonlight-gate__butterfly--three{display:none}
   .moonlight-gate__butterfly{width:30px}
-  .moonlight-gate__meteor{--meteor-angle:-68deg}
 }
 @media(prefers-reduced-motion:reduce){
   .moonlight-gate__magic{display:none!important}

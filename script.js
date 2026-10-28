@@ -287,6 +287,110 @@
     });
     dust.append(nodes);
   };
+
+  // The trail follows the exact past positions of the moving head, not an SVG
+  // rotated by a guessed angle. Works on portrait and landscape viewports.
+  const meteorCanvas = moonlightGate?.querySelector(".moonlight-gate__meteor-canvas");
+  let meteorFrame = 0;
+  const stopGateMeteors = () => {
+    if (meteorFrame) cancelAnimationFrame(meteorFrame);
+    meteorFrame = 0;
+    if (meteorCanvas) {
+      const ctx = meteorCanvas.getContext("2d");
+      ctx?.clearRect(0, 0, meteorCanvas.width, meteorCanvas.height);
+    }
+  };
+  const startGateMeteors = () => {
+    if (reducedGateMotion || !meteorCanvas) return;
+    const ctx = meteorCanvas.getContext("2d", { alpha:true });
+    if (!ctx) return;
+    stopGateMeteors();
+    const tracks = [
+      { from:[1.03,-.23], to:[-.31,1.27], delay:450, duration:3500, strength:1 },
+      { from:[1.13,-.25], to:[-.22,1.28], delay:1350, duration:3650, strength:.82 }
+    ];
+    const start = performance.now();
+    let width = 0, height = 0, density = 0;
+    const fit = () => {
+      const rect = meteorCanvas.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rect.width));
+      const h = Math.max(1, Math.round(rect.height));
+      const d = Math.min(window.devicePixelRatio || 1, 1.5);
+      if (w === width && h === height && d === density) return;
+      width = w; height = h; density = d;
+      meteorCanvas.width = Math.round(width * density);
+      meteorCanvas.height = Math.round(height * density);
+      ctx.setTransform(density, 0, 0, density, 0, 0);
+    };
+    const render = timestamp => {
+      meteorFrame = 0;
+      if (moonlightGate.hidden) return;
+      fit();
+      ctx.clearRect(0, 0, width, height);
+      const elapsed = timestamp - start;
+      const mobile = width <= 650;
+      tracks.forEach((track, index) => {
+        if (index === 1 && mobile) return;
+        const t = (elapsed - track.delay) / track.duration;
+        if (t <= 0 || t >= 1) return;
+        const x0 = track.from[0] * width, y0 = track.from[1] * height;
+        const dx = (track.to[0] - track.from[0]) * width;
+        const dy = (track.to[1] - track.from[1]) * height;
+        const hx = x0 + dx * t, hy = y0 + dy * t;
+        const prev = Math.max(0, t - (mobile ? .19 : .14));
+        const tx = x0 + dx * prev, ty = y0 + dy * prev;
+        const strength = track.strength * Math.min(1, t * 12, (1 - t) * 11);
+
+        ctx.save();
+        const trail = ctx.createLinearGradient(tx, ty, hx, hy);
+        trail.addColorStop(0, "rgba(232,169,103,0)");
+        trail.addColorStop(.24, "rgba(242,187,113,.10)");
+        trail.addColorStop(.60, "rgba(251,216,164,.44)");
+        trail.addColorStop(.88, "rgba(255,238,203,.85)");
+        trail.addColorStop(1, "rgba(255,253,235,1)");
+        ctx.strokeStyle = trail;
+        ctx.lineCap = "round";
+        const stroke = (size, alpha) => {
+          ctx.globalAlpha = strength * alpha;
+          ctx.lineWidth = size;
+          ctx.beginPath();
+          ctx.moveTo(tx,ty);
+          ctx.lineTo(hx,hy);
+          ctx.stroke();
+        };
+        stroke(18,.14);
+        stroke(6,.29);
+        stroke(1.7,.90);
+
+        // A few subtle fragments remain at places the star passed earlier.
+        const distance = Math.hypot(dx,dy) || 1;
+        const sideX = -dy / distance, sideY = dx / distance;
+        for (let i = 0; i < 8; i++) {
+          const age = .016 + i * .017;
+          if (t <= age) continue;
+          const offset = Math.sin((i + index * 11) * 8.7) * (1.8 + i * .45);
+          const px = x0 + dx * (t - age) + sideX * offset;
+          const py = y0 + dy * (t - age) + sideY * offset;
+          ctx.globalAlpha = strength * Math.max(0, .27 - age * 1.55);
+          ctx.fillStyle = i % 3 === 0 ? "#fff0cd" : "#dcb276";
+          ctx.beginPath();
+          ctx.arc(px, py, i % 3 === 0 ? .8 : .48, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        const halo = ctx.createRadialGradient(hx, hy, 0, hx, hy, 19);
+        halo.addColorStop(0, "rgba(255,254,237,.94)");
+        halo.addColorStop(.16, "rgba(255,238,198,.63)");
+        halo.addColorStop(.48, "rgba(244,186,106,.16)");
+        halo.addColorStop(1, "rgba(244,186,106,0)");
+        ctx.globalAlpha = strength;
+        ctx.fillStyle = halo;
+        ctx.fillRect(hx - 19, hy - 19, 38, 38);
+        ctx.restore();
+      });
+      if (elapsed < 5150) meteorFrame = requestAnimationFrame(render);
+    };
+    meteorFrame = requestAnimationFrame(render);
+  };
   const gateTimers = new Set();
   const scheduleGate = (callback, delay) => {
     const timer = window.setTimeout(() => {
@@ -304,6 +408,7 @@
   const completeMoonlightGate = () => {
     if (!moonlightGate || moonlightGate.hidden) return;
     clearGateTimers();
+    stopGateMeteors();
     leftGateDoor?.removeEventListener("transitionend", onDoorTransitionEnd);
     moonlightGate.hidden = true;
     moonlightGate.classList.remove(
@@ -357,6 +462,7 @@
       // avoids a stuck gate if a browser suppresses transitionend.
       leftGateDoor?.addEventListener("transitionend", onDoorTransitionEnd);
       moonlightGate.classList.add("is-opening");
+      startGateMeteors();
       scheduleGate(settleOpenDoor, GATE_DOOR_MS + 180);
     }, GATE_AWAKEN_MS);
   };
@@ -741,12 +847,16 @@
     return youtubePlayerPromise;
   }
 
-  // Create the silent YouTube player only after the entrance has finished.
-  // This keeps its iframe/network work off the 3D door transition while still
-  // preparing it before the guest later taps the music control (iOS Safari).
+  // The wax is an intentional entry gesture. Prepare YouTube while the
+  // cinematic plays, then start playback automatically when Hero arrives.
+  // Some browsers (especially iOS Safari) may still block sound autoplay;
+  // Settings remains a one-tap retry without falsely showing PLAYING.
   if (selectedParty && !linkToolInitial) {
-    document.addEventListener("wedding:waxopen", () => {
+    waxOpenButton?.addEventListener("click", () => {
       initYouTubeMusicPlayer().catch(() => {});
+    }, { once:true });
+    document.addEventListener("wedding:waxopen", () => {
+      requestMusicPlayback();
     }, { once:true });
   }
 
