@@ -1502,3 +1502,38 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 @media(prefers-reduced-motion:reduce){
   .floating-petals,.floating-petal{display:none!important;animation:none!important}
 }
+
+
+/* PERF — envelope animation budget for phones and Safari.
+   Avoid expensive filtered/composited surfaces and massive radial zooms. */
+.envelope-shell{filter:none}
+.envelope-back{box-shadow:0 18px 32px rgba(48,45,37,.12)}
+.envelope-burst-glow,.seal-fracture{filter:none}
+.envelope-burst-particle,.floating-petal{box-shadow:none;will-change:auto}
+.envelope-burst-rays{background:repeating-conic-gradient(from 5deg,rgba(251,225,166,.20) 0deg,transparent 2.5deg,transparent 29deg)}
+.invitation-portal-core{mix-blend-mode:normal}
+.invitation-portal-ring{box-shadow:0 0 18px rgba(255,233,189,.3)}
+@keyframes luxPortalBloom{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.12)}
+  22%{opacity:.78}
+  60%{opacity:.4}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(3.8)}
+}
+@keyframes luxPortalRing{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+  25%{opacity:.82}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(4.4)}
+}
+@keyframes luxPortalCamera{
+  from{transform:scale(1.12)}
+  to{transform:scale(1.09)}
+}
+@keyframes luxSealFracture{
+  0%,100%{transform:translate3d(-50%,-50%,0)}
+  38%{transform:translate3d(calc(-50% - 1px),-50%,0) scale(1.025)}
+  70%{transform:translate3d(calc(-50% + 1px),-50%,0) scale(.99)}
+}
+@media(max-width:650px){
+  .envelope-burst-rays{display:none}
+  .invitation-portal-ring{box-shadow:none}
+}

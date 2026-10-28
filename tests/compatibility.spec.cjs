@@ -250,11 +250,11 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#envelopeBurst")).toHaveClass(/is-active/);
   await expect(page.locator("#floatingPetals")).toBeVisible();
   const petals = await page.locator(".floating-petal").count();
-  expect(petals).toBeGreaterThanOrEqual(4);
-  expect(petals).toBeLessThanOrEqual(12);
+  expect(petals).toBeGreaterThanOrEqual(2);
+  expect(petals).toBeLessThanOrEqual(6);
   const foil = await page.locator(".envelope-burst-particle").count();
-  expect(foil).toBeGreaterThanOrEqual(10);
-  expect(foil).toBeLessThanOrEqual(24);
+  expect(foil).toBeGreaterThanOrEqual(4);
+  expect(foil).toBeLessThanOrEqual(12);
   await expect(page.locator("#closeInvitation")).toBeVisible();
   expect(await page.locator(".invitation-card").evaluate(node =>
     getComputedStyle(node).animationName

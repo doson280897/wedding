@@ -292,16 +292,14 @@
 
     // One short, user-triggered burst of champagne foil from the actual seal.
     // Geometry is measured BEFORE the flap moves so mobile stays centered.
-    const burstFromSeal = () => {
-      if (!envelopeBurst || prefersReducedMotion()) return;
-      const seal = intro.querySelector(".envelope-seal");
-      if (!seal) return;
-      const rect = seal.getBoundingClientRect();
-      envelopeBurst.style.setProperty("--burst-x", (rect.left + rect.width / 2) + "px");
-      envelopeBurst.style.setProperty("--burst-y", (rect.top + rect.height / 2) + "px");
+    const burstFromSeal = center => {
+      if (!envelopeBurst || prefersReducedMotion() || !center) return;
+      envelopeBurst.style.setProperty("--burst-x", center.x + "px");
+      envelopeBurst.style.setProperty("--burst-y", center.y + "px");
       const compact = matchMedia("(max-width: 650px)").matches;
       const saveData = navigator.connection?.saveData === true;
-      const count = saveData ? 10 : compact ? 16 : 24;
+      // Avoid dozens of independently composited layers on iOS Safari.
+      const count = saveData ? 4 : compact ? 8 : 12;
       const fragment = document.createDocumentFragment();
       for (let i = 0; i < count; i++) {
         const particle = document.createElement("span");
@@ -327,15 +325,12 @@
 
     // Petals float after the initial foil burst. A separate overlay allows
     // them to continue drifting when the user enters the hero immediately.
-    const releaseFloatingPetals = () => {
-      if (!floatingPetals || prefersReducedMotion()) return;
-      const seal = intro.querySelector(".envelope-seal");
-      if (!seal) return;
-      const rect = seal.getBoundingClientRect();
+    const releaseFloatingPetals = center => {
+      if (!floatingPetals || prefersReducedMotion() || !center) return;
       const compact = matchMedia("(max-width: 650px)").matches;
-      const count = navigator.connection?.saveData ? 4 : compact ? 8 : 12;
-      floatingPetals.style.setProperty("--petal-x", (rect.left + rect.width / 2) + "px");
-      floatingPetals.style.setProperty("--petal-y", (rect.top + rect.height / 2) + "px");
+      const count = navigator.connection?.saveData ? 2 : compact ? 4 : 6;
+      floatingPetals.style.setProperty("--petal-x", center.x + "px");
+      floatingPetals.style.setProperty("--petal-y", center.y + "px");
       const fragment = document.createDocumentFragment();
       for (let i = 0; i < count; i++) {
         const petal = document.createElement("span");
@@ -462,8 +457,15 @@
 
       const releaseEnvelope = () => {
         if (leaving) return;
-        burstFromSeal();
-        releaseFloatingPetals();
+        // Read layout once, before any DOM writes, and share the origin.
+        // Previously the second geometry read forced a synchronous relayout.
+        const sealRect = intro.querySelector(".envelope-seal")?.getBoundingClientRect();
+        const center = sealRect && {
+          x: sealRect.left + sealRect.width / 2,
+          y: sealRect.top + sealRect.height / 2
+        };
+        burstFromSeal(center);
+        releaseFloatingPetals(center);
         intro.classList.add("is-flap-open", "is-card-lifted", "is-opened");
         startAutoClose();
         closeInvitation?.focus({preventScroll:true});
