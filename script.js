@@ -344,7 +344,12 @@
       const envelopeActions = opened
         ? [closeInvitation]
         : [openInvitation, skipInvitation];
-      const focusable = [...languageButtons, ...envelopeActions].filter(button => button && !button.disabled);
+      const settingsTrigger = document.getElementById("settingsTrigger");
+      const settingsPanel = document.getElementById("settingsPanel");
+      const paletteButtons = settingsPanel?.hidden
+        ? [] : [...settingsPanel.querySelectorAll("button")];
+      const focusable = [settingsTrigger, ...paletteButtons, ...envelopeActions]
+        .filter(button => button && !button.disabled && !button.hidden);
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable.at(-1);
