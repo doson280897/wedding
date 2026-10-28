@@ -399,16 +399,8 @@
         return;
       }
 
-      if (coarsePointer.matches && tapStartedIdle && !control.classList.contains("settings-hub")) {
-        tapStartedIdle = false;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        wake();
-        setArmed(true);
-        scheduleIdle(3400);
-        return;
-      }
-
+      // A single tap must activate the Menu even when its icon is collapsed.
+      // The old "wake on first tap" behavior made touch users tap twice.
       tapStartedIdle = false;
       setArmed(false);
       wake();
