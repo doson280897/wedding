@@ -276,12 +276,21 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
   await expect(page.locator("#envelopeBurst")).toBeVisible();
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-flap-open/);
-  // Critical regression: flap must complete its transform BEFORE the card
-  // appears, not the 160ms overlap used previously.
+  // The flap stays present while it folds ABOVE the sealed pocket. No
+  // backface culling, even after the card is extracted.
   await expect(page.locator(".invitation-card")).toBeHidden();
-  expect(await page.locator(".envelope-flap").evaluate(node =>
-    getComputedStyle(node).transitionDuration
-  )).toContain("0.65s");
+  await expect.poll(() => page.locator(".envelope-flap").evaluate(node =>
+    getComputedStyle(node).transform
+  )).toMatch(/matrix\(1, 0, 0, -1, 0, 0\)/);
+  const openedFlap = await page.locator(".envelope-flap").evaluate(node => ({
+    opacity:getComputedStyle(node).opacity,
+    backface:getComputedStyle(node).backfaceVisibility,
+    foldedTop:node.getBoundingClientRect().top,
+    pocketTop:document.querySelector(".envelope-front").getBoundingClientRect().top
+  }));
+  expect(openedFlap.opacity).toBe("1");
+  expect(openedFlap.backface).toBe("visible");
+  expect(openedFlap.foldedTop).toBeLessThan(openedFlap.pocketTop);
   await expect(page.locator("#envelopeBurst")).toHaveClass(/is-active/);
   const foil = await page.locator(".envelope-burst-particle").count();
   expect(foil).toBeGreaterThanOrEqual(4);
@@ -335,7 +344,8 @@ test("reduced motion opens the envelope without particles or flash", async ({ pa
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeVisible();
   await expect(page.locator("#envelopeBurst")).toBeHidden();
-  await expect(page.locator(".envelope-flap")).toHaveCSS("opacity", "0");
+  await expect(page.locator(".envelope-flap")).toHaveCSS("opacity", "1");
+  await expect(page.locator(".envelope-flap")).toHaveCSS("transform", "matrix(1, 0, 0, -1, 0, 0)");
   await expect(page.locator(".envelope-burst-particle")).toHaveCount(0);
   await page.locator("#closeInvitation").click();
   await expect(page.locator("#envelopeIntro")).toBeHidden();

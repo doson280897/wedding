@@ -393,9 +393,11 @@ html.envelope-pending body>.language-switch{visibility:visible!important;pointer
   background:linear-gradient(157deg,#f8f2e8 0%,#e7dccb 55%,#d9c9b2 100%);
   border:1px solid rgba(139,124,91,.48);
   clip-path:polygon(0 0,100% 0,50% 62%);
-  transform-origin:50% 0%;backface-visibility:hidden;pointer-events:none;
-  transform:translateZ(0) rotateX(0deg);
-  transition:transform .65s cubic-bezier(.2,.68,.2,1),opacity .65s ease-out;
+  transform-origin:50% 0%;backface-visibility:visible;pointer-events:none;
+  transform:translate3d(0,0,0) scaleY(1);
+  /* A 2D hinged fold avoids the back-face culling that made the flap vanish
+     on iOS/WebKit. The flap stays solid and visible when folded up. */
+  transition:transform .62s cubic-bezier(.24,.72,.2,1);
 }
 .invitation-card{
   position:absolute;z-index:2;left:8%;right:8%;top:2%;height:78%;overflow:hidden;
@@ -491,7 +493,7 @@ html.envelope-pending body>.language-switch{visibility:visible!important;pointer
 }
 .envelope-intro{opacity:1;transition:opacity .26s cubic-bezier(.4,0,.2,1)}
 .envelope-inner{will-change:transform,opacity}
-.envelope-intro.is-flap-open .envelope-flap{transform:translateZ(0) rotateX(-168deg);opacity:.3}
+.envelope-intro.is-flap-open .envelope-flap{transform:translate3d(0,0,0) scaleY(-1);opacity:1;z-index:1}
 .envelope-intro.is-flap-open .envelope-seal{transform:translate3d(-50%,-58%,0) scale(.88);opacity:0}
 .envelope-intro.is-card-lifted .invitation-card{transform:translate3d(0,-12%,0)}
 .envelope-intro.is-card-lifted .envelope-front{transform:translate3d(0,14px,0);opacity:.58}
@@ -1640,5 +1642,5 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 
 /* Reduced-motion entrance is immediate, including the folded flap. */
 @media(prefers-reduced-motion:reduce){
-  .envelope-intro.is-flap-open .envelope-flap{opacity:0!important;transform:none!important}
+  .envelope-intro.is-flap-open .envelope-flap{opacity:1!important;transform:scaleY(-1)!important}
 }
