@@ -198,6 +198,7 @@ def generate_manifest():
             )
             return
 
+        MANIFEST_FILE.parent.mkdir(parents=True, exist_ok=True)
         MANIFEST_FILE.write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2),
             encoding="utf-8",
