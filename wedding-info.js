@@ -476,7 +476,6 @@ window.WEDDING_INFO = {
       "invitation.promiseGroom": "Về chung một nhà, thương nhau một đời.",
       "invitation.promiseSingle": "Hai lời hẹn, một ngày chung đôi.",
       "closing.note": "Cảm ơn bạn đã dành một chỗ cho chúng mình trong những yêu thương của bạn. Hẹn cùng nhau lưu lại một ngày thật đẹp.",
-      "gate.skip": "Vào xem thiệp",
       "album.captionLabel": "Lời tựa của bức ảnh"
     },
     "en": {
@@ -716,7 +715,6 @@ window.WEDDING_INFO = {
       "invitation.promiseGroom": "One home, a lifetime of love.",
       "invitation.promiseSingle": "Two promises, one celebration.",
       "closing.note": "Thank you for keeping a place for us in your heart. We look forward to sharing a beautiful day with you.",
-      "gate.skip": "View invitation",
       "album.captionLabel": "Photo caption"
     }
   },

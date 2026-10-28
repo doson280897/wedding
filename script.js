@@ -441,8 +441,6 @@
     }
     leftGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.hidden = true;
-    const skip = document.getElementById("gateSkip");
-    if (skip) skip.hidden = true;
     moonlightGate.classList.remove(
       "is-unlocking", "is-awakening", "is-opening", "is-opened", "is-handoff", "is-leaving"
     );
@@ -465,7 +463,6 @@
     heroPreparation = image.decode ? image.decode().catch(() => {}) : Promise.resolve();
   };
   let handoffStarted = false;
-  document.getElementById("gateSkip")?.addEventListener("click", completeMoonlightGate);
   const finishMoonlightGate = async () => {
     if (!moonlightGate || moonlightGate.hidden) return;
     if (handoffStarted) return;

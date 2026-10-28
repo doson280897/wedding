@@ -1387,7 +1387,7 @@ html[data-theme="light"] .moonlight-gate__reveal-subtitle{color:#634f38}
 .invitation-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;padding:20px 20px;background:#10191b;border-block:1px solid #c8a87830}
 .invitation-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:12px 22px;border:1px solid #c8a87870;border-radius:2px;font-size:11px;letter-spacing:.08em;color:#ecd3ac;transition:background .25s ease,border-color .25s ease}
 .invitation-actions a:hover{background:#d2b27b18;border-color:#d2b27b}
-.invitation-actions a:focus-visible,.gate-skip:focus-visible{outline:2px solid #d2b27b;outline-offset:4px}
+.invitation-actions a:focus-visible{outline:2px solid #d2b27b;outline-offset:4px}
 .promise-story{max-width:1150px;margin:90px auto 0;padding-top:55px;border-top:1px solid #bc9d6838}
 .promise-story .section-head{margin-bottom:38px}
 .promise-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
@@ -1404,13 +1404,10 @@ html[data-theme="light"] .moonlight-gate__reveal-subtitle{color:#634f38}
 .closing-crest{margin-bottom:30px}
 .closing-note{max-width:440px;margin:24px auto;font-size:14px;line-height:1.9;color:#e4d9c7;text-wrap:pretty}
 .album-lightbox-caption{position:absolute;z-index:4;bottom:max(65px,calc(env(safe-area-inset-bottom) + 50px));left:65px;right:65px;margin:0;text-align:center;font:italic clamp(17px,2vw,23px)/1.5 'Cormorant Garamond',serif;color:#e8d3b3;pointer-events:none;text-shadow:0 1px 8px #000}
-.gate-skip{display:none;position:fixed;z-index:10002;right:max(20px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom));min-height:44px;padding:10px 18px;background:#0b161ecc;border:1px solid #d0b17e70;border-radius:24px;color:#eed9b6;font:12px 'Montserrat',sans-serif;cursor:pointer}
-html.wax-pending:not(.party-pending):not(.link-tool-active) .gate-skip:not([hidden]){display:block}
 html[data-theme="light"] .invitation-actions{background:#ede5d7}
 html[data-theme="light"] .invitation-actions a{color:#624d30;border-color:#92734870}
 html[data-theme="light"] .promise-copy h3{color:#684b2b}
 html[data-theme="light"] .promise-copy p{color:#5e5b53}
-html[data-theme="light"] .gate-skip{background:#f4e9dacc;color:#61472c;border-color:#92734870}
 @media(max-width:650px){
   .wedding-crest{width:62px;height:70px}
   .wedding-crest .crest-first,.wedding-crest .crest-second{font-size:34px}
