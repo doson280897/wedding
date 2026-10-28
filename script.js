@@ -495,8 +495,8 @@
   let youtubePlayerReady = false;
   let youtubePlayerPromise = null;
   let musicPlaying = false;
-  // The seal click is the real playback gesture. Keep the track quiet during
-  // the gate, then raise its volume when the hero is visible.
+  // The seal click is the playback gesture. Play muted through the intro,
+  // then reveal the sound only after the hero is visible.
   let musicHeroEntered = false;
   let musicEnabled = false;
   let musicHasStarted = false;
@@ -509,6 +509,20 @@
   let musicRequestId = 0;
   let musicStartTimer = 0;
   let musicStatePoll = 0;
+
+  // Volume 0 alone is not reliable on mobile YouTube players; mute the iframe
+  // before playVideo. Unmute the SAME player at Hero without re-cueing or
+  // restarting the track. Some iOS versions can still block that unmute.
+  const syncMusicIntroAudio = player => {
+    if (!player) return;
+    if (!musicHeroEntered) {
+      try { player.mute?.(); } catch (_) {}
+      try { player.setVolume?.(0); } catch (_) {}
+    } else {
+      try { player.unMute?.(); } catch (_) {}
+      try { player.setVolume?.(70); } catch (_) {}
+    }
+  };
 
   const clearMusicWait = () => {
     clearTimeout(musicStartTimer);
@@ -662,6 +676,7 @@
             player.seekTo(musicPausePosition, true);
           }
         }
+        syncMusicIntroAudio(player);
         player.playVideo(); // Keep the same iframe and playback position.
       } catch (_) { failMusicAttempt(requestId); }
     };
@@ -807,7 +822,7 @@
             readySettled = true;
             clearTimeout(readyTimeout);
             youtubePlayerReady = true;
-            try { event.target.setVolume(musicHeroEntered ? 70 : 12); } catch (_) {}
+            syncMusicIntroAudio(event.target);
             resolve(event.target);
           },
           onStateChange: event => {
@@ -860,9 +875,8 @@
 
   // iOS Safari commonly rejects playVideo() called several seconds after a
   // tap: a delayed wedding:waxopen event is NOT a user gesture. Prepare the
-  // silent iframe while the guest is viewing the closed gate, then issue
-  // playVideo() synchronously from the actual seal click when it is ready.
-  // Start quietly and raise the volume on Hero; never restart the track.
+  // iframe while the gate is closed, start MUTED on the seal gesture, then
+  // unmute that same running player on Hero without restarting its track.
   // On slow networks, the existing retry in Settings remains necessary if
   // the YouTube iframe was not ready in time for that first gesture.
   if (selectedParty && !linkToolInitial) {
@@ -870,18 +884,15 @@
       if (!moonlightGate?.hidden) initYouTubeMusicPlayer().catch(() => {});
     }, 250);
     waxOpenButton?.addEventListener("click", () => {
-      if (youtubePlayerReady && youtubePlayer) {
-        try { youtubePlayer.setVolume(12); } catch (_) {}
-      }
+      // Never let the first frames of the unlock sequence make a sound.
+      if (youtubePlayerReady) syncMusicIntroAudio(youtubePlayer);
       // No setTimeout, Promise.then or requestAnimationFrame before playVideo
       // when the player is ready: preserve the browser's user activation.
       requestMusicPlayback();
     }, { once:true });
     document.addEventListener("wedding:waxopen", () => {
       musicHeroEntered = true;
-      try {
-        if (youtubePlayerReady) youtubePlayer?.setVolume(70);
-      } catch (_) {}
+      if (youtubePlayerReady) syncMusicIntroAudio(youtubePlayer);
     }, { once:true });
   }
 
