@@ -5,8 +5,8 @@ Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, 
 
 ### Giao diện và khách mời cá nhân hóa
 
-- Nút nổi **Tùy chỉnh** (có thể kéo thả) gom **VN / EN**, **Sáng / Tối** và **nhạc nền** vào một bảng; nút **Mục lục** vẫn riêng để truy cập nhanh các phần thiệp. Nhạc chỉ hiển thị khi đã vào thiệp của một bên.
-- Khi khách bật nhạc trong Tùy chỉnh, một **bong bóng nốt nhạc** xuất hiện ở góc dưới trái và lắc nhẹ lúc đang phát. Chạm bong bóng để mở các icon **Tạm dừng / Phát tiếp** và **Stop**. Pause giữ bong bóng nhưng cho icon đứng yên và đổi màu; Stop dừng hẳn, ẩn bong bóng, và chỉ có thể bật lại từ bảng Tùy chỉnh. Bong bóng không hiện khi nhạc chưa được bật.
+- **Một nút điều khiển chung** mặc định ở **góc dưới bên phải**, có thể kéo và tự hít vào mép gần nhất. Ở màn chọn tiệc / tạo link, bảng chỉ có **Cài đặt** (VN/EN và Sáng/Tối); sau khi mở thiệp, bảng thêm tab **Mục lục** (mở mặc định) trước tab **Cài đặt** (VN/EN, Sáng/Tối, nhạc). Nút Mục lục nổi riêng đã được loại bỏ.
+- Bong bóng nhạc **chỉ xuất hiện sau khi YouTube xác nhận `PLAYING`**, không hiện khi đang tải/buffering. Mặc định ở góc dưới trái; kéo/thả được cả lúc nhạc đang chạy, cùng cơ chế hít mép và tránh chồng lên nút chính. Chạm bong bóng mở **Pause / Resume / Stop**; Pause giữ vị trí phát, giữ bong bóng nhưng ngừng lắc và đổi màu; Resume phát tiếp tại vị trí cũ (tự seek nếu iframe bị tua về đầu); Stop dừng hẳn và ẩn bong bóng cho đến khi bật lại từ Cài đặt.
 - Chế độ **Sáng** dùng nền kem và màu xanh lá dịu; **Tối** giữ phong cách dark luxury. Album 3D và ảnh bìa vẫn tối có chủ đích để ảnh rõ chiều sâu, không bị lóa. Trong tab đang xem, F5 và điều hướng qua Mục lục giữ lựa chọn ngôn ngữ/theme. **Tab mới mặc định VN, theme theo cài đặt Sáng/Tối của điện thoại hoặc Windows; thiết bị không hỗ trợ thì mặc định Tối** (trừ link có `lang=en`).
 - Với link có `?to=Tên+khách`, hero hiển thị **Kính mời** phía trên, **tên người nhận** ở dòng dưới bằng font serif đậm. Có thể sửa nhãn trong `wedding-info.js` → `text.vi["guest.recipientLabel"]` / `text.en["guest.recipientLabel"]`. Link không có tên vẫn giữ lời mời chung.
 
@@ -50,7 +50,7 @@ Trong **[wedding-info.js](wedding-info.js)**, trường `wedding.mode` chọn ki
 
 **Quan trọng:** `parties.single` hiện là **dữ liệu mẫu** dựa trên ảnh/địa điểm của bộ thiệp đang có. Khi dùng cho khách mới, bắt buộc thay ngày, nhà hàng, đường dẫn map, ảnh, nhạc, tài khoản và tạo lại **mã QR đúng tài khoản mới** trước khi gửi thiệp.
 
-**Căn giữa nút Mục lục:** Khi thu nhỏ, SVG được căn chính giữa vùng chạm 44 × 44 px trên cả điện thoại và desktop.
+**Nút chung và nút nhạc:** Kéo dùng `translate3d` theo `requestAnimationFrame`; chỉ animate khi thả rồi hít vào cạnh, giữ vùng chạm tối thiểu 44 × 44 px. Lần nhấn ngay sau khi kéo không bị chặn. Cảnh mở cổng chuyển trực tiếp từ bầu trời/tên đang phóng lớn và mờ dần sang Hero zoom-in, không giữ cảnh tĩnh 1,5 giây.
 
 ## ⭐ Chỉ sửa một file khi làm thiệp mới
 
@@ -137,10 +137,10 @@ python generate_gallery.py
 - `script.js`: hiệu ứng mở cổng, tên, monogram, countdown, ICS và nhạc.
 - `link-tool.js`: tạo link thiệp cá nhân hóa ngay trong trang chính, dùng chung nút VN/EN.
 - `gallery.js`: album 3D và fullscreen.
-- `quick-nav.js`: cơ chế kéo thả nút nổi, popup menu, bản đồ, QR.
+- `quick-nav.js`: một cơ chế kéo-thả/hít mép cho nút chung và bong bóng nhạc, liên kết Mục lục, popup bản đồ và QR.
 - `preferences.js`: trạng thái ngôn ngữ và giao diện riêng của tab, được giữ khi F5 nhưng không truyền sang tab mới.
-- `settings.js`: cùng một bảng tùy chỉnh ngôn ngữ, light/dark, âm nhạc và lưu sở thích.
-  - Nút Tùy chỉnh mặc định ở góc trên phải và Mục lục ở góc dưới phải sau mỗi lần tải lại; có thể kéo đến mép khác trong phiên xem.
+- `settings.js`: bảng tab Mục lục/Cài đặt, theme, nhạc và trạng thái panel.
+  - Sau F5, nút điều khiển chung mặc định **dưới phải**; bong bóng nhạc (nếu đang phát) bắt đầu **dưới trái**. Cả hai có thể kéo/hít vào mép khác trong phiên xem.
 - `build-wedding.cjs`: sinh metadata Open Graph và favicon từ cấu hình.
 - `generate_gallery.py`: quy trình tối ưu ảnh.
 - `tests/compatibility.spec.cjs`: bộ test thiết bị/desktop.
