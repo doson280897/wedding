@@ -963,36 +963,163 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 /* FEAT 04 — the personal names are written into view by a single gold sweep. */
 #heroNames{position:relative;isolation:isolate}
 
-
-/* TEMPORARY WAX GATE — intentionally minimal while the intro is rebuilt. */
+/* MOONLIGHT GATE — cinematic, image-free entrance. */
 html.wax-pending,
 html.wax-pending body{overflow:hidden}
-html.wax-pending body{
-  background:#23372d;
+.moonlight-gate{
+  position:fixed;inset:0;z-index:10000;
+  display:grid;place-items:center;
+  overflow:hidden;isolation:isolate;
+  perspective:1200px;
 }
-html[data-theme="light"].wax-pending body{
-  background:#efe8de;
+.moonlight-gate[hidden],
+html.party-pending .moonlight-gate,
+html.link-tool-active .moonlight-gate{display:none!important}
+.moonlight-gate__backdrop{
+  position:absolute;inset:0;z-index:-3;
+  background:
+    radial-gradient(circle at 50% 18%,rgba(214,226,227,.18),transparent 18%),
+    linear-gradient(180deg,#09131a 0%,#0b1720 42%,#12221f 100%);
 }
-html.wax-pending body > :not(#waxOpenButton){
-  visibility:hidden!important;
+.moonlight-gate__backdrop:after{
+  content:"";position:absolute;inset:auto 0 0;height:36%;
+  background:linear-gradient(180deg,transparent,rgba(5,12,13,.56));
+}
+.moonlight-gate__moon{
+  position:absolute;left:50%;top:8.5%;
+  width:clamp(72px,11vw,112px);aspect-ratio:1;border-radius:50%;
+  transform:translateX(-50%);
+  background:
+    radial-gradient(circle at 36% 33%,rgba(183,195,195,.28) 0 5%,transparent 6%),
+    radial-gradient(circle at 62% 58%,rgba(176,189,190,.22) 0 8%,transparent 9%),
+    linear-gradient(145deg,#f5f1dc,#cfd9d8);
+  box-shadow:0 0 24px rgba(230,237,225,.42),0 0 72px rgba(181,207,204,.2);
+}
+.moonlight-gate__stars{
+  position:absolute;inset:0;opacity:.72;
+  background-image:
+    radial-gradient(circle at 14% 18%,#fff 0 1px,transparent 1.4px),
+    radial-gradient(circle at 80% 17%,#dce8e5 0 1px,transparent 1.4px),
+    radial-gradient(circle at 72% 34%,#fff 0 1px,transparent 1.2px),
+    radial-gradient(circle at 25% 39%,#dce8e5 0 1px,transparent 1.2px),
+    radial-gradient(circle at 91% 42%,#fff 0 1px,transparent 1.3px),
+    radial-gradient(circle at 7% 48%,#dce8e5 0 1px,transparent 1.2px);
+}
+.moonlight-gate__scene{
+  position:relative;
+  width:min(76vw,430px);
+  height:min(72svh,680px);
+  min-height:500px;
+  transform-style:preserve-3d;
+}
+.moonlight-gate__arch{
+  position:absolute;inset:0;z-index:6;pointer-events:none;
+  border:3px solid rgba(178,143,80,.84);
+  border-bottom-width:5px;
+  border-radius:50% 50% 4px 4px / 22% 22% 4px 4px;
+  box-shadow:
+    0 0 0 1px rgba(242,220,167,.18),
+    0 0 38px rgba(181,145,82,.13),
+    inset 0 0 28px rgba(0,0,0,.44);
+}
+.moonlight-gate__arch:before{
+  content:"";position:absolute;inset:12px;
+  border:1px solid rgba(212,181,124,.42);
+  border-radius:50% 50% 3px 3px / 21% 21% 3px 3px;
+}
+.moonlight-gate__arch-line--inner{
+  position:absolute;left:50%;top:18px;bottom:18px;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(214,183,124,.26) 18%,rgba(214,183,124,.5) 58%,transparent);
+}
+.moonlight-gate__arch-ornament{
+  position:absolute;top:25%;color:#b9975e;font:30px/1 "Cormorant Garamond",serif;
+  text-shadow:0 0 14px rgba(214,183,124,.24);
+}
+.moonlight-gate__arch-ornament--left{left:18px;transform:rotate(-38deg)}
+.moonlight-gate__arch-ornament--right{right:18px;transform:scaleX(-1) rotate(-38deg)}
+.moonlight-gate__door{
+  position:absolute;top:2.4%;bottom:1.7%;width:48.8%;z-index:2;
+  overflow:hidden;
+  background:
+    linear-gradient(90deg,rgba(210,176,112,.07),transparent 20%,transparent 80%,rgba(210,176,112,.06)),
+    linear-gradient(180deg,#0d1a22,#0a151d 58%,#0d1c1d);
+  border:1px solid rgba(183,148,86,.7);
+  box-shadow:inset 0 0 38px rgba(0,0,0,.46);
+}
+.moonlight-gate__door--left{
+  left:2.4%;border-radius:52% 0 0 2% / 19% 0 0 2%;
+}
+.moonlight-gate__door--right{
+  right:2.4%;border-radius:0 52% 2% 0 / 0 19% 2% 0;
+}
+.moonlight-gate__door-inlay{
+  position:absolute;inset:8% 10% 7%;
+  border:1px solid rgba(190,155,94,.4);
+  border-radius:44% 44% 2px 2px / 16% 16% 2px 2px;
+}
+.moonlight-gate__door-inlay:before,
+.moonlight-gate__door-inlay:after{
+  content:"";position:absolute;left:50%;width:56%;height:1px;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent,#b08c54,transparent);
+}
+.moonlight-gate__door-inlay:before{top:34%}
+.moonlight-gate__door-inlay:after{bottom:29%}
+.moonlight-gate__door-vine{
+  position:absolute;top:22%;color:rgba(190,157,99,.52);
+  font:36px/1 "Cormorant Garamond",serif;
+}
+.moonlight-gate__door--left .moonlight-gate__door-vine{left:22%;transform:rotate(-48deg)}
+.moonlight-gate__door--right .moonlight-gate__door-vine{right:22%;transform:scaleX(-1) rotate(-48deg)}
+.moonlight-gate__seam{
+  position:absolute;z-index:4;left:50%;top:18%;bottom:5%;width:1px;
+  transform:translateX(-50%);
+  background:linear-gradient(180deg,transparent,rgba(227,199,143,.2) 15%,rgba(227,199,143,.5) 56%,transparent);
+  box-shadow:0 0 8px rgba(223,198,147,.18);
 }
 #waxOpenButton{
-  position:fixed;left:50%;top:50%;z-index:10000;
-  width:72px;height:72px;padding:0;margin:0;
+  position:absolute;left:50%;top:58%;z-index:8;
+  width:76px;height:76px;padding:0;margin:0;
   display:grid;place-items:center;
   transform:translate(-50%,-50%);
-  border:1px solid #8d7b51;border-radius:50%;
-  background:radial-gradient(circle at 32% 24%,#d8c99b,#aa996d 68%,#8d7d56);
-  box-shadow:0 10px 26px rgba(42,35,23,.24),inset 0 0 0 4px rgba(245,237,210,.22);
-  color:#4f5e49;cursor:pointer;
+  border:1px solid #8f7447;border-radius:50%;
+  background:
+    radial-gradient(circle at 35% 28%,#d9c28b 0 11%,#b69a63 34%,#8c7449 72%,#6f5b3d 100%);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.38),
+    0 0 0 4px rgba(176,142,79,.14),
+    inset 0 2px 4px rgba(255,242,201,.35);
+  color:#19251f;cursor:pointer;
   appearance:none;-webkit-appearance:none;
-  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
 }
-#waxOpenButton:focus-visible{outline:3px solid #f2dfb5;outline-offset:6px}
-#waxOpenButton[hidden],
-html.party-pending #waxOpenButton,
-html.link-tool-active #waxOpenButton{display:none!important}
+#waxOpenButton:before{
+  content:"";position:absolute;inset:9px;border-radius:50%;
+  border:1px solid rgba(244,226,178,.34);
+}
+#waxOpenButton:focus-visible{outline:3px solid #e9cf96;outline-offset:7px}
 .wax-monogram{
   display:block;font:600 14px/1 Montserrat,sans-serif;
   letter-spacing:.08em;text-transform:uppercase;
+}
+.moonlight-gate__hint{
+  position:absolute;left:50%;bottom:max(28px,4svh);
+  margin:0;transform:translateX(-50%);
+  color:rgba(235,223,194,.78);
+  font:500 10px/1.4 Montserrat,sans-serif;
+  letter-spacing:.22em;text-align:center;white-space:nowrap;
+}
+@media(max-width:650px){
+  .moonlight-gate__scene{
+    width:min(82vw,360px);
+    height:min(69svh,590px);
+    min-height:470px;
+  }
+  .moonlight-gate__moon{top:9%;width:76px}
+  #waxOpenButton{width:70px;height:70px;top:59%}
+  .moonlight-gate__hint{bottom:max(20px,3svh);font-size:9px;letter-spacing:.18em}
+}
+@media(max-height:650px){
+  .moonlight-gate__scene{height:78svh;min-height:430px}
+  .moonlight-gate__hint{display:none}
 }
