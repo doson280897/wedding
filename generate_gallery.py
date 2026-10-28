@@ -20,7 +20,18 @@ OPTIMIZED_ROOT = IMAGE_ROOT / "optimized"
 OPTIMIZED_ASSETS = OPTIMIZED_ROOT / "assets"
 OPTIMIZED_ALBUM = OPTIMIZED_ROOT / "album"
 
-MANIFEST_FILE = IMAGE_ROOT / "manifest.json"
+def read_wedding_info() -> dict:
+    """Read the JSON object stored inside the one editable wedding-info.js file."""
+    source = (ROOT / "wedding-info.js").read_text(encoding="utf-8")
+    marker = "window.WEDDING_INFO = "
+    if marker not in source:
+        raise ValueError("Không tìm thấy window.WEDDING_INFO trong wedding-info.js")
+    value, _ = json.JSONDecoder().raw_decode(source.split(marker, 1)[1].lstrip())
+    return value
+
+
+WEDDING_INFO = read_wedding_info()
+MANIFEST_FILE = ROOT / WEDDING_INFO.get("gallery", {}).get("manifest", "images/manifest.json")
 
 SUPPORTED_EXTENSIONS = {
     ".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif", ".bmp", ".tif", ".tiff"
@@ -29,16 +40,20 @@ SUPPORTED_EXTENSIONS = {
 ALBUM_MAX_SIDE = 960
 ALBUM_QUALITY = 80
 
-ASSET_SIZES = {
-    "hero_bride": 1920,
-    "hero_groom": 1920,
-    "ending_bride": 1600,
-    "ending_groom": 1600,
-    "son-1": 1000,
-    "son-2": 900,
-    "nga-1": 1000,
-    "nga-2": 900,
-}
+# Read portrait / hero / ending filenames from wedding-info.js.
+# Changing the couple's photo filenames does not require editing this script.
+ASSET_SIZES = {}
+for party in WEDDING_INFO["parties"].values():
+    images = party["images"]
+    for key, max_side in (
+        ("hero", 1920),
+        ("ending", 1600),
+        ("portraitMain", 1000),
+        ("portraitSecondary", 900),
+    ):
+        asset_name = Path(images[key]).stem
+        ASSET_SIZES[asset_name] = max_side
+
 BACKGROUND = (16, 20, 25)
 
 
