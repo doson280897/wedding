@@ -251,8 +251,12 @@
   const setContentBrowserTheme = () => setBrowserTheme(
     document.documentElement.dataset.theme === "light" ? "#f5f0e6" : "#0b0e0e"
   );
+  const setEnvelopeBrowserTheme = () => setBrowserTheme(
+    document.documentElement.dataset.theme === "light" ? "#eee6dc" : "#61766a"
+  );
   document.addEventListener("wedding:themechange", () => {
-    if (!document.body.classList.contains("envelope-locked")) setContentBrowserTheme();
+    if (document.body.classList.contains("envelope-locked")) setEnvelopeBrowserTheme();
+    else setContentBrowserTheme();
   });
   const openInvitation = document.getElementById("openInvitation");
   const envelopeStageHit = document.getElementById("envelopeStageHit");
@@ -271,7 +275,7 @@
   }
 
   if (intro && selectedParty && !alreadyEntered && !linkToolInitial) {
-    setBrowserTheme("#496957");
+    setEnvelopeBrowserTheme();
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
     resetInvitationScroll();

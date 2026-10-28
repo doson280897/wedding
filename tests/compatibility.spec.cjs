@@ -246,8 +246,21 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
     stage:getComputedStyle(document.getElementById("envelopeIntro")).backgroundColor,
     card:getComputedStyle(document.querySelector(".invitation-card")).backgroundColor
   }));
-  expect(visualContrast.stage).toBe("rgb(25, 39, 32)");
+  expect(visualContrast.stage).toBe("rgb(97, 118, 106)");
   expect(visualContrast.card).toBe("rgb(255, 250, 240)");
+
+  // Global Dark/Light must update the locked envelope itself, not only content
+  // behind it. Also verify the browser chrome and the toggle button state.
+  await page.locator("#settingsTrigger").click();
+  await expect(page.locator("#settingsPanel")).toBeVisible();
+  await page.locator('[data-theme-option="light"]').click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator(".envelope-intro")).toHaveCSS("background-color", "rgb(238, 230, 220)");
+  await expect(page.locator("#themeColor")).toHaveAttribute("content", "#eee6dc");
+  await page.locator('[data-theme-option="dark"]').click();
+  await expect(page.locator(".envelope-intro")).toHaveCSS("background-color", "rgb(97, 118, 106)");
+  await expect(page.locator("#themeColor")).toHaveAttribute("content", "#61766a");
+  await page.locator("#settingsClose").click();
   await expect(page.locator("#envelopeStageHit")).toBeVisible();
   await expect(page.locator(".envelope-seal")).toBeVisible();
   // The original diamond flap pointed upward as if already opened.

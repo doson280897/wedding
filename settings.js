@@ -20,11 +20,12 @@
       button.setAttribute("aria-pressed", String(active));
     }
 
-    // The envelope uses its own paper/chrome color regardless of the theme.
     const envelopeVisible = document.body.classList.contains("envelope-locked") ||
       document.documentElement.classList.contains("envelope-pending");
-    if (themeMeta && !envelopeVisible) {
-      themeMeta.content = theme === "light" ? "#f5f0e6" : "#0b0e0e";
+    if (themeMeta) {
+      themeMeta.content = envelopeVisible
+        ? (theme === "light" ? "#eee6dc" : "#61766a")
+        : (theme === "light" ? "#f5f0e6" : "#0b0e0e");
     }
   };
 

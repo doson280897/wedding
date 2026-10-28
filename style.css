@@ -1380,13 +1380,23 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 
 /* ENVELOPE CONTRAST & MOBILE SMOOTHNESS — matte dark-olive stage, warm
    stationery pocket and a distinct pearl-ivory card. No background animation. */
-.envelope-intro{
-  background-color:#192720;
+/* Envelope also obeys the global appearance setting. Both palettes use
+   quiet, warm mid-tones rather than the previous near-black stage. */
+html[data-theme="dark"] .envelope-intro{
+  background-color:#61766a;
   background-image:
-    radial-gradient(ellipse at 50% 45%,rgba(188,158,110,.17),transparent 57%),
-    linear-gradient(155deg,#2c3b32 0%,#1c2a22 57%,#111a16 100%);
+    radial-gradient(ellipse at 51% 42%,rgba(250,231,190,.23),transparent 64%),
+    linear-gradient(150deg,#829688 0%,#61776c 56%,#485f54 100%);
+  color:#fff6e5;
 }
-.envelope-intro:before,.envelope-intro:after{opacity:.065}
+html[data-theme="light"] .envelope-intro{
+  background-color:#eee6dc;
+  background-image:
+    radial-gradient(ellipse at 48% 40%,rgba(255,255,249,.88),transparent 62%),
+    linear-gradient(145deg,#f6f1e9 0%,#eee2d5 58%,#e4d7cd 100%);
+  color:#384b40;
+}
+.envelope-intro:before,.envelope-intro:after{opacity:.055}
 .envelope-shell .envelope-back{
   background:linear-gradient(145deg,#e6d6bb,#d6c2a4);
   border-color:rgba(123,98,64,.45);
@@ -1471,3 +1481,13 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   .envelope-cooldown svg{width:36px;height:36px}
   .envelope-cooldown span{font-size:14px}
 }
+
+/* Intro controls stay legible in each theme without changing global panels. */
+html[data-theme="dark"] .envelope-skip{color:#fff6e6}
+html[data-theme="light"] .envelope-skip{color:#58665b}
+html[data-theme="light"] .envelope-cooldown{
+  background:#fffaf2;border-color:#aa956e;color:#354e40;
+}
+html[data-theme="light"] .envelope-cooldown span{color:#354e40}
+html[data-theme="light"] .envelope-cooldown-track{stroke:#d3d8cc}
+html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
