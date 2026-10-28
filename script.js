@@ -38,13 +38,25 @@
       const url = new URL(window.location.href);
       url.searchParams.set("party", side);
       url.hash = "";
-      window.location.replace(url.href);
+      // Switch to the selected invitation within the same history entry.
+      // This preserves this tab's theme/language through the page reload,
+      // while a separately opened tab starts in VN + Dark.
+      try {
+        history.replaceState(history.state, "", url.href);
+        window.location.reload();
+      } catch (_) {
+        window.location.replace(url.href);
+      }
     }));
 
     document.addEventListener("keydown", event => {
       if (!document.documentElement.classList.contains("party-pending") || document.documentElement.classList.contains("link-tool-active") || event.key !== "Tab") return;
       const adminLink = document.querySelector(".party-admin-link");
-      const focusable = [...languageButtons, ...partyButtons, adminLink].filter(element => element && !element.disabled);
+      const settingsTrigger = document.getElementById("settingsTrigger");
+      const settingsPanel = document.getElementById("settingsPanel");
+      const settingsButtons = settingsPanel?.hidden ? [] : [...settingsPanel.querySelectorAll("button")];
+      const focusable = [settingsTrigger, ...settingsButtons, ...partyButtons, adminLink]
+        .filter(element => element && !element.disabled && !element.hidden);
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable.at(-1);
