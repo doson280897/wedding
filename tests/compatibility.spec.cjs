@@ -13,9 +13,9 @@ test("one shared language control, in-page generator, back navigation", async ({
   await expect(languageControl).toBeVisible();
   await expect(page.locator(".party-admin-link")).toBeVisible();
 
-  // The original floating control can collapse on idle. A first tap
-  // wakes it; the next tap selects the language on touch devices.
-  await languageControl.locator('[data-lang="vi"]').click();
+  // Language and appearance now share the draggable settings palette.
+  await page.locator("#settingsTrigger").click();
+  await expect(page.locator("#settingsPanel")).toBeVisible();
   await languageControl.locator('[data-lang="en"]').click();
   await expect(page.locator(".party-admin-link")).toContainText(
     "CREATE PERSONALIZED",
@@ -159,7 +159,8 @@ test("floating language pill really shrinks on touch and desktop", async ({ page
 
   expect(collapsedWidth).toBeLessThanOrEqual(48);
   expect(expandedWidth).toBeGreaterThan(collapsedWidth + 12);
-  await expect(control.locator(".language-option.is-active")).toBeVisible();
+  await expect(page.locator("#settingsTrigger")).toBeVisible();
+  await expect(page.locator("#settingsPanel")).toBeHidden();
 });
 
 
@@ -341,4 +342,95 @@ test("a deploy cache refresh keeps the already opened invitation in the same tab
   expect(await page.evaluate(() => history.state?.weddingEnvelopeOpened)).toBe(
     JSON.stringify(["bride", "DeployGuest"]),
   );
+});
+
+
+test("settings palette provides light/dark, persistent language and music in one place", async ({
+  page,
+}) => {
+  await page.goto(base + "/index.html", { waitUntil: "domcontentloaded" });
+  const hub = page.locator("#settingsHub");
+  await expect(hub).toHaveCount(1);
+  await expect(page.locator("#settingsPanel")).toBeHidden();
+  // Music control is inside this single hub and no longer floats separately.
+  expect(await page.locator("#musicToggle").evaluate(node => hub ? node.closest("#settingsHub") !== null : false)).toBe(true);
+  await page.locator("#settingsTrigger").click();
+  await expect(page.locator("#settingsPanel")).toBeVisible();
+  await page.locator('[data-theme-option="light"]').click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator('[data-theme-option="light"]')).toHaveAttribute("aria-pressed", "true");
+  const lightBackground = await page.locator(".party-selector-card").evaluate(
+    node => getComputedStyle(node).backgroundImage,
+  );
+  await page.locator('[data-lang="en"]').click();
+  await expect(page.locator("#settingsPanel .settings-row-label").first()).toHaveText("Language");
+  await page.locator("#settingsClose").click();
+  await expect(page.locator("#settingsPanel")).toBeHidden();
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.locator("#settingsTrigger").click();
+  await expect(page.locator('[data-lang="en"]')).toHaveAttribute("aria-pressed", "true");
+  await page.locator('[data-theme-option="dark"]').click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const darkBackground = await page.locator(".party-selector-card").evaluate(
+    node => getComputedStyle(node).backgroundImage,
+  );
+  expect(lightBackground).not.toBe(darkBackground);
+});
+
+test("settings popover stays inside phone and tablet viewport when hub is dragged", async ({
+  page,
+}) => {
+  await page.goto(base + "/index.html", { waitUntil: "domcontentloaded" });
+  await page.locator("#settingsHub").evaluate(node => {
+    node.style.top = Math.max(10, innerHeight - 64) + "px";
+    node.style.left = Math.floor(innerWidth / 2) + "px";
+    node.style.right = "auto";
+  });
+  await page.locator("#settingsTrigger").click();
+  const rect = await page.locator("#settingsPanel").evaluate(node => {
+    const r = node.getBoundingClientRect();
+    return { left:r.left, right:r.right, top:r.top, bottom:r.bottom, viewportW:innerWidth, viewportH:innerHeight };
+  });
+  expect(rect.left).toBeGreaterThanOrEqual(4);
+  expect(rect.right).toBeLessThanOrEqual(rect.viewportW - 4);
+  expect(rect.top).toBeGreaterThanOrEqual(4);
+  expect(rect.bottom).toBeLessThanOrEqual(rect.viewportH - 4);
+});
+
+test("personal invitation puts bold recipient below the greeting in both places", async ({
+  page,
+}) => {
+  const guest = "Anh Minh và chị Lan";
+  await page.goto(base + "/index.html?party=bride&to=" + encodeURIComponent(guest), {
+    waitUntil:"domcontentloaded",
+  });
+  await expect(page.locator("#envelopeGuestLabel")).toHaveText("Kính mời");
+  await expect(page.locator("#envelopeGuest")).toHaveText(guest);
+  const envelopeStyle = await page.locator("#envelopeGuest").evaluate(node => ({
+    weight:getComputedStyle(node).fontWeight,
+    below:node.getBoundingClientRect().top >= document.getElementById("envelopeGuestLabel").getBoundingClientRect().top,
+  }));
+  expect(Number(envelopeStyle.weight)).toBeGreaterThanOrEqual(600);
+  expect(envelopeStyle.below).toBe(true);
+  await page.locator("#skipInvitation").click();
+  await expect(page.locator("#heroGuestLabel")).toHaveText("Kính mời");
+  await expect(page.locator("#guestName")).toHaveText(guest);
+  await expect(page.locator("#guestName")).toBeVisible();
+  await page.locator("#settingsTrigger").click();
+  await page.locator('[data-lang="en"]').click();
+  await expect(page.locator("#envelopeGuestLabel")).toHaveText("Cordially inviting");
+  await expect(page.locator("#heroGuestLabel")).toHaveText("Cordially inviting");
+  await expect(page.locator("#guestName")).toHaveText(guest);
+});
+
+test("unnamed invitation remains generic instead of showing an empty recipient name", async ({
+  page,
+}) => {
+  await page.goto(base + "/index.html?party=groom", { waitUntil:"domcontentloaded" });
+  await expect(page.locator("#envelopeGuestLabel")).toHaveText("Trân trọng kính mời");
+  await expect(page.locator("#envelopeGuest")).toBeHidden();
+  await page.locator("#skipInvitation").click();
+  await expect(page.locator("#guestName")).toBeHidden();
+  await expect(page.locator("#heroGuestLabel")).toContainText("Trân trọng kính mời");
 });
