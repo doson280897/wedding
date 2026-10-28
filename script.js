@@ -419,15 +419,34 @@
 
       const raiseCard = () => {
         if (leaving) return;
-        // Nothing from the invitation is visible until the flap has finished.
-        intro.querySelector(".invitation-card")?.removeAttribute("aria-hidden");
-        intro.classList.add("is-card-lifted", "is-opened");
-        if (!reduced) releasePetals(petalOrigin);
-        // Schedule badge layout after this animation frame rather than during
-        // the card's first raster/composite step.
-        if (reduced) startAutoClose();
-        else requestAnimationFrame(startAutoClose);
-        closeInvitation?.focus({preventScroll:true});
+        const paper = intro.querySelector(".invitation-paper-proxy");
+        let completed = false;
+        let fallbackTimer = 0;
+        const finishPaper = event => {
+          if (event && (event.target !== paper || event.propertyName !== "transform")) return;
+          if (completed || leaving) return;
+          completed = true;
+          paper?.removeEventListener("transitionend", finishPaper);
+          window.clearTimeout(fallbackTimer);
+          // The fully typeset card has been painted stationary behind the
+          // proxy. Swap layers only once the cheap paper sheet has settled.
+          intro.querySelector(".invitation-card")?.removeAttribute("aria-hidden");
+          intro.classList.add("is-card-lifted", "is-opened");
+          if (reduced) startAutoClose();
+          else requestAnimationFrame(startAutoClose);
+          closeInvitation?.focus({preventScroll:true});
+        };
+        if (reduced || !paper) {
+          finishPaper();
+          return;
+        }
+        paper.addEventListener("transitionend", finishPaper);
+        intro.classList.add("is-paper-rising");
+        // Stagger decorative petals after the first sheet movement frame.
+        requestAnimationFrame(() => {
+          if (!leaving) releasePetals(petalOrigin);
+        });
+        fallbackTimer = window.setTimeout(finishPaper, 980);
       };
 
       const unfoldFlap = () => {

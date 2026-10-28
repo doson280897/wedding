@@ -320,6 +320,8 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeVisible();
   await expect(page.locator(".invitation-card")).not.toHaveAttribute("aria-hidden", "true");
+  await expect(page.locator(".invitation-paper-proxy")).toBeHidden();
+  await expect(page.locator(".invitation-card")).toHaveCSS("animation-name","none");
   await expect(page.locator("#floatingPetals")).toBeVisible();
   const petalCount = await page.locator(".floating-petal").count();
   expect(petalCount).toBeGreaterThanOrEqual(2);
@@ -365,16 +367,11 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   expect(pocket.opacity).toBe("1");
   expect(["none","matrix(1, 0, 0, 1, 0, 0)","matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)"]).toContain(pocket.transform);
   await expect(page.locator("#envelopeSealButton")).toBeDisabled();
+  // Only the lightweight paper proxy transitions. The full invitation never
+  // runs a moving layer animation, avoiding Safari text/SVG raster jitter.
   expect(await page.locator(".invitation-card").evaluate(node =>
     getComputedStyle(node).animationName
-  )).toContain("luxInvitationFlight");
-  // No scale or filter animation on the large card layer.
-  const riseKeyframes = await page.locator(".invitation-card").evaluate(node => {
-    const animation = node.getAnimations().find(a => a.animationName === "luxInvitationFlight");
-    return animation?.effect?.getKeyframes().map(frame => frame.transform) ?? [];
-  });
-  expect(riseKeyframes.length).toBeGreaterThan(0);
-  expect(riseKeyframes.every(transform => !/scale|rotate/i.test(transform))).toBe(true);
+  )).toBe("none");
   await page.locator("#closeInvitation").click();
   await expect(page.locator("#invitationReveal")).toBeVisible();
   await expect(page.locator("#invitationPortal")).toHaveCount(0);
