@@ -43,6 +43,21 @@ jobs:
           couple = wedding["couple"]
           parties = wedding["parties"]
 
+          # A custom socialImage points to an existing file (or public HTTPS URL).
+          # Only the default og-preview.jpg needs the generated hero-based card.
+          social_image = wedding["site"].get("socialImage", "og-preview.jpg")
+          if social_image != "og-preview.jpg":
+              from urllib.parse import urlparse, unquote
+              parsed = urlparse(social_image)
+              if parsed.scheme in ("https", "http"):
+                  print("Using configured external social image:", social_image)
+                  raise SystemExit(0)
+              social_path = Path(unquote(parsed.path))
+              if social_path.is_absolute() or ".." in social_path.parts or not social_path.is_file():
+                  raise SystemExit(f"Configured socialImage not found or unsafe: {social_image}")
+              print("Using configured local social image:", social_path)
+              raise SystemExit(0)
+
           source = Path(parties["bride"]["images"]["hero"])
           if not source.exists():
               raise SystemExit(f"Missing configured hero image: {source}")
