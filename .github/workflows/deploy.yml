@@ -3,9 +3,6 @@ name: Deploy Wedding (optimized images only)
 on:
   push:
     branches: [main]
-  workflow_run:
-    workflows: ["Import wedding album from config"]
-    types: [completed]
   workflow_dispatch:
 
 permissions:
