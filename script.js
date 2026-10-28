@@ -307,7 +307,7 @@
     const releasePetals = origin => {
       if (!floatingPetals || !origin || prefersReducedMotion()) return;
       const compact = matchMedia("(max-width: 650px)").matches;
-      const count = navigator.connection?.saveData ? 2 : compact ? 4 : 8;
+      const count = navigator.connection?.saveData ? 3 : compact ? 6 : 10;
       floatingPetals.style.setProperty("--petal-x", origin.x + "px");
       floatingPetals.style.setProperty("--petal-y", origin.y + "px");
       const fragment = document.createDocumentFragment();
@@ -316,8 +316,8 @@
         petal.className = "floating-petal";
         const angle = (360 / count) * i + 14;
         petal.style.setProperty("--petal-angle", angle + "deg");
-        petal.style.setProperty("--petal-distance", "-" + (compact ? 95 + (i % 3) * 23 : 120 + (i % 4) * 28) + "px");
-        petal.style.setProperty("--petal-delay", ((i % 3) * 50) + "ms");
+        petal.style.setProperty("--petal-distance", "-" + (compact ? 145 + (i % 3) * 34 : 175 + (i % 4) * 42) + "px");
+        petal.style.setProperty("--petal-delay", ((i % 4) * 38) + "ms");
         fragment.append(petal);
       }
       floatingPetals.replaceChildren(fragment);
@@ -328,7 +328,7 @@
         floatingPetals.hidden = true;
         floatingPetals.classList.remove("is-active");
         floatingPetals.replaceChildren();
-      }, 1700);
+      }, 2050);
     };
 
     const stopAutoClose = () => {

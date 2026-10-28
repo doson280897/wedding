@@ -297,7 +297,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await page.locator("#envelopeSealButton").click();
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
   await expect(page.locator(".envelope-seal-light")).toBeVisible();
-  await expect(page.locator(".envelope-seal-light")).toHaveCSS("animation-name", "sealLightReveal");
+  await expect(page.locator(".envelope-seal-light")).toHaveCSS("animation-name", "sealLocalizedBurst");
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-flap-open/);
   await expect(page.locator("#envelopeBurst")).toHaveCount(0);
   await expect(page.locator("#floatingPetals")).toBeHidden();
@@ -332,8 +332,11 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator(".invitation-card")).toHaveCSS("animation-name","none");
   await expect(page.locator("#floatingPetals")).toBeVisible();
   const petalCount = await page.locator(".floating-petal").count();
-  expect(petalCount).toBeGreaterThanOrEqual(2);
-  expect(petalCount).toBeLessThanOrEqual(8);
+  expect(petalCount).toBeGreaterThanOrEqual(3);
+  expect(petalCount).toBeLessThanOrEqual(10);
+  const petalBox = await page.locator(".floating-petal").first().boundingBox();
+  expect(petalBox.width).toBeGreaterThanOrEqual(11);
+  expect(petalBox.height).toBeGreaterThanOrEqual(20);
   await expect(page.locator("#envelopeCooldown")).toBeVisible();
   // Verify actual rendered contrast of the timer's digits against its surface.
   const timerContrast = await page.locator("#envelopeCooldown").evaluate(node => {
@@ -382,7 +385,10 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   )).toBe("none");
   await page.locator("#closeInvitation").click();
   await expect(page.locator("#invitationReveal")).toBeVisible();
-  await expect(page.locator("#invitationReveal")).toHaveCSS("animation-name","weddingWarmHeroReveal");
+  await expect(page.locator("#invitationReveal")).toHaveCSS("background-image","none");
+  expect(await page.locator("#invitationReveal").evaluate(node =>
+    getComputedStyle(node,"::before").animationName
+  )).toBe("heroLocalizedBurst");
   await expect(page.locator("#invitationPortal")).toHaveCount(0);
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden({ timeout: 3000 });
