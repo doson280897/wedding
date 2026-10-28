@@ -613,9 +613,13 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
     node => getComputedStyle(node).backgroundImage,
   );
   expect(pausedBackground).not.toBe(playingBackground);
+  await expect(page.locator("#musicBubbleActions")).toBeHidden();
 
+  await page.locator("#musicBubbleTrigger").click();
   await page.locator("#musicBubblePause").click();
   await expect(bubble).toHaveAttribute("data-music-state", "playing");
+  await expect(page.locator("#musicBubbleActions")).toBeHidden();
+  await page.locator("#musicBubbleTrigger").click();
   await page.locator("#musicBubbleStop").click();
   await expect(bubble).toBeHidden();
   await expect(page.locator("#musicToggle")).toHaveAttribute("aria-pressed", "false");
