@@ -72,8 +72,8 @@ window.WEDDING_INFO = {
       },
       "home": {
         "address": {
-          "vi": "144 Chu Văn An, Krông Ana, Đắk Lắk",
-          "en": "144 Chu Văn An Street, Krông Ana Commune, Đắk Lắk Province"
+          "vi": "{{families.bride.address}}",
+          "en": "{{families.bride.address}}"
         }
       },
       "venue": {
@@ -86,8 +86,8 @@ window.WEDDING_INFO = {
           "en": "24 Hùng Vương Street, Krông Ana, Đắk Lắk"
         },
         "calendarAddress": {
-          "vi": "Nhà Hàng Hương Lan, 24 Hùng Vương, Krông Ana, Đắk Lắk",
-          "en": "Hương Lan Restaurant, 24 Hùng Vương Street, Krông Ana, Đắk Lắk"
+          "vi": "{{parties.bride.venue.name}}, {{parties.bride.venue.address}}",
+          "en": "{{parties.bride.venue.name}}, {{parties.bride.venue.address}}"
         },
         "mapUrl": "https://www.google.com/maps/search/?api=1&query=Nhà+Hàng+Hương+Lan+24+Hùng+Vương+Krông+Ana+Đắk+Lắk",
         "embedUrl": "https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"
@@ -133,8 +133,8 @@ window.WEDDING_INFO = {
       },
       "home": {
         "address": {
-          "vi": "Ấp Cao Cang, Xã Định Quán, Đồng Nai",
-          "en": "Cao Cang Hamlet, Định Quán Commune, Đồng Nai City"
+          "vi": "{{families.groom.address}}",
+          "en": "{{families.groom.address}}"
         }
       },
       "venue": {
@@ -147,8 +147,8 @@ window.WEDDING_INFO = {
           "en": "Cao Cang Hamlet, Định Quán Commune, Đồng Nai City"
         },
         "calendarAddress": {
-          "vi": "Ấp Cao Cang, Xã Định Quán, Đồng Nai",
-          "en": "Cao Cang Hamlet, Định Quán Commune, Đồng Nai City"
+          "vi": "{{parties.groom.venue.address}}",
+          "en": "{{parties.groom.venue.address}}"
         },
         "mapUrl": "https://www.google.com/maps/place/11%C2%B009'48.2%22N+107%C2%B023'24.5%22E/@11.163395,107.3875511,17z/",
         "embedUrl": "https://maps.google.com/maps?q=11.163389,107.390139&z=16&output=embed"
@@ -355,7 +355,7 @@ window.WEDDING_INFO = {
       "link.back": "← Quay lại chọn tiệc",
       "link.backAria": "Quay lại màn hình chọn Nhà trai hoặc Nhà gái",
       "link.title": "Tạo thiệp mời riêng",
-    "link.brand": "{{couple.bride.short}} & {{couple.groom.short}} · WEDDING {{parties.bride.dateYear}}",
+      "link.brand": "{{couple.bride.short}} & {{couple.groom.short}} · WEDDING {{parties.bride.dateYear}}",
       "link.description": "Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho người nhận.",
       "link.guest": "Tên khách mời",
       "link.placeholder": "Ví dụ: Anh Minh và chị Lan",
@@ -544,7 +544,7 @@ window.WEDDING_INFO = {
       "link.back": "← Back to celebrations",
       "link.backAria": "Return to bride or groom celebration selection",
       "link.title": "Create a personalized invitation",
-    "link.brand": "{{couple.bride.short}} & {{couple.groom.short}} · WEDDING {{parties.bride.dateYear}}",
+      "link.brand": "{{couple.bride.short}} & {{couple.groom.short}} · WEDDING {{parties.bride.dateYear}}",
       "link.description": "Enter your guest's name and select the celebration. Their invitation link will display a personal greeting.",
       "link.guest": "Guest name",
       "link.placeholder": "e.g. Minh and Lan",
