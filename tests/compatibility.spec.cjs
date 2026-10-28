@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const base = "http://127.0.0.1:8000";
 
-test("one shared language control, in-page generator, back navigation", async ({
+test("one shared language control, in-page generator, back navigation @smoke @core", async ({
   page,
 }) => {
   const errors = [];
@@ -50,7 +50,7 @@ test("one shared language control, in-page generator, back navigation", async ({
   expect(errors).toEqual([]);
 });
 
-test("party link, envelope and album lightbox interactions", async ({
+test("party link, envelope and album lightbox interactions @smoke", async ({
   page,
 }) => {
   const errors = [];
@@ -82,7 +82,7 @@ test("party link, envelope and album lightbox interactions", async ({
   expect(errors).toEqual([]);
 });
 
-test("short screens can scroll and avoid horizontal page overflow", async ({
+test("short screens can scroll and avoid horizontal page overflow @smoke", async ({
   page,
 }) => {
   await page.goto(base + "/index.html", { waitUntil: "domcontentloaded" });
@@ -110,7 +110,7 @@ test("legacy generator URL redirects to the shared in-page view", async ({ page 
   await expect(page.locator(".language-switch")).toHaveCount(1);
 });
 
-test("menu, map and gift overlays open and close on each device", async ({
+test("menu, map and gift overlays open and close on each device @smoke", async ({
   page,
 }) => {
   await page.goto(base + "/index.html?party=groom&to=Guest", {
@@ -252,7 +252,7 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
 });
 
 
-test("F5 keeps the invitation open within the same tab", async ({ page }) => {
+test("F5 keeps the invitation open within the same tab @core", async ({ page }) => {
   const url = base + "/index.html?party=bride&to=ReloadGuest&lang=vi";
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeVisible();
@@ -272,7 +272,7 @@ test("F5 keeps the invitation open within the same tab", async ({ page }) => {
   );
 });
 
-test("a newly opened tab still shows the envelope", async ({ page }) => {
+test("a newly opened tab still shows the envelope @smoke", async ({ page }) => {
   const url = base + "/index.html?party=groom&to=TabGuest";
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await page.locator("#skipInvitation").click();
@@ -345,7 +345,7 @@ test("a deploy cache refresh keeps the already opened invitation in the same tab
 });
 
 
-test("settings palette provides light/dark, persistent language and music in one place", async ({
+test("settings palette provides light/dark, persistent language and music in one place @smoke @core", async ({
   page,
 }) => {
   await page.goto(base + "/index.html", { waitUntil: "domcontentloaded" });
@@ -378,7 +378,7 @@ test("settings palette provides light/dark, persistent language and music in one
   expect(lightBackground).not.toBe(darkBackground);
 });
 
-test("settings popover stays inside phone and tablet viewport when hub is dragged", async ({
+test("settings popover stays inside phone and tablet viewport when hub is dragged @smoke", async ({
   page,
 }) => {
   await page.goto(base + "/index.html", { waitUntil: "domcontentloaded" });
@@ -398,7 +398,7 @@ test("settings popover stays inside phone and tablet viewport when hub is dragge
   expect(rect.bottom).toBeLessThanOrEqual(rect.viewportH - 4);
 });
 
-test("personal invitation puts bold recipient below the greeting in both places", async ({
+test("personal invitation puts bold recipient below the greeting in both places @smoke", async ({
   page,
 }) => {
   const guest = "Anh Minh và chị Lan";
@@ -433,4 +433,119 @@ test("unnamed invitation remains generic instead of showing an empty recipient n
   await page.locator("#skipInvitation").click();
   await expect(page.locator("#guestName")).toBeHidden();
   await expect(page.locator("#heroGuestLabel")).toContainText("Trân trọng kính mời");
+});
+
+
+test("F5 resets settings and menu positions to opposite right corners @smoke", async ({ page }) => {
+  await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
+  const hub = page.locator("#settingsHub");
+  const menu = page.locator("#wqToggle");
+  await expect(hub).toHaveClass(/floating-control/);
+  await expect(menu).toHaveClass(/floating-control/);
+
+  // Simulate actual drag placement and check it does NOT survive F5.
+  for (const control of [hub, menu]) {
+    await control.evaluate(node => {
+      node.dataset.userMoved = "true";
+      node.dataset.floatEdge = "left";
+      node.style.top = Math.round(innerHeight * .43) + "px";
+      node.style.left = "8px";
+      node.style.right = "auto";
+      node.style.bottom = "auto";
+    });
+  }
+  await page.reload({ waitUntil:"domcontentloaded" });
+
+  const corners = await page.evaluate(() => {
+    const settings = document.getElementById("settingsHub").getBoundingClientRect();
+    const menu = document.getElementById("wqToggle").getBoundingClientRect();
+    return {
+      settings: { right: innerWidth - settings.right, top:settings.top },
+      menu: { right:innerWidth - menu.right, bottom:innerHeight - menu.bottom }
+    };
+  });
+  expect(corners.settings.right).toBeLessThanOrEqual(30);
+  expect(corners.settings.top).toBeLessThanOrEqual(40);
+  expect(corners.menu.right).toBeLessThanOrEqual(30);
+  expect(corners.menu.bottom).toBeLessThanOrEqual(40);
+});
+
+test("collapsed settings icon is centered both vertically and horizontally @smoke", async ({ page }) => {
+  await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
+  const dock = page.locator("#settingsHub");
+  await dock.evaluate(node => node.classList.add("is-idle"));
+  const result = await dock.evaluate(node => {
+    const bounds = node.getBoundingClientRect();
+    const icon = node.querySelector(".settings-trigger svg").getBoundingClientRect();
+    const label = node.querySelector(".settings-trigger-label");
+    return {
+      dx:Math.abs((bounds.left + bounds.width / 2) - (icon.left + icon.width / 2)),
+      dy:Math.abs((bounds.top + bounds.height / 2) - (icon.top + icon.height / 2)),
+      labelDisplay:getComputedStyle(label).display
+    };
+  });
+  expect(result.dx).toBeLessThanOrEqual(2);
+  expect(result.dy).toBeLessThanOrEqual(2);
+  expect(result.labelDisplay).toBe("none");
+});
+
+test("light palette remains light when opening an invitation @smoke @core", async ({ page }) => {
+  await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
+  await page.locator("#settingsTrigger").click();
+  await page.locator('[data-theme-option="light"]').click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+  await page.locator("#settingsClose").click();
+
+  await page.locator('[data-party-select="bride"]').click();
+  await expect(page.locator("#envelopeIntro")).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+  await page.locator("#skipInvitation").click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+
+  const hub = page.locator("#settingsHub");
+  await hub.evaluate(node => node.classList.add("is-idle"));
+  const actual = await hub.evaluate(node => {
+    const color = getComputedStyle(node).backgroundColor;
+    const root = document.documentElement.dataset.theme;
+    const parsed = color.match(/[\\d.]+/g)?.slice(0,3).map(Number) || [];
+    return {color,root,parsed};
+  });
+  expect(actual.root).toBe("light");
+  expect(actual.parsed.length).toBe(3);
+  expect(actual.parsed[0]).toBeGreaterThan(180);
+  expect(actual.parsed[1]).toBeGreaterThan(170);
+  expect(actual.parsed[2]).toBeGreaterThan(150);
+});
+
+test("a new tab starts in VN and Dark even after the first tab was changed @smoke @core", async ({
+  page
+}) => {
+  const url = base + "/index.html";
+  await page.goto(url, { waitUntil:"domcontentloaded" });
+  await page.locator("#settingsTrigger").click();
+  await page.locator('[data-lang="en"]').click();
+  await page.locator('[data-theme-option="light"]').click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+  await expect(page.locator("html")).toHaveAttribute("lang","en");
+
+  await page.evaluate(destination => {
+    const a = document.createElement("a");
+    a.href = destination;
+    a.target = "_blank";
+    a.rel = "opener";
+    a.id = "newTabWithPreferencesTest";
+    a.textContent = "open new tab";
+    document.body.append(a);
+  }, url);
+  const popupPromise = page.waitForEvent("popup");
+  await page.locator("#newTabWithPreferencesTest").click();
+  const other = await popupPromise;
+  await other.waitForLoadState("domcontentloaded");
+  await expect(other.locator("html")).toHaveAttribute("data-theme","dark");
+  await expect(other.locator("html")).toHaveAttribute("lang","vi");
+  await other.close();
+
+  await page.reload({ waitUntil:"domcontentloaded" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+  await expect(page.locator("html")).toHaveAttribute("lang","en");
 });
