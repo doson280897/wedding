@@ -1379,7 +1379,7 @@ html[data-theme="light"] .moonlight-gate__reveal-subtitle{color:#634f38}
 /* A shared engraved crest: live initials keep the ceremony's name order. */
 .wedding-crest{position:relative;display:inline-grid;grid-template-columns:1fr 1fr;place-items:center;width:78px;height:86px;border:1px solid currentColor;border-radius:48% 48% 45% 45%;color:#d7b884;font-family:'Cormorant Garamond',serif;letter-spacing:0;isolation:isolate}
 .wedding-crest:before{content:"";position:absolute;inset:5px;border:1px solid currentColor;border-radius:inherit;opacity:.45;pointer-events:none}
-.wedding-crest:after{content:"✧";position:absolute;bottom:-10px;background:#151b1b;padding:0 5px;font-size:16px;line-height:18px}
+.wedding-crest:after{content:"✧";position:absolute;bottom:-10px;background:transparent;padding:0 5px;font-size:16px;line-height:18px}
 .wedding-crest .crest-first{font-size:42px;transform:translate(7px,-7px)}
 .wedding-crest .crest-second{font-size:42px;transform:translate(-7px,9px)}
 .wedding-crest .crest-join{position:absolute;font:22px 'Great Vibes',cursive;opacity:.7}
