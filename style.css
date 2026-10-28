@@ -1227,10 +1227,27 @@ html[data-theme="light"] .moonlight-gate__portal{filter:blur(10px) saturate(.75)
   width:52%;height:64%;
   color:#fbe2af;filter:drop-shadow(0 1px 4px #4c2324a6);
 }
-.wax-lock{display:block;width:100%;height:100%;overflow:visible}
-/* Key entry, twist and shackle release share one 1.6s sequence. The
-   stationary tip (23.5,36) is the rotation pivot; the key stays aligned
-   with the lock as it turns instead of swinging around its centre. */
+.wax-lock{
+  display:block;width:100%;height:100%;overflow:visible;
+  transform-origin:50% 54%;
+  animation:gateLockNudge 3.7s ease-in-out infinite;
+}
+/* A small, periodic pendulum nudge makes the lock discoverable without
+   shaking the whole seal or interfering with its hit target. */
+@keyframes gateLockNudge{
+  0%,36%,75%,100%{transform:rotate(0deg)}
+  44%{transform:rotate(-6deg)}
+  52%{transform:rotate(5deg)}
+  60%{transform:rotate(-3.5deg)}
+  68%{transform:rotate(1.8deg)}
+}
+.moonlight-gate.is-unlocking .wax-lock,
+.moonlight-gate.is-awakening .wax-lock,
+.moonlight-gate.is-opening .wax-lock{animation:none}
+/* The key slides into the keyhole horizontally. Its turn is an axial twist
+   around the SHAFT (a horizontal axis at y=36), not a clock-hand swing around
+   the tip. The 2-D foreshortening mimics the front view of a real 3-D turn,
+   and remains consistent on iOS Safari and desktop browsers. */
 .wax-lock__key-insert{
   opacity:0;
   transform:translate(38px,5px) rotate(-9deg);
@@ -1241,6 +1258,7 @@ html[data-theme="light"] .moonlight-gate__portal{filter:blur(10px) saturate(.75)
 .wax-lock__key-turn{
   transform-box:view-box;
   transform-origin:23.5px 36px;
+  backface-visibility:hidden;
 }
 .wax-lock__shackle{
   transform-box:view-box;
@@ -1264,8 +1282,13 @@ html[data-theme="light"] .moonlight-gate__portal{filter:blur(10px) saturate(.75)
   45%,100%{opacity:1;transform:translate(0,0) rotate(0)}
 }
 @keyframes gateKeyTwist{
-  0%,48%{transform:rotate(0deg)}
-  79%,100%{transform:rotate(55deg)}
+  /* The shaft stays locked into the hole: only its visible vertical
+     profile compresses as the teeth and bow turn edge-on. */
+  0%,48%{transform:scaleY(1)}
+  64%{transform:scaleY(.75)}
+  78%{transform:scaleY(.14)}
+  86%{transform:scaleY(.23)}
+  100%{transform:scaleY(.18)}
 }
 @keyframes gateLockShackle{
   0%,78%{transform:translateY(0) rotate(0deg)}
