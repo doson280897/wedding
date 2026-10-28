@@ -147,8 +147,8 @@ test("party link, wax gate and album lightbox interactions", async ({
   await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
   await expect(page.locator("#heroMonogram")).toContainText(initials.split(" · ")[0]);
-  await page.locator(".couple-section .section-title").scrollIntoViewIfNeeded();
-  await expect(page.locator(".couple-section .section-title")).toHaveClass(/is-visible/);
+  await page.locator("#coupleHeading").scrollIntoViewIfNeeded();
+  await expect(page.locator("#coupleHeading")).toHaveClass(/is-visible/);
 
   await page.locator("#albumViewport").scrollIntoViewIfNeeded();
   await expect.poll(() => page.locator(".album-slide").count()).toBeGreaterThan(0);
