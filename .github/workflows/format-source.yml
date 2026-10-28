@@ -29,11 +29,13 @@ jobs:
         run: |
           ./node_modules/.bin/prettier --write \
             index.html link-tool.html \
-            style.css quick-nav.css \
-            script.js quick-nav.js gallery.js i18n.js \
+            style.css quick-nav.css link-tool.css \
+            script.js quick-nav.js gallery.js i18n.js link-tool.js wedding-info.js \
+            build-wedding.cjs playwright.config.cjs tests/*.cjs \
             .github/workflows/deploy.yml \
             .github/workflows/import-wedding-photos.yml \
             .github/workflows/format-source.yml \
+            .github/workflows/browser-compatibility.yml \
             .prettierrc.json README.md images/manifest.json
           black generate_gallery.py
 
@@ -43,6 +45,10 @@ jobs:
           node --check quick-nav.js
           node --check gallery.js
           node --check i18n.js
+          node --check wedding-info.js
+          node --check link-tool.js
+          node --check build-wedding.cjs
+          node --test tests/data-source.test.cjs
           python -m py_compile generate_gallery.py
           python -m json.tool images/manifest.json > /dev/null
 
