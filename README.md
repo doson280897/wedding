@@ -52,10 +52,11 @@ Trong **[wedding-info.js](wedding-info.js)**, trường `wedding.mode` chọn ki
 
 **Nút chung và nút nhạc:** Kéo dùng `translate3d` theo `requestAnimationFrame`; chỉ animate khi thả rồi hít vào cạnh, giữ vùng chạm tối thiểu 44 × 44 px. Lần nhấn ngay sau khi kéo không bị chặn. Cảnh mở cổng chuyển trực tiếp từ bầu trời/tên đang phóng lớn và mờ dần sang Hero zoom-in, không giữ cảnh tĩnh 1,5 giây.
 
-## ⭐ Chỉ sửa một file khi làm thiệp mới
+## ⭐ Hai nơi dữ liệu rõ ràng: thông tin cưới và album
 
-**[wedding-info.js](wedding-info.js)** là **file thông tin duy nhất** phải cập nhật khi làm thiệp cho cặp đôi khác.
-Không chỉnh tên, ngày, chữ viết tắt, nhạc hoặc lời mời trực tiếp trong HTML/CSS/JS nữa.
+**[wedding-info.js](wedding-info.js)** chứa tên, ngày, nhạc, lời mời, ảnh bìa và các bản dịch giao diện.
+
+**[images/manifest.json](images/manifest.json)** là **nơi duy nhất quản lý album ảnh**: danh sách ảnh, chế độ thêm/thay thế, thứ tự, chú thích và cấu hình tối ưu WebP. Không còn cấu hình album trùng trong `wedding-info.js` hoặc `gallery.js`.
 
 | Mục trong `wedding-info.js` | Nội dung bạn đổi |
 | --- | --- |
@@ -69,7 +70,6 @@ Không chỉnh tên, ngày, chữ viết tắt, nhạc hoặc lời mời trực
 | `parties.*.music.youtubeId` | Mã video nhạc YouTube cho từng lễ |
 | `parties.*.images` | Ảnh hero, ảnh kết, chân dung, favicon |
 | `parties.*.gift` | Tên ngân hàng, chủ tài khoản, số tài khoản, mã QR |
-| `gallery` | File manifest album hoặc danh sách ảnh tự chọn |
 | `text.vi` và `text.en` | **Toàn bộ lời mời, câu chữ, thông báo, tiêu đề** của cả hai ngôn ngữ |
 
 ### Ví dụ đổi tên và chữ viết tắt
@@ -103,31 +103,42 @@ Chỉ thay chữ trong config không thể biến ảnh cưới cũ thành ảnh
 
 **Quan trọng với QR mừng cưới:** Khi thay `gift.bank`, `gift.accountNumber` hoặc `gift.accountHolder`, phải tạo lại mã QR cho **đúng tài khoản mới**, upload QR mới và cập nhật `gift.qrImage`. Thay số tài khoản hiển thị trong file thông tin **không tự sửa nội dung QR cũ**. Luôn thử quét mã và đối chiếu ngân hàng, số tài khoản, người nhận trước khi gửi thiệp cho khách.
 
-Nếu giữ `gallery.photos: null`, album sẽ tự đọc `gallery.manifest` (mặc định `images/manifest.json`) do pipeline tạo.
+### Album ảnh — chỉ quản lý trong `images/manifest.json`
 
-**Khi làm thiệp cho cặp đôi khác:** đặt `gallery.mode` thành `"replace"` để bộ tạo ảnh **không trộn ảnh cưới cũ** vào manifest mới. Giá trị `"append"` mặc định giữ nguyên bộ ảnh hiện tại khi bổ sung ảnh. Chế độ `"replace"` không xóa ảnh trong repository, chỉ không đưa ảnh cũ vào danh sách hiển thị.
-
-
-Nếu muốn hoàn toàn chọn danh sách ảnh ngay trong file thông tin, điền:
-
-```js
-"gallery": {
-  "manifest": "images/manifest.json",
+```json
+{
+  "mode": "append",
+  "shuffle": true,
+  "optimization": { "maxSide": 960, "quality": 80 },
+  "captions": {
+    "vi": ["CHÚNG MÌNH", "BÊN NHAU"],
+    "en": ["US", "TOGETHER"]
+  },
+  "total": 2,
   "photos": [
-    { "src": "images/optimized/album/anh-1.webp", "width": 640, "height": 960 },
-    { "src": "images/optimized/album/anh-2.webp", "width": 960, "height": 640 }
+    { "src": "images/optimized/album/anh-1.webp", "name": "Ảnh 1", "width": 640, "height": 960 },
+    { "src": "images/optimized/album/anh-2.webp", "name": "Ảnh 2", "width": 960, "height": 640 }
   ]
 }
 ```
 
-Để tối ưu ảnh mới trên máy cá nhân:
+- `mode: "append"`: giữ ảnh có trong `photos` và bổ sung ảnh gốc mới; `"replace"`: tạo danh sách chỉ từ ảnh gốc hiện có (nếu không còn ảnh gốc, album sẽ rỗng). Hãy để `append` khi chỉ thêm ảnh cưới mới.
+- `shuffle: true`: xáo ảnh mỗi lần mở album; `false`: hiển thị theo đúng thứ tự mảng `photos`.
+- `optimization`: giới hạn cạnh dài WebP (`maxSide`), chất lượng (`quality`). `total` do script cập nhật.
+- `captions.vi/en`: chú thích xoay vòng. Có thể đặt chú thích riêng từng ảnh trong `photos` bằng `"caption": {"vi": "Khoảnh khắc của chúng mình", "en": "Our moment"}`.
+- `photos`: danh sách **được website hiển thị**. Bạn có thể sắp thứ tự, thêm mục trỏ tới file WebP đã có, sửa chú thích, hoặc bỏ mục. Lưu ý nếu bỏ mục mà ảnh gốc cùng tên vẫn có trong thư mục gốc, chạy generator sẽ thêm ảnh đó lại; hãy chuyển/xóa file gốc tương ứng.
+- Các dòng chữ nút và bản dịch giao diện chung (ví dụ: "Đang tải album", "Xem toàn màn hình") vẫn ở `wedding-info.js` vì dùng chung hệ thống ngôn ngữ, không phải dữ liệu ảnh.
+
+**Thêm ảnh mới:** chép ảnh vào `images/original/album/` trên máy tính rồi chạy:
 
 ```powershell
 python -m pip install -r requirements.txt
 python generate_gallery.py
 ```
 
-Ảnh gốc `images/original/` được Git ignore. File ảnh tối ưu nằm trong `images/optimized/`; manifest là file kỹ thuật tự sinh, **không phải file nội dung cần chỉnh tay**.
+Script sẽ tối ưu ảnh mới vào `images/optimized/album/` và tự cập nhật **chính `images/manifest.json`**, giữ các mục ảnh cũ và chú thích chỉnh tay khi `mode: "append"`.
+
+Sau đó **commit/push `images/manifest.json` và ảnh mới trong `images/optimized/`** để website được cập nhật. Ảnh gốc `images/original/` được Git ignore nên không bị đẩy lên GitHub. Workflow deploy hiện **không tự chạy** `generate_gallery.py`; phải chạy local trước hoặc tự khai báo ảnh WebP đã tối ưu trong manifest.
 
 ## Các file khác chỉ là template / engine
 
@@ -142,7 +153,7 @@ python generate_gallery.py
 - `settings.js`: bảng tab Mục lục/Cài đặt, theme, nhạc và trạng thái panel.
   - Sau F5, nút điều khiển chung mặc định **dưới phải**; bong bóng nhạc (nếu đang phát) bắt đầu **dưới trái**. Cả hai có thể kéo/hít vào mép khác trong phiên xem.
 - `build-wedding.cjs`: sinh metadata Open Graph và favicon từ cấu hình.
-- `generate_gallery.py`: quy trình tối ưu ảnh.
+- `generate_gallery.py`: đọc thiết lập album từ manifest và bổ sung ảnh WebP vào danh sách ở cùng file.
 - `tests/compatibility.spec.cjs`: bộ test thiết bị/desktop.
 
 ## Chạy và deploy

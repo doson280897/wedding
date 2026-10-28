@@ -118,13 +118,25 @@ test("one shared floating language control and one data script", () => {
   assert.equal((html.match(/src="wedding-info[.]js/g) || []).length, 1);
 });
 
-test("gallery configuration has no Drive imports or remote dependencies", () => {
-  assert.ok(["append", "replace"].includes(info.gallery.mode));
-  assert.ok(!Object.hasOwn(info.gallery, "imports"), "Remove obsolete Drive photo IDs");
-  const imageGenerator = read("generate_gallery.py");
-  assert.ok(imageGenerator.includes('ALBUM_MODE == "replace"'));
-  assert.ok(imageGenerator.includes('ALBUM_MODE == "append"'));
+test("album settings, captions and photo list live only in images/manifest.json", () => {
+  assert.equal(info.gallery, undefined, "Do not duplicate album config in wedding-info.js");
+  const manifest = JSON.parse(read("images/manifest.json"));
+  assert.ok(["append", "replace"].includes(manifest.mode));
+  assert.equal(typeof manifest.shuffle, "boolean");
+  assert.ok(manifest.optimization.maxSide >= 160);
+  assert.ok(manifest.optimization.quality >= 1 && manifest.optimization.quality <= 100);
+  assert.ok(Array.isArray(manifest.captions.vi));
+  assert.ok(Array.isArray(manifest.captions.en));
+  assert.ok(Array.isArray(manifest.photos));
+  assert.equal(manifest.total, manifest.photos.length);
+  assert.equal(new Set(manifest.photos.map(photo => photo.src)).size, manifest.photos.length);
+  assert.ok(manifest.photos.every(photo => photo.src.startsWith("images/optimized/album/")));
+  const generator = read("generate_gallery.py");
+  const renderer = read("gallery.js");
+  assert.ok(generator.includes('MANIFEST_FILE = IMAGE_ROOT / "manifest.json"'));
+  assert.ok(generator.includes('ALBUM_MODE == "append"'));
+  assert.ok(!generator.includes('WEDDING_INFO.get("gallery"'));
+  assert.ok(renderer.includes('new URL("images/manifest.json", document.baseURI)'));
+  assert.ok(!renderer.includes("WEDDING_INFO?.gallery"));
   assert.ok(!fs.existsSync(path.join(root, ".github/workflows/import-wedding-photos.yml")));
-  const deploy = read(".github/workflows/deploy.yml");
-  assert.ok(!deploy.includes("Import wedding album from config"));
 });
