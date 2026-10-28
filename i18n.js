@@ -80,6 +80,10 @@
       node.textContent = getInfo(node.dataset.info);
     });
     document.querySelectorAll("[data-info-src]").forEach(node => {
+      // Only load the active celebration's QR; dormant bride/groom/single
+      // panels must not fetch unrelated clients' bank QR images.
+      const scope = node.closest("[data-party-scope]")?.dataset.partyScope;
+      if (scope && scope !== document.documentElement.dataset.party) return;
       const src = getInfo(node.dataset.infoSrc);
       if (!src) return;
       const url = new URL(src, document.baseURI);
