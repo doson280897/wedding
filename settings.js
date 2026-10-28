@@ -73,6 +73,7 @@
       panel.style.top = "";
       panel.style.right = "";
       panel.style.bottom = "";
+      document.dispatchEvent(new Event("wedding:settingsclosed"));
       if (restoreFocus) trigger.focus({ preventScroll: true });
     }
   };
@@ -100,7 +101,12 @@
 
   const navToggle = document.getElementById("wqToggle");
   navToggle?.addEventListener("click", () => setOpen(false));
-  document.addEventListener("wedding:envelopeexit", syncThemeControls);
+  document.querySelector(".party-admin-link")?.addEventListener("click", () => setOpen(false));
+  window.addEventListener("popstate", () => setOpen(false));
+  document.addEventListener("wedding:envelopeexit", () => {
+    setOpen(false);
+    syncThemeControls();
+  });
   window.addEventListener("resize", positionPanel, { passive: true });
   window.addEventListener("scroll", positionPanel, { passive: true });
   hub.addEventListener("pointerup", () => requestAnimationFrame(positionPanel));
