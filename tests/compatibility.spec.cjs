@@ -257,13 +257,16 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   )).toContain("luxInvitationFlight");
   await page.locator("#closeInvitation").click();
   await expect(page.locator("#invitationReveal")).toBeVisible();
+  await expect(page.locator("#invitationPortal")).toBeVisible();
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden({ timeout: 3000 });
+  await expect(page.locator("#invitationPortal")).toBeHidden({ timeout: 3000 });
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#envelopeBurst")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden();
+  await expect(page.locator("#invitationPortal")).toBeHidden();
   await expect(page.locator("html")).toHaveClass(/envelope-resumed/);
   await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
   expect(await page.evaluate(() => history.state?.weddingEnvelopeOpened)).toBe(
@@ -283,6 +286,7 @@ test("reduced motion opens the envelope without particles or flash", async ({ pa
   await page.locator("#closeInvitation").click();
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden();
+  await expect(page.locator("#invitationPortal")).toBeHidden();
   await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
 });
 

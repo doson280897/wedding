@@ -259,6 +259,7 @@
   const skipInvitation = document.getElementById("skipInvitation");
   const envelopeBurst = document.getElementById("envelopeBurst");
   const invitationReveal = document.getElementById("invitationReveal");
+  const invitationPortal = document.getElementById("invitationPortal");
   const envelopeCooldown = document.getElementById("envelopeCooldown");
   const envelopeCooldownValue = document.getElementById("envelopeCooldownValue");
   // A reload in the same tab resumes the invitation without replaying its
@@ -283,6 +284,7 @@
     let cooldownTickTimer = 0;
     let burstCleanupTimer = 0;
     let revealCleanupTimer = 0;
+    let portalCleanupTimer = 0;
     const prefersReducedMotion = () =>
       matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -327,6 +329,20 @@
       if (!invitationReveal || prefersReducedMotion()) return;
       invitationReveal.hidden = false;
       invitationReveal.classList.add("is-active");
+      if (invitationPortal) {
+        const rect = intro.querySelector(".invitation-card")?.getBoundingClientRect();
+        invitationPortal.style.setProperty("--portal-x", (rect ? rect.left + rect.width / 2 : innerWidth / 2) + "px");
+        invitationPortal.style.setProperty("--portal-y", (rect ? rect.top + rect.height / 2 : innerHeight / 2) + "px");
+        invitationPortal.hidden = false;
+        invitationPortal.classList.add("is-active");
+        document.documentElement.classList.add("portal-entering");
+        window.clearTimeout(portalCleanupTimer);
+        portalCleanupTimer = window.setTimeout(() => {
+          invitationPortal.hidden = true;
+          invitationPortal.classList.remove("is-active");
+          document.documentElement.classList.remove("portal-entering");
+        }, 1300);
+      }
       window.clearTimeout(revealCleanupTimer);
       revealCleanupTimer = window.setTimeout(() => {
         invitationReveal.hidden = true;

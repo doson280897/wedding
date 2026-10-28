@@ -319,7 +319,7 @@ html.envelope-theme body{
 html.envelope-resumed #envelopeIntro{display:none!important}
 html.party-pending #envelopeIntro{display:none!important}
 html.envelope-pending body{overflow:hidden;background:#f2eee4}
-html.envelope-pending body> :not(#envelopeIntro):not(.language-switch):not(#musicBubble):not(#invitationReveal){visibility:hidden!important}
+html.envelope-pending body> :not(#envelopeIntro):not(.language-switch):not(#musicBubble):not(#invitationReveal):not(#invitationPortal){visibility:hidden!important}
 html.envelope-pending #envelopeIntro{visibility:visible!important}
 html.envelope-pending body>.language-switch{visibility:visible!important;pointer-events:auto!important}
 .envelope-intro{
@@ -1389,4 +1389,55 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   .envelope-intro.is-card-lifted .invitation-card{
     animation:none!important;transform:translate3d(0,-12%,0)!important;
   }
+}
+
+
+/* FEAT 03 — seamless warm portal: the paper becomes the entrance to the hero. */
+.invitation-portal[hidden]{display:none!important}
+.invitation-portal{
+  position:fixed;inset:0;z-index:4001;overflow:hidden;pointer-events:none;
+  --portal-x:50%;--portal-y:50%;
+}
+.invitation-portal-core,.invitation-portal-ring{
+  position:absolute;left:var(--portal-x);top:var(--portal-y);border-radius:50%;
+  pointer-events:none;opacity:0;
+}
+.invitation-portal-core{
+  width:240px;height:240px;
+  background:radial-gradient(circle,#fff7df 0%,#f3dcb0 23%,rgba(211,171,116,.85) 42%,rgba(142,103,62,.2) 65%,transparent 74%);
+  mix-blend-mode:screen;
+}
+.invitation-portal-ring{
+  width:180px;height:180px;border:2px solid rgba(255,233,192,.67);
+  box-shadow:0 0 40px rgba(255,233,189,.65),inset 0 0 40px rgba(233,181,110,.38);
+}
+.invitation-portal.is-active .invitation-portal-core{
+  animation:luxPortalBloom 1250ms cubic-bezier(.18,.63,.21,1) both;
+}
+.invitation-portal.is-active .invitation-portal-ring{
+  animation:luxPortalRing 1100ms cubic-bezier(.14,.72,.2,1) both;
+}
+@keyframes luxPortalBloom{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.12)}
+  20%{opacity:.95}
+  52%{opacity:.85}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(8)}
+}
+@keyframes luxPortalRing{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+  25%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(9)}
+}
+@media(prefers-reduced-motion:no-preference){
+  html.portal-entering .hero-photo{
+    animation:luxPortalCamera 1200ms cubic-bezier(.16,.7,.21,1) both!important;
+  }
+}
+@keyframes luxPortalCamera{
+  from{transform:scale(1.15);filter:brightness(1.16) saturate(1.04)}
+  to{transform:scale(1.09);filter:brightness(1) saturate(1)}
+}
+@media(max-width:650px){.invitation-portal-core{width:180px;height:180px}}
+@media(prefers-reduced-motion:reduce){
+  .invitation-portal,.invitation-portal *{display:none!important;animation:none!important}
 }
