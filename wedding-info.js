@@ -724,72 +724,75 @@ window.WEDDING_INFO = {
   "story": {
     "images": {
       "together": {
-        "src": "images/optimized/assets/promise-7920.webp",
+        "src": "images/optimized/assets/promise-5982.webp",
+        "sourceName": "NAK_5982.JPG",
         "alt": {
-          "vi": "Sơn và Nga bên nhau trước cổng đá cổ",
-          "en": "Sơn and Nga together in front of a historic stone gate"
-        },
-        "width": 1333,
-        "height": 2000,
-        "variants": [
-          {
-            "src": "images/optimized/assets/promise-7920-640.webp",
-            "width": 640
-          },
-          {
-            "src": "images/optimized/assets/promise-7920-1000.webp",
-            "width": 1000
-          },
-          {
-            "src": "images/optimized/assets/promise-7920.webp",
-            "width": 1333
-          }
-        ],
-        "sizes": "(max-width: 414px) calc(100vw - 34px), (max-width: 650px) 380px, (max-width: 1000px) 31vw, 365px"
-      },
-      "love": {
-        "src": "images/optimized/assets/promise-7885.webp",
-        "alt": {
-          "vi": "Sơn và Nga dịu dàng bên hồ sen",
-          "en": "Sơn and Nga sharing a quiet moment by the lotus pond"
+          "vi": "Sơn và Nga đứng bên nhau trên cầu trước cung điện",
+          "en": "Sơn and Nga together on the bridge in front of the palace"
         },
         "width": 2000,
         "height": 1333,
         "variants": [
           {
-            "src": "images/optimized/assets/promise-7885-1200.webp",
+            "src": "images/optimized/assets/promise-5982-1200.webp",
             "width": 1200
           },
           {
-            "src": "images/optimized/assets/promise-7885-1600.webp",
+            "src": "images/optimized/assets/promise-5982-1600.webp",
             "width": 1600
           },
           {
-            "src": "images/optimized/assets/promise-7885.webp",
+            "src": "images/optimized/assets/promise-5982.webp",
             "width": 2000
           }
         ],
         "sizes": "(max-width: 414px) calc(180vw - 62px), (max-width: 650px) 684px, (max-width: 1000px) 60vw, 690px"
       },
-      "home": {
-        "src": "images/optimized/assets/promise-7860.webp",
+      "love": {
+        "src": "images/optimized/assets/promise-6143.webp",
+        "sourceName": "NAK_6143.JPG",
         "alt": {
-          "vi": "Sơn che ô cho Nga dưới mái cổng gạch bên hồ",
-          "en": "Sơn holding a parasol for Nga by the pond and brick pavilion"
+          "vi": "Sơn và Nga bên hàng cột đỏ trong cung điện",
+          "en": "Sơn and Nga beside the red palace columns"
         },
         "width": 1333,
         "height": 2000,
         "variants": [
           {
-            "src": "images/optimized/assets/promise-7860-640.webp",
+            "src": "images/optimized/assets/promise-6143-640.webp",
             "width": 640
           },
           {
-            "src": "images/optimized/assets/promise-7860-1000.webp",
+            "src": "images/optimized/assets/promise-6143-1000.webp",
             "width": 1000
           },
           {
-            "src": "images/optimized/assets/promise-7860.webp",
+            "src": "images/optimized/assets/promise-6143.webp",
+            "width": 1333
+          }
+        ],
+        "sizes": "(max-width: 414px) calc(100vw - 34px), (max-width: 650px) 380px, (max-width: 1000px) 31vw, 365px"
+      },
+      "home": {
+        "src": "images/optimized/assets/promise-6511.webp",
+        "sourceName": "NAK_6511.JPG",
+        "alt": {
+          "vi": "Sơn và Nga ngồi bên nhau trên bậc thềm cung điện",
+          "en": "Sơn and Nga sitting together on the palace steps"
+        },
+        "width": 1333,
+        "height": 2000,
+        "variants": [
+          {
+            "src": "images/optimized/assets/promise-6511-640.webp",
+            "width": 640
+          },
+          {
+            "src": "images/optimized/assets/promise-6511-1000.webp",
+            "width": 1000
+          },
+          {
+            "src": "images/optimized/assets/promise-6511.webp",
             "width": 1333
           }
         ],
