@@ -765,6 +765,9 @@ test("collapsed menu SVG is geometrically centered on phones and desktop @smoke"
   const menu = page.locator("#wqToggle");
   await expect(menu).toHaveClass(/floating-control/);
   await menu.evaluate(node => node.classList.add("is-idle"));
+  // The menu deliberately animates its padding over 260ms. Measure its
+  // settled circle, not the temporary box midway through that transition.
+  await page.waitForTimeout(350);
   const geometry = await menu.evaluate(node => {
     const outer = node.getBoundingClientRect();
     const glyph = node.querySelector(".wq-toggle-glyph svg").getBoundingClientRect();
