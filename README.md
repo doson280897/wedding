@@ -54,10 +54,8 @@ Chỉ thay chữ trong config không thể biến ảnh cưới cũ thành ảnh
 
 Nếu giữ `gallery.photos: null`, album sẽ tự đọc `gallery.manifest` (mặc định `images/manifest.json`) do pipeline tạo.
 
-**Khi làm thiệp cho cặp đôi khác:** đặt `gallery.mode` thành `"replace"` để bộ tạo ảnh **không trộn ảnh cưới cũ** vào manifest mới; đồng thời thay hoặc xoá danh sách `gallery.imports` cũ. Giá trị `"append"` mặc định giữ nguyên bộ ảnh hiện tại khi bổ sung ảnh. Chế độ `"replace"` không xóa ảnh trong repository, chỉ không đưa ảnh cũ vào danh sách hiển thị.
+**Khi làm thiệp cho cặp đôi khác:** đặt `gallery.mode` thành `"replace"` để bộ tạo ảnh **không trộn ảnh cưới cũ** vào manifest mới. Giá trị `"append"` mặc định giữ nguyên bộ ảnh hiện tại khi bổ sung ảnh. Chế độ `"replace"` không xóa ảnh trong repository, chỉ không đưa ảnh cũ vào danh sách hiển thị.
 
-
-Có thể nhập ảnh từ Google Drive bằng `gallery.imports` trong **cùng file thông tin**. Mỗi mục dùng `{ "name": "anh-1.jpg", "fileId": "GOOGLE_DRIVE_FILE_ID" }`. Sau khi sửa danh sách, vào **GitHub Actions → Import wedding album from config → Run workflow** để tải và tối ưu ảnh. Workflow nhập ảnh chỉ chạy khi được yêu cầu, không tự chạy khi cập nhật template.
 
 Nếu muốn hoàn toàn chọn danh sách ảnh ngay trong file thông tin, điền:
 
@@ -71,7 +69,7 @@ Nếu muốn hoàn toàn chọn danh sách ảnh ngay trong file thông tin, đi
 }
 ```
 
-Để tối ưu ảnh tự động trên máy cá nhân (không thay đổi ảnh gốc Google Drive):
+Để tối ưu ảnh mới trên máy cá nhân:
 
 ```powershell
 python -m pip install -r requirements.txt
