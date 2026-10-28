@@ -1876,3 +1876,52 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
   transform:translate3d(0,28%,0);
   will-change:transform;
 }
+
+
+/* POCKET SEAL — make the envelope front physically opaque. The prior three
+   clipped triangles left tiny uncovered wedges where the motion face leaked. */
+.envelope-front{
+  background:linear-gradient(180deg,#e6d2b4 0%,#d4bd9d 100%);
+  border:1px solid rgba(122,95,60,.34);
+  border-top:0;
+  border-radius:0 0 4px 4px;
+}
+html[data-theme="light"] .envelope-front{
+  background:linear-gradient(180deg,#eadac2 0%,#d8c3a6 100%);
+}
+
+/* Start fully inside the pocket. Keep the lower edge within the stage so
+   nothing can peek below the envelope while the flap is opening. */
+.envelope-intro.is-card-prepared:not(.is-card-lifted) .invitation-paper-proxy{
+  transform:translate3d(0,20%,0);
+}
+.envelope-intro.is-paper-rising .invitation-paper-proxy{
+  transform:translate3d(0,-12%,0);
+}
+
+/* TRUE CROSSFADE — both faces share the final transform. The detailed card
+   fades up under the lightweight moving face; there is no one-frame pop. */
+.envelope-intro.is-card-settling .invitation-card{
+  visibility:visible!important;
+  opacity:0!important;
+  transform:translate3d(0,-12%,0)!important;
+  transition:opacity .32s ease-out!important;
+}
+.envelope-intro.is-card-settling .invitation-paper-proxy{
+  visibility:visible!important;
+  opacity:1!important;
+  transform:translate3d(0,-12%,0)!important;
+  transition:opacity .32s ease-out!important;
+}
+.envelope-intro.is-card-crossfading .invitation-card{
+  opacity:1!important;
+}
+.envelope-intro.is-card-crossfading .invitation-paper-proxy{
+  opacity:0!important;
+}
+.envelope-intro.is-card-settled .invitation-card{
+  opacity:1!important;
+}
+.envelope-intro.is-card-settled .invitation-paper-proxy{
+  visibility:hidden!important;opacity:0!important;transition:none!important;
+}

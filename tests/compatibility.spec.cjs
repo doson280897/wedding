@@ -305,6 +305,20 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   // backface culling, even after the card is extracted.
   await expect(page.locator(".invitation-card")).toHaveAttribute("aria-hidden", "true");
   await expect(page.locator(".invitation-paper-proxy")).toBeVisible();
+  // The motion face must remain fully within the stage while prewarmed,
+  // and the front pocket is a solid occluding surface.
+  const pocketGeometry = await page.evaluate(() => {
+    const stage = document.querySelector(".envelope-stage").getBoundingClientRect();
+    const proxy = document.querySelector(".invitation-paper-proxy").getBoundingClientRect();
+    const front = getComputedStyle(document.querySelector(".envelope-front"));
+    return {
+      proxyBottom:proxy.bottom,
+      stageBottom:stage.bottom,
+      frontBackground:front.backgroundImage
+    };
+  });
+  expect(pocketGeometry.proxyBottom).toBeLessThanOrEqual(pocketGeometry.stageBottom + .5);
+  expect(pocketGeometry.frontBackground).not.toBe("none");
   await expect(page.locator(".invitation-paper-proxy-names")).toContainText("Nga");
   await expect(page.locator(".invitation-paper-proxy-names")).toContainText("Sơn");
   const expectedMotionDate = await page.locator(".envelope-date").innerText();
@@ -331,6 +345,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator(".invitation-card")).not.toHaveAttribute("aria-hidden", "true");
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-card-settled/);
   await expect(page.locator(".invitation-paper-proxy")).toBeHidden();
+  await expect(page.locator(".invitation-card")).toHaveCSS("opacity","1");
   await expect(page.locator(".invitation-card")).toHaveCSS("animation-name","none");
   await expect(page.locator("#floatingPetals")).toBeVisible();
   const petalCount = await page.locator(".floating-petal").count();

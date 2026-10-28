@@ -461,10 +461,16 @@
           intro.querySelector(".invitation-card")?.removeAttribute("aria-hidden");
           intro.classList.add("is-card-lifted", "is-card-settling", "is-opened");
           if (!reduced) {
+            // Keep both layers at the same final coordinates. First paint the
+            // full invitation invisibly, then crossfade instead of swapping.
+            requestAnimationFrame(() => {
+              if (leaving) return;
+              intro.classList.add("is-card-crossfading");
+            });
             window.setTimeout(() => {
-              intro.classList.remove("is-card-settling");
+              intro.classList.remove("is-card-settling", "is-card-crossfading");
               intro.classList.add("is-card-settled");
-            }, 180);
+            }, 360);
           } else {
             intro.classList.add("is-card-settled");
           }
