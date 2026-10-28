@@ -33,7 +33,6 @@ jobs:
             script.js quick-nav.js gallery.js i18n.js link-tool.js wedding-info.js \
             build-wedding.cjs playwright.config.cjs tests/*.cjs \
             .github/workflows/deploy.yml \
-            .github/workflows/import-wedding-photos.yml \
             .github/workflows/format-source.yml \
             .github/workflows/browser-compatibility.yml \
             .prettierrc.json README.md images/manifest.json
