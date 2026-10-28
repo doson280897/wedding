@@ -255,6 +255,8 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(gate).toBeVisible();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
   await expect(page.locator("#waxMonogram")).toHaveText("N · S");
+  await expect(page.locator(".moonlight-gate__reveal-overline")).toHaveText("NGÀY CHUNG ĐÔI");
+  await expect(page.locator(".moonlight-gate__reveal-overline")).not.toContainText("KÍNH MỜI");
   await expect(page.locator(".moonlight-gate__celestial")).toBeVisible();
   await expect(page.locator(".moonlight-gate__hint")).toHaveCount(0);
   const celestialWidth = await page.locator(".moonlight-gate__celestial").evaluate(node =>
