@@ -39,7 +39,7 @@ jobs:
 
       - name: Verify data-only customization rules
         run: |
-          node --test tests/data-source.test.cjs
+          node --test tests/*.test.cjs
           python3 -m py_compile generate_gallery.py
           python3 - <<'PY'
           import json
@@ -64,6 +64,7 @@ jobs:
           ! grep -q '"fileId"' wedding-info.js
           grep -q 'name="description"' index.html
           ! grep -q '__WEDDING_TITLE__' index.html
+          ! grep -q '__WEDDING_IMAGE_MIME__' index.html
 
       - name: Start local website
         run: |
