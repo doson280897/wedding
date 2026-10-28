@@ -364,14 +364,14 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(gate).toHaveClass(/is-opening/);
   // Lightweight visual accents start with the doors, never in the pre-open view.
   await expect(page.locator("#gateMagic .moonlight-gate__spark")).toHaveCount(18);
-  await expect(page.locator("#gateMagic .moonlight-gate__meteor")).toHaveCount(2);
+  await expect(page.locator("#gateMagic canvas.moonlight-gate__meteor-canvas")).toHaveCount(1);
+  await expect.poll(() => page.locator(".moonlight-gate__meteor-canvas")
+    .evaluate(node => node.width)).toBeGreaterThan(0);
   await expect(page.locator("#gateMagic .moonlight-gate__butterfly")).toHaveCount(3);
   const celestialMotion = await page.evaluate(() => ({
-    meteor:getComputedStyle(document.querySelector(".moonlight-gate__meteor--first")).animationName,
     butterfly:getComputedStyle(document.querySelector(".moonlight-gate__butterfly--one")).animationName,
     spark:getComputedStyle(document.querySelector(".moonlight-gate__spark")).animationName
   }));
-  expect(celestialMotion.meteor).toBe("gateMeteorFall");
   expect(celestialMotion.butterfly).toBe("gateButterflyDrift");
   expect(celestialMotion.spark).toBe("gateStarTwinkle");
   // The class is applied before the browser paints its first transform frame.
