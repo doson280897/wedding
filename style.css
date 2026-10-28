@@ -1209,3 +1209,18 @@ html.link-tool-active .moonlight-gate{display:none!important}
     transition:none!important;animation:none!important;
   }
 }
+
+
+/* Moonlight Gate compositor budget: two moving door layers only. */
+.moonlight-gate__scene{contain:layout paint}
+.moonlight-gate__backdrop{will-change:opacity}
+.moonlight-gate__door{contain:layout paint}
+.moonlight-gate.is-opening .moonlight-gate__door{pointer-events:none}
+@media(max-width:650px){
+  .moonlight-gate__door{
+    box-shadow:inset 0 0 24px rgba(0,0,0,.4);
+  }
+  .moonlight-gate__arch{
+    box-shadow:0 0 0 1px rgba(242,220,167,.15),0 0 22px rgba(181,145,82,.1);
+  }
+}
