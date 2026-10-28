@@ -242,23 +242,62 @@
   );
   document.addEventListener("wedding:themechange", setContentBrowserTheme);
 
+  const moonlightGate = document.getElementById("moonlightGate");
   const waxOpenButton = document.getElementById("waxOpenButton");
-  const openFromWax = () => {
-    if (!waxOpenButton || waxOpenButton.hidden) return;
-    waxOpenButton.hidden = true;
+  const reducedGateMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let gateOpening = false;
+  let gateFallbackTimer = 0;
+
+  const finishMoonlightGate = () => {
+    if (!moonlightGate || moonlightGate.hidden) return;
+    window.clearTimeout(gateFallbackTimer);
+    moonlightGate.classList.add("is-leaving");
     document.documentElement.classList.remove("wax-pending");
     setContentBrowserTheme();
     resetInvitationScroll();
     document.dispatchEvent(new Event("wedding:waxopen"));
+    window.setTimeout(() => {
+      moonlightGate.hidden = true;
+      moonlightGate.classList.remove("is-awakening", "is-opening", "is-leaving");
+    }, reducedGateMotion ? 0 : 360);
   };
 
-  if (waxOpenButton) {
+  const openFromWax = () => {
+    if (!moonlightGate || !waxOpenButton || gateOpening || moonlightGate.hidden) return;
+    gateOpening = true;
+    waxOpenButton.disabled = true;
+
+    if (reducedGateMotion) {
+      finishMoonlightGate();
+      return;
+    }
+
+    moonlightGate.classList.add("is-awakening");
+    window.setTimeout(() => {
+      if (!moonlightGate || moonlightGate.hidden) return;
+      moonlightGate.classList.add("is-opening");
+      const leftDoor = moonlightGate.querySelector(".moonlight-gate__door--left");
+      let completed = false;
+      const finishDoors = event => {
+        if (event && (event.target !== leftDoor || event.propertyName !== "transform")) return;
+        if (completed) return;
+        completed = true;
+        leftDoor?.removeEventListener("transitionend", finishDoors);
+        finishMoonlightGate();
+      };
+      leftDoor?.addEventListener("transitionend", finishDoors);
+      gateFallbackTimer = window.setTimeout(finishDoors, 1250);
+    }, 280);
+  };
+
+  if (moonlightGate && waxOpenButton) {
     if (selectedParty && !linkToolInitial) {
-      waxOpenButton.hidden = false;
+      moonlightGate.hidden = false;
+      waxOpenButton.disabled = false;
       waxOpenButton.addEventListener("click", openFromWax, { once:true });
       requestAnimationFrame(() => waxOpenButton.focus({ preventScroll:true }));
     } else {
-      waxOpenButton.hidden = true;
+      moonlightGate.hidden = true;
     }
   }
 

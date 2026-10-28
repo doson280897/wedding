@@ -60,6 +60,7 @@ test("party link, wax gate and album lightbox interactions", async ({
     base + "/index.html?party=bride&to=CrossDeviceTest&lang=vi",
     { waitUntil: "domcontentloaded" },
   );
+  await expect(page.locator("#moonlightGate")).toBeVisible();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
   // The seal is personalized from data, not hard-coded into the HTML.
   const initials = await page.evaluate(() =>
@@ -67,7 +68,10 @@ test("party link, wax gate and album lightbox interactions", async ({
   );
   await expect(page.locator("#waxMonogram")).toHaveText(initials);
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#waxOpenButton")).toBeHidden();
+  await expect(page.locator("#moonlightGate")).toHaveClass(/is-awakening/);
+  await expect(page.locator("#moonlightGate")).toHaveClass(/is-opening/);
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:3000 });
+  await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
   await expect(page.locator("#heroMonogram")).toContainText(initials.split(" · ")[0]);
   await page.locator(".couple-section .section-title").scrollIntoViewIfNeeded();
   await expect(page.locator(".couple-section .section-title")).toHaveClass(/is-visible/);
@@ -237,20 +241,28 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
 });
 
 
-test("temporary wax gate is the only intro control and simply reveals content @core", async ({ page }) => {
+test("Moonlight Gate opens from personalized wax and reveals the invitation @core", async ({ page }) => {
   await page.goto(base + "/index.html?party=bride&to=ReloadGuest", { waitUntil:"domcontentloaded" });
+  const gate = page.locator("#moonlightGate");
+  await expect(gate).toBeVisible();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
   await expect(page.locator("#waxMonogram")).toHaveText("N · S");
-  await expect(page.locator(".hero")).toBeHidden();
-  await expect(page.locator("#settingsHub")).toBeHidden();
-  await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#waxOpenButton")).toBeHidden();
-  await expect(page.locator(".hero")).toBeVisible();
-  await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
+  await expect(page.locator(".moonlight-gate__moon")).toBeVisible();
 
-  // Temporary baseline intentionally reappears after reload; no open-state persistence.
+  await page.locator("#waxOpenButton").click();
+  await expect(gate).toHaveClass(/is-awakening/);
+  await expect(gate).toHaveClass(/is-opening/);
+  const leftTransform = await page.locator(".moonlight-gate__door--left").evaluate(node =>
+    getComputedStyle(node).transform
+  );
+  expect(leftTransform).not.toBe("none");
+  await expect(gate).toBeHidden({ timeout:3000 });
+  await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
+  await expect(page.locator(".hero")).toBeVisible();
+
+  // New-tab/reload baseline intentionally shows the gate again.
   await page.reload({ waitUntil:"domcontentloaded" });
-  await expect(page.locator("#waxOpenButton")).toBeVisible();
+  await expect(gate).toBeVisible();
 });
 
 test("settings popover stays inside phone and tablet viewport when hub is dragged @smoke", async ({
