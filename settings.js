@@ -31,9 +31,7 @@
   const setTheme = (next, persist = true) => {
     if (next !== "light" && next !== "dark") return;
     document.documentElement.dataset.theme = next;
-    if (persist) {
-      try { localStorage.setItem("wedding-theme", next); } catch (_) {}
-    }
+    if (persist) window.WeddingPreferences?.setTheme(next);
     syncThemeControls();
     document.dispatchEvent(new CustomEvent("wedding:themechange", { detail: { theme: next } }));
   };
@@ -110,10 +108,6 @@
   window.addEventListener("resize", positionPanel, { passive: true });
   window.addEventListener("scroll", positionPanel, { passive: true });
   hub.addEventListener("pointerup", () => requestAnimationFrame(positionPanel));
-
-  window.addEventListener("storage", event => {
-    if (event.key === "wedding-theme") setTheme(event.newValue === "light" ? "light" : "dark", false);
-  });
 
   syncThemeControls();
   window.WeddingTheme = { getTheme: currentTheme, setTheme };
