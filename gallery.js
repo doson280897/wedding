@@ -26,6 +26,7 @@
 
   let statusKey = status?.dataset.statusKey || "album.lazy";
   let photos = [];
+  let captions = {};
   let items = [];
 
   // Camera state. Images never change src while browsing; only transforms move.
@@ -184,7 +185,12 @@
 
   function updateEditorialCaption(photoIndex, animate = true) {
     if (!captionText || photoIndex < 0) return;
-    captionText.textContent = tr("album.caption." + (photoIndex % 5));
+    const photoCaption = photos[photoIndex]?.caption;
+    const language = document.documentElement.lang === "en" ? "en" : "vi";
+    const custom = typeof photoCaption === "string"
+      ? photoCaption : photoCaption?.[language];
+    const cycle = captions[language] || captions.vi || [];
+    captionText.textContent = custom || (cycle.length ? cycle[photoIndex % cycle.length] : "");
 
     if (editorialCaption && animate && !reducedMotion) {
       editorialCaption.classList.remove("is-changing");
@@ -230,7 +236,7 @@
       const relative = shortestRelative(item.photoIndex, position);
       const abs = Math.abs(relative);
 
-      // Prefetch cards close to the camera, but not all 30 photos at once.
+      // Prefetch nearby cards, not the entire album at once.
       if (abs <= metrics.activeRange + (SAVE_DATA ? .25 : 1.5)) {
         ensureItemLoaded(item, abs);
       }
@@ -809,21 +815,19 @@
     setStatus("album.loading");
 
     try {
-      const gallery = window.WEDDING_INFO?.gallery || {};
-      // Named list in the info file overrides the auto-generated technical manifest.
-      let list = Array.isArray(gallery.photos) ? gallery.photos : null;
-      if (!list) {
-        const manifestUrl = new URL(gallery.manifest || "images/manifest.json", document.baseURI);
-        manifestUrl.searchParams.set("v", buildId);
-        manifestUrl.searchParams.set("t", String(Date.now()));
-
-        const response = await fetch(manifestUrl, { cache:"no-store" });
-        if (!response.ok) throw new Error("HTTP " + response.status);
-
-        const manifest = await response.json();
-        list = Array.isArray(manifest) ? manifest : manifest.photos;
-      }
-      if (!Array.isArray(list)) throw new Error("Invalid album photo list from wedding-info.js");
+      // Album data lives only in images/manifest.json.
+      const manifestUrl = new URL("images/manifest.json", document.baseURI);
+      manifestUrl.searchParams.set("v", buildId);
+      manifestUrl.searchParams.set("t", String(Date.now()));
+      const response = await fetch(manifestUrl, { cache:"no-store" });
+      if (!response.ok) throw new Error("Album manifest HTTP " + response.status);
+      const manifest = await response.json();
+      if (!manifest || !Array.isArray(manifest.photos))
+        throw new Error("Invalid album: photos must be an array in images/manifest.json");
+      if (typeof manifest.shuffle !== "boolean")
+        throw new Error("Invalid album: shuffle must be a boolean");
+      const list = manifest.photos;
+      captions = manifest.captions || {};
 
       photos = list
         .filter(photo => photo && typeof photo.src === "string" && photo.src)
@@ -836,11 +840,12 @@
           };
         });
 
-      // Shuffle once per album load. Fisher–Yates avoids a fixed filename order.
-      // Keep the same array for the 3D scene, counter and lightbox.
-      for (let i = photos.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [photos[i], photos[j]] = [photos[j], photos[i]];
+      // Shuffle is configured in the manifest; false preserves manual order.
+      if (manifest.shuffle) {
+        for (let i = photos.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [photos[i], photos[j]] = [photos[j], photos[i]];
+        }
       }
 
       if (!photos.length) {

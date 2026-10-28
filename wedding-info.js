@@ -6,10 +6,10 @@
  * 3. wedding.mode: "double" (nhà gái & nhà trai) hoặc "single" (một tiệc chung).
  *    Chọn "single": chỉ cần sửa parties.single (ngày/giờ/địa điểm/nhạc/ảnh/QR).
  *    Chọn "double": sửa parties.bride và parties.groom như hiện nay.
- * 4. gallery: mode="append" giữ ảnh cũ, mode="replace" chỉ dùng ảnh mới;
- *    photos=null để dùng manifest tự tạo, hoặc nhập mảng {src, width, height}.
- * 5. text.vi / text.en: mọi nội dung hiển thị, lời mời và bản dịch. Dùng {{duong.dan}}
- *    để lấy dữ liệu phía trên; ví dụ {{couple.groom.short}}, {{parties.bride.dateDots}}.
+ * 4. Album ảnh: mode/shuffle/WebP/chú thích/danh sách ảnh đều nằm trong
+ *    images/manifest.json; không khai báo album lặp trong file này.
+ * 5. text.vi / text.en: chữ giao diện/lời mời, dùng {{duong.dan}}
+ *    tham chiếu {{couple.groom.short}}, {{parties.bride.dateDots}}, v.v.
  * 6. site.introSound: đường dẫn tùy chọn tới một đoạn tiếng mở khóa/cổng.
  *    Để trống nếu chưa có file. Hiệu ứng này tách biệt với nhạc YouTube.
  *
@@ -238,11 +238,6 @@ window.WEDDING_INFO = {
       }
     }
   },
-  "gallery": {
-    "mode": "append",
-    "manifest": "images/manifest.json",
-    "photos": null
-  },
   "text": {
     "vi": {
       "page.title": "{{site.titlePrefix}} | {{couple.bride.short}} · {{couple.groom.short}}",
@@ -401,11 +396,6 @@ window.WEDDING_INFO = {
       "calendar.brideReceptionNote": "{{parties.bride.receptionTime}} · Tiệc mừng",
       "calendar.groomCeremonyNote": "{{parties.groom.ceremonyTime}} · Hôn lễ tại tư gia nhà trai",
       "calendar.groomReceptionNote": "{{parties.groom.receptionTime}} · Tiệc mừng tại tư gia",
-      "album.caption.0": "CHÚNG MÌNH",
-      "album.caption.1": "BÊN NHAU",
-      "album.caption.2": "NHỮNG NGÀY YÊU",
-      "album.caption.3": "MỘT LỜI HẸN ƯỚC",
-      "album.caption.4": "MÃI VỀ SAU",
       "link.back": "← Quay lại chọn tiệc",
       "link.backAria": "Quay lại màn hình chọn Nhà trai hoặc Nhà gái",
       "link.title": "Tạo thiệp mời riêng",
@@ -630,11 +620,6 @@ window.WEDDING_INFO = {
       "calendar.brideReceptionNote": "{{parties.bride.receptionTime}} · Wedding reception",
       "calendar.groomCeremonyNote": "{{parties.groom.ceremonyTime}} · Wedding ceremony at the groom's family home",
       "calendar.groomReceptionNote": "{{parties.groom.receptionTime}} · Wedding reception at the family home",
-      "album.caption.0": "US",
-      "album.caption.1": "TOGETHER",
-      "album.caption.2": "OUR LOVE",
-      "album.caption.3": "A PROMISE",
-      "album.caption.4": "FOREVER",
       "link.back": "← Back to celebrations",
       "link.backAria": "Return to bride or groom celebration selection",
       "link.title": "Create a personalized invitation",
