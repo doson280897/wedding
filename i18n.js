@@ -30,9 +30,9 @@
     const name = String(path || "").trim();
     const derivedName = /^couple\.(bride|groom)\.fullUpper$/.exec(name);
     if (derivedName) return info.couple[derivedName[1]].full.toLocaleUpperCase("vi-VN");
-    const derivedSlug = /^couple\\.(bride|groom)\\.slug$/.exec(name);
+    const derivedSlug = /^couple\.(bride|groom)\.slug$/.exec(name);
     if (derivedSlug) return String(info.couple[derivedSlug[1]].short).normalize("NFD")
-      .replace(/[\\u0300-\\u036f]/g, "").replace(/[đĐ]/g, "d")
+      .replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, "d")
       .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const derivedDate = /^parties\.(bride|groom)\.(dateDots|dateSlashes|dateEnglish|dateSpaced|dateYear|weekday)$/.exec(name);
     if (derivedDate) {
