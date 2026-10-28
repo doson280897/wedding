@@ -1035,3 +1035,29 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
     .hero { --hero-photo-height: min(58vh, 520px); }
   }
 }
+
+
+/* One-reception template: a single celebration instead of bride/groom tabs.
+   The introduction still features both people and both families. */
+html:not([data-wedding-mode="single"]) [data-party-scope="single"],
+html:not([data-wedding-mode="single"]) [data-party-date="single"],
+html[data-wedding-mode="single"] [data-party-scope="bride"],
+html[data-wedding-mode="single"] [data-party-scope="groom"],
+html[data-wedding-mode="single"] [data-party-date="bride"],
+html[data-wedding-mode="single"] [data-party-date="groom"],
+html[data-wedding-mode="single"] .party-date-separator,
+html[data-wedding-mode="single"] #partySelector,
+html[data-wedding-mode="single"] .link-tool-party-field {
+  display:none!important;
+}
+html[data-party="single"] .hero-photo {
+  background-image:var(--hero-single-image, none);
+}
+html[data-party="single"] .closing {
+  background-image:var(--ending-single-image, none);
+}
+html[data-party="single"] .event-grid,
+html[data-party="single"] .location-grid {
+  grid-template-columns:minmax(0,720px);
+  justify-content:center;
+}
