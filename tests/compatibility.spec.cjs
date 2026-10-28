@@ -248,6 +248,10 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
   await expect(page.locator("#envelopeBurst")).toBeVisible();
   await expect(page.locator("#envelopeBurst")).toHaveClass(/is-active/);
+  await expect(page.locator("#floatingPetals")).toBeVisible();
+  const petals = await page.locator(".floating-petal").count();
+  expect(petals).toBeGreaterThanOrEqual(4);
+  expect(petals).toBeLessThanOrEqual(12);
   const foil = await page.locator(".envelope-burst-particle").count();
   expect(foil).toBeGreaterThanOrEqual(10);
   expect(foil).toBeLessThanOrEqual(24);
@@ -261,14 +265,18 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden({ timeout: 3000 });
   await expect(page.locator("#invitationPortal")).toBeHidden({ timeout: 3000 });
+  await expect(page.locator("#floatingPetals")).toBeHidden({ timeout: 4000 });
+  await expect(page.locator(".floating-petal")).toHaveCount(0);
   await expect(page.locator("html")).toHaveClass(/golden-signature-entered/);
-  await expect(page.locator("#heroNames")).toContainText("NGA");
+  const brideShort = await page.evaluate(() => window.WEDDING_INFO.couple.bride.short.toLocaleUpperCase("vi-VN"));
+  await expect(page.locator("#heroNames")).toContainText(brideShort);
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#envelopeBurst")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden();
   await expect(page.locator("#invitationPortal")).toBeHidden();
+  await expect(page.locator("#floatingPetals")).toBeHidden();
   await expect(page.locator("html")).toHaveClass(/envelope-resumed/);
   await expect(page.locator("html")).not.toHaveClass(/golden-signature-entered/);
   await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
@@ -290,6 +298,7 @@ test("reduced motion opens the envelope without particles or flash", async ({ pa
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden();
   await expect(page.locator("#invitationPortal")).toBeHidden();
+  await expect(page.locator("#floatingPetals")).toBeHidden();
   await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
 });
 

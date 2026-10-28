@@ -319,7 +319,7 @@ html.envelope-theme body{
 html.envelope-resumed #envelopeIntro{display:none!important}
 html.party-pending #envelopeIntro{display:none!important}
 html.envelope-pending body{overflow:hidden;background:#f2eee4}
-html.envelope-pending body> :not(#envelopeIntro):not(.language-switch):not(#musicBubble):not(#invitationReveal):not(#invitationPortal){visibility:hidden!important}
+html.envelope-pending body> :not(#envelopeIntro):not(.language-switch):not(#musicBubble):not(#invitationReveal):not(#invitationPortal):not(#floatingPetals){visibility:hidden!important}
 html.envelope-pending #envelopeIntro{visibility:visible!important}
 html.envelope-pending body>.language-switch{visibility:visible!important;pointer-events:auto!important}
 .envelope-intro{
@@ -1472,4 +1472,33 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   html.golden-signature-entered .hero-copy > #heroNames{
     animation:none!important;clip-path:none!important;filter:none!important;
   }
+}
+
+
+/* FEAT 05 — sparse ivory petals drift past the envelope into the hero. */
+.floating-petals[hidden]{display:none!important}
+.floating-petals{
+  position:fixed;inset:0;z-index:3500;pointer-events:none;overflow:hidden;
+  contain:layout style paint;--petal-x:50%;--petal-y:50%;
+}
+.floating-petal{
+  position:absolute;left:var(--petal-x);top:var(--petal-y);
+  width:9px;height:16px;opacity:0;pointer-events:none;
+  border-radius:90% 6% 85% 12%;
+  background:linear-gradient(135deg,#fff8eb 0%,#e9d8bd 52%,#cfa773 100%);
+  box-shadow:0 1px 6px rgba(161,132,94,.15);
+  will-change:transform,opacity;
+}
+.floating-petal:nth-child(3n){width:7px;height:13px;background:linear-gradient(140deg,#fffaf0,#efd6b3)}
+.floating-petals.is-active .floating-petal{
+  animation:luxFloatingPetal 2150ms cubic-bezier(.2,.58,.38,1) var(--petal-delay,420ms) both;
+}
+@keyframes luxFloatingPetal{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(0deg) scale(.45)}
+  16%{opacity:.88}
+  58%{opacity:.72}
+  100%{opacity:0;transform:translate(calc(-50% + var(--petal-dx)),calc(-50% + var(--petal-dy))) rotate(var(--petal-rotate)) scale(.8)}
+}
+@media(prefers-reduced-motion:reduce){
+  .floating-petals,.floating-petal{display:none!important;animation:none!important}
 }

@@ -260,6 +260,7 @@
   const envelopeBurst = document.getElementById("envelopeBurst");
   const invitationReveal = document.getElementById("invitationReveal");
   const invitationPortal = document.getElementById("invitationPortal");
+  const floatingPetals = document.getElementById("floatingPetals");
   const envelopeCooldown = document.getElementById("envelopeCooldown");
   const envelopeCooldownValue = document.getElementById("envelopeCooldownValue");
   // A reload in the same tab resumes the invitation without replaying its
@@ -285,6 +286,7 @@
     let burstCleanupTimer = 0;
     let revealCleanupTimer = 0;
     let portalCleanupTimer = 0;
+    let petalsCleanupTimer = 0;
     const prefersReducedMotion = () =>
       matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -321,6 +323,39 @@
         envelopeBurst.classList.remove("is-active");
         envelopeBurst.querySelectorAll(".envelope-burst-particle").forEach(node => node.remove());
       }, 1850);
+    };
+
+    // Petals float after the initial foil burst. A separate overlay allows
+    // them to continue drifting when the user enters the hero immediately.
+    const releaseFloatingPetals = () => {
+      if (!floatingPetals || prefersReducedMotion()) return;
+      const seal = intro.querySelector(".envelope-seal");
+      if (!seal) return;
+      const rect = seal.getBoundingClientRect();
+      const compact = matchMedia("(max-width: 650px)").matches;
+      const count = navigator.connection?.saveData ? 4 : compact ? 8 : 12;
+      floatingPetals.style.setProperty("--petal-x", (rect.left + rect.width / 2) + "px");
+      floatingPetals.style.setProperty("--petal-y", (rect.top + rect.height / 2) + "px");
+      const fragment = document.createDocumentFragment();
+      for (let i = 0; i < count; i++) {
+        const petal = document.createElement("span");
+        petal.className = "floating-petal";
+        const direction = i % 2 ? 1 : -1;
+        petal.style.setProperty("--petal-dx", (direction * (25 + (i % 5) * (compact ? 15 : 24))) + "px");
+        petal.style.setProperty("--petal-dy", "-" + (compact ? 75 + (i % 4) * 30 : 110 + (i % 5) * 38) + "px");
+        petal.style.setProperty("--petal-rotate", (direction * (65 + (i % 4) * 45)) + "deg");
+        petal.style.setProperty("--petal-delay", (420 + (i % 5) * 85) + "ms");
+        fragment.append(petal);
+      }
+      floatingPetals.replaceChildren(fragment);
+      floatingPetals.hidden = false;
+      floatingPetals.classList.add("is-active");
+      window.clearTimeout(petalsCleanupTimer);
+      petalsCleanupTimer = window.setTimeout(() => {
+        floatingPetals.hidden = true;
+        floatingPetals.classList.remove("is-active");
+        floatingPetals.replaceChildren();
+      }, 3000);
     };
 
     // A single champagne light wash bridges the closing envelope and hero.
@@ -428,6 +463,7 @@
       const releaseEnvelope = () => {
         if (leaving) return;
         burstFromSeal();
+        releaseFloatingPetals();
         intro.classList.add("is-flap-open", "is-card-lifted", "is-opened");
         startAutoClose();
         closeInvitation?.focus({preventScroll:true});
