@@ -171,22 +171,29 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
   // Simulate a new couple by replacing ONLY the response body of the data file.
   await page.route("**/wedding-info.js*", async route => {
     const response = await route.fetch();
-    let body = await response.text();
-    const changes = [
-      ['"short": "Tố Nga"', '"short": "Mai An"'],
-      ['"full": "Lữ Thị Tố Nga"', '"full": "Nguyễn Thị Mai An"'],
-      ['"initial": "N"', '"initial": "M"'],
-      ['"short": "Thành Sơn"', '"short": "Tuấn Minh"'],
-      ['"full": "Đỗ Ngọc Thành Sơn"', '"full": "Trần Tuấn Minh"'],
-      ['"initial": "S"', '"initial": "T"'],
-      ['"date": "2026-11-14"', '"date": "2027-03-15"'],
-      ['"Nhà Hàng Hương Lan"', '"Hoa Sen Venue"'],
-    ];
-    for (const [oldValue, newValue] of changes) {
-      expect(body).toContain(oldValue);
-      body = body.replace(oldValue, newValue);
-    }
-    await route.fulfill({ response, body });
+    const sandbox = { window: {} };
+    require("node:vm").runInNewContext(await response.text(), sandbox);
+    const config = sandbox.window.WEDDING_INFO;
+    // Change structured fields only; translations and templates stay untouched.
+    Object.assign(config.couple.bride, {
+      short: "Mai An",
+      full: "Nguyễn Thị Mai An",
+      initial: "M",
+    });
+    Object.assign(config.couple.groom, {
+      short: "Tuấn Minh",
+      full: "Trần Tuấn Minh",
+      initial: "T",
+    });
+    config.parties.bride.date = "2027-03-15";
+    config.parties.bride.venue.name = {
+      vi: "Nhà hàng Hoa Sen",
+      en: "Hoa Sen Venue",
+    };
+    await route.fulfill({
+      response,
+      body: "window.WEDDING_INFO = " + JSON.stringify(config) + ";",
+    });
   });
 
   await page.goto(base + "/index.html?party=bride&lang=en", {
