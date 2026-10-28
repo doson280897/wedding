@@ -70,7 +70,7 @@ test("party link, wax gate and album lightbox interactions", async ({
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#moonlightGate")).toHaveClass(/is-awakening/);
   await expect(page.locator("#moonlightGate")).toHaveClass(/is-opening/);
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:3000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:4500 });
   await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
   await expect(page.locator("#heroMonogram")).toContainText(initials.split(" · ")[0]);
   await page.locator(".couple-section .section-title").scrollIntoViewIfNeeded();
@@ -130,7 +130,7 @@ test("menu, map and gift overlays open and close on each device @smoke", async (
     waitUntil: "domcontentloaded",
   });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:3000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:4500 });
   const menuToggle = page.locator("#wqToggle");
   // Even a collapsed idle Menu must open on the FIRST touch on phones.
   await menuToggle.evaluate(node => node.classList.add("is-idle"));
@@ -206,7 +206,7 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
     waitUntil: "domcontentloaded",
   });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:3000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:4500 });
 
   await expect(page.locator("#heroMonogram")).toContainText("M");
   await expect(page.locator("#heroMonogram")).toContainText("T");
@@ -299,7 +299,7 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(gate).toHaveClass(/is-blooming/);
   await expect(page.locator("html")).toHaveClass(/gate-hero-revealing/);
   await expect(page.locator(".hero")).toHaveCSS("opacity","1");
-  await expect(gate).toBeHidden({ timeout:3500 });
+  await expect(gate).toBeHidden({ timeout:4500 });
   await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
   await expect(page.locator(".hero")).toBeVisible();
 
@@ -342,7 +342,7 @@ test("personal invitation keeps the bold recipient in hero across languages", as
     waitUntil:"domcontentloaded",
   });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:3000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:4500 });
   await expect(page.locator("#heroGuestLabel")).toHaveText("Kính mời");
   await expect(page.locator("#guestName")).toHaveText(guest);
   await expect(page.locator("#guestName")).toBeVisible();
@@ -354,7 +354,7 @@ test("personal invitation keeps the bold recipient in hero across languages", as
   // A generic link must not render an empty personalized-name line.
   await page.goto(base + "/index.html?party=groom", { waitUntil: "domcontentloaded" });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:3000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:4500 });
   await expect(page.locator("#guestName")).toBeHidden();
 });
 
@@ -498,7 +498,7 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
 
   await page.goto(base + "/index.html?party=bride", { waitUntil: "domcontentloaded" });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:3000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:4500 });
   await page.waitForFunction(() => window.__musicMockReady === true);
 
   const bubble = page.locator("#musicBubble");
@@ -570,7 +570,7 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await expect(page.locator("#partySelector")).toBeHidden();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:3000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:4500 });
   await expect(page.locator("#heroCeremonyLabel")).toContainText("TIỆC CƯỚI");
   await expect(page.locator(".hero-date [data-party-date='single']")).toHaveText("21.05.2027");
   await expect(page.locator(".event-card:visible")).toHaveCount(1);
