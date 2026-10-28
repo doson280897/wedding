@@ -47,7 +47,7 @@
 }
 .album-slide{
   position:absolute;left:50%;top:50%;display:block;transform-style:preserve-3d;
-  pointer-events:auto;cursor:zoom-in;will-change:transform,opacity;contain:layout paint
+  pointer-events:auto;cursor:zoom-in;will-change:auto;contain:layout paint
 }
 .album-card{
   position:absolute;inset:0;overflow:hidden;border:1px solid rgba(224,194,143,.47);border-radius:4px;
