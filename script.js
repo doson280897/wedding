@@ -2,6 +2,8 @@
   "use strict";
   const i18n = window.WeddingI18n;
   const tr = key => i18n ? i18n.t(key) : key;
+  const info = window.WEDDING_INFO;
+  const partyInfo = side => info.parties[side];
   const params = new URLSearchParams(window.location.search);
   const partyParam = params.get("party");
   const selectedParty = partyParam === "bride" || partyParam === "groom" ? partyParam : null;
@@ -69,12 +71,12 @@
 
   const weddingDates = {
     bride: {
-      time: new Date("2026-11-14T09:00:00+07:00").getTime(),
+      time: new Date(partyInfo("bride").date + "T" + partyInfo("bride").ceremonyTime + ":00" + info.site.timezone).getTime(),
       titleKey: "countdown.brideTitle",
       ariaKey: "countdown.brideAria"
     },
     groom: {
-      time: new Date("2026-11-29T09:00:00+07:00").getTime(),
+      time: new Date(partyInfo("groom").date + "T" + partyInfo("groom").ceremonyTime + ":00" + info.site.timezone).getTime(),
       titleKey: "countdown.groomTitle",
       ariaKey: "countdown.groomAria"
     }
@@ -137,21 +139,31 @@
     else scheduleCountdown();
   });
 
+  const toCalendarUTC = (side, time) => new Date(
+    partyInfo(side).date + "T" + time + ":00" + info.site.timezone
+  ).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+
   function buildSchedule(side) {
-    if (side === "bride") {
-      return {
-        filename: tr("calendar.brideFile"),
-        events: [
-          {title:tr("calendar.brideCeremonyTitle"),start:"20261114T020000Z",end:"20261114T030000Z",place:tr("calendar.brideCeremonyPlace"),note:tr("calendar.brideCeremonyNote")},
-          {title:tr("calendar.brideReceptionTitle"),start:"20261114T040000Z",end:"20261114T060000Z",place:tr("calendar.brideReceptionPlace"),note:tr("calendar.brideReceptionNote")}
-        ]
-      };
-    }
+    const details = partyInfo(side);
+    const ceremonyPlace = side === "bride" ? "calendar.brideCeremonyPlace" : "calendar.groomPlace";
+    const receptionPlace = side === "bride" ? "calendar.brideReceptionPlace" : "calendar.groomPlace";
     return {
-      filename: tr("calendar.groomFile"),
+      filename: tr("calendar." + side + "File"),
       events: [
-        {title:tr("calendar.groomCeremonyTitle"),start:"20261129T020000Z",end:"20261129T030000Z",place:tr("calendar.groomPlace"),note:tr("calendar.groomCeremonyNote")},
-        {title:tr("calendar.groomReceptionTitle"),start:"20261129T040000Z",end:"20261129T060000Z",place:tr("calendar.groomPlace"),note:tr("calendar.groomReceptionNote")}
+        {
+          title:tr("calendar." + side + "CeremonyTitle"),
+          start:toCalendarUTC(side, details.ceremonyTime),
+          end:toCalendarUTC(side, details.ceremonyEnd),
+          place:tr(ceremonyPlace),
+          note:tr("calendar." + side + "CeremonyNote")
+        },
+        {
+          title:tr("calendar." + side + "ReceptionTitle"),
+          start:toCalendarUTC(side, details.receptionTime),
+          end:toCalendarUTC(side, details.receptionEnd),
+          place:tr(receptionPlace),
+          note:tr("calendar." + side + "ReceptionNote")
+        }
       ]
     };
   }
@@ -163,7 +175,7 @@
       const timestamp = new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
       const body = schedule.events.map((event,index) => [
         "BEGIN:VEVENT",
-        "UID:" + button.dataset.calendar + "-" + index + "-2026@wedding.doson280897.github.io",
+        "UID:" + button.dataset.calendar + "-" + index + "-" + partyInfo(button.dataset.calendar).date + "@" + new URL(info.site.url).hostname,
         "DTSTAMP:" + timestamp,
         "DTSTART:" + event.start,
         "DTEND:" + event.end,
@@ -310,7 +322,7 @@
   }
 
   const musicButton = document.getElementById("musicToggle");
-  const YOUTUBE_MUSIC_ID = selectedParty === "bride" ? "TA1W-pHNKl8" : "Pnoco4_lM-8";
+  const YOUTUBE_MUSIC_ID = partyInfo(selectedParty || "groom").music.youtubeId;
   let youtubePlayer = null;
   let youtubePlayerReady = false;
   let youtubePlayerPromise = null;
@@ -463,29 +475,36 @@
 
   function renderPartyNameOrder() {
     if (!selectedParty) return;
+
     const brideFirst = selectedParty === "bride";
+    const bride = info.couple.bride;
+    const groom = info.couple.groom;
+    const first = brideFirst ? bride : groom;
+    const second = brideFirst ? groom : bride;
+
+    const upper = name => name.toLocaleUpperCase("vi-VN");
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, character =>
+      ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[character])
+    );
+    const pair = (left, right, separator) =>
+      escapeHtml(left) + " <span>" + separator + "</span> " + escapeHtml(right);
+
     const pairs = {
-      envelope: brideFirst
-        ? '<span>Tố Nga</span><em>&amp;</em><span>Thành Sơn</span>'
-        : '<span>Thành Sơn</span><em>&amp;</em><span>Tố Nga</span>',
-      hero: brideFirst
-        ? 'TỐ NGA <span>&amp;</span> THÀNH SƠN'
-        : 'THÀNH SƠN <span>&amp;</span> TỐ NGA',
-      closing: brideFirst
-        ? 'Tố Nga <span>&amp;</span> Thành Sơn'
-        : 'Thành Sơn <span>&amp;</span> Tố Nga',
-      footer: brideFirst
-        ? '© 2026 TỐ NGA &amp; THÀNH SƠN'
-        : '© 2026 THÀNH SƠN &amp; TỐ NGA',
-      menu: brideFirst
-        ? 'TỐ NGA <span>♡</span> THÀNH SƠN'
-        : 'THÀNH SƠN <span>♡</span> TỐ NGA'
+      envelope: "<span>" + escapeHtml(first.short) + "</span><em>&amp;</em><span>" + escapeHtml(second.short) + "</span>",
+      hero: pair(upper(first.short), upper(second.short), "&amp;"),
+      closing: pair(first.short, second.short, "&amp;"),
+      footer: "© " + new Date(partyInfo(selectedParty).date + "T00:00:00Z").getUTCFullYear() +
+        " " + pair(upper(first.short), upper(second.short), "&amp;"),
+      menu: pair(upper(first.short), upper(second.short), "♡")
     };
 
     document.querySelectorAll("[data-party-name-pair]").forEach(node => {
       const key = node.dataset.partyNamePair;
       if (pairs[key]) node.innerHTML = pairs[key];
     });
+
+    const monogram = document.getElementById("heroMonogram");
+    if (monogram) monogram.innerHTML = escapeHtml(first.initial) + " <span>&amp;</span> " + escapeHtml(second.initial);
   }
 
   function refreshPartyLabels() {
@@ -507,12 +526,6 @@
       menuCoupleLabel.textContent = tr(brideFirst ? "menu.coupleBrideFirst" : "menu.coupleGroomFirst");
     }
 
-    const heroMonogram = document.getElementById("heroMonogram");
-    if (heroMonogram) {
-      heroMonogram.innerHTML = brideFirst
-        ? 'N <span>&amp;</span> S'
-        : 'S <span>&amp;</span> N';
-    }
 
     document.title = tr(brideFirst ? "page.titleBride" : "page.titleGroom");
   }
