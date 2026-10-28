@@ -7,6 +7,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const os = require("node:os");
 const vm = require("node:vm");
 
 const root = __dirname;
@@ -55,7 +56,7 @@ for (const side of ["bride", "groom"]) {
     .replaceAll("__SECOND_INITIAL__", escapeXml(second));
   fs.writeFileSync(target, content);
 }
-fs.writeFileSync("/tmp/wedding-deploy-info.json", JSON.stringify(wedding));
+fs.writeFileSync(path.join(os.tmpdir(), "wedding-deploy-info.json"), JSON.stringify(wedding));
 fs.writeFileSync(
   path.join(root, "version.json"),
   JSON.stringify({ build }),
