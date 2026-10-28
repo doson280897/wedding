@@ -34,7 +34,7 @@
     if (derivedSlug) return String(info.couple[derivedSlug[1]].short).normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, "d")
       .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const derivedDate = /^parties\.(bride|groom)\.(dateDots|dateSlashes|dateEnglish|dateSpaced|dateYear|weekday)$/.exec(name);
+    const derivedDate = /^parties\.(bride|groom|single)\.(dateDots|dateSlashes|dateEnglish|dateSpaced|dateYear|weekday)$/.exec(name);
     if (derivedDate) {
       if (derivedDate[2] === "dateYear") return String(dateParts(derivedDate[1]).year);
       const styles = {dateDots:"dots",dateSlashes:"slashes",dateEnglish:"english",dateSpaced:"spaced",weekday:"weekday"};
@@ -108,7 +108,7 @@
     document.querySelectorAll("[data-party-weekday]").forEach(node => {
       node.textContent = formatDate(node.dataset.partyWeekday, "weekday", locale);
     });
-    for (const side of ["bride", "groom"]) {
+    for (const side of ["bride", "groom", "single"]) {
       const img = getInfo("parties." + side + ".images.hero");
       const ending = getInfo("parties." + side + ".images.ending");
       const safeCssUrl = value => {
