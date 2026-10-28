@@ -35,7 +35,7 @@ jobs:
             .github/workflows/deploy.yml \
             .github/workflows/format-source.yml \
             .github/workflows/browser-compatibility.yml \
-            .prettierrc.json README.md images/manifest.json
+            .prettierrc.json package.json README.md images/manifest.json
           black generate_gallery.py
 
       - name: Validate JavaScript and Python syntax

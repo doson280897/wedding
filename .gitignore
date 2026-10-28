@@ -10,6 +10,10 @@
 /version.json
 
 # Local caches / environments.
+/node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
 __pycache__/
 *.py[cod]
 .venv/

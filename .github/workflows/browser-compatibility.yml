@@ -8,6 +8,7 @@ on:
       - "link-tool.html"
       - "*.js"
       - "*.cjs"
+      - "package.json"
       - "*.svg"
       - "*.css"
       - "tests/**"
