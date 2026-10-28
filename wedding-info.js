@@ -392,7 +392,9 @@ window.WEDDING_INFO = {
       "music.bubblePausedAria": "Nhạc đã tạm dừng, mở các nút điều khiển",
       "music.pauseAria": "Tạm dừng nhạc",
       "music.resumeAria": "Phát nhạc tiếp",
-      "music.stopAria": "Dừng hẳn và ẩn nút nhạc"
+      "music.stopAria": "Dừng hẳn và ẩn nút nhạc",
+      "music.retry": "NHẠC: CHƯA PHÁT · THỬ LẠI",
+      "music.cancelAria": "Hủy tải và tạm dừng nhạc"
     },
     "en": {
       "page.title": "{{site.titlePrefix}} | {{couple.bride.short}} · {{couple.groom.short}}",
@@ -600,7 +602,9 @@ window.WEDDING_INFO = {
       "music.bubblePausedAria": "Music paused, open playback controls",
       "music.pauseAria": "Pause music",
       "music.resumeAria": "Resume music",
-      "music.stopAria": "Stop music and hide the floating button"
+      "music.stopAria": "Stop music and hide the floating button",
+      "music.retry": "MUSIC: RETRY PLAYBACK",
+      "music.cancelAria": "Cancel loading and pause music"
     }
   }
 };
