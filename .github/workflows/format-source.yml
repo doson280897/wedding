@@ -30,7 +30,7 @@ jobs:
           ./node_modules/.bin/prettier --write \
             index.html link-tool.html \
             style.css quick-nav.css link-tool.css settings.css \
-            script.js quick-nav.js gallery.js i18n.js link-tool.js settings.js wedding-info.js \
+            script.js quick-nav.js gallery.js i18n.js link-tool.js settings.js preferences.js wedding-info.js \
             build-wedding.cjs playwright.config.cjs tests/*.cjs \
             .github/workflows/deploy.yml \
             .github/workflows/format-source.yml \
@@ -44,6 +44,8 @@ jobs:
           node --check quick-nav.js
           node --check gallery.js
           node --check i18n.js
+          node --check preferences.js
+          node --check settings.js
           node --check wedding-info.js
           node --check link-tool.js
           node --check build-wedding.cjs
