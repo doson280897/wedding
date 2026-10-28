@@ -252,15 +252,14 @@
     if (!moonlightGate || moonlightGate.hidden) return;
     window.clearTimeout(gateFallbackTimer);
     moonlightGate.classList.add("is-leaving");
-    document.documentElement.classList.remove("wax-pending");
     setContentBrowserTheme();
     resetInvitationScroll();
     document.dispatchEvent(new Event("wedding:waxopen"));
     window.setTimeout(() => {
       moonlightGate.hidden = true;
       moonlightGate.classList.remove("is-awakening", "is-opening", "is-blooming", "is-hero-revealing", "is-leaving");
-      document.documentElement.classList.remove("gate-hero-revealing");
-    }, reducedGateMotion ? 0 : 720);
+      document.documentElement.classList.remove("wax-pending", "gate-hero-revealing");
+    }, reducedGateMotion ? 0 : 940);
   };
 
   const openFromWax = () => {
@@ -292,15 +291,15 @@
       // only fades in after the doors are already clearly open.
       window.setTimeout(() => {
         if (!moonlightGate.hidden) moonlightGate.classList.add("is-blooming");
-      }, 500);
+      }, 460);
       window.setTimeout(() => {
         if (!moonlightGate.hidden) {
           moonlightGate.classList.add("is-hero-revealing");
           document.documentElement.classList.add("gate-hero-revealing");
         }
-      }, 900);
+      }, 760);
 
-      gateFallbackTimer = window.setTimeout(finishDoors, 1780);
+      gateFallbackTimer = window.setTimeout(finishDoors, 2020);
     }, 240);
   };
 
