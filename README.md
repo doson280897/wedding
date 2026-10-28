@@ -3,6 +3,13 @@
 Website thiệp cưới **Cinematic Editorial / Dark Luxury** triển khai bằng GitHub Pages.
 Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, nhạc, lịch, bản đồ, QR và tiếng Việt / Anh.
 
+### Giao diện và khách mời cá nhân hóa
+
+- Nút nổi **Tùy chỉnh** (có thể kéo thả) gom **VN / EN**, **Sáng / Tối** và **nhạc nền** vào một bảng; nút **Mục lục** vẫn riêng để truy cập nhanh các phần thiệp. Nhạc chỉ hiển thị khi đã vào thiệp của một bên.
+- Chế độ **Sáng** dùng nền kem và màu xanh lá dịu; **Tối** giữ phong cách dark luxury. Album 3D và ảnh bìa vẫn tối có chủ đích để ảnh rõ chiều sâu, không bị lóa. Chế độ hiển thị được ghi nhớ trên trình duyệt qua `wedding-theme`.
+- Với link có `?to=Tên+khách`, cả phong bì và hero hiển thị **Kính mời** phía trên, **tên người nhận** ở dòng dưới bằng font serif đậm. Có thể sửa nhãn trong `wedding-info.js` → `text.vi["guest.recipientLabel"]` / `text.en["guest.recipientLabel"]`. Link không có tên vẫn giữ lời mời chung.
+
+
 ## ⭐ Chỉ sửa một file khi làm thiệp mới
 
 **[wedding-info.js](wedding-info.js)** là **file thông tin duy nhất** phải cập nhật khi làm thiệp cho cặp đôi khác.
@@ -81,12 +88,13 @@ python generate_gallery.py
 ## Các file khác chỉ là template / engine
 
 - `index.html`: cấu trúc giao diện, không chứa dữ liệu cưới cố định.
-- `style.css`, `quick-nav.css`, `link-tool.css`: giao diện responsive.
+- `style.css`, `quick-nav.css`, `link-tool.css`, `settings.css`: giao diện responsive, light/dark và thiết kế bảng tùy chỉnh.
 - `i18n.js`: máy dịch VN/EN; đọc `text` và trường thông tin từ `wedding-info.js`.
 - `script.js`: phong bì, tên, monogram, countdown, ICS, nhạc.
 - `link-tool.js`: tạo link thiệp cá nhân hóa ngay trong trang chính, dùng chung nút VN/EN.
 - `gallery.js`: album 3D và fullscreen.
-- `quick-nav.js`: nút nổi, popup menu, bản đồ, QR.
+- `quick-nav.js`: cơ chế kéo thả nút nổi, popup menu, bản đồ, QR.
+- `settings.js`: cùng một bảng tùy chỉnh ngôn ngữ, light/dark, âm nhạc và lưu sở thích.
 - `build-wedding.cjs`: sinh metadata Open Graph và favicon từ cấu hình.
 - `generate_gallery.py`: quy trình tối ưu ảnh.
 - `tests/compatibility.spec.cjs`: bộ test thiết bị/desktop.
