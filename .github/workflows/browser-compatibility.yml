@@ -37,6 +37,9 @@ jobs:
       - name: Install Chromium, WebKit and Firefox browser engines
         run: npx playwright install --with-deps chromium webkit firefox
 
+      - name: Verify data-only customization rules
+        run: node --test tests/data-source.test.cjs
+
       - name: Validate single-file configuration and build templates
         env:
           BUILD_SHA: ${{ github.sha }}
