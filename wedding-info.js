@@ -383,7 +383,16 @@ window.WEDDING_INFO = {
       "settings.theme": "Giao diện",
       "settings.dark": "☾ Tối",
       "settings.light": "☀ Sáng",
-      "settings.music": "Âm nhạc"
+      "settings.music": "Âm nhạc",
+      "music.paused": "NHẠC: TẠM DỪNG",
+      "music.loading": "NHẠC: ĐANG TẢI",
+      "music.controlsAria": "Điều khiển nhạc nền",
+      "music.bubbleTitle": "Điều khiển nhạc",
+      "music.bubblePlayingAria": "Nhạc đang phát, mở các nút điều khiển",
+      "music.bubblePausedAria": "Nhạc đã tạm dừng, mở các nút điều khiển",
+      "music.pauseAria": "Tạm dừng nhạc",
+      "music.resumeAria": "Phát nhạc tiếp",
+      "music.stopAria": "Dừng hẳn và ẩn nút nhạc"
     },
     "en": {
       "page.title": "{{site.titlePrefix}} | {{couple.bride.short}} · {{couple.groom.short}}",
@@ -582,7 +591,16 @@ window.WEDDING_INFO = {
       "settings.theme": "Appearance",
       "settings.dark": "☾ Dark",
       "settings.light": "☀ Light",
-      "settings.music": "Music"
+      "settings.music": "Music",
+      "music.paused": "MUSIC: PAUSED",
+      "music.loading": "MUSIC: LOADING",
+      "music.controlsAria": "Background music controls",
+      "music.bubbleTitle": "Music controls",
+      "music.bubblePlayingAria": "Music playing, open playback controls",
+      "music.bubblePausedAria": "Music paused, open playback controls",
+      "music.pauseAria": "Pause music",
+      "music.resumeAria": "Resume music",
+      "music.stopAria": "Stop music and hide the floating button"
     }
   }
 };
