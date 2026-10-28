@@ -13,7 +13,7 @@ test("one shared language control, in-page generator, back navigation @smoke @co
   await expect(languageControl).toBeVisible();
   await expect(page.locator(".party-admin-link")).toBeVisible();
 
-  // Language and appearance now share the draggable settings palette.
+  // Language and music share the draggable settings palette.
   await page.locator("#settingsTrigger").click();
   await expect(page.locator("#settingsPanel")).toBeVisible();
   await languageControl.locator('[data-lang="en"]').click();
@@ -676,7 +676,7 @@ test("F5 resets the single floating hub to bottom-right and keeps its icon cente
 });
 
 
-test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @core", async ({
+test("Dark stays fixed across OS settings and tabs while language survives F5 @smoke @core", async ({
   page
 }) => {
   await page.emulateMedia({ colorScheme:"dark" });
@@ -684,8 +684,8 @@ test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @c
   await page.goto(url, { waitUntil:"domcontentloaded" });
   await page.locator("#settingsTrigger").click();
   await page.locator('[data-lang="en"]').click();
-  await page.locator('[data-theme-option="light"]').click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+  await expect(page.locator("[data-theme-option]")).toHaveCount(0);
+  await expect(page.locator("html")).toHaveAttribute("data-theme","dark");
   await expect(page.locator("html")).toHaveAttribute("lang","en");
   await page.locator("#settingsClose").click();
 
@@ -702,43 +702,44 @@ test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @c
   await page.locator("#newTabWithPreferencesTest").click();
   const other = await popupPromise;
   await other.waitForLoadState("domcontentloaded");
-  const popupSystemTheme = await other.evaluate(() =>
-    matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
-  );
-  await expect(other.locator("html")).toHaveAttribute("data-theme", popupSystemTheme);
+  await expect(other.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(other.locator("html")).toHaveAttribute("lang","vi");
   await expect(other.locator("#waxOpenButton")).toBeVisible();
   await other.close();
 
+  await page.evaluate(() => history.replaceState({ ...history.state, weddingPreferences: { language: "en", theme: "light" } }, ""));
   await page.reload({ waitUntil:"domcontentloaded" });
-  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme","dark");
   await expect(page.locator("html")).toHaveAttribute("lang","en");
 
   const lightPage = await page.context().newPage();
   await lightPage.emulateMedia({ colorScheme:"light" });
   await lightPage.goto(url + "?party=bride", { waitUntil:"domcontentloaded" });
-  await expect(lightPage.locator("html")).toHaveAttribute("data-theme","light");
+  await expect(lightPage.locator("html")).toHaveAttribute("data-theme","dark");
   await expect(lightPage.locator("#moonlightGate")).toBeVisible();
   await expect(lightPage.locator(".moonlight-gate__celestial")).toBeVisible();
   await expect(lightPage.locator("#settingsHub")).toBeHidden();
-  await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#e4ddd0");
+  await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#0b161e");
   await lightPage.locator("#waxOpenButton").click();
   await expect(lightPage.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await expect(lightPage.locator("#settingsHub")).toBeVisible();
-  await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#f5f0e6");
+  await lightPage.locator("#settingsTrigger").click();
+  await lightPage.locator("#controlTabSettings").click();
+  await expect(lightPage.locator("[data-theme-option]")).toHaveCount(0);
+  await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#0b0e0e");
   await lightPage.close();
 });
 
 
 
-test("menu section navigation preserves per-tab theme and language on F5 @smoke", async ({ page }) => {
+test("menu section navigation keeps Dark and preserves per-tab language on F5 @smoke", async ({ page }) => {
   await page.goto(base + "/index.html?party=bride", { waitUntil:"domcontentloaded" });
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await page.locator("#settingsTrigger").click();
   await page.locator("#controlTabSettings").click();
   await page.locator('[data-lang="en"]').click();
-  await page.locator('[data-theme-option="light"]').click();
+  await expect(page.locator("[data-theme-option]")).toHaveCount(0);
   await page.locator("#settingsClose").click();
 
   await page.locator("#settingsTrigger").click();
@@ -747,7 +748,7 @@ test("menu section navigation preserves per-tab theme and language on F5 @smoke"
   await expect(page).toHaveURL(/#album$/);
   await page.reload({ waitUntil:"domcontentloaded" });
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
 test("music orb animates when playing, pauses without hiding, stops until re-enabled @smoke @core", async ({
