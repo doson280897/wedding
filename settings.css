@@ -484,7 +484,8 @@ html[data-theme="light"] .language-switch.settings-hub.floating-control.is-open 
   color:#bbad83;
 }
 .music-float[data-music-state="starting"] .music-float-trigger::before {
-  animation:musicFloatHalo 1.4s ease-in-out infinite;
+  animation:none;
+  opacity:.42;
 }
 .music-float-actions {
   position:absolute;
@@ -521,9 +522,8 @@ html[data-theme="light"] .language-switch.settings-hub.floating-control.is-open 
 .music-float-action:focus-visible {background:rgba(229,198,143,.24);outline:2px solid rgba(234,202,147,.7);outline-offset:2px}
 .music-float-stop {color:#e4ad9b}
 .music-float-stop:hover {background:rgba(194,89,67,.22)}
-.music-float[data-music-state="playing"] .music-float-play-icon,
-.music-float:not([data-music-state="playing"]) .music-float-pause-icon {display:none}
-.music-float[data-music-state="starting"] .music-float-play-icon {opacity:.48}
+.music-float:is([data-music-state="playing"],[data-music-state="starting"]) .music-float-play-icon,
+.music-float[data-music-state="paused"] .music-float-pause-icon {display:none}
 .music-float-action:disabled {opacity:.5;cursor:progress}
 .music-float-trigger:focus-visible {outline:2px solid #f1d49f;outline-offset:4px}
 html[data-theme="light"] .music-float-trigger {
@@ -559,4 +559,16 @@ html[data-theme="light"] .music-float-action:hover {background:#e2d1b4}
   .music-float .music-float-note svg,
   .music-float .music-float-trigger::before {animation:none!important}
   .music-float-trigger {transition:none}
+}
+
+
+/* The invitation's full-screen envelope deliberately hides page content.
+   Keep the music orb above that overlay as well, so users can stop/pause
+   audio even before choosing "Open Invitation". The settings dock remains
+   one layer higher and is still accessible. */
+html.envelope-pending body > #musicBubble,
+body.envelope-locked > #musicBubble {
+  visibility:visible!important;
+  pointer-events:auto!important;
+  z-index:3000;
 }
