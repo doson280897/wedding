@@ -419,7 +419,7 @@
         const copyText = (targetSelector, sourceSelector) => {
           const target = motionCard.querySelector(targetSelector);
           const source = realCard.querySelector(sourceSelector);
-          if (target && source) target.textContent = source.textContent.trim();
+          if (target && source) target.textContent = source.innerText.trim();
         };
         copyText(".invitation-paper-proxy-eyebrow", ".envelope-eyebrow");
         copyText(".invitation-paper-proxy-date", ".envelope-date");
