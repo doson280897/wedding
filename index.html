@@ -208,8 +208,64 @@
   </div>
   <div class="moonlight-gate__magic" id="gateMagic" aria-hidden="true">
     <span class="moonlight-gate__dust"></span>
-    <span class="moonlight-gate__meteor moonlight-gate__meteor--first"></span>
-    <span class="moonlight-gate__meteor moonlight-gate__meteor--second"></span>
+    <span class="moonlight-gate__meteor moonlight-gate__meteor--first">
+      <svg class="moonlight-gate__meteor-art" viewBox="0 0 360 64" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+        <defs>
+          <linearGradient id="gateMeteorTailFirst" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#fffef2" stop-opacity=".96"/>
+            <stop offset="5%" stop-color="#ffe9c2" stop-opacity=".82"/>
+            <stop offset="18%" stop-color="#f6d09c" stop-opacity=".43"/>
+            <stop offset="42%" stop-color="#efbd7e" stop-opacity=".14"/>
+            <stop offset="72%" stop-color="#f1b978" stop-opacity=".025"/>
+            <stop offset="100%" stop-color="#f1b978" stop-opacity="0"/>
+          </linearGradient>
+          <radialGradient id="gateMeteorHeadFirst">
+            <stop offset="0%" stop-color="#fffef0" stop-opacity=".98"/>
+            <stop offset="18%" stop-color="#ffeac4" stop-opacity=".74"/>
+            <stop offset="54%" stop-color="#f5c687" stop-opacity=".19"/>
+            <stop offset="100%" stop-color="#f5c687" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="gateMeteorSoftFirst" x="-6%" y="-200%" width="112%" height="500%">
+            <feGaussianBlur stdDeviation="4"/>
+          </filter>
+        </defs>
+        <path d="M8 32 C91 30.5 207 31.4 353 32" fill="none" stroke="url(#gateMeteorTailFirst)" stroke-width="16" filter="url(#gateMeteorSoftFirst)" opacity=".62"/>
+        <path d="M8 32 C97 30.8 219 31.4 347 32" fill="none" stroke="url(#gateMeteorTailFirst)" stroke-width="3.1" opacity=".77"/>
+        <path d="M8 32 C76 31.7 162 31.7 288 32" fill="none" stroke="url(#gateMeteorTailFirst)" stroke-width="1.15"/>
+        <path d="M16 33 C90 33.2 153 34.6 233 35.2" fill="none" stroke="url(#gateMeteorTailFirst)" stroke-width=".65" opacity=".27"/>
+        <circle cx="8" cy="32" r="16" fill="url(#gateMeteorHeadFirst)"/>
+        <circle cx="8" cy="32" r="2.5" fill="#fffdf1" opacity=".94"/>
+      </svg>
+    </span>
+    <span class="moonlight-gate__meteor moonlight-gate__meteor--second">
+      <svg class="moonlight-gate__meteor-art" viewBox="0 0 360 64" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+        <defs>
+          <linearGradient id="gateMeteorTailSecond" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#fffef2" stop-opacity=".96"/>
+            <stop offset="5%" stop-color="#ffe9c2" stop-opacity=".82"/>
+            <stop offset="18%" stop-color="#f6d09c" stop-opacity=".43"/>
+            <stop offset="42%" stop-color="#efbd7e" stop-opacity=".14"/>
+            <stop offset="72%" stop-color="#f1b978" stop-opacity=".025"/>
+            <stop offset="100%" stop-color="#f1b978" stop-opacity="0"/>
+          </linearGradient>
+          <radialGradient id="gateMeteorHeadSecond">
+            <stop offset="0%" stop-color="#fffef0" stop-opacity=".98"/>
+            <stop offset="18%" stop-color="#ffeac4" stop-opacity=".74"/>
+            <stop offset="54%" stop-color="#f5c687" stop-opacity=".19"/>
+            <stop offset="100%" stop-color="#f5c687" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="gateMeteorSoftSecond" x="-6%" y="-200%" width="112%" height="500%">
+            <feGaussianBlur stdDeviation="4"/>
+          </filter>
+        </defs>
+        <path d="M8 32 C91 30.5 207 31.4 353 32" fill="none" stroke="url(#gateMeteorTailSecond)" stroke-width="16" filter="url(#gateMeteorSoftSecond)" opacity=".62"/>
+        <path d="M8 32 C97 30.8 219 31.4 347 32" fill="none" stroke="url(#gateMeteorTailSecond)" stroke-width="3.1" opacity=".77"/>
+        <path d="M8 32 C76 31.7 162 31.7 288 32" fill="none" stroke="url(#gateMeteorTailSecond)" stroke-width="1.15"/>
+        <path d="M16 33 C90 33.2 153 34.6 233 35.2" fill="none" stroke="url(#gateMeteorTailSecond)" stroke-width=".65" opacity=".27"/>
+        <circle cx="8" cy="32" r="16" fill="url(#gateMeteorHeadSecond)"/>
+        <circle cx="8" cy="32" r="2.5" fill="#fffdf1" opacity=".94"/>
+      </svg>
+    </span>
     <span class="moonlight-gate__butterfly moonlight-gate__butterfly--one">
       <svg viewBox="0 0 64 52" focusable="false" aria-hidden="true">
         <path class="moonlight-gate__wing moonlight-gate__wing--left" d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"/>
