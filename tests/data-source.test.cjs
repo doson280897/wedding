@@ -99,8 +99,8 @@ test("album Drive imports are declared only in wedding-info.js", () => {
   assert.ok(!/^  push:/m.test(importer), "Updating the workflow must not auto-import old photos");
   assert.ok(Array.isArray(info.gallery.imports));
   for (const item of info.gallery.imports) {
-    assert.match(item.name, /^[\\w. -]+\\.(jpg|jpeg|png|webp|avif)$/i);
-    assert.match(item.fileId, /^[\\w-]{20,}$/);
+    assert.match(item.name, /^[\w. -]+\.(jpg|jpeg|png|webp|avif)$/i);
+    assert.match(item.fileId, /^[\w-]{20,}$/);
     assert.ok(!importer.includes(item.fileId), "Google Drive IDs must not be hardcoded in workflow");
   }
 });
