@@ -535,7 +535,7 @@ test("a new tab starts in VN and Dark even after the first tab was changed @smok
     a.rel = "opener";
     a.id = "newTabWithPreferencesTest";
     a.textContent = "open new tab";
-    document.body.append(a);
+    document.querySelector(".party-selector-card").append(a);
   }, url);
   const popupPromise = page.waitForEvent("popup");
   await page.locator("#newTabWithPreferencesTest").click();
