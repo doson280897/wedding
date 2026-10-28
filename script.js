@@ -7,6 +7,8 @@
   const params = new URLSearchParams(window.location.search);
   const partyParam = params.get("party");
   const selectedParty = partyParam === "bride" || partyParam === "groom" ? partyParam : null;
+  const invitationKey = JSON.stringify([selectedParty, params.get("to") || ""]);
+  const alreadyEntered = !!selectedParty && history.state?.weddingEnvelopeOpened === invitationKey;
   const partySelector = document.getElementById("partySelector");
   const languageButtons = Array.from(document.querySelectorAll(".language-switch [data-lang]"));
 
@@ -204,7 +206,16 @@
   const skipInvitation = document.getElementById("skipInvitation");
   const envelopeCooldown = document.getElementById("envelopeCooldown");
   const envelopeCooldownValue = document.getElementById("envelopeCooldownValue");
-  if (intro && selectedParty) {
+  // A reload in the same tab resumes the invitation without replaying its
+  // envelope. New tabs and a different party/guest still begin at the envelope.
+  if (intro && alreadyEntered) {
+    intro.hidden = true;
+    document.body.classList.remove("envelope-locked");
+    document.documentElement.classList.remove("envelope-theme", "envelope-pending");
+    setBrowserTheme("#0b0e0e");
+  }
+
+  if (intro && selectedParty && !alreadyEntered) {
     setBrowserTheme("#496957");
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
@@ -253,6 +264,14 @@
       if (leaving) return;
       leaving = true;
       stopAutoClose();
+
+      // Persist on the current browser history entry only. This survives F5
+      // (and back/forward) without copying an opened invitation to new tabs.
+      try {
+        const currentState = history.state && typeof history.state === "object"
+          ? history.state : {};
+        history.replaceState({ ...currentState, weddingEnvelopeOpened: invitationKey }, "");
+      } catch (_) { /* Storage/history restrictions must not block opening. */ }
 
       if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) {
         intro.hidden = true;
