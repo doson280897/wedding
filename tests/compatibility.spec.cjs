@@ -50,7 +50,7 @@ test("one shared language control, in-page generator, back navigation @smoke @co
   expect(errors).toEqual([]);
 });
 
-test("party link, envelope and album lightbox interactions @smoke", async ({
+test("party link, envelope and album lightbox interactions", async ({
   page,
 }) => {
   const errors = [];
@@ -272,7 +272,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   );
 });
 
-test("a newly opened tab still shows the envelope @smoke", async ({ page }) => {
+test("a newly opened tab still shows the envelope", async ({ page }) => {
   const url = base + "/index.html?party=groom&to=TabGuest";
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await page.locator("#skipInvitation").click();
@@ -398,7 +398,7 @@ test("settings popover stays inside phone and tablet viewport when hub is dragge
   expect(rect.bottom).toBeLessThanOrEqual(rect.viewportH - 4);
 });
 
-test("personal invitation puts bold recipient below the greeting in both places @smoke", async ({
+test("personal invitation puts bold recipient below the greeting in both places", async ({
   page,
 }) => {
   const guest = "Anh Minh và chị Lan";
