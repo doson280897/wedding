@@ -317,3 +317,28 @@ test("previously entered guest/party does not suppress another invitation", asyn
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeVisible();
 });
+
+
+test("a deploy cache refresh keeps the already opened invitation in the same tab", async ({
+  page,
+}) => {
+  const url = base + "/index.html?party=bride&to=DeployGuest";
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+  await page.locator("#skipInvitation").click();
+  await expect(page.locator("#envelopeIntro")).toBeHidden();
+
+  await page.route("**/version.json*", route =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ build: "test-deploy-new-version" }),
+    }),
+  );
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page).toHaveURL(/[_]v=test-deploy-new-version/);
+  await page.waitForLoadState("domcontentloaded");
+  await expect(page.locator("#envelopeIntro")).toBeHidden();
+  expect(await page.evaluate(() => history.state?.weddingEnvelopeOpened)).toBe(
+    JSON.stringify(["bride", "DeployGuest"]),
+  );
+});
