@@ -878,9 +878,9 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   html.cinematic-entered:not(.party-pending) .hero-copy > :is(.overline,.guest-greeting,h1,.fine-flourish,.handwriting,.hero-date,.hero-count-title,.countdown){
     animation:cinematicHeroIn .8s cubic-bezier(.18,.75,.18,1) backwards;
   }
-  html.cinematic-entered .hero-copy > h1{animation-delay:90ms}
-  html.cinematic-entered .hero-copy > :is(.handwriting,.hero-date){animation-delay:160ms}
-  html.cinematic-entered .hero-copy > :is(.hero-count-title,.countdown){animation-delay:230ms}
+  html.cinematic-entered .hero-copy > h1{animation-delay:180ms}
+  html.cinematic-entered .hero-copy > :is(.handwriting,.hero-date){animation-delay:300ms}
+  html.cinematic-entered .hero-copy > :is(.hero-count-title,.countdown){animation-delay:420ms}
 }
 @media(prefers-reduced-motion:reduce){
   .cinematic-ready .cinematic-reveal,
@@ -1343,6 +1343,22 @@ html.wax-pending .hero{
              transform 1.35s cubic-bezier(.22,.72,.2,1);
 }
 html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
+/* A transparent wash bridges the portal glow and the real photograph.
+   Only opacity is animated; the photo remains at its original resolution. */
+.hero-arrival-light{
+  position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse at 50% 38%,rgba(250,218,163,.32),rgba(231,197,145,.10) 42%,transparent 76%);
+}
+html[data-theme="light"] .hero-arrival-light{
+  background:radial-gradient(ellipse at 50% 38%,rgba(255,244,217,.48),rgba(244,222,183,.16) 42%,transparent 76%);
+}
+@media(prefers-reduced-motion:no-preference){
+  html.gate-hero-revealing .hero-arrival-light{animation:heroArrivalLight 1.35s ease-out both}
+  html.wax-pending.gate-hero-revealing .hero{will-change:transform,opacity}
+}
+@keyframes heroArrivalLight{
+  0%{opacity:0}28%{opacity:1}100%{opacity:0}
+}
 /* Light mode keeps the same handoff while using champagne door panels. */
 html[data-theme="light"] .moonlight-gate{--gate-gold:#9c7641;background:#e8dfd2}
 html[data-theme="light"] .moonlight-gate__backdrop{

@@ -450,9 +450,28 @@
     // Defer music/hero background activity until the visual handoff is complete.
     requestAnimationFrame(() => document.dispatchEvent(new Event("wedding:waxopen")));
   };
-  const finishMoonlightGate = () => {
+  // Warm the exact hero asset during the existing door sequence. Decoding
+  // runs asynchronously and never postpones the guest's opening gesture.
+  let heroPreparation = Promise.resolve();
+  const prepareHero = () => {
+    const src = partyInfo(selectedParty)?.images?.hero;
+    if (!src) return;
+    const image = new Image();
+    image.decoding = "async";
+    image.src = src + (src.includes("?") ? "&" : "?") + "v=" +
+      (document.querySelector('meta[name="wedding-build"]')?.content || "dev");
+    heroPreparation = image.decode ? image.decode().catch(() => {}) : Promise.resolve();
+  };
+  let handoffStarted = false;
+  const finishMoonlightGate = async () => {
     if (!moonlightGate || moonlightGate.hidden) return;
-    document.documentElement.classList.add("gate-hero-revealing", "cinematic-entered");
+    if (handoffStarted) return;
+    handoffStarted = true;
+    // A bounded wait avoids revealing undecoded pixels on slower phones.
+    // The open sky stays visible and animated throughout this short wait.
+    await Promise.race([heroPreparation, new Promise(resolve => scheduleGate(resolve, 650))]);
+    if (moonlightGate.hidden) return;
+    document.documentElement.classList.add("gate-hero-revealing");
     if (reducedGateMotion) {
       completeMoonlightGate();
       return;
@@ -460,6 +479,9 @@
     // Animate the cover itself, the sky/title and the underlying hero in one
     // uninterrupted handoff. Keep the cover until the final animation frame.
     moonlightGate.classList.add("is-handoff");
+    // Bring the lettering in once the gate has begun to dissolve, instead
+    // of spending its entire entrance animation behind the opaque scenery.
+    scheduleGate(() => document.documentElement.classList.add("cinematic-entered"), 420);
     scheduleGate(completeMoonlightGate, GATE_HANDOFF_MS);
   };
   const settleOpenDoor = () => {
@@ -478,6 +500,7 @@
   const openFromWax = () => {
     if (!moonlightGate || !waxOpenButton || gateOpening || moonlightGate.hidden) return;
     gateOpening = true;
+    prepareHero();
     waxOpenButton.disabled = true;
     playIntroSound();
     spawnGateSparkles();
