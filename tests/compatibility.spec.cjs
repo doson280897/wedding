@@ -671,7 +671,9 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
   const bubble = page.locator("#musicBubble");
   await expect(bubble).toBeHidden();
   await page.locator("#settingsTrigger").click();
-  await page.locator("#musicToggle").click();
+  // State-machine test: real pointer hit-testing is covered by the dedicated
+  // unopened-envelope smoke case, so avoid Firefox/YouTube actionability stalls.
+  await page.locator("#musicToggle").evaluate(node => node.click());
   await expect(bubble).toBeVisible();
   await expect(bubble).toHaveAttribute("data-music-state", "playing");
   await expect(page.locator("#musicToggle")).toHaveAttribute("aria-pressed", "true");
@@ -709,7 +711,7 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
 
   // The stopped bubble cannot start music itself; guests must use Settings.
   await page.locator("#settingsTrigger").click();
-  await page.locator("#musicToggle").click();
+  await page.locator("#musicToggle").evaluate(node => node.click());
   await expect(bubble).toBeVisible();
   await expect(bubble).toHaveAttribute("data-music-state", "playing");
   expect(await page.evaluate(() => window.__musicTestPlayCalls)).toBe(3);
