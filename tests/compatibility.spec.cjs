@@ -891,3 +891,28 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await page.locator("#linkToolBack").click();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
 });
+
+
+test("reduced-motion album can switch, close and reopen without losing its image @smoke @core", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(base + "/index.html?party=bride", { waitUntil: "domcontentloaded" });
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden();
+  const viewport = page.locator("#albumViewport");
+  await viewport.scrollIntoViewIfNeeded();
+  await expect(page.locator(".album-card.is-main")).toHaveCount(1);
+  await viewport.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#albumLightbox")).toBeVisible();
+  const before = await page.locator("#albumLightboxCounter").textContent();
+  await page.locator("#albumLightboxNext").click();
+  await expect(page.locator("#albumLightboxCounter")).not.toHaveText(before);
+  await page.locator("#albumLightboxClose").click();
+  await expect(page.locator("#albumLightboxImage")).toHaveCount(1);
+  await viewport.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#albumLightboxImage")).toBeVisible();
+  await expect.poll(() => page.locator("#albumLightboxImage").evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
+  await page.locator("#albumLightboxNext").click();
+  await expect(page.locator("#albumLightboxCounter")).not.toHaveText(before);
+});

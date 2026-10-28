@@ -638,6 +638,7 @@
       if (generation !== lightboxGeneration || lightbox.hidden) return;
       if (!decoded) { failLightboxStep(); return; }
       decoded.image.id = "albumLightboxImage";
+      decoded.image.classList.remove("album-lightbox-incoming");
       lightboxImage.replaceWith(decoded.image);
       lightboxImage = decoded.image;
       lightboxIndex = decoded.index;

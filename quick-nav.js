@@ -21,7 +21,7 @@
   let giftPreviousFocus = null;
 
   const trapFocus = (event, focusable) => {
-    const items = focusable.filter(node => node && !node.disabled && !node.hidden);
+    const items = focusable.filter(node => node && !node.disabled && !node.hidden && node.getClientRects().length);
     if (!items.length) return;
     const first = items[0];
     const last = items.at(-1);
@@ -41,7 +41,7 @@
       ? [target.querySelector("iframe[data-src]")].filter(Boolean)
       : [...mapModal.querySelectorAll("iframe[data-src]")];
     frames.forEach(frame => {
-      frame.src = frame.dataset.src;
+      if (frame.src !== frame.dataset.src) frame.src = frame.dataset.src;
       frame.removeAttribute("data-src");
     });
   };
