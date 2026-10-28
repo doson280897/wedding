@@ -184,7 +184,7 @@
         "LOCATION:" + escapeICS(event.place),
         "END:VEVENT"
       ].join("\r\n")).join("\r\n");
-      const calendar = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Son Nga Wedding//Wedding Calendar//VI","CALSCALE:GREGORIAN","METHOD:PUBLISH",body,"END:VCALENDAR"].join("\r\n") + "\r\n";
+      const calendar = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//" + new URL(info.site.url).hostname + "//Wedding Invitation//EN","CALSCALE:GREGORIAN","METHOD:PUBLISH",body,"END:VCALENDAR"].join("\r\n") + "\r\n";
       const url = URL.createObjectURL(new Blob([calendar], {type:"text/calendar;charset=utf-8"}));
       const link = document.createElement("a");
       link.href = url;
