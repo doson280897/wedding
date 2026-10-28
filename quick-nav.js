@@ -165,9 +165,10 @@
   }));
 
   // Draggable floating controls: hover on desktop, two-tap activation on touch.
+  // Music now lives inside the unified settings palette, not as a separate
+  // draggable button scattered across the invitation.
   const floatingControls = [
     document.querySelector(".language-switch"),
-    document.getElementById("musicToggle"),
     toggle
   ].filter(Boolean);
 
@@ -298,6 +299,7 @@
     };
 
     const collapseNow = () => {
+      if (control.classList.contains("settings-hub") && control.classList.contains("is-open")) return;
       setArmed(false);
       snapFloatingToEdge(control, true);
       control.classList.add("is-idle");
@@ -361,6 +363,7 @@
 
     control.addEventListener("pointerdown", event => {
       if (event.button != null && event.button !== 0) return;
+      if (control.classList.contains("settings-hub") && event.target.closest(".settings-panel")) return;
       tapStartedIdle = control.classList.contains("is-idle");
       wake();
 
@@ -380,6 +383,9 @@
     }, { passive:true });
 
     control.addEventListener("click", event => {
+      // Children in the settings palette are independent interactive controls,
+      // not drag handles; don't suppress taps or reset idle while selecting.
+      if (control.classList.contains("settings-hub") && event.target.closest(".settings-panel")) return;
       if (suppressClick) {
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -387,7 +393,7 @@
         return;
       }
 
-      if (coarsePointer.matches && tapStartedIdle) {
+      if (coarsePointer.matches && tapStartedIdle && !control.classList.contains("settings-hub")) {
         tapStartedIdle = false;
         event.preventDefault();
         event.stopImmediatePropagation();
