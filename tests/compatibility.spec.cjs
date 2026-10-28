@@ -716,3 +716,45 @@ test("music confirms playing from player state even if YouTube sends no PLAYING 
   await page.locator("#musicBubblePause").click();
   await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","paused");
 });
+
+
+test("music loading times out into a retryable paused state instead of freezing", async ({ page }) => {
+  await page.addInitScript(() => {
+    // Only shorten the product's 10s playback watchdog; leave other timers alone.
+    const originalTimeout = window.setTimeout;
+    window.setTimeout = (callback, delay, ...args) =>
+      originalTimeout(callback, delay === 10000 ? 180 : delay, ...args);
+    window.__allowMusicPlay = false;
+    window.YT = {
+      PlayerState: { PLAYING:1, PAUSED:2, ENDED:0 },
+      Player: function (_host, options) {
+        const player = {
+          setVolume() {},
+          playVideo() {
+            if (window.__allowMusicPlay) {
+              options.events.onStateChange({data:1, target:player});
+            }
+          },
+          pauseVideo() {},
+          stopVideo() {},
+          getPlayerState() { return window.__allowMusicPlay ? 1 : -1; },
+        };
+        queueMicrotask(() => options.events.onReady({target:player}));
+        return player;
+      },
+    };
+  });
+
+  await page.goto(base + "/index.html?party=bride", {waitUntil:"domcontentloaded"});
+  await page.locator("#skipInvitation").click();
+  await page.locator("#settingsTrigger").click();
+  await page.locator("#musicToggle").click();
+
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","paused", {timeout:3000});
+  await expect(page.locator("#musicToggle .music-label")).toContainText("THỬ LẠI");
+  await page.locator("#musicBubbleTrigger").click();
+  await expect(page.locator("#musicBubblePause")).toBeEnabled();
+  await page.evaluate(() => window.__allowMusicPlay = true);
+  await page.locator("#musicBubblePause").click();
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing", {timeout:3000});
+});
