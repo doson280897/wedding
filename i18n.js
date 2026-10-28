@@ -30,6 +30,10 @@
     const name = String(path || "").trim();
     const derivedName = /^couple\.(bride|groom)\.fullUpper$/.exec(name);
     if (derivedName) return info.couple[derivedName[1]].full.toLocaleUpperCase("vi-VN");
+    const derivedSlug = /^couple\\.(bride|groom)\\.slug$/.exec(name);
+    if (derivedSlug) return String(info.couple[derivedSlug[1]].short).normalize("NFD")
+      .replace(/[\\u0300-\\u036f]/g, "").replace(/[đĐ]/g, "d")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const derivedDate = /^parties\.(bride|groom)\.(dateDots|dateSlashes|dateEnglish|dateSpaced|dateYear|weekday)$/.exec(name);
     if (derivedDate) {
       if (derivedDate[2] === "dateYear") return String(dateParts(derivedDate[1]).year);
@@ -37,8 +41,9 @@
       return formatDate(derivedDate[1], styles[derivedDate[2]], language);
     }
     const value = name.split(".").reduce((node, key) => node == null ? undefined : node[key], info);
-    if (value && typeof value === "object" && ("vi" in value || "en" in value)) return value[language] ?? value.vi ?? "";
-    return value == null ? "" : String(value);
+    if (value && typeof value === "object" && ("vi" in value || "en" in value))
+      return renderText(value[language] ?? value.vi ?? "", language);
+    return value == null ? "" : renderText(String(value), language);
   };
   const renderText = (template, language = locale) =>
     String(template ?? "").replace(/\{\{([\w.]+)\}\}/g, (_, path) => getInfo(path, language));
