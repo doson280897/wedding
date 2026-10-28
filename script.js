@@ -61,14 +61,27 @@
   const rawGuest = params.get("to");
   const displayGuest = rawGuest ? rawGuest.replace(/[_+]/g, " ").trim().slice(0, 100) : "";
   const guestNode = document.getElementById("guestName");
+  const heroGuestLabel = document.getElementById("heroGuestLabel");
   const envelopeGuest = document.getElementById("envelopeGuest");
+  const envelopeGuestLabel = document.getElementById("envelopeGuestLabel");
 
   function updateGuest() {
-    const guestLabel = displayGuest || tr("guest.default");
+    const named = Boolean(displayGuest);
+    const label = tr("guest.recipientLabel");
     const heroTemplate = tr(selectedParty === "bride" ? "guest.heroBride" : "guest.heroGroom");
-    const heroText = heroTemplate.replace("{guest}", guestLabel);
-    if (guestNode) guestNode.textContent = heroText;
-    if (envelopeGuest) envelopeGuest.textContent = displayGuest ? tr("guest.prefix") + displayGuest : tr("envelope.invite");
+    // Only personalized invitations use the two-line typographic treatment.
+    // Unnamed links keep the original generic invitation message.
+    if (heroGuestLabel) heroGuestLabel.textContent = named
+      ? label : heroTemplate.replace("{guest}", tr("guest.default"));
+    if (guestNode) {
+      guestNode.textContent = named ? displayGuest : "";
+      guestNode.hidden = !named;
+    }
+    if (envelopeGuestLabel) envelopeGuestLabel.textContent = named ? label : tr("envelope.invite");
+    if (envelopeGuest) {
+      envelopeGuest.textContent = named ? displayGuest : "";
+      envelopeGuest.hidden = !named;
+    }
   }
 
   const weddingDates = {
@@ -201,6 +214,12 @@
   const intro = document.getElementById("envelopeIntro");
   const themeColor = document.getElementById("themeColor");
   const setBrowserTheme = color => themeColor?.setAttribute("content", color);
+  const setContentBrowserTheme = () => setBrowserTheme(
+    document.documentElement.dataset.theme === "light" ? "#f5f0e6" : "#0b0e0e"
+  );
+  document.addEventListener("wedding:themechange", () => {
+    if (!document.body.classList.contains("envelope-locked")) setContentBrowserTheme();
+  });
   const openInvitation = document.getElementById("openInvitation");
   const closeInvitation = document.getElementById("closeInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
@@ -212,7 +231,7 @@
     intro.hidden = true;
     document.body.classList.remove("envelope-locked");
     document.documentElement.classList.remove("envelope-theme", "envelope-pending");
-    setBrowserTheme("#0b0e0e");
+    setContentBrowserTheme();
   }
 
   if (intro && selectedParty && !alreadyEntered) {
@@ -278,7 +297,7 @@
         resetInvitationScroll();
         document.body.classList.remove("envelope-locked");
         document.documentElement.classList.remove("envelope-theme", "envelope-pending");
-        setBrowserTheme("#0b0e0e");
+        setContentBrowserTheme();
         document.dispatchEvent(new Event("wedding:envelopeexit"));
         return;
       }
@@ -289,7 +308,7 @@
         resetInvitationScroll();
         document.body.classList.remove("envelope-locked");
         document.documentElement.classList.remove("envelope-theme", "envelope-pending");
-        setBrowserTheme("#0b0e0e");
+        setContentBrowserTheme();
         document.dispatchEvent(new Event("wedding:envelopeexit"));
       }, 260);
     };
