@@ -294,6 +294,22 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   expect(openedFlap.foldedTop).toBeLessThan(openedFlap.pocketTop);
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeVisible();
+  await expect(page.locator("#envelopeCooldown")).toBeVisible();
+  // Verify actual rendered contrast of the timer's digits against its surface.
+  const timerContrast = await page.locator("#envelopeCooldown").evaluate(node => {
+    const luminance = color => {
+      const rgb = color.match(/[0-9.]+/g).slice(0,3).map(Number);
+      const channels = rgb.map(channel => {
+        const n = channel / 255;
+        return n <= .04045 ? n / 12.92 : ((n + .055) / 1.055) ** 2.4;
+      });
+      return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+    };
+    const bg = luminance(getComputedStyle(node).backgroundColor);
+    const text = luminance(getComputedStyle(node.querySelector("span")).color);
+    return (Math.max(bg,text) + .05) / (Math.min(bg,text) + .05);
+  });
+  expect(timerContrast).toBeGreaterThanOrEqual(7);
   // The pocket remains fixed while the card rises out of it.
   const pocket = await page.locator(".envelope-front").evaluate(node => {
     const style = getComputedStyle(node);

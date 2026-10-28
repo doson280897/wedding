@@ -1450,3 +1450,24 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 @media(prefers-reduced-motion:reduce){
   .envelope-intro.is-flap-open .envelope-flap{opacity:1!important;transform:scaleY(-1)!important}
 }
+
+
+/* ACCESSIBLE INTRO CONTROLS — opaque countdown, ivory digits, brass ring.
+   No backdrop blur or bright-on-bright text on mobile. */
+.envelope-cooldown{
+  color:#fbf5e7;background:#213629;border:1px solid #bfa476;
+  box-shadow:0 5px 16px rgba(4,16,10,.23);
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+.envelope-cooldown span{color:#fbf5e7;font-weight:700;text-shadow:none}
+.envelope-cooldown-track{stroke:#6d826f}
+.envelope-cooldown-progress{stroke:#f1d59e}
+.envelope-open:focus-visible,.envelope-close:focus-visible,
+.envelope-skip:focus-visible,.envelope-stage-hit:focus-visible{
+  outline:3px solid #f5dca9;outline-offset:4px;
+}
+@media(max-width:650px){
+  .envelope-cooldown{width:44px;height:44px;box-shadow:0 4px 12px rgba(4,16,10,.2)}
+  .envelope-cooldown svg{width:36px;height:36px}
+  .envelope-cooldown span{font-size:14px}
+}
