@@ -40,8 +40,9 @@ jobs:
           from pathlib import Path
           from PIL import Image, ImageDraw, ImageFont, ImageOps
           import json
+          import tempfile
 
-          wedding = json.loads(Path("/tmp/wedding-deploy-info.json").read_text(encoding="utf-8"))
+          wedding = json.loads((Path(tempfile.gettempdir()) / "wedding-deploy-info.json").read_text(encoding="utf-8"))
           couple = wedding["couple"]
           parties = wedding["parties"]
 
