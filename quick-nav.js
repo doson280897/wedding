@@ -371,7 +371,11 @@
       if (event.button != null && event.button !== 0) return;
       if (control.classList.contains("settings-hub") && event.target.closest(".settings-panel")) return;
       tapStartedIdle = control.classList.contains("is-idle");
-      wake();
+      // On touchscreens, expanding the collapsed Menu during pointerdown
+      // moves the button under the finger before pointerup. Safari/Chrome
+      // then cancel the native click, leaving the menu closed. Keep its
+      // geometry stable through the tap; wake during the click itself.
+      if (!(control === toggle && tapStartedIdle && coarsePointer.matches)) wake();
 
       const rect = control.getBoundingClientRect();
       drag = {
@@ -413,7 +417,10 @@
     control.addEventListener("pointerleave", () => {
       if (!coarsePointer.matches) scheduleIdle();
     });
-    control.addEventListener("focusin", wake);
+    control.addEventListener("focusin", () => {
+      if (control === toggle && tapStartedIdle && coarsePointer.matches) return;
+      wake();
+    });
     control.addEventListener("focusout", () => scheduleIdle());
     if (control.classList.contains("settings-hub")) {
       document.addEventListener("wedding:settingsclosed", () => scheduleIdle(1250));
