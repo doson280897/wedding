@@ -161,3 +161,60 @@ test("floating language pill really shrinks on touch and desktop", async ({ page
   expect(expandedWidth).toBeGreaterThan(collapsedWidth + 12);
   await expect(control.locator(".language-option.is-active")).toBeVisible();
 });
+
+
+test("editing only wedding-info.js updates names, initials, dates, venue and gifts", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", error => errors.push(error.message));
+  // Simulate a new couple by replacing ONLY the response body of the data file.
+  await page.route("**/wedding-info.js*", async route => {
+    const response = await route.fetch();
+    let body = await response.text();
+    const changes = [
+      ['"short": "Tố Nga"', '"short": "Mai An"'],
+      ['"full": "Lữ Thị Tố Nga"', '"full": "Nguyễn Thị Mai An"'],
+      ['"initial": "N"', '"initial": "M"'],
+      ['"short": "Thành Sơn"', '"short": "Tuấn Minh"'],
+      ['"full": "Đỗ Ngọc Thành Sơn"', '"full": "Trần Tuấn Minh"'],
+      ['"initial": "S"', '"initial": "T"'],
+      ['"date": "2026-11-14"', '"date": "2027-03-15"'],
+      ['"Nhà Hàng Hương Lan"', '"Hoa Sen Venue"'],
+    ];
+    for (const [oldValue, newValue] of changes) {
+      expect(body).toContain(oldValue);
+      body = body.replace(oldValue, newValue);
+    }
+    await route.fulfill({ response, body });
+  });
+
+  await page.goto(base + "/index.html?party=bride&lang=en", {
+    waitUntil: "domcontentloaded",
+  });
+  await page.locator("#skipInvitation").click();
+
+  await expect(page.locator("#heroMonogram")).toContainText("M");
+  await expect(page.locator("#heroMonogram")).toContainText("T");
+  await expect(page.locator("#heroNames")).toContainText("MAI AN");
+  await expect(page.locator("#heroNames")).toContainText("TUẤN MINH");
+  await expect(page.locator(".person-bride .person-copy h3")).toHaveText(
+    "NGUYỄN THỊ MAI AN",
+  );
+  await expect(page.locator(".hero-date [data-party-date='bride']")).toHaveText(
+    "15.03.2027",
+  );
+  await expect(page.locator("#map-bride h3")).toHaveText("Hoa Sen Venue");
+  await expect(page.locator(".gift-card[data-party-scope='bride'] h3")).toHaveText(
+    "NGUYỄN THỊ MAI AN",
+  );
+
+  await page.goto(base + "/index.html?tool=links&lang=en", {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(page.locator(".link-tool-eyebrow")).toContainText(
+    "Mai An & Tuấn Minh",
+  );
+  await expect(page.locator(".link-tool-eyebrow")).toContainText("2027");
+  expect(errors).toEqual([]);
+});
