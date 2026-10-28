@@ -63,6 +63,7 @@ test("Vietnamese and English strings have matching keys and valid data placehold
 test("template and engine files contain no customer-specific information", () => {
   const files = [
     "index.html", "script.js", "i18n.js", "gallery.js", "link-tool.js",
+    "settings.js", "settings.css",
     "link-tool.html", "quick-nav.js", "style.css", "quick-nav.css",
     "build-wedding.cjs",
   ];
@@ -88,7 +89,9 @@ test("template and engine files contain no customer-specific information", () =>
 
 test("one shared floating language control and one data script", () => {
   const html = read("index.html");
-  assert.equal((html.match(/class="language-switch"/g) || []).length, 1);
+  assert.equal((html.match(/class="language-switch settings-hub"/g) || []).length, 1);
+  assert.equal((html.match(/id="settingsPanel"/g) || []).length, 1);
+  assert.equal((html.match(/id="musicToggle"/g) || []).length, 1);
   assert.equal((html.match(/src="wedding-info[.]js/g) || []).length, 1);
 });
 
