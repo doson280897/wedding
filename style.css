@@ -1866,3 +1866,13 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
 @media(prefers-reduced-motion:reduce){
   .envelope-intro.is-card-lifted .invitation-paper-proxy{display:none!important}
 }
+
+
+/* PREWARM THE MOTION FACE while the flap is opening. It sits behind the
+   envelope front (z2 vs z4), so its text is rasterized before extraction. */
+.envelope-intro.is-card-prepared:not(.is-card-lifted) .invitation-paper-proxy{
+  visibility:visible;
+  opacity:1;
+  transform:translate3d(0,28%,0);
+  will-change:transform;
+}

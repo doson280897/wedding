@@ -304,6 +304,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   // The flap stays present while it folds ABOVE the sealed pocket. No
   // backface culling, even after the card is extracted.
   await expect(page.locator(".invitation-card")).toHaveAttribute("aria-hidden", "true");
+  await expect(page.locator(".invitation-paper-proxy")).toBeVisible();
   await expect(page.locator(".invitation-paper-proxy-names")).toContainText("Nga");
   await expect(page.locator(".invitation-paper-proxy-names")).toContainText("Sơn");
   const expectedMotionDate = await page.locator(".envelope-date").innerText();
