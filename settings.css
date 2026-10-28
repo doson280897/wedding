@@ -373,3 +373,45 @@ html[data-theme="light"] .settings-hub .settings-options :is(.language-option,.t
 html[data-theme="light"] .settings-hub .settings-options :is(.language-option,.theme-option).is-active {background:#435e4a;color:#fff8ec}
 html[data-theme="light"] .settings-hub .settings-music-row .music-toggle {background:#f2eadb;color:#395240;border-color:#b7a077}
 html[data-theme="light"] .settings-hub .settings-music-row .music-toggle[aria-pressed=true] {background:#405e46;color:#fff8e8}
+
+/* Floating controls start at stable corners on every page load.
+   Respect iOS/Android safe areas; JS keeps these anchors while idle. */
+.language-switch.settings-hub {
+  top:max(8px,env(safe-area-inset-top,0px));
+  right:max(8px,env(safe-area-inset-right,0px));
+}
+.wq-toggle.floating-control {
+  right:max(8px,env(safe-area-inset-right,0px));
+  bottom:max(8px,env(safe-area-inset-bottom,0px));
+}
+
+/* In a collapsed dock, remove the *layout gap* as well as the text.
+   Otherwise the 9px flex gap leaves the settings icon off-center. */
+.settings-hub.floating-control.is-idle:not(.is-open) .settings-trigger {
+  display:grid;
+  place-items:center;
+  width:42px;
+  height:42px;
+  padding:0;
+  gap:0;
+}
+.settings-hub.floating-control.is-idle:not(.is-open) .settings-trigger-label {
+  display:none;
+}
+.settings-hub.floating-control.is-idle:not(.is-open) .settings-trigger svg {
+  display:block;
+  margin:0 auto;
+  flex:none;
+}
+
+/* Light mode must out-rank every dark dock state (expanded and collapsed).
+   The older generic .floating-control.is-idle selector was winning specificity. */
+html[data-theme="light"] .language-switch.settings-hub,
+html[data-theme="light"] .language-switch.settings-hub.floating-control,
+html[data-theme="light"] .language-switch.settings-hub.floating-control.is-idle,
+html[data-theme="light"] .language-switch.settings-hub.floating-control.is-open {
+  background:#f5ebdc;
+  border-color:#aa8c5c;
+  color:#36513f;
+  box-shadow:0 8px 24px rgba(67,53,27,.19);
+}
