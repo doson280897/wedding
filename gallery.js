@@ -28,6 +28,9 @@
   let photos = [];
   let captions = {};
   let items = [];
+  const itemBySlide = new WeakMap();
+  let cachedMetrics = null;
+  let loadedImageCount = 0;
 
   // Camera state. Images never change src while browsing; only transforms move.
   let position = 0;
@@ -55,6 +58,9 @@
   // Limit simultaneous image decodes on phones to avoid GPU/memory spikes.
   const MAX_DECODE_CONCURRENCY = matchMedia("(max-width: 700px), (pointer: coarse)").matches ? 2 : 4;
   const SAVE_DATA = Boolean(navigator.connection?.saveData);
+  // Bound retained decoded photos on long albums; versioned image URLs remain cacheable.
+  const MAX_RETAINED_IMAGES = SAVE_DATA ? 12 : MAX_DECODE_CONCURRENCY === 2 ? 20 : 32;
+  const lightboxPreloaders = [new Image(), new Image()];
 
   const wrap = index => ((index % photos.length) + photos.length) % photos.length;
 
@@ -74,7 +80,7 @@
   function pumpDecodeQueue() {
     while (activeDecodes < MAX_DECODE_CONCURRENCY && decodeQueue.length) {
       const img = decodeQueue.shift();
-      if (!img?.decode || !img.isConnected) continue;
+      if (!img?.decode || !img.isConnected || !img.hasAttribute("src")) continue;
       activeDecodes++;
       img.decode().catch(() => {}).finally(() => {
         activeDecodes--;
@@ -93,8 +99,9 @@
     const safeRatio = clamp(Number(ratio) || .78, .50, 2.05);
     item.ratio = safeRatio;
 
-    const compact = viewport.clientWidth < 700;
-    const sceneHeight = viewport.clientHeight || (compact ? 520 : 680);
+    const metrics = sceneMetrics();
+    const compact = metrics.compact;
+    const sceneHeight = metrics.height || (compact ? 520 : 680);
     let height = compact ? Math.min(sceneHeight * .61, 340) : Math.min(sceneHeight * .66, 475);
 
     if (safeRatio >= 1.35) height *= compact ? .61 : .64;
@@ -102,8 +109,8 @@
 
     let width = height * safeRatio;
     const maxWidth = compact
-      ? Math.min(viewport.clientWidth * .74, 320)
-      : Math.min(viewport.clientWidth * .36, 540);
+      ? Math.min(metrics.width * .74, 320)
+      : Math.min(metrics.width * .36, 540);
 
     if (width > maxWidth) {
       const factor = maxWidth / width;
@@ -167,6 +174,7 @@
     card.append(img);
     slide.append(card);
     space.append(slide);
+    itemBySlide.set(slide, item);
     return item;
   }
 
@@ -174,6 +182,7 @@
     if (item.img.hasAttribute("src")) return;
     item.img.fetchPriority = relativeDistance < 1.7 ? "high" : "low";
     item.img.src = versionedAsset(photos[item.photoIndex]);
+    loadedImageCount++;
   }
 
   function shortestRelative(photoIndex, cameraPosition) {
@@ -214,17 +223,31 @@
   }
 
   function sceneMetrics() {
-    const compact = viewport.clientWidth < 700;
-    return {
-      compact,
-      height:viewport.clientHeight,
-      // Wider than a carousel: neighbors live in the surrounding 3D space,
-      // not in a tight horizontal row.
-      spacing:compact ? viewport.clientWidth * .34 : viewport.clientWidth * .285,
+    if (cachedMetrics) return cachedMetrics;
+    const width = viewport.clientWidth;
+    const height = viewport.clientHeight;
+    const compact = width < 700;
+    // Read viewport geometry once, not after every slide style mutation.
+    return (cachedMetrics = {
+      width, height, compact,
+      spacing:compact ? width * .34 : width * .285,
       activeRange:compact ? 3.25 : 4.10,
       centerZ:compact ? 235 : 325,
       depthStep:compact ? 132 : 164
-    };
+    });
+  }
+
+  function trimPhotoCache(metrics) {
+    if (loadedImageCount <= MAX_RETAINED_IMAGES) return;
+    const keepDistance = metrics.activeRange + (SAVE_DATA ? 1.5 : 3.5);
+    for (const item of items) {
+      if (loadedImageCount <= MAX_RETAINED_IMAGES) break;
+      if (!item.hidden || !item.img.hasAttribute("src")) continue;
+      if (Math.abs(shortestRelative(item.photoIndex, position)) <= keepDistance) continue;
+      // Keep nearby full-resolution cards decoded for inertia and seamless wrapping.
+      item.img.removeAttribute("src");
+      loadedImageCount--;
+    }
   }
 
   function renderScene() {
@@ -247,6 +270,7 @@
         // on every animation frame (which is costly with 100+ photos).
         if (!item.hidden) {
           item.hidden = true;
+          item.slide.style.willChange = "auto";
           item.slide.style.opacity = "0";
           item.slide.style.pointerEvents = "none";
           item.slide.setAttribute("aria-hidden", "true");
@@ -259,7 +283,10 @@
         continue;
       }
 
-      item.hidden = false;
+      if (item.hidden) {
+        item.hidden = false;
+        item.slide.style.willChange = "transform, opacity";
+      }
 
       // Stable per-photo offsets. They never jump when the camera crosses
       // half/integer boundaries; only the continuous relative value changes.
@@ -321,6 +348,7 @@
     if (currentPhoto !== focusedPhotoIndex) {
       focusedPhotoIndex = currentPhoto;
       updateProgress(currentPhoto, true);
+      trimPhotoCache(metrics);
     }
   }
 
@@ -367,7 +395,7 @@
 
   function itemFromTarget(node) {
     const slide = node?.closest?.(".album-slide");
-    return slide ? items.find(item => item.slide === slide) : null;
+    return slide ? itemBySlide.get(slide) || null : null;
   }
 
   viewport.addEventListener("pointerdown", event => {
@@ -534,10 +562,11 @@
   }
 
   function preloadLightboxNeighbors() {
-    [-1, 1].forEach(delta => {
-      const neighbor = new Image();
+    [-1, 1].forEach((delta, index) => {
+      const neighbor = lightboxPreloaders[index];
       neighbor.decoding = "async";
-      neighbor.src = versionedAsset(photos[wrap(lightboxIndex + delta)]);
+      const url = versionedAsset(photos[wrap(lightboxIndex + delta)]);
+      if (neighbor.src !== url) neighbor.src = url;
     });
   }
 
@@ -806,6 +835,7 @@
   addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
+      cachedMetrics = null;
       for (const item of items) applyCardSize(item, item.ratio);
       requestSceneFrame();
     }, 80);
@@ -854,6 +884,8 @@
       }
 
       space.replaceChildren();
+      loadedImageCount = 0;
+      cachedMetrics = null;
       items = photos.map(createItem);
       position = 0;
       targetPosition = 0;
