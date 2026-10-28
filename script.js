@@ -516,9 +516,6 @@
   let youtubePlayerReady = false;
   let youtubePlayerPromise = null;
   let musicPlaying = false;
-  // The seal click is the playback gesture. Play muted through the intro,
-  // then reveal the sound only after the hero is visible.
-  let musicHeroEntered = false;
   let musicEnabled = false;
   let musicHasStarted = false;
   let musicPausePosition = 0;
@@ -530,20 +527,6 @@
   let musicRequestId = 0;
   let musicStartTimer = 0;
   let musicStatePoll = 0;
-
-  // The iframe can buffer/play muted during the gate. Hero may make it audible
-  // ONLY if the guest has not paused/stopped and YouTube still wants playback.
-  // Otherwise an unconditional unMute() could produce a surprise resumption.
-  const syncMusicIntroAudio = player => {
-    if (!player) return;
-    if (!musicHeroEntered || !musicEnabled || !musicWantsPlayback) {
-      try { player.mute?.(); } catch (_) {}
-      try { player.setVolume?.(0); } catch (_) {}
-    } else {
-      try { player.unMute?.(); } catch (_) {}
-      try { player.setVolume?.(70); } catch (_) {}
-    }
-  };
 
   const clearMusicWait = () => {
     clearTimeout(musicStartTimer);
@@ -561,7 +544,6 @@
     musicStarting = false;
     musicPlaybackFailed = false;
     musicHasStarted = true;
-    syncMusicIntroAudio(youtubePlayer);
     if (musicResumePending && musicPausePosition > 1) {
       musicResumePending = false;
       try {
@@ -584,7 +566,6 @@
     musicPlaying = false;
     musicStarting = false;
     musicPlaybackFailed = true;
-    syncMusicIntroAudio(youtubePlayer);
     setMusicUI();
     // If a delayed play command eventually takes effect, silence it.
     try { if (youtubePlayerReady) youtubePlayer?.pauseVideo(); } catch (_) {}
@@ -614,9 +595,9 @@
       );
     }
     if (musicBubble) {
-      // The gate has its own sound channel. Hide background-music controls
-      // until Hero; do not flash a PLAYING/PAUSED icon during the intro.
-      musicBubble.hidden = !musicHeroEntered || !musicHasStarted;
+      // Play audio immediately when the seal is tapped. Display its floating
+      // control only after the gate is gone so it does not cover the animation.
+      musicBubble.hidden = !moonlightGate?.hidden || !musicHasStarted;
       musicBubble.dataset.musicState = state;
     }
     if (!musicEnabled) setBubbleActionsOpen(false);
@@ -649,7 +630,6 @@
     musicHasStarted = false;
     musicPausePosition = 0;
     musicResumePending = false;
-    syncMusicIntroAudio(youtubePlayer);
     setBubbleActionsOpen(false);
     setMusicUI();
     try {
@@ -702,7 +682,10 @@
             player.seekTo(musicPausePosition, true);
           }
         }
-        syncMusicIntroAudio(player);
+        // This is called synchronously from the seal's tap if YouTube is
+        // already ready, preserving mobile browsers' user activation.
+        player.unMute?.();
+        player.setVolume?.(70);
         player.playVideo(); // Keep the same iframe and playback position.
       } catch (_) { failMusicAttempt(requestId); }
     };
@@ -726,7 +709,6 @@
       if (Number.isFinite(current) && current > 0) musicPausePosition = current;
     } catch (_) {}
     musicResumePending = false;
-    syncMusicIntroAudio(youtubePlayer);
     setMusicUI();
     try {
       if (youtubePlayerReady && youtubePlayer) youtubePlayer.pauseVideo();
@@ -849,7 +831,7 @@
             readySettled = true;
             clearTimeout(readyTimeout);
             youtubePlayerReady = true;
-            syncMusicIntroAudio(event.target);
+            try { event.target.setVolume(70); } catch (_) {}
             resolve(event.target);
           },
           onStateChange: event => {
@@ -907,28 +889,14 @@
     return youtubePlayerPromise;
   }
 
-  // iOS Safari commonly rejects playVideo() called several seconds after a
-  // tap: a delayed wedding:waxopen event is NOT a user gesture. Prepare the
-  // iframe while the gate is closed, start MUTED on the seal gesture, then
-  // unmute that same running player on Hero without restarting its track.
-  // On slow networks, the existing retry in Settings remains necessary if
-  // the YouTube iframe was not ready in time for that first gesture.
+  // Preload YouTube while the locked gate is displayed. A direct tap on
+  // the seal starts audible music; the transition to Hero never touches the
+  // player's play/pause/volume state. iOS still requires the iframe to have
+  // finished loading before that first gesture; manual retry remains possible.
   if (selectedParty && !linkToolInitial) {
-    window.setTimeout(() => {
-      if (!moonlightGate?.hidden) initYouTubeMusicPlayer().catch(() => {});
-    }, 250);
-    waxOpenButton?.addEventListener("click", () => {
-      // Never let the first frames of the unlock sequence make a sound.
-      if (youtubePlayerReady) syncMusicIntroAudio(youtubePlayer);
-      // No setTimeout, Promise.then or requestAnimationFrame before playVideo
-      // when the player is ready: preserve the browser's user activation.
-      requestMusicPlayback();
-    }, { once:true });
-    document.addEventListener("wedding:waxopen", () => {
-      musicHeroEntered = true;
-      if (youtubePlayerReady) syncMusicIntroAudio(youtubePlayer);
-      setMusicUI();
-    }, { once:true });
+    initYouTubeMusicPlayer().catch(() => {});
+    waxOpenButton?.addEventListener("click", requestMusicPlayback, { once:true });
+    document.addEventListener("wedding:waxopen", setMusicUI, { once:true });
   }
 
   // Settings is the entry point for activating music. The contextual bubble
