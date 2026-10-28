@@ -802,16 +802,21 @@
     setStatus("album.loading");
 
     try {
-      const manifestUrl = new URL("./images/manifest.json", document.baseURI);
-      manifestUrl.searchParams.set("v", buildId);
-      manifestUrl.searchParams.set("t", String(Date.now()));
+      const gallery = window.WEDDING_INFO?.gallery || {};
+      // Named list in the info file overrides the auto-generated technical manifest.
+      let list = Array.isArray(gallery.photos) ? gallery.photos : null;
+      if (!list) {
+        const manifestUrl = new URL(gallery.manifest || "images/manifest.json", document.baseURI);
+        manifestUrl.searchParams.set("v", buildId);
+        manifestUrl.searchParams.set("t", String(Date.now()));
 
-      const response = await fetch(manifestUrl, { cache:"no-store" });
-      if (!response.ok) throw new Error("HTTP " + response.status);
+        const response = await fetch(manifestUrl, { cache:"no-store" });
+        if (!response.ok) throw new Error("HTTP " + response.status);
 
-      const manifest = await response.json();
-      const list = Array.isArray(manifest) ? manifest : manifest.photos;
-      if (!Array.isArray(list)) throw new Error("Invalid manifest");
+        const manifest = await response.json();
+        list = Array.isArray(manifest) ? manifest : manifest.photos;
+      }
+      if (!Array.isArray(list)) throw new Error("Invalid album photo list from wedding-info.js");
 
       photos = list
         .filter(photo => photo && typeof photo.src === "string" && photo.src)
