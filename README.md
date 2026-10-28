@@ -7,8 +7,8 @@ Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, 
 
 - Nút nổi **Tùy chỉnh** (có thể kéo thả) gom **VN / EN**, **Sáng / Tối** và **nhạc nền** vào một bảng; nút **Mục lục** vẫn riêng để truy cập nhanh các phần thiệp. Nhạc chỉ hiển thị khi đã vào thiệp của một bên.
 - Khi khách bật nhạc trong Tùy chỉnh, một **bong bóng nốt nhạc** xuất hiện ở góc dưới trái và lắc nhẹ lúc đang phát. Chạm bong bóng để mở các icon **Tạm dừng / Phát tiếp** và **Stop**. Pause giữ bong bóng nhưng cho icon đứng yên và đổi màu; Stop dừng hẳn, ẩn bong bóng, và chỉ có thể bật lại từ bảng Tùy chỉnh. Bong bóng không hiện khi nhạc chưa được bật.
-- Chế độ **Sáng** dùng nền kem và màu xanh lá dịu; **Tối** giữ phong cách dark luxury. Album 3D và ảnh bìa vẫn tối có chủ đích để ảnh rõ chiều sâu, không bị lóa. Ngôn ngữ và chế độ hiển thị được ghi nhớ **trong tab đang xem** qua trạng thái lịch sử trình duyệt: F5 giữ lựa chọn, mở tab mới bắt đầu với **VN + Tối** (trừ link có `lang=en`).
-- Với link có `?to=Tên+khách`, cả phong bì và hero hiển thị **Kính mời** phía trên, **tên người nhận** ở dòng dưới bằng font serif đậm. Có thể sửa nhãn trong `wedding-info.js` → `text.vi["guest.recipientLabel"]` / `text.en["guest.recipientLabel"]`. Link không có tên vẫn giữ lời mời chung.
+- Chế độ **Sáng** dùng nền kem và màu xanh lá dịu; **Tối** giữ phong cách dark luxury. Album 3D và ảnh bìa vẫn tối có chủ đích để ảnh rõ chiều sâu, không bị lóa. Trong tab đang xem, F5 và điều hướng qua Mục lục giữ lựa chọn ngôn ngữ/theme. **Tab mới mặc định VN, theme theo cài đặt Sáng/Tối của điện thoại hoặc Windows; thiết bị không hỗ trợ thì mặc định Tối** (trừ link có `lang=en`).
+- Với link có `?to=Tên+khách`, hero hiển thị **Kính mời** phía trên, **tên người nhận** ở dòng dưới bằng font serif đậm. Có thể sửa nhãn trong `wedding-info.js` → `text.vi["guest.recipientLabel"]` / `text.en["guest.recipientLabel"]`. Link không có tên vẫn giữ lời mời chung.
 
 
 ## Một tiệc hay hai tiệc — chỉ đổi trong file thông tin
@@ -46,7 +46,7 @@ Trong **[wedding-info.js](wedding-info.js)**, trường `wedding.mode` chọn ki
 
 Đây là cấu trúc minh họa; **không xóa các trường đang có** khi sửa file. Các trường `parties.bride` và `parties.groom` vẫn được giữ làm mẫu cho chế độ hai tiệc, nhưng **không hiển thị ở chế độ một tiệc**.
 
-**Khác biệt ở chế độ một tiệc:** khách mở link là gặp phong bì; không phải chọn nhà gái/nhà trai; lịch hiển thị **một** ngày/giờ/địa điểm; lịch tải xuống `.ics` chỉ có **một sự kiện tiệc**; popup bản đồ và mừng cưới có **một lựa chọn** theo `parties.single`. Phần giới thiệu cô dâu, chú rể và hai gia đình vẫn có thể giữ nguyên. Công cụ tạo link `/?tool=links` sẽ chỉ hỏi **tên khách**, không hiện ô chọn tiệc, và link tạo ra không cần `?party=`.
+**Khác biệt ở chế độ một tiệc:** khách mở link là gặp cổng mở thiệp; không phải chọn nhà gái/nhà trai; lịch hiển thị **một** ngày/giờ/địa điểm; lịch tải xuống `.ics` chỉ có **một sự kiện tiệc**; popup bản đồ và mừng cưới có **một lựa chọn** theo `parties.single`. Phần giới thiệu cô dâu, chú rể và hai gia đình vẫn có thể giữ nguyên. Công cụ tạo link `/?tool=links` sẽ chỉ hỏi **tên khách**, không hiện ô chọn tiệc, và link tạo ra không cần `?party=`.
 
 **Quan trọng:** `parties.single` hiện là **dữ liệu mẫu** dựa trên ảnh/địa điểm của bộ thiệp đang có. Khi dùng cho khách mới, bắt buộc thay ngày, nhà hàng, đường dẫn map, ảnh, nhạc, tài khoản và tạo lại **mã QR đúng tài khoản mới** trước khi gửi thiệp.
 
@@ -84,7 +84,7 @@ Trong `wedding-info.js` chỉ cần thay dữ liệu:
 ```
 
 Lúc vào nhà gái, monogram sẽ là **M & A**; vào nhà trai là **A & M**.
-Tên trên phong bì, hero, thông tin gia đình, chân trang, đường dẫn tạo thiệp, lịch và tiêu đề chia sẻ đều lấy từ cấu hình.
+Con dấu wax ở cổng (N · S hoặc S · N), hero, thông tin gia đình, chân trang, đường dẫn tạo thiệp, lịch và tiêu đề chia sẻ đều lấy từ cấu hình.
 Không cần đổi một ký tự trong `script.js`, `i18n.js` hay `index.html`.
 
 Mẫu `{{couple.bride.short}}`, `{{parties.groom.dateDots}}`, `{{parties.bride.venue.name}}` trong phần `text` tự động đọc trường cấu hình. Không xóa dấu ngoặc của chúng nếu muốn chữ tự thay theo dữ liệu.
@@ -134,13 +134,13 @@ python generate_gallery.py
 - `index.html`: cấu trúc giao diện, không chứa dữ liệu cưới cố định.
 - `style.css`, `quick-nav.css`, `link-tool.css`, `settings.css`: giao diện responsive, light/dark và thiết kế bảng tùy chỉnh.
 - `i18n.js`: máy dịch VN/EN; đọc `text` và trường thông tin từ `wedding-info.js`.
-- `script.js`: phong bì, tên, monogram, countdown, ICS, nhạc.
+- `script.js`: hiệu ứng mở cổng, tên, monogram, countdown, ICS và nhạc.
 - `link-tool.js`: tạo link thiệp cá nhân hóa ngay trong trang chính, dùng chung nút VN/EN.
 - `gallery.js`: album 3D và fullscreen.
 - `quick-nav.js`: cơ chế kéo thả nút nổi, popup menu, bản đồ, QR.
 - `preferences.js`: trạng thái ngôn ngữ và giao diện riêng của tab, được giữ khi F5 nhưng không truyền sang tab mới.
 - `settings.js`: cùng một bảng tùy chỉnh ngôn ngữ, light/dark, âm nhạc và lưu sở thích.
-- `quick-nav.js`: nút Tùy chỉnh mặc định góc trên phải và Mục lục góc dưới phải mỗi lần tải lại. Có thể kéo đến nơi khác trong phiên xem hiện tại.
+  - Nút Tùy chỉnh mặc định ở góc trên phải và Mục lục ở góc dưới phải sau mỗi lần tải lại; có thể kéo đến mép khác trong phiên xem.
 - `build-wedding.cjs`: sinh metadata Open Graph và favicon từ cấu hình.
 - `generate_gallery.py`: quy trình tối ưu ảnh.
 - `tests/compatibility.spec.cjs`: bộ test thiết bị/desktop.
@@ -161,6 +161,14 @@ node build-wedding.cjs
 ```
 
 Lưu ý: `node build-wedding.cjs` sinh ra các file build trong thư mục hiện tại, thường chạy trên runner GitHub Actions thay vì sửa source đã commit.
+
+### Kiểm tra tự động
+
+- **Unit/config:** `node --test tests/*.test.cjs`
+- **Browser:** `npm install --no-save --no-package-lock @playwright/test`, `npx playwright install --with-deps chromium webkit firefox`, chạy `python3 -m http.server 8000` và `npx playwright test tests/compatibility.spec.cjs`.
+- **CI:** workflow `Cross-device browser compatibility` chạy unit + trình duyệt Chromium, Android, iPhone WebKit và Firefox khi sửa nguồn; bản 8 thiết bị có thể bật bằng `workflow_dispatch` với tùy chọn `extended=true`. Workflow `Deploy Wedding` phải thành công riêng để website được phát hành.
+
+Album chỉ tải ảnh ở gần vùng hiển thị; animation mở cổng dùng `transform/opacity`, giữ tính năng giảm chuyển động của thiết bị.
 
 ## Các đường dẫn
 

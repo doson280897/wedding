@@ -276,23 +276,9 @@
     defaultPosition(control);
 
     let idleTimer = 0;
-    let armedTimer = 0;
     let drag = null;
     let suppressClick = false;
-    let armed = false;
     let tapStartedIdle = false;
-
-    const setArmed = value => {
-      armed = value;
-      control.classList.toggle("is-armed", value);
-      clearTimeout(armedTimer);
-      if (value) {
-        armedTimer = setTimeout(() => {
-          armed = false;
-          control.classList.remove("is-armed");
-        }, 3200);
-      }
-    };
 
     const wake = () => {
       clearTimeout(idleTimer);
@@ -302,7 +288,6 @@
 
     const collapseNow = () => {
       if (control.classList.contains("settings-hub") && control.classList.contains("is-open")) return;
-      setArmed(false);
       control.classList.add("is-idle");
       if (control.dataset.userMoved === "true") snapFloatingToEdge(control, true);
       else defaultPosition(control);
@@ -322,8 +307,7 @@
       if (!drag.moved && Math.hypot(dx, dy) > 6) {
         drag.moved = true;
         tapStartedIdle = false;
-        setArmed(false);
-        control.classList.add("is-dragging");
+          control.classList.add("is-dragging");
 
         const rect = control.getBoundingClientRect();
         control.style.right = "auto";
@@ -404,7 +388,6 @@
       // A single tap must activate the Menu even when its icon is collapsed.
       // The old "wake on first tap" behavior made touch users tap twice.
       tapStartedIdle = false;
-      setArmed(false);
       wake();
       scheduleIdle();
     }, true);
