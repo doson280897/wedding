@@ -353,7 +353,7 @@ test("settings palette provides light/dark, persistent language and music in one
   await expect(hub).toHaveCount(1);
   await expect(page.locator("#settingsPanel")).toBeHidden();
   // Music control is inside this single hub and no longer floats separately.
-  expect(await page.locator("#musicToggle").evaluate(node => hub ? node.closest("#settingsHub") !== null : false)).toBe(true);
+  expect(await page.locator("#musicToggle").evaluate(node => node.closest("#settingsHub") !== null)).toBe(true);
   await page.locator("#settingsTrigger").click();
   await expect(page.locator("#settingsPanel")).toBeVisible();
   await page.locator('[data-theme-option="light"]').click();
