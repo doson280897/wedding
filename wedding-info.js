@@ -720,5 +720,30 @@ window.WEDDING_INFO = {
   },
   "wedding": {
     "mode": "double"
+  },
+  "story": {
+    "images": {
+      "together": {
+        "src": "images/optimized/assets/promise-7920.webp",
+        "alt": {
+          "vi": "Sơn và Nga bên nhau trước cổng đá cổ",
+          "en": "Sơn and Nga together in front of a historic stone gate"
+        }
+      },
+      "love": {
+        "src": "images/optimized/assets/promise-7885.webp",
+        "alt": {
+          "vi": "Sơn và Nga dịu dàng bên hồ sen",
+          "en": "Sơn and Nga sharing a quiet moment by the lotus pond"
+        }
+      },
+      "home": {
+        "src": "images/optimized/assets/promise-7860.webp",
+        "alt": {
+          "vi": "Sơn che ô cho Nga dưới mái cổng gạch bên hồ",
+          "en": "Sơn holding a parasol for Nga by the pond and brick pavilion"
+        }
+      }
+    }
   }
 };
