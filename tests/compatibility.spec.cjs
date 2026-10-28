@@ -269,11 +269,26 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await page.locator("#waxOpenButton").click();
   await expect(gate).toHaveClass(/is-awakening/);
   await expect(gate).toHaveClass(/is-opening/);
-  const leftTransform = await page.locator(".moonlight-gate__door--left").evaluate(node =>
-    getComputedStyle(node).transform
-  );
-  expect(leftTransform).not.toBe("none");
-  await expect(gate).toBeHidden({ timeout:3000 });
+  const hingeState = await page.evaluate(() => {
+    const left = document.querySelector(".moonlight-gate__door--left");
+    const right = document.querySelector(".moonlight-gate__door--right");
+    const l = getComputedStyle(left);
+    const r = getComputedStyle(right);
+    return {
+      leftTransform:l.transform,
+      rightTransform:r.transform,
+      leftOrigin:l.transformOrigin,
+      rightOrigin:r.transformOrigin
+    };
+  });
+  expect(hingeState.leftTransform).toContain("matrix3d");
+  expect(hingeState.rightTransform).toContain("matrix3d");
+  expect(hingeState.leftOrigin.startsWith("0px")).toBe(true);
+  expect(hingeState.rightOrigin.startsWith("0px")).toBe(false);
+  await expect(gate).toHaveClass(/is-blooming/);
+  await expect(page.locator("html")).toHaveClass(/gate-hero-revealing/);
+  await expect(page.locator(".hero")).toHaveCSS("opacity","1");
+  await expect(gate).toBeHidden({ timeout:3500 });
   await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
   await expect(page.locator(".hero")).toBeVisible();
 

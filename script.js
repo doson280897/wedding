@@ -258,7 +258,8 @@
     document.dispatchEvent(new Event("wedding:waxopen"));
     window.setTimeout(() => {
       moonlightGate.hidden = true;
-      moonlightGate.classList.remove("is-awakening", "is-opening", "is-leaving");
+      moonlightGate.classList.remove("is-awakening", "is-opening", "is-blooming", "is-hero-revealing", "is-leaving");
+      document.documentElement.classList.remove("gate-hero-revealing");
     }, reducedGateMotion ? 0 : 360);
   };
 
@@ -286,8 +287,21 @@
         finishMoonlightGate();
       };
       leftDoor?.addEventListener("transitionend", finishDoors);
-      gateFallbackTimer = window.setTimeout(finishDoors, 1250);
-    }, 280);
+
+      // Let celestial light leak through the growing seam first. The hero
+      // only fades in after the doors are already clearly open.
+      window.setTimeout(() => {
+        if (!moonlightGate.hidden) moonlightGate.classList.add("is-blooming");
+      }, 360);
+      window.setTimeout(() => {
+        if (!moonlightGate.hidden) {
+          moonlightGate.classList.add("is-hero-revealing");
+          document.documentElement.classList.add("gate-hero-revealing");
+        }
+      }, 610);
+
+      gateFallbackTimer = window.setTimeout(finishDoors, 1450);
+    }, 240);
   };
 
   if (moonlightGate && waxOpenButton) {

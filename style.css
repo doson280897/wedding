@@ -1320,3 +1320,205 @@ html[data-theme="light"] .moonlight-gate__backdrop:before{
 html[data-theme="light"] .moonlight-gate__arch:after{
   background:linear-gradient(180deg,rgba(185,145,80,.12),rgba(121,96,58,.08));
 }
+
+
+/* FULL-SCREEN INWARD DOOR REVEAL
+   Two real hinge motions only: outer edges stay fixed, inner edges rotate
+   away from the viewer. Moon/Sun lives behind the doors and is revealed
+   through the widening seam before the hero fades in. */
+.moonlight-gate{
+  perspective:1800px;
+  perspective-origin:50% 52%;
+}
+.moonlight-gate__scene{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  width:100vw;
+  height:100svh;
+  min-height:0;
+  margin:0!important;
+  transform-style:preserve-3d;
+  contain:layout paint;
+}
+.moonlight-gate__celestial{
+  top:12%;
+  z-index:1;
+  width:clamp(92px,11vw,150px);
+  opacity:.18;
+  transform:translateX(-50%) scale(.9);
+  transition:opacity .72s ease,transform .9s cubic-bezier(.18,.72,.18,1),box-shadow .72s ease;
+}
+.moonlight-gate__arch{
+  inset:clamp(10px,1.4vw,24px);
+  z-index:6;
+  border-radius:48% 48% 8px 8px / 15% 15% 8px 8px;
+  pointer-events:none;
+}
+.moonlight-gate__arch:before{
+  inset:clamp(10px,1vw,18px);
+  border-radius:48% 48% 6px 6px / 14% 14% 6px 6px;
+}
+.moonlight-gate__door{
+  top:clamp(16px,1.8vh,28px);
+  bottom:clamp(16px,1.8vh,28px);
+  width:calc(50% - clamp(10px,.9vw,18px));
+  z-index:3;
+  backface-visibility:hidden;
+  transform:rotateY(0deg);
+  will-change:transform;
+  transition:transform 1.12s cubic-bezier(.18,.72,.16,1),filter .72s ease;
+}
+.moonlight-gate__door--left{
+  left:clamp(10px,.9vw,18px);
+  border-radius:45% 0 0 8px / 14% 0 0 8px;
+  transform-origin:0 50%;
+}
+.moonlight-gate__door--right{
+  right:clamp(10px,.9vw,18px);
+  border-radius:0 45% 8px 0 / 0 14% 8px 0;
+  transform-origin:100% 50%;
+}
+.moonlight-gate__door:before{
+  content:"";
+  position:absolute;
+  inset:4.5% 5% 4.5%;
+  border:1px solid rgba(215,181,117,.38);
+  border-radius:42% 42% 5px 5px / 13% 13% 5px 5px;
+  box-shadow:
+    inset 0 0 0 8px rgba(195,158,91,.025),
+    inset 0 0 0 9px rgba(236,206,148,.05);
+  pointer-events:none;
+}
+.moonlight-gate__door:after{
+  content:"";
+  position:absolute;
+  left:50%;top:51%;
+  width:clamp(54px,5vw,86px);
+  aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  border:1px solid rgba(210,174,107,.35);
+  border-radius:50%;
+  background:
+    radial-gradient(circle,transparent 0 34%,rgba(213,176,107,.12) 35% 37%,transparent 38%),
+    conic-gradient(from 0deg,transparent 0 11deg,rgba(210,175,109,.22) 12deg 14deg,transparent 15deg 44deg);
+  opacity:.8;
+  pointer-events:none;
+}
+.moonlight-gate__door-inlay{
+  inset:8% 10% 8%;
+  border-radius:44% 44% 4px 4px / 13% 13% 4px 4px;
+}
+.moonlight-gate__door-vine{
+  top:18%;
+  font-size:clamp(42px,4.5vw,72px);
+  opacity:.78;
+}
+.moonlight-gate__seam{
+  z-index:7;
+  top:7%;
+  bottom:4%;
+  width:2px;
+  opacity:.18;
+  transform:translateX(-50%) scaleY(.35);
+  background:linear-gradient(180deg,transparent,rgba(245,228,190,.35) 10%,rgba(255,238,199,.86) 54%,transparent);
+}
+#waxOpenButton{z-index:9;top:58%}
+.moonlight-gate__hint{z-index:8}
+.moonlight-gate:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  opacity:0;
+  background:radial-gradient(circle at 50% 24%,rgba(241,247,240,.0) 0 5%,rgba(214,229,225,.18) 18%,rgba(176,207,202,.08) 34%,transparent 58%);
+  transform:scale(.72);
+  transition:opacity .7s ease,transform .9s cubic-bezier(.18,.72,.18,1);
+}
+html[data-theme="light"] .moonlight-gate:before{
+  background:radial-gradient(circle at 50% 24%,rgba(255,251,229,0) 0 4%,rgba(255,224,157,.28) 18%,rgba(238,190,99,.12) 35%,transparent 60%);
+}
+.moonlight-gate.is-awakening .moonlight-gate__seam{
+  opacity:1;
+  transform:translateX(-50%) scaleY(1);
+  box-shadow:0 0 18px rgba(245,226,182,.92),0 0 48px rgba(215,187,128,.48);
+}
+.moonlight-gate.is-opening .moonlight-gate__door--left{
+  transform:rotateY(74deg);
+  filter:brightness(.72);
+}
+.moonlight-gate.is-opening .moonlight-gate__door--right{
+  transform:rotateY(-74deg);
+  filter:brightness(.72);
+}
+.moonlight-gate.is-opening .moonlight-gate__backdrop{
+  opacity:1;
+}
+.moonlight-gate.is-opening .moonlight-gate__arch{
+  opacity:1;
+  transform:none;
+}
+.moonlight-gate.is-opening .moonlight-gate__seam{
+  opacity:.55;
+}
+.moonlight-gate.is-blooming:before{
+  opacity:1;
+  transform:scale(1.08);
+}
+.moonlight-gate.is-blooming .moonlight-gate__celestial{
+  opacity:1;
+  transform:translateX(-50%) scale(1.08);
+}
+html[data-theme="dark"] .moonlight-gate.is-blooming .moonlight-gate__celestial{
+  box-shadow:0 0 38px rgba(235,242,232,.72),0 0 130px rgba(181,207,204,.48);
+}
+html[data-theme="light"] .moonlight-gate.is-blooming .moonlight-gate__celestial{
+  box-shadow:0 0 46px rgba(255,229,166,.9),0 0 140px rgba(238,188,95,.58);
+}
+html.wax-pending .hero{
+  opacity:0;
+  transition:opacity .78s cubic-bezier(.2,.65,.2,1);
+}
+html.wax-pending.gate-hero-revealing .hero{
+  opacity:1;
+}
+.moonlight-gate.is-hero-revealing .moonlight-gate__backdrop{
+  opacity:.32;
+}
+.moonlight-gate.is-hero-revealing:before{
+  opacity:.72;
+}
+.moonlight-gate.is-leaving{
+  transition:opacity .42s ease;
+  opacity:0;
+}
+@media(max-width:650px){
+  .moonlight-gate__scene{
+    width:100vw;
+    height:100svh;
+    min-height:0;
+    margin:0!important;
+  }
+  .moonlight-gate__celestial{
+    top:max(9svh,calc(env(safe-area-inset-top) + 54px));
+    width:clamp(78px,22vw,104px);
+  }
+  .moonlight-gate__arch{
+    inset:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));
+    border-radius:46% 46% 6px 6px / 13% 13% 6px 6px;
+  }
+  .moonlight-gate__door{
+    top:max(12px,env(safe-area-inset-top));
+    bottom:max(12px,env(safe-area-inset-bottom));
+    width:calc(50% - 8px);
+  }
+  .moonlight-gate__door--left{left:8px}
+  .moonlight-gate__door--right{right:8px}
+  .moonlight-gate.is-opening .moonlight-gate__door--left{transform:rotateY(78deg)}
+  .moonlight-gate.is-opening .moonlight-gate__door--right{transform:rotateY(-78deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  html.wax-pending .hero{transition:none!important}
+  .moonlight-gate:before,.moonlight-gate__celestial{transition:none!important}
+}
