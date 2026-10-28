@@ -50,6 +50,8 @@ Mẫu `{{couple.bride.short}}`, `{{parties.groom.dateDots}}`, `{{parties.bride.v
 Các file hình là tài nguyên vật lý: **phải upload ảnh/QR mới**, rồi thay đường dẫn của chúng trong `wedding-info.js`.
 Chỉ thay chữ trong config không thể biến ảnh cưới cũ thành ảnh mới.
 
+**Quan trọng với QR mừng cưới:** Khi thay `gift.bank`, `gift.accountNumber` hoặc `gift.accountHolder`, phải tạo lại mã QR cho **đúng tài khoản mới**, upload QR mới và cập nhật `gift.qrImage`. Thay số tài khoản hiển thị trong file thông tin **không tự sửa nội dung QR cũ**. Luôn thử quét mã và đối chiếu ngân hàng, số tài khoản, người nhận trước khi gửi thiệp cho khách.
+
 Nếu giữ `gallery.photos: null`, album sẽ tự đọc `gallery.manifest` (mặc định `images/manifest.json`) do pipeline tạo.
 Nếu muốn hoàn toàn chọn danh sách ảnh ngay trong file thông tin, điền:
 
