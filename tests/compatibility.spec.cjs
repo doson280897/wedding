@@ -899,7 +899,10 @@ test("reduced-motion album can switch, close and reopen without losing its image
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#moonlightGate")).toBeHidden();
   const viewport = page.locator("#albumViewport");
-  await viewport.scrollIntoViewIfNeeded();
+  // Use the guest-facing navigation: WebKit can ignore an automation scroll
+  // issued in the same rendering turn that the gate releases overflow:hidden.
+  await page.locator("#settingsTrigger").click();
+  await page.locator('#wqPanel a[href="#album"]').click();
   // A late load/pageshow must not undo a guest's scroll after entering.
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
   await page.evaluate(() => window.dispatchEvent(new Event("pageshow")));

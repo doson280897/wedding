@@ -99,6 +99,11 @@ jobs:
           cat /tmp/wedding-http.log
           exit 1
 
+      - name: Verify reduced-motion regression on all default browser projects
+        run: npx playwright test tests/compatibility.spec.cjs --grep "reduced-motion album" --reporter=line --workers=2
+        env:
+          CI: "true"
+
       - name: Test desktop functionality and targeted cross-device smoke
         run: npx playwright test tests/compatibility.spec.cjs --reporter=line --workers=2
         env:
