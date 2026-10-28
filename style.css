@@ -1108,15 +1108,52 @@ html[data-theme="light"] .moonlight-gate__magic{filter:brightness(.76) sepia(.16
   position:absolute;inset:0;z-index:4;display:flex;width:100%;height:100svh;
   transform-style:preserve-3d;perspective:1150px;contain:layout paint;
 }
+/* The doors physically occlude this full-size glow. As the gap widens the
+   light spreads naturally, without any line overlaid in front of the doors. */
+.moonlight-gate__portal{
+  position:absolute;inset:0;z-index:1;opacity:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 24% 85% at 50% 51%,#fff8dfec 0%,#ffe7b5bb 37%,#eeb77855 72%,transparent 100%),
+    radial-gradient(ellipse 57% 75% at 50% 52%,#f2ca8555 0%,transparent 81%);
+  filter:blur(10px);
+}
+.moonlight-gate__portal::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 38% 65% at 50% 52%,#fff6d69c 0%,#e9b87439 51%,transparent 85%);
+  filter:blur(20px);
+}
 .moonlight-gate__door{
   position:relative;flex:0 0 50%;height:100%;z-index:3;
   transform-style:preserve-3d;backface-visibility:hidden;
-  /* Keep the wings visibly moving throughout the whole 2.9s swing. */
-  transition:transform 2.9s cubic-bezier(.42,.05,.58,.95);
   will-change:transform;
 }
 .moonlight-gate__door--left{transform-origin:0% 50%}
 .moonlight-gate__door--right{transform-origin:100% 50%}
+/* Start slowly, reach 30 degrees after 52% of the opening, then accelerate. */
+.moonlight-gate.is-opening .moonlight-gate__door--left{animation:gateDoorOpenLeft 3.2s both}
+.moonlight-gate.is-opening .moonlight-gate__door--right{animation:gateDoorOpenRight 3.2s both}
+@keyframes gateDoorOpenLeft{
+  0%{transform:rotateY(0deg);animation-timing-function:cubic-bezier(.45,.02,.72,.65)}
+  52%{transform:rotateY(-30deg);animation-timing-function:cubic-bezier(.16,.62,.36,1)}
+  100%{transform:rotateY(-82deg)}
+}
+@keyframes gateDoorOpenRight{
+  0%{transform:rotateY(0deg);animation-timing-function:cubic-bezier(.45,.02,.72,.65)}
+  52%{transform:rotateY(30deg);animation-timing-function:cubic-bezier(.16,.62,.36,1)}
+  100%{transform:rotateY(82deg)}
+}
+/* Light peaks at 30 degrees; it falls as the doors accelerate and the stars
+   become visible. No fixed line survives after the panels have moved apart. */
+.moonlight-gate.is-awakening .moonlight-gate__portal{opacity:.55}
+.moonlight-gate.is-opening .moonlight-gate__portal{animation:gatePortalBloom 3.2s both}
+@keyframes gatePortalBloom{
+  0%{opacity:.55}
+  15%{opacity:.92}
+  52%{opacity:1}
+  73%{opacity:.35}
+  100%{opacity:0}
+}
+html[data-theme="light"] .moonlight-gate__portal{filter:blur(10px) saturate(.75)}
 .moonlight-gate__door-face{
   position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;
   background:linear-gradient(110deg,#1c2938,#111b2c 38%,#18283a 70%,#0b1321);
@@ -1162,30 +1199,6 @@ html[data-theme="light"] .moonlight-gate__magic{filter:brightness(.76) sepia(.16
   position:absolute;bottom:17%;left:50%;transform:translateX(-50%);
   font:12px Georgia,serif;letter-spacing:.55em;color:#c8a365;
 }
-.moonlight-gate__seam{
-  position:absolute;z-index:5;top:5%;bottom:4%;left:50%;width:4px;
-  opacity:0;transform:translateX(-50%) scaleY(.08);transform-origin:50% 56%;
-  pointer-events:none;
-  background:linear-gradient(180deg,transparent 0%,#ffebbf 24%,#fff9df 53%,#e9b877 80%,transparent 100%);
-  box-shadow:0 0 17px 3px #ffe0a4c4,0 0 46px 9px #ebb56a76;
-  transition:opacity .36s ease,transform .58s cubic-bezier(.18,.72,.18,1);
-}
-.moonlight-gate__seam::before,
-.moonlight-gate__seam::after{
-  content:"";position:absolute;pointer-events:none;
-  left:50%;top:50%;transform:translate(-50%,-50%);
-}
-.moonlight-gate__seam::before{
-  width:clamp(55px,10vw,180px);height:88%;
-  border-radius:50%;
-  background:radial-gradient(ellipse,#fff1ca9e 0%,#f5c78458 28%,transparent 74%);
-  filter:blur(17px);
-}
-.moonlight-gate__seam::after{
-  width:clamp(115px,19vw,320px);height:56%;
-  background:radial-gradient(ellipse,#ffeac462,transparent 72%);
-  filter:blur(24px);
-}
 .moonlight-gate__top-caption,.moonlight-gate__bottom-caption{
   position:absolute;z-index:5;left:0;width:100%;text-align:center;
   font:500 10px Montserrat,sans-serif;letter-spacing:.28em;color:#d3ac70;
@@ -1222,22 +1235,7 @@ html[data-theme="light"] .moonlight-gate__magic{filter:brightness(.76) sepia(.16
 .moonlight-gate.is-awakening .wax-lock__shackle{
   transform:translateY(-5px) rotate(-18deg);
 }
-.moonlight-gate.is-awakening .moonlight-gate__seam{
-  opacity:1;transform:translateX(-50%) scaleY(1);
-}
-.moonlight-gate.is-opening .moonlight-gate__door--left{transform:rotateY(-82deg)}
-.moonlight-gate.is-opening .moonlight-gate__door--right{transform:rotateY(82deg)}
 .moonlight-gate.is-opening #waxOpenButton{opacity:0;transform:translate(-50%,-50%) scale(.7)}
-.moonlight-gate.is-opening .moonlight-gate__seam{
-  animation:gateSeamRelease 2.55s ease-out both;
-}
-@keyframes gateSeamRelease{
-  0%{opacity:.96;transform:translateX(-50%) scaleY(1)}
-  18%{opacity:1;transform:translateX(-50%) scaleY(1.08)}
-  52%{opacity:.92;transform:translateX(-50%) scaleY(1.1)}
-  77%{opacity:.58;transform:translateX(-50%) scaleY(1.08)}
-  100%{opacity:0;transform:translateX(-50%) scaleY(1.02)}
-}
 .moonlight-gate.is-opening .moonlight-gate__top-caption,
 .moonlight-gate.is-opening .moonlight-gate__bottom-caption{opacity:0}
 /* Names rise into view while the door gap widens, without an empty dead beat. */

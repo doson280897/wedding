@@ -257,7 +257,7 @@
   // Enjoy the names and full-screen shooting stars after the doors settle,
   // then crossfade the night sky and the real hero together.
   const GATE_AWAKEN_MS = 240;
-  const GATE_DOOR_MS = 2900;
+  const GATE_DOOR_MS = 3200;
   const GATE_REVEAL_BEAT_MS = 2200;
   const GATE_HANDOFF_MS = 1350;
   let gateOpening = false;
@@ -409,7 +409,7 @@
     if (!moonlightGate || moonlightGate.hidden) return;
     clearGateTimers();
     stopGateMeteors();
-    leftGateDoor?.removeEventListener("transitionend", onDoorTransitionEnd);
+    leftGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.hidden = true;
     moonlightGate.classList.remove(
       "is-awakening", "is-opening", "is-opened", "is-handoff", "is-leaving"
@@ -435,13 +435,13 @@
   const settleOpenDoor = () => {
     if (doorSettled || !moonlightGate || moonlightGate.hidden) return;
     doorSettled = true;
-    leftGateDoor?.removeEventListener("transitionend", onDoorTransitionEnd);
+    leftGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.classList.add("is-opened");
     // Hold the opened sky until both shooting stars travel off-screen.
     scheduleGate(finishMoonlightGate, GATE_REVEAL_BEAT_MS);
   };
-  function onDoorTransitionEnd(event) {
-    if (event.target === leftGateDoor && event.propertyName === "transform") {
+  function onDoorAnimationEnd(event) {
+    if (event.target === leftGateDoor && event.animationName === "gateDoorOpenLeft") {
       settleOpenDoor();
     }
   }
@@ -458,9 +458,9 @@
     moonlightGate.classList.add("is-awakening");
     scheduleGate(() => {
       if (moonlightGate.hidden) return;
-      // Listen to the real hinge end, not only a clock. The guarded fallback
-      // avoids a stuck gate if a browser suppresses transitionend.
-      leftGateDoor?.addEventListener("transitionend", onDoorTransitionEnd);
+      // Wait for the real two-stage hinge animation to finish. Keep the
+      // guarded fallback for browsers that suppress animationend.
+      leftGateDoor?.addEventListener("animationend", onDoorAnimationEnd);
       moonlightGate.classList.add("is-opening");
       startGateMeteors();
       scheduleGate(settleOpenDoor, GATE_DOOR_MS + 180);
