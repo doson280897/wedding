@@ -49,7 +49,7 @@ for (const filename of ["index.html", "link-tool.html", "style.css"]) {
   let html = fs.readFileSync(target, "utf8").replaceAll("__BUILD_ID__", build);
   if (filename === "index.html" && wedding.site.socialImage !== "og-preview.jpg") {
     // Custom images may have a different aspect ratio; avoid false 1200×630 metadata.
-    html = html.replace(/^<meta property="og:image:(?:width|height)"[^>]*>\\r?\\n/gm, "");
+    html = html.replace(/^<meta property="og:image:(?:width|height)"[^>]*>\r?\n/gm, "");
   }
   for (const [placeholder, value] of Object.entries(meta)) {
     html = html.replaceAll(placeholder, escapeXml(value));
