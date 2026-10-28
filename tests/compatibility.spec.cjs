@@ -79,6 +79,10 @@ test("party link, envelope and album lightbox interactions", async ({
   expect(loadedImages).toBeGreaterThan(0);
   if (totalSlides > 12) expect(loadedImages).toBeLessThan(totalSlides);
   await expect(page.locator(".album-card.is-main")).toHaveCount(1);
+  // A CSS filter animates from dim to full illumination in ~500ms.
+  // Wait for the final frame rather than asserting during interpolation.
+  await expect.poll(() => page.locator(".album-card.is-main .album-photo")
+    .evaluate(node => getComputedStyle(node).filter)).toBe("none");
   const lighting = await page.evaluate(() => ({
     focused:getComputedStyle(document.querySelector(".album-card.is-main .album-photo")).filter,
     adjacent:getComputedStyle(document.querySelector(".album-card:not(.is-main) .album-photo")).filter,
