@@ -79,8 +79,7 @@
 .settings-row { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid rgba(210,181,132,.19) }
 .settings-row-label { flex:1 1 auto;min-width:76px;color:#e1d9c9;font-size:12px;font-weight:500;letter-spacing:0 }
 .settings-options { flex:0 0 auto;display:flex;align-items:center;gap:3px;padding:3px;border:1px solid rgba(199,167,114,.30);border-radius:999px;background:rgba(0,0,0,.16) }
-.settings-hub .settings-options .language-option,
-.settings-hub .settings-options .theme-option {
+.settings-hub .settings-options .language-option {
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -98,8 +97,8 @@
   cursor:pointer;
   white-space:nowrap;
 }
-.settings-hub .settings-options .theme-option { min-width:70px }
-.settings-hub .settings-options :is(.language-option,.theme-option).is-active {
+
+.settings-hub .settings-options .language-option.is-active {
   background:#c9a86e;
   color:#151c16;
   box-shadow:0 2px 10px rgba(0,0,0,.22);
@@ -154,8 +153,7 @@ html.link-tool-active .settings-music-row {display:none!important}
     gap:0;
   }
   .settings-hub .settings-panel { padding:16px; }
-  .settings-hub .settings-options .language-option,
-  .settings-hub .settings-options .theme-option {
+  .settings-hub .settings-options .language-option {
     min-height:40px;
   }
 }
@@ -195,150 +193,9 @@ html.link-tool-active .settings-music-row {display:none!important}
   .hero-recipient-label {font-size:10px}
 }
 
-/* Warm ivory / sage palette. Photos and cinema lightbox remain naturally dark.
-   This avoids washing out the pictures while making reading areas truly light. */
-html[data-theme="light"] body {background:#f5f0e6;color:#25382c}
-html[data-theme="light"] .couple-section {background:radial-gradient(ellipse at 50% 25%,#f6f0e4,#e9e2d4 75%)}
-html[data-theme="light"] .family-section,
-html[data-theme="light"] .events-section,
-html[data-theme="light"] .locations-section {background:#f5f0e6}
-html[data-theme="light"] .events-section {background:radial-gradient(ellipse at 50% 0%,#eee5d6,#f7f2e9 75%)}
-html[data-theme="light"] .locations-section {background:#f2ebdf}
-html[data-theme="light"] .section-title,
-html[data-theme="light"] .person-copy h3,
-html[data-theme="light"] .family-card h3,
-html[data-theme="light"] .family-card h4,
-html[data-theme="light"] .location-info h3 {color:#355442}
-html[data-theme="light"] .section-title em {color:#8b7651}
-html[data-theme="light"] .section-lead,
-html[data-theme="light"] .person-copy p,
-html[data-theme="light"] .event-address,
-html[data-theme="light"] .family-address,
-html[data-theme="light"] .lunar,
-html[data-theme="light"] .location-info p {color:#526356}
-html[data-theme="light"] .gold,
-html[data-theme="light"] .person-copy .script {color:#81693f}
-html[data-theme="light"] .couple-divider,
-html[data-theme="light"] .ornament {color:#947446}
-html[data-theme="light"] .family-card,
-html[data-theme="light"] .event-card,
-html[data-theme="light"] .location-card {
-  background:linear-gradient(145deg,#fffdf6,#f2ecdf);
-  border-color:rgba(156,128,78,.42);
-  box-shadow:0 14px 38px rgba(63,51,33,.11);
-}
-html[data-theme="light"] .family-card p,
-html[data-theme="light"] .family-card strong,
-html[data-theme="light"] .event-detail {color:#314639}
-html[data-theme="light"] .family-card>span,
-html[data-theme="light"] .family-card small,
-html[data-theme="light"] .event-label,
-html[data-theme="light"] .location-info small {color:#8b6c3a}
-html[data-theme="light"] .date-block strong {color:#4a6b52}
-html[data-theme="light"] .date-block small {color:#65766b}
-html[data-theme="light"] .event-detail span {color:#846337}
-html[data-theme="light"] .calendar-button,
-html[data-theme="light"] .map-button {background:#f9f3e6;color:#395240;border-color:#b89a66}
-html[data-theme="light"] .calendar-button:hover,
-html[data-theme="light"] .map-button:hover {background:#ebdfc9}
-html[data-theme="light"] footer {background:#eae0d0;color:#485b4c}
-
-/* Retain a deep 3D stage, but use an ivory frame when in light mode. */
-html[data-theme="light"] .album-section {
-  background:
-    radial-gradient(ellipse at 50% 44%,#324249 0%,#17242a 48%,#0a1216 92%);
-  border-color:#ac905f;
-}
-html[data-theme="light"] .album-ambient {opacity:.70}
-html[data-theme="light"] .album-card {border-color:rgba(232,209,158,.6)}
-
 /* Landing page and invitation generator: both participate in the theme. */
-html[data-theme="light"].party-pending body {background:#f1eadf}
-html[data-theme="light"] .party-selector {color:#2c4234}
-html[data-theme="light"] .party-selector-backdrop {
-  background:radial-gradient(circle at 50% 10%,#e2d6bb,#f5efe4 64%,#ebe2d3 100%);
-}
-html[data-theme="light"] .party-selector-card {
-  background:linear-gradient(145deg,#fffdf6,#eee7d9);
-  border-color:#cbb38b;
-  box-shadow:0 30px 72px rgba(76,59,35,.17);
-}
-html[data-theme="light"] .party-selector-card h2 {color:#2e4a39}
-html[data-theme="light"] .party-selector-card>p:not(.party-selector-kicker) {color:#667466}
-html[data-theme="light"] .party-selector-kicker,
-html[data-theme="light"] .party-selector-role,
-html[data-theme="light"] .party-selector-action {color:#806339}
-html[data-theme="light"] .party-selector-option {
-  background:linear-gradient(150deg,#f9f4e9,#e8e0d0);
-  border-color:rgba(166,136,83,.42);
-  color:#2c4735;
-}
-html[data-theme="light"] .party-selector-option:hover {background:#fffaf0;border-color:#987b4b}
-html[data-theme="light"] .party-selector-option small {color:#68786c}
-html[data-theme="light"] .party-admin-link {color:#6b552f;border-color:#ab9064}
-html[data-theme="light"] .party-admin-link:hover {background:#e9ddc9}
 
 /* Main navigation and modal surfaces. */
-html[data-theme="light"] .wq-panel {background:linear-gradient(145deg,#fffaf0,#eae2d4);color:#2a4234;border-color:#c9b087;box-shadow:0 24px 65px #44391d38}
-html[data-theme="light"] .wq-heading {color:#2a4234}
-html[data-theme="light"] .wq-heading em,
-html[data-theme="light"] .wq-kicker,
-html[data-theme="light"] .wq-no,
-html[data-theme="light"] .wq-arrow,
-html[data-theme="light"] .wq-footnote {color:#856c42}
-html[data-theme="light"] .wq-description,
-html[data-theme="light"] .wq-group-label {color:#657468}
-html[data-theme="light"] .wq-link {color:#324a3b;border-color:#bda78554}
-html[data-theme="light"] .wq-link:hover {color:#84683a}
-html[data-theme="light"] .wq-close,
-html[data-theme="light"] .wm-close,
-html[data-theme="light"] .wg-close {color:#385442}
-html[data-theme="light"] .wm-dialog,
-html[data-theme="light"] .wg-dialog {background:#f5efe3;border-color:#baa173;box-shadow:0 24px 60px #1a281b4a;color:#2e4234}
-html[data-theme="light"] .wm-header,
-html[data-theme="light"] .wg-header {background:#eee6d9f2;border-color:#c5ad8559}
-html[data-theme="light"] .gift-card {background:linear-gradient(145deg,#fffdf8,#e9e1d3);border-color:#cbb18b;box-shadow:0 10px 28px #513f2422}
-html[data-theme="light"] .gift-card h3 {color:#34513f}
-html[data-theme="light"] .gift-bank {color:#886734}
-html[data-theme="light"] .gift-account-number,
-html[data-theme="light"] .gift-hint {color:#56695a}
-
-/* Admin form: light surfaces, correct contrast and accessible inputs. */
-html[data-theme="light"] .link-tool-screen {
-  background:radial-gradient(ellipse at 50% 0%,#e5dac4,#f6f0e6 78%);
-  color:#2b4434;
-}
-html[data-theme="light"] .link-tool-card {
-  background:#fffaf1;
-  border-color:#cdb48a;
-  box-shadow:0 24px 70px rgba(76,54,27,.18);
-}
-html[data-theme="light"] .link-tool-back,
-html[data-theme="light"] .link-tool-eyebrow,
-html[data-theme="light"] .link-tool-result small {color:#856337}
-html[data-theme="light"] .link-tool-description,
-html[data-theme="light"] .link-tool-note {color:#526354}
-html[data-theme="light"] .link-tool-card input,
-html[data-theme="light"] .link-tool-card select {background:#fffcf6;color:#2c4133;border-color:#a6a28a}
-html[data-theme="light"] .link-tool-card input::placeholder {color:#7e8b80}
-html[data-theme="light"] .link-tool-action {background:#465f4c;color:#fffaf0;border-color:#465f4c}
-html[data-theme="light"] .link-tool-action.secondary {background:#fffaf0;color:#34503d;border-color:#ad9264}
-html[data-theme="light"] #linkToolGenerated,
-html[data-theme="light"] .link-tool-feedback {color:#826236}
-
-/* Settings popover in ivory mode. */
-html[data-theme="light"] .settings-hub.language-switch {background:#f5ebdc;border-color:#aa8c5c;color:#36513f;box-shadow:0 8px 24px #43351b30}
-html[data-theme="light"] .settings-hub .settings-trigger {color:#385442}
-html[data-theme="light"] .settings-hub .settings-panel {background:linear-gradient(145deg,#fffdf7,#eee6d7);color:#2d4636;border-color:#c9ad7b;box-shadow:0 22px 66px #43351b40}
-html[data-theme="light"] .settings-panel-heading,
-html[data-theme="light"] .settings-row-label {color:#395341}
-html[data-theme="light"] .settings-close {color:#49614c}
-html[data-theme="light"] .settings-row {border-color:#b4a27d69}
-html[data-theme="light"] .settings-options {background:#eee5d6;border-color:#baa37c}
-html[data-theme="light"] .settings-hub .settings-options :is(.language-option,.theme-option) {color:#465c49}
-html[data-theme="light"] .settings-hub .settings-options :is(.language-option,.theme-option).is-active {background:#435e4a;color:#fff8ec}
-html[data-theme="light"] .settings-hub .settings-music-row .music-toggle {background:#f2eadb;color:#395240;border-color:#b7a077}
-html[data-theme="light"] .settings-hub .settings-music-row .music-toggle[aria-pressed=true] {background:#405e46;color:#fff8e8}
 
 /* The only permanent control docks at the bottom RIGHT by default. */
 .language-switch.settings-hub {
@@ -366,19 +223,6 @@ html[data-theme="light"] .settings-hub .settings-music-row .music-toggle[aria-pr
   margin:0 auto;
   flex:none;
 }
-
-/* Light mode must out-rank every dark dock state (expanded and collapsed).
-   The older generic .floating-control.is-idle selector was winning specificity. */
-html[data-theme="light"] .language-switch.settings-hub,
-html[data-theme="light"] .language-switch.settings-hub.floating-control,
-html[data-theme="light"] .language-switch.settings-hub.floating-control.is-idle,
-html[data-theme="light"] .language-switch.settings-hub.floating-control.is-open {
-  background:#f5ebdc;
-  border-color:#aa8c5c;
-  color:#36513f;
-  box-shadow:0 8px 24px rgba(67,53,27,.19);
-}
-
 
 /* Contextual music orb: only visible after confirmed PLAYING.
    Pause keeps its position; Stop hides it until re-enabled in Settings. */
@@ -491,21 +335,7 @@ html[data-theme="light"] .language-switch.settings-hub.floating-control.is-open 
 .music-float[data-music-state="paused"] .music-float-pause-icon {display:none}
 .music-float-action:disabled {opacity:.5;cursor:progress}
 .music-float-trigger:focus-visible {outline:2px solid #f1d49f;outline-offset:4px}
-html[data-theme="light"] .music-float-trigger {
-  background:linear-gradient(140deg,#fff6e3,#dfc8a2);
-  color:#5a6e4e;
-  border-color:#a68b61;
-  box-shadow:0 7px 24px rgba(65,50,27,.24);
-}
-html[data-theme="light"] .music-float[data-music-state="paused"] .music-float-trigger {
-  background:#dce5ea;
-  color:#567080;
-  border-color:#8ba6b5;
-}
-html[data-theme="light"] .music-float-actions {background:#f8f1e5;border-color:#b8a07a}
-html[data-theme="light"] .music-float-action {background:#eee1c8;color:#516b52}
-html[data-theme="light"] .music-float-stop {color:#996450}
-html[data-theme="light"] .music-float-action:hover {background:#e2d1b4}
+
 @keyframes musicFloatSway {
   0%,100% {transform:rotate(-10deg) translateY(1px)}
   50% {transform:rotate(10deg) translateY(-2px)}
@@ -525,131 +355,6 @@ html[data-theme="light"] .music-float-action:hover {background:#e2d1b4}
   .music-float .music-float-trigger::before {animation:none!important}
   .music-float-trigger {transition:none}
 }
-
-
-/* PREMIUM LIGHT — ivory stationery, espresso ink, muted olive and antique brass.
-   Reading surfaces change; photographs, hero and museum gallery keep their
-   natural cinematic darkness for depth and contrast. */
-html[data-theme="light"]{
-  --paper-ivory:#f6f1e8;
-  --paper-white:#fffdf8;
-  --paper-warm:#eee6d9;
-  --ink-espresso:#303c33;
-  --ink-muted:#59695c;
-  --accent-olive:#415c4a;
-  --accent-brass:#937346;
-  --hairline:rgba(150,122,75,.32);
-}
-html[data-theme="light"] body{
-  color:var(--ink-espresso);background:var(--paper-ivory);
-}
-html[data-theme="light"] :is(.couple-section,.family-section,.events-section,.locations-section){
-  background:
-    radial-gradient(ellipse at 6% 12%,rgba(195,175,138,.13),transparent 36%),
-    radial-gradient(ellipse at 95% 90%,rgba(114,135,110,.065),transparent 35%),
-    linear-gradient(165deg,#faf7f0,#f0e9de);
-}
-html[data-theme="light"] .couple-section:after{
-  background:linear-gradient(90deg,rgba(119,106,82,.035),transparent 23%,transparent 77%,rgba(119,106,82,.035));
-}
-html[data-theme="light"] .couple-section:before,
-html[data-theme="light"] .family-section:before,
-html[data-theme="light"] .events-section:before{color:rgba(142,122,82,.11)}
-html[data-theme="light"] .section-title{
-  color:#355044;text-shadow:none;letter-spacing:.012em;
-}
-html[data-theme="light"] .section-title em{color:#997a4b}
-html[data-theme="light"] .section-lead,
-html[data-theme="light"] .person-copy p,
-html[data-theme="light"] .event-address,
-html[data-theme="light"] .family-address,
-html[data-theme="light"] .lunar,
-html[data-theme="light"] .location-info p{color:var(--ink-muted)}
-html[data-theme="light"] :is(.overline.gold,.person-copy .script,.ornament,.couple-divider){
-  color:var(--accent-brass);
-}
-html[data-theme="light"] .person-copy h3{
-  color:var(--accent-olive);text-shadow:none;
-}
-html[data-theme="light"] .portrait{
-  border-color:rgba(174,148,103,.64);
-  box-shadow:0 19px 44px rgba(69,57,39,.17),0 1px 1px rgba(82,62,30,.11);
-}
-html[data-theme="light"] .portrait.small{border-color:#f3ecdf}
-html[data-theme="light"] :is(.family-card,.event-card,.location-card){
-  color:var(--ink-espresso);
-  background:linear-gradient(150deg,rgba(255,253,248,.98),rgba(247,241,231,.97));
-  border:1px solid var(--hairline);
-  box-shadow:0 14px 38px rgba(83,69,48,.09),inset 0 1px rgba(255,255,255,.8);
-}
-html[data-theme="light"] :is(.family-card h3,.family-card h4,.location-info h3){
-  color:#3e5849;
-}
-html[data-theme="light"] :is(.family-card p,.family-card strong,.event-detail){
-  color:#34483b;
-}
-html[data-theme="light"] :is(.family-card>span,.family-card small,.event-label,.location-info small){
-  color:#896b43;
-}
-html[data-theme="light"] .date-block strong{color:#405b49}
-html[data-theme="light"] .event-rule{
-  background:linear-gradient(90deg,transparent,rgba(155,125,74,.43),transparent);
-}
-html[data-theme="light"] .mini-line{
-  background:linear-gradient(90deg,transparent,#b69a69,transparent);
-}
-html[data-theme="light"] :is(.map-button,.calendar-button){
-  color:#405b49;background:rgba(255,253,246,.75);
-  border-color:rgba(154,125,74,.66);transition:background .2s ease,box-shadow .2s ease;
-}
-html[data-theme="light"] :is(.map-button,.calendar-button):hover{
-  background:#e9dfcd;box-shadow:0 5px 14px rgba(80,65,39,.10);
-}
-html[data-theme="light"] .party-selector-backdrop{
-  background:
-    radial-gradient(ellipse at 20% 18%,rgba(171,151,114,.16),transparent 35%),
-    radial-gradient(ellipse at 84% 85%,rgba(100,127,107,.1),transparent 35%),
-    linear-gradient(150deg,#f8f4ec,#ede5d7);
-}
-html[data-theme="light"] .party-selector-card{
-  background:linear-gradient(150deg,#fffdf8,#f5eee2);
-  border-color:rgba(170,143,99,.46);
-  box-shadow:0 28px 80px rgba(73,60,42,.15),inset 0 1px #fff;
-}
-html[data-theme="light"] .party-selector-card h2{color:#354d3f}
-html[data-theme="light"] .party-selector-option{
-  background:linear-gradient(150deg,#fcf8f0,#eee6d9);
-  border-color:rgba(153,128,84,.4);color:#354c3e;
-}
-html[data-theme="light"] .party-selector-option:hover{
-  background:#fffdf8;border-color:#9a7b4b;
-}
-html[data-theme="light"] .link-tool-screen{
-  background:radial-gradient(ellipse at 50% 3%,#e9dcc6,#f7f2e9 70%);
-}
-html[data-theme="light"] .link-tool-card{
-  background:linear-gradient(145deg,#fffdf8,#f6eee2);
-  border-color:var(--hairline);box-shadow:0 24px 68px rgba(73,60,42,.13);
-}
-html[data-theme="light"] :is(.settings-hub .settings-panel,.wq-panel,.wm-dialog,.wg-dialog){
-  background:linear-gradient(150deg,#fffdf8,#eee6d9);
-  border-color:rgba(154,124,76,.43);
-  box-shadow:0 25px 68px rgba(66,54,36,.19);
-}
-html[data-theme="light"] .settings-options{background:#ebe2d4;border-color:#bda780}
-html[data-theme="light"] .settings-hub .settings-options :is(.language-option,.theme-option).is-active{
-  background:#425f4a;color:#fff9ed;box-shadow:0 2px 8px rgba(42,68,48,.15);
-}
-html[data-theme="light"] .settings-hub.language-switch{
-  background:#faf4e9;border-color:#b79b70;color:#395341;
-  box-shadow:0 7px 25px rgba(75,59,37,.15);
-}
-html[data-theme="light"] .reading-progress{background:#ab8a58}
-html[data-theme="light"] footer{background:#eae2d5;color:#506354;border-top:1px solid var(--hairline)}
-@media(prefers-reduced-motion:reduce){
-  html[data-theme="light"] :is(.map-button,.calendar-button){transition:none}
-}
-
 
 /* The gate is a single uninterrupted scene. Controls are unavailable until
    the hero has completed its reveal. Keep layout dimensions for edge snapping.
@@ -673,12 +378,7 @@ html.wax-pending:not(.party-pending):not(.link-tool-active)
 .settings-hub .wq-description{margin-bottom:14px}
 .settings-hub .wq-link{padding:12px 2px;font-size:12px;gap:10px}
 .settings-hub .wq-footnote{margin-top:16px}
-html[data-theme="light"] .settings-hub .control-tabs{background:#eee5d6;border-color:#baa37c}
-html[data-theme="light"] .settings-hub .control-tab{color:#465c49}
-html[data-theme="light"] .settings-hub .control-tab[aria-selected="true"]{background:#435e4a;color:#fff8ec}
-html[data-theme="light"] .settings-hub .wq-panel{background:transparent;color:#395341;box-shadow:none}
-html[data-theme="light"] .settings-hub .wq-link{color:#395341}
-html[data-theme="light"] .settings-hub .wq-description{color:#67776b}
+
 @media(max-width:650px){.settings-hub .settings-panel{padding:16px}}
 
 /* The shared dock controller animates ONLY the release, never pointer moves.

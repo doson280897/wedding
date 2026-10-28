@@ -43,8 +43,7 @@
       url.searchParams.set("party", side);
       url.hash = "";
       // Switch to the selected invitation within the same history entry.
-      // This preserves this tab's theme/language through the page reload;
-      // a new tab follows the OS theme (fallback Dark).
+      // Preserve this tab's language through the page reload.
       try {
         history.replaceState(history.state, "", url.href);
         window.location.reload();
@@ -245,13 +244,9 @@
   const themeColor = document.getElementById("themeColor");
   const setBrowserTheme = color => themeColor?.setAttribute("content", color);
   const setContentBrowserTheme = () => {
-    const isLight = document.documentElement.dataset.theme === "light";
     const gateVisible = document.documentElement.classList.contains("wax-pending");
-    setBrowserTheme(gateVisible
-      ? (isLight ? "#e4ddd0" : "#0b161e")
-      : (isLight ? "#f5f0e6" : "#0b0e0e"));
+    setBrowserTheme(gateVisible ? "#0b161e" : "#0b0e0e");
   };
-  document.addEventListener("wedding:themechange", setContentBrowserTheme);
   setContentBrowserTheme();
 
   const moonlightGate = document.getElementById("moonlightGate");

@@ -18,28 +18,6 @@
     !document.documentElement.classList.contains("party-pending") &&
     !document.documentElement.classList.contains("link-tool-active");
 
-  const themeButtons = [...panel.querySelectorAll("[data-theme-option]")];
-
-  const currentTheme = () => document.documentElement.dataset.theme === "light" ? "light" : "dark";
-
-  const syncThemeControls = () => {
-    const theme = currentTheme();
-    for (const button of themeButtons) {
-      const active = button.dataset.themeOption === theme;
-      button.classList.toggle("is-active", active);
-      button.setAttribute("aria-pressed", String(active));
-    }
-
-  };
-
-  const setTheme = (next, persist = true) => {
-    if (next !== "light" && next !== "dark") return;
-    document.documentElement.dataset.theme = next;
-    if (persist) window.WeddingPreferences?.setTheme(next);
-    syncThemeControls();
-    document.dispatchEvent(new CustomEvent("wedding:themechange", { detail: { theme: next } }));
-  };
-
   const positionPanel = () => {
     if (panel.hidden) return;
     const triggerRect = trigger.getBoundingClientRect();
@@ -122,11 +100,8 @@
     if (!panel.hidden && panelTitle) panelTitle.textContent =
       tr(menuContent.hidden ? "settings.title" : "menu.toggle");
   });
-  themeButtons.forEach(button => button.addEventListener("click", () => {
-    setTheme(button.dataset.themeOption);
-  }));
 
-  // Keep language, theme and music in a single compact panel, but let the
+  // Keep language and music in a single compact panel, but let the
   // existing language and YouTube handlers control their own behavior.
   document.addEventListener("pointerdown", event => {
     if (!panel.hidden && !hub.contains(event.target)) setOpen(false);
@@ -158,6 +133,4 @@
   window.visualViewport?.addEventListener("scroll", schedulePanelPosition, { passive: true });
   hub.addEventListener("pointerup", schedulePanelPosition);
 
-  syncThemeControls();
-  window.WeddingTheme = { getTheme: currentTheme, setTheme };
 })();
