@@ -289,7 +289,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-flap-open/);
   await expect(page.locator("#envelopeBurst")).toHaveCount(0);
-  await expect(page.locator("#floatingPetals")).toHaveCount(0);
+  await expect(page.locator("#floatingPetals")).toBeHidden();
   // The flap stays present while it folds ABOVE the sealed pocket. No
   // backface culling, even after the card is extracted.
   await expect(page.locator(".invitation-card")).toHaveAttribute("aria-hidden", "true");
@@ -311,6 +311,10 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeVisible();
   await expect(page.locator(".invitation-card")).not.toHaveAttribute("aria-hidden", "true");
+  await expect(page.locator("#floatingPetals")).toBeVisible();
+  const petalCount = await page.locator(".floating-petal").count();
+  expect(petalCount).toBeGreaterThanOrEqual(2);
+  expect(petalCount).toBeLessThanOrEqual(8);
   await expect(page.locator("#envelopeCooldown")).toBeVisible();
   // Verify actual rendered contrast of the timer's digits against its surface.
   const timerContrast = await page.locator("#envelopeCooldown").evaluate(node => {
@@ -351,7 +355,8 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden({ timeout: 3000 });
   await expect(page.locator("#invitationPortal")).toHaveCount(0);
-  await expect(page.locator("#floatingPetals")).toHaveCount(0);
+  await expect(page.locator("#floatingPetals")).toBeHidden({timeout:3000});
+  await expect(page.locator(".floating-petal")).toHaveCount(0);
   await expect(page.locator("html")).toHaveClass(/golden-signature-entered/);
   const brideShort = await page.evaluate(() => window.WEDDING_INFO.couple.bride.short.toLocaleUpperCase("vi-VN"));
   await expect(page.locator("#heroNames")).toContainText(brideShort);
@@ -361,7 +366,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#envelopeBurst")).toHaveCount(0);
   await expect(page.locator("#invitationReveal")).toBeHidden();
   await expect(page.locator("#invitationPortal")).toHaveCount(0);
-  await expect(page.locator("#floatingPetals")).toHaveCount(0);
+  await expect(page.locator("#floatingPetals")).toBeHidden();
   await expect(page.locator("html")).toHaveClass(/envelope-resumed/);
   await expect(page.locator("html")).not.toHaveClass(/golden-signature-entered/);
   await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
@@ -387,7 +392,8 @@ test("reduced motion opens the envelope without particles or flash", async ({ pa
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden();
   await expect(page.locator("#invitationPortal")).toHaveCount(0);
-  await expect(page.locator("#floatingPetals")).toHaveCount(0);
+  await expect(page.locator("#floatingPetals")).toBeHidden();
+  await expect(page.locator(".floating-petal")).toHaveCount(0);
   await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
 });
 

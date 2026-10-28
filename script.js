@@ -263,6 +263,7 @@
   const closeInvitation = document.getElementById("closeInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
   const invitationReveal = document.getElementById("invitationReveal");
+  const floatingPetals = document.getElementById("floatingPetals");
   const envelopeCooldown = document.getElementById("envelopeCooldown");
   const envelopeCooldownValue = document.getElementById("envelopeCooldownValue");
   // A reload in the same tab resumes the invitation without replaying its
@@ -286,6 +287,7 @@
     let autoCloseTimer = 0;
     let cooldownTickTimer = 0;
     let revealCleanupTimer = 0;
+    let petalsCleanupTimer = 0;
     const prefersReducedMotion = () =>
       matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -300,6 +302,35 @@
         invitationReveal.hidden = true;
         invitationReveal.classList.remove("is-active");
       }, 720);
+    };
+
+    // Ivory petal bloom, deliberately separate from the card raster/flight.
+    // 4 petals on phones, 8 on desktop; all compositor-only and self-cleaning.
+    const releasePetals = origin => {
+      if (!floatingPetals || !origin || prefersReducedMotion()) return;
+      const compact = matchMedia("(max-width: 650px)").matches;
+      const count = navigator.connection?.saveData ? 2 : compact ? 4 : 8;
+      floatingPetals.style.setProperty("--petal-x", origin.x + "px");
+      floatingPetals.style.setProperty("--petal-y", origin.y + "px");
+      const fragment = document.createDocumentFragment();
+      for (let i = 0; i < count; i++) {
+        const petal = document.createElement("i");
+        petal.className = "floating-petal";
+        const angle = (360 / count) * i + 14;
+        petal.style.setProperty("--petal-angle", angle + "deg");
+        petal.style.setProperty("--petal-distance", "-" + (compact ? 95 + (i % 3) * 23 : 120 + (i % 4) * 28) + "px");
+        petal.style.setProperty("--petal-delay", ((i % 3) * 50) + "ms");
+        fragment.append(petal);
+      }
+      floatingPetals.replaceChildren(fragment);
+      floatingPetals.hidden = false;
+      floatingPetals.classList.add("is-active");
+      window.clearTimeout(petalsCleanupTimer);
+      petalsCleanupTimer = window.setTimeout(() => {
+        floatingPetals.hidden = true;
+        floatingPetals.classList.remove("is-active");
+        floatingPetals.replaceChildren();
+      }, 1700);
     };
 
     const stopAutoClose = () => {
@@ -379,12 +410,20 @@
       skipInvitation?.setAttribute("disabled", "");
 
       const reduced = prefersReducedMotion();
+      // One geometry read before the paper or seal moves; no forced layout
+      // during the transform animation.
+      const seal = intro.querySelector(".envelope-seal")?.getBoundingClientRect();
+      const petalOrigin = seal && {
+        x: seal.left + seal.width / 2,
+        y: seal.top + seal.height / 2
+      };
 
       const raiseCard = () => {
         if (leaving) return;
         // Nothing from the invitation is visible until the flap has finished.
         intro.querySelector(".invitation-card")?.removeAttribute("aria-hidden");
         intro.classList.add("is-card-lifted", "is-opened");
+        if (!reduced) releasePetals(petalOrigin);
         startAutoClose();
         closeInvitation?.focus({preventScroll:true});
       };

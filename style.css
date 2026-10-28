@@ -319,7 +319,7 @@ html.envelope-theme body{
 html.envelope-resumed #envelopeIntro{display:none!important}
 html.party-pending #envelopeIntro{display:none!important}
 html.envelope-pending body{overflow:hidden;background:#f2eee4}
-html.envelope-pending body> :not(#envelopeIntro):not(.language-switch):not(#musicBubble):not(#invitationReveal):not(#invitationPortal):not(#floatingPetals){visibility:hidden!important}
+html.envelope-pending body> :not(#envelopeIntro):not(.language-switch):not(#musicBubble):not(#invitationReveal):not(#floatingPetals){visibility:hidden!important}
 html.envelope-pending #envelopeIntro{visibility:visible!important}
 html.envelope-pending body>.language-switch{visibility:visible!important;pointer-events:auto!important}
 .envelope-intro{
@@ -1507,3 +1507,28 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
     visibility:hidden;opacity:0;
   }
 }
+
+/* Lightweight ivory petal bloom restored by request. No filters, shadows,
+   gradients with blurs or persistent RAF loops. */
+.floating-petals[hidden]{display:none!important}
+.floating-petals{
+  position:fixed;inset:0;z-index:3500;overflow:hidden;pointer-events:none;
+  contain:layout style paint;--petal-x:50%;--petal-y:50%;
+}
+.floating-petal{
+  position:absolute;left:var(--petal-x);top:var(--petal-y);
+  width:9px;height:15px;opacity:0;pointer-events:none;
+  background:linear-gradient(140deg,#fffaf0,#dcbda1);
+  border-radius:80% 8% 85% 12%;
+}
+.floating-petal:nth-child(even){width:7px;height:12px;background:#f6e5cf}
+.floating-petals.is-active .floating-petal{
+  animation:ivoryPetalBloom 1.45s cubic-bezier(.16,.72,.22,1) var(--petal-delay,0ms) both;
+}
+@keyframes ivoryPetalBloom{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--petal-angle)) translateY(0) scale(.5)}
+  17%{opacity:.85}
+  68%{opacity:.65}
+  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--petal-angle)) translateY(var(--petal-distance)) scale(.7)}
+}
+@media(prefers-reduced-motion:reduce){.floating-petals{display:none!important}}
