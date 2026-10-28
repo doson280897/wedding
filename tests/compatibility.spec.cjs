@@ -166,6 +166,19 @@ test("floating language pill really shrinks on touch and desktop", async ({ page
 test("editing only wedding-info.js updates names, initials, dates, venue and gifts", async ({
   page,
 }) => {
+  // Local YouTube API stub verifies which configured video would be played
+  // without contacting YouTube or triggering autoplay.
+  await page.addInitScript(() => {
+    window.YT = {
+      PlayerState: { PLAYING: 1, PAUSED: 2, ENDED: 0 },
+      Player: function (_host, options) {
+        window.__configuredWeddingMusicId = options.videoId;
+        const player = { setVolume() {}, playVideo() {}, pauseVideo() {} };
+        setTimeout(() => options.events.onReady({ target: player }), 0);
+        return player;
+      },
+    };
+  });
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
   // Simulate a new couple by replacing ONLY the response body of the data file.
@@ -186,6 +199,8 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
       initial: "T",
     });
     config.parties.bride.date = "2027-03-15";
+    config.parties.bride.music.youtubeId = config.parties.groom.music.youtubeId;
+    config.parties.bride.images.hero = config.parties.groom.images.hero;
     config.parties.bride.venue.name = {
       vi: "Nhà hàng Hoa Sen",
       en: "Hoa Sen Venue",
@@ -215,6 +230,15 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
   await expect(page.locator(".gift-card[data-party-scope='bride'] h3")).toHaveText(
     "NGUYỄN THỊ MAI AN",
   );
+  const computed = await page.evaluate(() => ({
+    hero: document.documentElement.style.getPropertyValue("--hero-bride-image"),
+    music: window.__configuredWeddingMusicId,
+    configuredMusic: window.WEDDING_INFO.parties.bride.music.youtubeId,
+    calendarFilename: window.WeddingI18n.t("calendar.brideFile"),
+  }));
+  expect(computed.hero).toContain("hero_groom.webp");
+  expect(computed.music).toBe(computed.configuredMusic);
+  expect(computed.calendarFilename).toContain("mai-an-tuan-minh.ics");
 
   await page.goto(base + "/index.html?tool=links&lang=en", {
     waitUntil: "domcontentloaded",
