@@ -8,7 +8,6 @@
   if (!hub || !trigger || !panel || !closeButton) return;
 
   const themeButtons = [...panel.querySelectorAll("[data-theme-option]")];
-  const themeMeta = document.getElementById("themeColor");
 
   const currentTheme = () => document.documentElement.dataset.theme === "light" ? "light" : "dark";
 
@@ -20,7 +19,6 @@
       button.setAttribute("aria-pressed", String(active));
     }
 
-    if (themeMeta) themeMeta.content = theme === "light" ? "#f5f0e6" : "#0b0e0e";
   };
 
   const setTheme = (next, persist = true) => {

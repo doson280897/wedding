@@ -15,7 +15,7 @@
     : (partyParam === "bride" || partyParam === "groom" ? partyParam : null);
   document.documentElement.dataset.weddingMode = singleMode ? "single" : "double";
   const partySelector = document.getElementById("partySelector");
-  const languageButtons = Array.from(document.querySelectorAll(".language-switch [data-lang]"));
+  // Language buttons are owned by i18n.js; no duplicate click handlers here.
 
   // Keep the invitation anchored to the top while the entrance gate is active.
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
@@ -161,10 +161,10 @@
     const delay = 1030 - (Date.now() % 1000);
     countdownTimer = window.setTimeout(scheduleCountdown, delay);
   }
-  scheduleCountdown();
+  if (selectedParty && !linkToolInitial) scheduleCountdown();
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) window.clearTimeout(countdownTimer);
-    else scheduleCountdown();
+    else if (selectedParty && !linkToolInitial) scheduleCountdown();
   });
 
   const toCalendarUTC = (side, time) => new Date(
@@ -242,6 +242,7 @@
     document.documentElement.dataset.theme === "light" ? "#f5f0e6" : "#0b0e0e"
   );
   document.addEventListener("wedding:themechange", setContentBrowserTheme);
+  setContentBrowserTheme();
 
   const moonlightGate = document.getElementById("moonlightGate");
   const waxOpenButton = document.getElementById("waxOpenButton");

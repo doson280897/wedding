@@ -236,13 +236,20 @@
       }
 
       if (abs > metrics.activeRange) {
-        // Apply hidden state even on the very first render. Newly created
-        // slides already have hidden=true, so a conditional here left them
-        // visible at their untransformed default position until scrolling.
-        item.hidden = true;
-        item.slide.style.opacity = "0";
-        item.slide.style.pointerEvents = "none";
-        item.slide.setAttribute("aria-hidden", "true");
+        // Newly created slides already start hidden. Update the DOM only
+        // when crossing the visible boundary, not for every hidden slide
+        // on every animation frame (which is costly with 100+ photos).
+        if (!item.hidden) {
+          item.hidden = true;
+          item.slide.style.opacity = "0";
+          item.slide.style.pointerEvents = "none";
+          item.slide.setAttribute("aria-hidden", "true");
+          if (item.isMain) {
+            item.isMain = false;
+            item.card.classList.remove("is-main");
+          }
+          item.interactive = false;
+        }
         continue;
       }
 
@@ -886,9 +893,13 @@
     viewport.addEventListener("focus", ensureAlbumStarted, { once:true });
     viewport.addEventListener("pointerdown", ensureAlbumStarted, { once:true });
     checkAlbumVisibility();
-    // Last-resort fallback: the album is small enough to initialize after
-    // the invitation has settled, without loading all photos at once.
-    if (document.documentElement.dataset.party) window.setTimeout(ensureAlbumStarted, 2500);
+    // The entrance should not compete with a speculative album load.
+    // Check visibility after opening, without fetching any distant images.
+    if (document.documentElement.dataset.party) {
+      document.addEventListener("wedding:waxopen", () => {
+        window.setTimeout(checkAlbumVisibility, 200);
+      }, { once:true });
+    }
   } else {
     ensureAlbumStarted();
   }
