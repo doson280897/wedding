@@ -254,6 +254,22 @@
   const moonlightGate = document.getElementById("moonlightGate");
   const waxOpenButton = document.getElementById("waxOpenButton");
   const reducedGateMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // One optional sound clip for the whole lock-to-door sequence. It starts
+  // directly on the seal gesture and is independent from the YouTube iframe.
+  const introSoundUrl = typeof info.site?.introSound === "string" ? info.site.introSound.trim() : "";
+  const introSound = selectedParty && !linkToolInitial && introSoundUrl
+    ? new Audio(introSoundUrl) : null;
+  if (introSound) {
+    introSound.preload = "auto";
+    introSound.volume = .75;
+  }
+  const playIntroSound = () => {
+    if (!introSound || reducedGateMotion) return;
+    try {
+      introSound.currentTime = 0;
+      introSound.play().catch(() => {}); // A failed SFX must not block the gate.
+    } catch (_) {}
+  };
   // Enjoy the names and full-screen shooting stars after the doors settle,
   // then crossfade the night sky and the real hero together.
   const GATE_UNLOCK_MS = 1600;
@@ -410,6 +426,10 @@
     if (!moonlightGate || moonlightGate.hidden) return;
     clearGateTimers();
     stopGateMeteors();
+    if (introSound) {
+      introSound.pause();
+      try { introSound.currentTime = 0; } catch (_) {}
+    }
     leftGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.hidden = true;
     moonlightGate.classList.remove(
@@ -450,6 +470,7 @@
     if (!moonlightGate || !waxOpenButton || gateOpening || moonlightGate.hidden) return;
     gateOpening = true;
     waxOpenButton.disabled = true;
+    playIntroSound();
     spawnGateSparkles();
     if (reducedGateMotion) {
       finishMoonlightGate();
@@ -510,12 +531,12 @@
   let musicStartTimer = 0;
   let musicStatePoll = 0;
 
-  // Volume 0 alone is not reliable on mobile YouTube players; mute the iframe
-  // before playVideo. Unmute the SAME player at Hero without re-cueing or
-  // restarting the track. Some iOS versions can still block that unmute.
+  // The iframe can buffer/play muted during the gate. Hero may make it audible
+  // ONLY if the guest has not paused/stopped and YouTube still wants playback.
+  // Otherwise an unconditional unMute() could produce a surprise resumption.
   const syncMusicIntroAudio = player => {
     if (!player) return;
-    if (!musicHeroEntered) {
+    if (!musicHeroEntered || !musicEnabled || !musicWantsPlayback) {
       try { player.mute?.(); } catch (_) {}
       try { player.setVolume?.(0); } catch (_) {}
     } else {
@@ -540,6 +561,7 @@
     musicStarting = false;
     musicPlaybackFailed = false;
     musicHasStarted = true;
+    syncMusicIntroAudio(youtubePlayer);
     if (musicResumePending && musicPausePosition > 1) {
       musicResumePending = false;
       try {
@@ -562,6 +584,7 @@
     musicPlaying = false;
     musicStarting = false;
     musicPlaybackFailed = true;
+    syncMusicIntroAudio(youtubePlayer);
     setMusicUI();
     // If a delayed play command eventually takes effect, silence it.
     try { if (youtubePlayerReady) youtubePlayer?.pauseVideo(); } catch (_) {}
@@ -591,7 +614,9 @@
       );
     }
     if (musicBubble) {
-      musicBubble.hidden = !musicHasStarted;
+      // The gate has its own sound channel. Hide background-music controls
+      // until Hero; do not flash a PLAYING/PAUSED icon during the intro.
+      musicBubble.hidden = !musicHeroEntered || !musicHasStarted;
       musicBubble.dataset.musicState = state;
     }
     if (!musicEnabled) setBubbleActionsOpen(false);
@@ -624,6 +649,7 @@
     musicHasStarted = false;
     musicPausePosition = 0;
     musicResumePending = false;
+    syncMusicIntroAudio(youtubePlayer);
     setBubbleActionsOpen(false);
     setMusicUI();
     try {
@@ -700,6 +726,7 @@
       if (Number.isFinite(current) && current > 0) musicPausePosition = current;
     } catch (_) {}
     musicResumePending = false;
+    syncMusicIntroAudio(youtubePlayer);
     setMusicUI();
     try {
       if (youtubePlayerReady && youtubePlayer) youtubePlayer.pauseVideo();
@@ -826,7 +853,14 @@
             resolve(event.target);
           },
           onStateChange: event => {
-            if (!musicEnabled) return;
+            // A late PLAYING callback after Pause/Stop must never bring the
+            // music back, even if the iframe resumed itself while hidden.
+            if (!musicEnabled || !musicWantsPlayback) {
+              if (event.data === window.YT.PlayerState.PLAYING) {
+                try { event.target.pauseVideo(); } catch (_) {}
+              }
+              return;
+            }
             if (event.data === window.YT.PlayerState.BUFFERING && musicWantsPlayback) {
               musicPlaying = false;
               musicStarting = true;
@@ -893,6 +927,7 @@
     document.addEventListener("wedding:waxopen", () => {
       musicHeroEntered = true;
       if (youtubePlayerReady) syncMusicIntroAudio(youtubePlayer);
+      setMusicUI();
     }, { once:true });
   }
 

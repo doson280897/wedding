@@ -10,6 +10,8 @@
  *    photos=null để dùng manifest tự tạo, hoặc nhập mảng {src, width, height}.
  * 5. text.vi / text.en: mọi nội dung hiển thị, lời mời và bản dịch. Dùng {{duong.dan}}
  *    để lấy dữ liệu phía trên; ví dụ {{couple.groom.short}}, {{parties.bride.dateDots}}.
+ * 6. site.introSound: đường dẫn tùy chọn tới một đoạn tiếng mở khóa/cổng.
+ *    Để trống nếu chưa có file. Hiệu ứng này tách biệt với nhạc YouTube.
  *
  * Muốn đổi ảnh / QR / album: đặt file ảnh mới vào repository, rồi cập nhật đường dẫn ở đây.
  * Tuyệt đối không cần sửa index.html, script.js, i18n.js, link-tool.js, style.css.
@@ -23,6 +25,7 @@ window.WEDDING_INFO = {
     },
     "timezone": "+07:00",
     "socialImage": "og-preview.jpg",
+    "introSound": "",
     "titlePrefix": {
       "vi": "Thiệp cưới",
       "en": "Wedding Invitation"
