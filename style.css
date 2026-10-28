@@ -1006,6 +1006,7 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   align-items:center;justify-content:center;gap:0;text-align:center;
   padding:24px;color:#fff0d3;opacity:0;transform:scale(.96);
   pointer-events:none;transition:opacity .8s ease,transform 1.1s cubic-bezier(.18,.72,.18,1);
+  transition-delay:0s;
 }
 .moonlight-gate__reveal-overline,.moonlight-gate__reveal-subtitle{
   font:500 clamp(9px,1vw,12px) Montserrat,sans-serif;letter-spacing:.26em;color:#edd0a0;
@@ -1026,7 +1027,8 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate__door{
   position:relative;flex:0 0 50%;height:100%;z-index:3;
   transform-style:preserve-3d;backface-visibility:hidden;
-  transition:transform 3.55s cubic-bezier(.25,.68,.15,1);
+  /* Keep the wings visibly moving throughout the whole 2.9s swing. */
+  transition:transform 2.9s cubic-bezier(.42,.05,.58,.95);
   will-change:transform;
 }
 .moonlight-gate__door--left{transform-origin:0% 50%}
@@ -1113,13 +1115,19 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate.is-awakening .moonlight-gate__seam{
   opacity:1;transform:translateX(-50%) scaleY(1);
 }
-.moonlight-gate.is-opening .moonlight-gate__door--left{transform:rotateY(-105deg)}
-.moonlight-gate.is-opening .moonlight-gate__door--right{transform:rotateY(105deg)}
+.moonlight-gate.is-opening .moonlight-gate__door--left{transform:rotateY(-82deg)}
+.moonlight-gate.is-opening .moonlight-gate__door--right{transform:rotateY(82deg)}
 .moonlight-gate.is-opening #waxOpenButton{opacity:0;transform:translate(-50%,-50%) scale(.7)}
 .moonlight-gate.is-opening .moonlight-gate__seam{opacity:0}
 .moonlight-gate.is-opening .moonlight-gate__top-caption,
 .moonlight-gate.is-opening .moonlight-gate__bottom-caption{opacity:0}
-.moonlight-gate.is-opened .moonlight-gate__reveal{opacity:1;transform:scale(1)}
+/* Names rise into view while the door gap widens, without an empty dead beat. */
+.moonlight-gate.is-opening .moonlight-gate__reveal{
+  opacity:1;transform:scale(1);transition-delay:1.4s;
+}
+.moonlight-gate.is-opened .moonlight-gate__reveal{
+  opacity:1;transform:scale(1);transition-delay:0s;
+}
 .moonlight-gate.is-leaving{opacity:0;pointer-events:none;transition:opacity 1.25s cubic-bezier(.18,.62,.2,1)}
 html.wax-pending .hero{
   opacity:0;transform:scale(1.018);

@@ -651,12 +651,12 @@ html[data-theme="light"] footer{background:#eae2d5;color:#506354;border-top:1px 
 }
 
 
-/* Settings must remain operable while the cinematic gate is present. */
-html.wax-pending .language-switch.settings-hub,
-html.wax-pending .language-switch.settings-hub.floating-control{
-  z-index:12050!important;
-  visibility:visible!important;
-  opacity:1!important;
-  pointer-events:auto!important;
+/* The gate is a single uninterrupted scene. Controls are unavailable until
+   the hero has completed its reveal. Keep layout dimensions for edge snapping.
+   The party chooser and personalized-link generator remain interactive. */
+html.wax-pending:not(.party-pending):not(.link-tool-active)
+:is(#settingsHub,#wqToggle,#wqPanel,#wqBackdrop,#musicBubble){
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
 }
-html.wax-pending .settings-hub .settings-panel{z-index:3}

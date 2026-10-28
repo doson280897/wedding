@@ -261,7 +261,8 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
     node.getBoundingClientRect().width
   );
   expect(celestialWidth).toBeGreaterThanOrEqual(98);
-  await expect(page.locator("#settingsHub")).toBeVisible();
+  await expect(page.locator("#settingsHub")).toBeHidden();
+  await expect(page.locator("#wqToggle")).toBeHidden();
   const gateLayout = await page.evaluate(() => {
     const scene = document.querySelector(".moonlight-gate__scene").getBoundingClientRect();
     const celestial = document.querySelector(".moonlight-gate__celestial");
@@ -306,6 +307,12 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   );
   expect(hingeDuration).toBeGreaterThanOrEqual(1400);
   await expect(gate).toHaveClass(/is-opened/, { timeout:6000 });
+  await expect(page.locator(".moonlight-gate__reveal-names")).toBeVisible();
+  await expect(page.locator(".moonlight-gate__reveal-names")).toContainText("Nga");
+  await expect(page.locator("#settingsHub")).toBeHidden();
+  await expect(page.locator("#wqToggle")).toBeHidden();
+  const finalHinge = await leftDoor.evaluate(node => getComputedStyle(node).transform);
+  expect(finalHinge).toMatch(/matrix3d\\(/);
   // The real hero must stay hidden during the deliberate 1.5s pause.
   await expect(page.locator("html")).not.toHaveClass(/gate-hero-revealing/);
   await expect(page.locator(".hero")).toHaveCSS("opacity", "0");
@@ -316,6 +323,8 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(gate).toBeHidden({ timeout:9000 });
   await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
   await expect(page.locator(".hero")).toBeVisible();
+  await expect(page.locator("#settingsHub")).toBeVisible();
+  await expect(page.locator("#wqToggle")).toBeVisible();
 
   // New-tab/reload baseline intentionally shows the gate again.
   await page.reload({ waitUntil:"domcontentloaded" });
@@ -474,10 +483,11 @@ test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @c
   await expect(lightPage.locator("html")).toHaveAttribute("data-theme","light");
   await expect(lightPage.locator("#moonlightGate")).toBeVisible();
   await expect(lightPage.locator(".moonlight-gate__celestial")).toBeVisible();
-  await expect(lightPage.locator("#settingsHub")).toBeVisible();
+  await expect(lightPage.locator("#settingsHub")).toBeHidden();
   await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#e4ddd0");
   await lightPage.locator("#waxOpenButton").click();
   await expect(lightPage.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(lightPage.locator("#settingsHub")).toBeVisible();
   await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#f5f0e6");
   await lightPage.close();
 });

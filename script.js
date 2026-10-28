@@ -257,10 +257,12 @@
   const reducedGateMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   // Door fully swings first, scene rests for 1.5s, then crossfades to the real hero.
   const GATE_AWAKEN_MS = 240;
-  const GATE_DOOR_MS = 3550;
+  const GATE_DOOR_MS = 2900;
   const GATE_PAUSE_MS = 1500;
   const GATE_HANDOFF_MS = 1250;
   let gateOpening = false;
+  let doorSettled = false;
+  const leftGateDoor = moonlightGate?.querySelector(".moonlight-gate__door--left");
   const gateTimers = new Set();
   const scheduleGate = (callback, delay) => {
     const timer = window.setTimeout(() => {
@@ -278,6 +280,7 @@
   const completeMoonlightGate = () => {
     if (!moonlightGate || moonlightGate.hidden) return;
     clearGateTimers();
+    leftGateDoor?.removeEventListener("transitionend", onDoorTransitionEnd);
     moonlightGate.hidden = true;
     moonlightGate.classList.remove(
       "is-awakening", "is-opening", "is-opened", "is-leaving"
@@ -298,6 +301,19 @@
     moonlightGate.classList.add("is-leaving");
     scheduleGate(completeMoonlightGate, GATE_HANDOFF_MS);
   };
+  const settleOpenDoor = () => {
+    if (doorSettled || !moonlightGate || moonlightGate.hidden) return;
+    doorSettled = true;
+    leftGateDoor?.removeEventListener("transitionend", onDoorTransitionEnd);
+    moonlightGate.classList.add("is-opened");
+    // The pause begins at the actual end of the 3D hinge transition.
+    scheduleGate(finishMoonlightGate, GATE_PAUSE_MS);
+  };
+  function onDoorTransitionEnd(event) {
+    if (event.target === leftGateDoor && event.propertyName === "transform") {
+      settleOpenDoor();
+    }
+  }
   const openFromWax = () => {
     if (!moonlightGate || !waxOpenButton || gateOpening || moonlightGate.hidden) return;
     gateOpening = true;
@@ -310,15 +326,11 @@
     moonlightGate.classList.add("is-awakening");
     scheduleGate(() => {
       if (moonlightGate.hidden) return;
+      // Listen to the real hinge end, not only a clock. The guarded fallback
+      // avoids a stuck gate if a browser suppresses transitionend.
+      leftGateDoor?.addEventListener("transitionend", onDoorTransitionEnd);
       moonlightGate.classList.add("is-opening");
-
-      // The sky is revealed through the opening, without exposing the hero.
-      scheduleGate(() => {
-        if (moonlightGate.hidden) return;
-        moonlightGate.classList.add("is-opened");
-        // Hold the fully open scene for an intentional 1.5-second breath.
-        scheduleGate(finishMoonlightGate, GATE_PAUSE_MS);
-      }, GATE_DOOR_MS);
+      scheduleGate(settleOpenDoor, GATE_DOOR_MS + 180);
     }, GATE_AWAKEN_MS);
   };
   if (moonlightGate && waxOpenButton) {
