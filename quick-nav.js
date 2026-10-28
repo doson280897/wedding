@@ -180,16 +180,31 @@
   const FLOAT_IDLE_DELAY = 2600;
   const coarsePointer = window.matchMedia("(hover: none), (pointer: coarse)");
 
+  // Measure notch and home-indicator insets once independently of CSS
+  // positions, which become "auto" after a dragged control is anchored.
+  const safeArea = (() => {
+    const probe = document.createElement("div");
+    probe.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;inset:0;" +
+      "padding-top:env(safe-area-inset-top,0px);" +
+      "padding-right:env(safe-area-inset-right,0px);" +
+      "padding-bottom:env(safe-area-inset-bottom,0px)";
+    document.body.append(probe);
+    const computed = getComputedStyle(probe);
+    const insets = {
+      top:parseFloat(computed.paddingTop) || 0,
+      right:parseFloat(computed.paddingRight) || 0,
+      bottom:parseFloat(computed.paddingBottom) || 0
+    };
+    probe.remove();
+    return insets;
+  })();
+
   // Drag positions deliberately live only in the current document.
-  // Every F5/navigation starts at top-right (settings) and
-  // bottom-right (menu), rather than restoring old sessionStorage.
+  // Every F5/navigation resets to top-right (settings) and bottom-right
+  // (menu), so no previous tab's position can be restored.
   const defaultPosition = control => {
-    const css = getComputedStyle(control);
     const rect = control.getBoundingClientRect();
-    const safeOffset = control === toggle
-      ? Number.parseFloat(css.bottom)
-      : Number.parseFloat(css.top);
-    const margin = Math.max(FLOAT_EDGE, Number.isFinite(safeOffset) ? safeOffset : FLOAT_EDGE);
+    const margin = FLOAT_EDGE + (control === toggle ? safeArea.bottom : safeArea.top);
     const top = control === toggle
       ? Math.max(FLOAT_EDGE, innerHeight - rect.height - margin)
       : margin;
@@ -210,7 +225,7 @@
       control.style.left = FLOAT_EDGE + "px";
       control.style.right = "auto";
     } else {
-      control.style.right = FLOAT_EDGE + "px";
+      control.style.right = (FLOAT_EDGE + safeArea.right) + "px";
       control.style.left = "auto";
     }
   };
