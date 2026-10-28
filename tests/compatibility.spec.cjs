@@ -261,6 +261,8 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden({ timeout: 3000 });
   await expect(page.locator("#invitationPortal")).toBeHidden({ timeout: 3000 });
+  await expect(page.locator("html")).toHaveClass(/golden-signature-entered/);
+  await expect(page.locator("#heroNames")).toContainText("NGA");
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeHidden();
@@ -268,6 +270,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#invitationReveal")).toBeHidden();
   await expect(page.locator("#invitationPortal")).toBeHidden();
   await expect(page.locator("html")).toHaveClass(/envelope-resumed/);
+  await expect(page.locator("html")).not.toHaveClass(/golden-signature-entered/);
   await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
   expect(await page.evaluate(() => history.state?.weddingEnvelopeOpened)).toBe(
     JSON.stringify(["bride", "ReloadGuest"]),

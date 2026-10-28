@@ -1441,3 +1441,35 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 @media(prefers-reduced-motion:reduce){
   .invitation-portal,.invitation-portal *{display:none!important;animation:none!important}
 }
+
+
+/* FEAT 04 — the personal names are written into view by a single gold sweep. */
+#heroNames{position:relative;isolation:isolate}
+@media(prefers-reduced-motion:no-preference){
+  html.golden-signature-entered .hero-copy > #heroNames{
+    animation:luxGoldenSignature 1300ms cubic-bezier(.16,.79,.18,1) both;
+  }
+  html.golden-signature-entered #heroNames:after{
+    content:"";position:absolute;inset:-8px -10px;pointer-events:none;z-index:2;
+    background:linear-gradient(100deg,transparent 0%,transparent 40%,
+      rgba(255,248,220,.04) 47%,rgba(255,227,160,.32) 51%,transparent 58%,transparent 100%);
+    mix-blend-mode:screen;
+    animation:luxSignatureGlint 1320ms cubic-bezier(.14,.66,.23,1) both;
+  }
+}
+@keyframes luxGoldenSignature{
+  0%{opacity:.45;clip-path:inset(0 100% 0 0);filter:brightness(1.38)}
+  55%{opacity:1;filter:brightness(1.12)}
+  100%{opacity:1;clip-path:inset(0 0 0 0);filter:none}
+}
+@keyframes luxSignatureGlint{
+  0%,10%{opacity:0;transform:translate3d(-100%,0,0)}
+  32%{opacity:.9}
+  85%{opacity:.7}
+  100%{opacity:0;transform:translate3d(100%,0,0)}
+}
+@media(prefers-reduced-motion:reduce){
+  html.golden-signature-entered .hero-copy > #heroNames{
+    animation:none!important;clip-path:none!important;filter:none!important;
+  }
+}

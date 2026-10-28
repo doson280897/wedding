@@ -415,6 +415,7 @@
         document.documentElement.classList.remove("envelope-theme", "envelope-pending");
         setContentBrowserTheme();
         document.dispatchEvent(new Event("wedding:envelopeexit"));
+        document.dispatchEvent(new Event("wedding:ceremonialentry"));
       }, 260);
     };
 
@@ -984,5 +985,13 @@
   const enterCinematicHero = () => document.documentElement.classList.add("cinematic-entered");
   document.addEventListener("wedding:envelopeexit", enterCinematicHero, {once:true});
   if (!document.body.classList.contains("envelope-locked")) enterCinematicHero();
+
+  // Only a deliberate ceremonial entrance earns the one-time golden signature.
+  // The fast Skip button, reduced-motion visitors and same-tab reloads do not.
+  document.addEventListener("wedding:ceremonialentry", () => {
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.documentElement.classList.add("golden-signature-entered");
+    }
+  }, {once:true});
 
 })();
