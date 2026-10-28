@@ -61,6 +61,7 @@ jobs:
           node --check link-tool.js
           node --check quick-nav.js
           node build-wedding.cjs
+          ! grep -q '"fileId"' wedding-info.js
           grep -q 'name="description"' index.html
           ! grep -q '__WEDDING_TITLE__' index.html
 
