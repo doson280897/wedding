@@ -254,11 +254,11 @@
   const moonlightGate = document.getElementById("moonlightGate");
   const waxOpenButton = document.getElementById("waxOpenButton");
   const reducedGateMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // After the doors finish, briefly reveal the names, then zoom the sky and
-  // names OUT as the real hero zooms IN. The two scenes crossfade together.
+  // Enjoy the names and full-screen shooting stars after the doors settle,
+  // then crossfade the night sky and the real hero together.
   const GATE_AWAKEN_MS = 240;
   const GATE_DOOR_MS = 2900;
-  const GATE_REVEAL_BEAT_MS = 220;
+  const GATE_REVEAL_BEAT_MS = 2200;
   const GATE_HANDOFF_MS = 1350;
   let gateOpening = false;
   let doorSettled = false;
@@ -280,7 +280,7 @@
       star.className = "moonlight-gate__spark";
       star.style.setProperty("--sx", x + "%");
       star.style.setProperty("--sy", y + "%");
-      star.style.setProperty("--size", (index % 5 === 0 ? 3 : 2) + "px");
+      star.style.setProperty("--size", (index % 5 === 0 ? 4.5 : 3) + "px");
       star.style.setProperty("--duration", (1.45 + index % 4 * .32) + "s");
       star.style.setProperty("--delay", (-index * .29) + "s");
       nodes.append(star);
@@ -332,7 +332,7 @@
     doorSettled = true;
     leftGateDoor?.removeEventListener("transitionend", onDoorTransitionEnd);
     moonlightGate.classList.add("is-opened");
-    // No stationary 1.5s hold: only a tiny beat for the names to register.
+    // Hold the opened sky until both shooting stars travel off-screen.
     scheduleGate(finishMoonlightGate, GATE_REVEAL_BEAT_MS);
   };
   function onDoorTransitionEnd(event) {

@@ -987,13 +987,13 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate__stars{
   position:absolute;inset:0;opacity:.8;
   background:
-    radial-gradient(circle at 9% 15%,#fce2ae 0 1px,transparent 1.5px),
-    radial-gradient(circle at 23% 38%,#fce2ae 0 1px,transparent 1.5px),
-    radial-gradient(circle at 36% 8%,#fce2ae 0 1px,transparent 1.5px),
-    radial-gradient(circle at 59% 19%,#fce2ae 0 1px,transparent 1.5px),
-    radial-gradient(circle at 78% 13%,#fce2ae 0 1px,transparent 1.5px),
-    radial-gradient(circle at 88% 44%,#fce2ae 0 1px,transparent 1.5px),
-    radial-gradient(circle at 68% 41%,#fce2ae 0 1px,transparent 1.5px);
+    radial-gradient(circle at 9% 15%,#fce2ae 0 1.5px,transparent 2.3px),
+    radial-gradient(circle at 23% 38%,#fce2ae 0 1.5px,transparent 2.3px),
+    radial-gradient(circle at 36% 8%,#fce2ae 0 1.5px,transparent 2.3px),
+    radial-gradient(circle at 59% 19%,#fce2ae 0 1.5px,transparent 2.3px),
+    radial-gradient(circle at 78% 13%,#fce2ae 0 1.5px,transparent 2.3px),
+    radial-gradient(circle at 88% 44%,#fce2ae 0 1.5px,transparent 2.3px),
+    radial-gradient(circle at 68% 41%,#fce2ae 0 1.5px,transparent 2.3px);
 }
 .moonlight-gate__land{
   position:absolute;inset:auto 0 0;height:25%;opacity:.54;
@@ -1017,7 +1017,7 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate__spark{
   position:absolute;left:var(--sx);top:var(--sy);
   width:var(--size);height:var(--size);border-radius:50%;opacity:0;
-  background:#ffe8b0;box-shadow:0 0 7px 1px #efc887b5;
+  background:#ffe8b0;box-shadow:0 0 10px 2px #efc887a8;
 }
 .moonlight-gate.is-opening .moonlight-gate__spark{
   animation:gateStarTwinkle var(--duration) ease-in-out var(--delay) infinite;
@@ -1029,36 +1029,45 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   79%{opacity:.92;transform:scale(1.18)}
 }
 .moonlight-gate__meteor{
-  position:absolute;z-index:1;left:77%;top:17%;
-  width:clamp(105px,19vw,225px);height:2px;opacity:0;
+  /* Meteor head follows a full-viewport diagonal; tail points top-right. */
+  position:absolute;z-index:1;left:77%;top:-5%;
+  width:clamp(150px,25vw,305px);height:3px;opacity:0;
   border-radius:100%;pointer-events:none;
+  --meteor-start-x:26vw;--meteor-start-y:-18svh;
+  --meteor-end-x:-108vw;--meteor-end-y:132svh;
+  --meteor-angle:-40deg;
   background:linear-gradient(90deg,#fff9e2 0%,#f4c778 13%,#cda36652 43%,transparent 100%);
-  box-shadow:0 0 9px #f2d39484;
+  box-shadow:0 0 13px 2px #f2d3948a;
   transform-origin:0 50%;
+  will-change:transform,opacity;
 }
 .moonlight-gate__meteor:before{
-  content:"";position:absolute;left:-3px;top:-3px;width:8px;height:8px;
-  border-radius:50%;background:#fff4d0;box-shadow:0 0 13px 3px #f6cb85ab;
+  content:"";position:absolute;left:-5px;top:-5px;width:12px;height:12px;
+  border-radius:50%;background:#fff4d0;box-shadow:0 0 19px 4px #f6cb85ab;
 }
 .moonlight-gate__meteor--second{
-  left:89%;top:34%;width:clamp(75px,12vw,155px);height:1px;
-  filter:brightness(.78);
+  left:90%;top:-4%;width:clamp(110px,18vw,215px);height:2.5px;
+  --meteor-start-x:23vw;--meteor-start-y:-21svh;
+  --meteor-end-x:-112vw;--meteor-end-y:132svh;
+  filter:brightness(.82);
 }
 .moonlight-gate.is-opening .moonlight-gate__meteor--first{
-  animation:gateMeteorFall 1.22s cubic-bezier(.2,.52,.45,1) .82s both;
+  animation:gateMeteorFall 3.5s linear .45s both;
 }
 .moonlight-gate.is-opening .moonlight-gate__meteor--second{
-  animation:gateMeteorFall 1.06s cubic-bezier(.2,.52,.45,1) 1.85s both;
+  animation:gateMeteorFall 3.65s linear 1.35s both;
 }
+/* The head enters from beyond the top-right and leaves below the bottom edge,
+   on both wide desktops and tall phones. */
 @keyframes gateMeteorFall{
-  0%{opacity:0;transform:translate3d(85px,-65px,0) rotate(-32deg) scaleX(.68)}
-  18%{opacity:.94}
-  65%{opacity:.8}
-  100%{opacity:0;transform:translate3d(-170px,115px,0) rotate(-32deg) scaleX(.35)}
+  0%{opacity:0;transform:translate3d(var(--meteor-start-x),var(--meteor-start-y),0) rotate(var(--meteor-angle))}
+  9%{opacity:.95}
+  89%{opacity:.9}
+  100%{opacity:0;transform:translate3d(var(--meteor-end-x),var(--meteor-end-y),0) rotate(var(--meteor-angle))}
 }
 .moonlight-gate__butterfly{
   position:absolute;left:var(--bx);top:var(--by);
-  width:clamp(20px,3vw,38px);aspect-ratio:64/52;opacity:0;
+  width:clamp(26px,3.7vw,46px);aspect-ratio:64/52;opacity:0;
   color:#f0cd8c;pointer-events:none;
 }
 .moonlight-gate__butterfly svg{
@@ -1071,9 +1080,9 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate__butterfly-body{
   fill:none;stroke:#ffe1a3;stroke-width:1.85;stroke-linecap:round;
 }
-.moonlight-gate__butterfly--one{--bx:13%;--by:64%;--fly-x:52px;--fly-y:-82px;--fly-tilt:-13deg;--fly-delay:1.12s;--fly-time:3.05s}
-.moonlight-gate__butterfly--two{--bx:87%;--by:57%;--fly-x:-62px;--fly-y:-96px;--fly-tilt:13deg;--fly-delay:1.43s;--fly-time:2.85s}
-.moonlight-gate__butterfly--three{--bx:25%;--by:78%;--fly-x:45px;--fly-y:-57px;--fly-tilt:-9deg;--fly-delay:1.9s;--fly-time:2.6s;width:clamp(17px,2.3vw,29px)}
+.moonlight-gate__butterfly--one{--bx:13%;--by:64%;--fly-x:78px;--fly-y:-120px;--fly-tilt:-13deg;--fly-delay:.85s;--fly-time:4.25s}
+.moonlight-gate__butterfly--two{--bx:87%;--by:57%;--fly-x:-82px;--fly-y:-135px;--fly-tilt:13deg;--fly-delay:1.05s;--fly-time:4.15s}
+.moonlight-gate__butterfly--three{--bx:25%;--by:78%;--fly-x:65px;--fly-y:-85px;--fly-tilt:-9deg;--fly-delay:1.45s;--fly-time:3.8s;width:clamp(21px,2.8vw,35px)}
 .moonlight-gate.is-opening .moonlight-gate__butterfly{
   animation:gateButterflyDrift var(--fly-time) ease-in-out var(--fly-delay) both;
 }
@@ -1094,7 +1103,8 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 html[data-theme="light"] .moonlight-gate__magic{filter:brightness(.76) sepia(.16)}
 @media(max-width:650px){
   .moonlight-gate__butterfly--three,.moonlight-gate__meteor--second{display:none}
-  .moonlight-gate__butterfly{width:25px}
+  .moonlight-gate__butterfly{width:30px}
+  .moonlight-gate__meteor{--meteor-angle:-53deg}
 }
 @media(prefers-reduced-motion:reduce){
   .moonlight-gate__magic{display:none!important}
