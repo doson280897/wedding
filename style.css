@@ -1151,3 +1151,74 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   .cinematic-ready .cinematic-reveal.is-visible{opacity:1;transform:none;filter:none;transition:none}
   .reveal{opacity:1;transform:none}
 }
+
+
+/* MUSEUM GALLERY — one lit artwork, neighboring prints recede into shadow.
+   Keep image pixels unblurred and preserve the existing spring camera. */
+.album-section{
+  background:
+    radial-gradient(ellipse at 50% 32%,rgba(170,151,115,.095),transparent 35%),
+    radial-gradient(ellipse at 50% 49%,#202a2c 0%,#0d1418 43%,#05090c 87%);
+  border-top-color:rgba(206,172,117,.34);
+  border-bottom-color:rgba(206,172,117,.22);
+}
+.album-ambient{
+  background:
+    radial-gradient(ellipse 30% 46% at 50% 42%,rgba(235,210,168,.12),transparent 100%),
+    linear-gradient(90deg,rgba(0,0,0,.43),transparent 26%,transparent 74%,rgba(0,0,0,.43));
+}
+.album-viewport:before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 23% 40% at 50% 40%,rgba(240,223,186,.105),transparent 100%),
+    linear-gradient(180deg,rgba(255,237,190,.018),transparent 70%);
+}
+.album-card{
+  border-color:rgba(199,175,135,.22);
+  box-shadow:0 21px 55px rgba(0,0,0,.62);
+  transition:border-color .35s ease,box-shadow .55s ease;
+}
+.album-card .album-photo{
+  filter:brightness(.66) saturate(.74);
+  transition:filter .5s cubic-bezier(.2,.72,.2,1);
+}
+.album-card.is-main{
+  border-color:rgba(235,215,177,.92);
+  box-shadow:
+    0 38px 95px rgba(0,0,0,.88),
+    0 0 0 5px rgba(8,11,11,.6),
+    0 0 0 6px rgba(204,176,124,.23),
+    0 0 70px rgba(219,188,130,.17);
+}
+.album-card.is-main .album-photo{
+  filter:none;
+}
+.album-card:after{
+  box-shadow:inset 0 0 0 1px rgba(255,245,219,.05),
+    inset 0 0 28px rgba(6,10,12,.21);
+}
+.album-caption-rule{background:linear-gradient(90deg,#5e4d36,#c7aa79,#5e4d36)}
+.album-header h2{letter-spacing:.015em}
+.album-lightbox{
+  background:rgba(4,7,8,.985);
+}
+.album-lightbox:before{
+  background:
+    radial-gradient(ellipse 38% 55% at 50% 44%,rgba(207,185,143,.09),transparent 100%),
+    linear-gradient(90deg,rgba(0,0,0,.48),transparent 22%,transparent 78%,rgba(0,0,0,.48));
+}
+.album-lightbox-stage:before{
+  content:"";position:absolute;inset:clamp(12px,3vw,44px);
+  border:1px solid rgba(196,166,113,.12);
+  pointer-events:none;
+}
+@media(max-width:700px){
+  .album-viewport:before{background:radial-gradient(ellipse 52% 39% at 50% 44%,rgba(238,209,163,.085),transparent)}
+  .album-card.is-main{
+    box-shadow:0 25px 65px rgba(0,0,0,.8),0 0 0 3px rgba(8,11,11,.52),
+      0 0 0 4px rgba(204,176,124,.18),0 0 35px rgba(219,188,130,.13);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .album-card,.album-card .album-photo{transition:none!important}
+}

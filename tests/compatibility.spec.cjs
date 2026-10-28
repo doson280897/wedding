@@ -61,8 +61,16 @@ test("party link, envelope and album lightbox interactions", async ({
     { waitUntil: "domcontentloaded" },
   );
   await expect(page.locator("#envelopeIntro")).toBeVisible();
+  // The seal is personalized from data, not hard-coded into the HTML.
+  const initials = await page.evaluate(() =>
+    window.WEDDING_INFO.couple.bride.initial + " · " + window.WEDDING_INFO.couple.groom.initial
+  );
+  await expect(page.locator("#envelopeMonogram")).toHaveText(initials);
   await page.locator("#skipInvitation").click();
   await expect(page.locator("#envelopeIntro")).toBeHidden();
+  await expect(page.locator("#heroMonogram")).toContainText(initials.split(" · ")[0]);
+  await page.locator(".couple-section .section-title").scrollIntoViewIfNeeded();
+  await expect(page.locator(".couple-section .section-title")).toHaveClass(/is-visible/);
 
   await page.locator("#albumViewport").scrollIntoViewIfNeeded();
   await expect.poll(() => page.locator(".album-slide").count()).toBeGreaterThan(0);
@@ -70,6 +78,13 @@ test("party link, envelope and album lightbox interactions", async ({
   const loadedImages = await page.locator(".album-photo[src]").count();
   expect(loadedImages).toBeGreaterThan(0);
   if (totalSlides > 12) expect(loadedImages).toBeLessThan(totalSlides);
+  await expect(page.locator(".album-card.is-main")).toHaveCount(1);
+  const lighting = await page.evaluate(() => ({
+    focused:getComputedStyle(document.querySelector(".album-card.is-main .album-photo")).filter,
+    adjacent:getComputedStyle(document.querySelector(".album-card:not(.is-main) .album-photo")).filter,
+  }));
+  expect(lighting.focused).toBe("none");
+  expect(lighting.adjacent).toContain("brightness");
 
   await page.locator("#albumViewport").focus();
   await page.keyboard.press("Enter");
@@ -253,6 +268,9 @@ test("settings palette provides light/dark, persistent language and music in one
   await page.locator('[data-theme-option="light"]').click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await expect(page.locator('[data-theme-option="light"]')).toHaveAttribute("aria-pressed", "true");
+  expect(await page.locator("html").evaluate(node =>
+    getComputedStyle(node).getPropertyValue("--paper-ivory").trim()
+  )).toBe("#f6f1e8");
   const lightBackground = await page.locator(".party-selector-card").evaluate(
     node => getComputedStyle(node).backgroundImage,
   );
