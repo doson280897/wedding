@@ -376,9 +376,10 @@ test("F5 resets settings and menu positions to opposite right corners @smoke", a
 });
 
 
-test("a new tab starts in VN and Dark even after the first tab was changed @smoke @core", async ({
+test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @core", async ({
   page
 }) => {
+  await page.emulateMedia({ colorScheme:"dark" });
   const url = base + "/index.html";
   await page.goto(url, { waitUntil:"domcontentloaded" });
   await page.locator("#settingsTrigger").click();
@@ -408,6 +409,15 @@ test("a new tab starts in VN and Dark even after the first tab was changed @smok
   await page.reload({ waitUntil:"domcontentloaded" });
   await expect(page.locator("html")).toHaveAttribute("data-theme","light");
   await expect(page.locator("html")).toHaveAttribute("lang","en");
+
+  const lightPage = await page.context().newPage();
+  await lightPage.emulateMedia({ colorScheme:"light" });
+  await lightPage.goto(url + "?party=bride", { waitUntil:"domcontentloaded" });
+  await expect(lightPage.locator("html")).toHaveAttribute("data-theme","light");
+  await expect(lightPage.locator("#moonlightGate")).toBeVisible();
+  await expect(lightPage.locator(".moonlight-gate__celestial")).toBeVisible();
+  await expect(lightPage.locator("#settingsHub")).toBeVisible();
+  await lightPage.close();
 });
 
 

@@ -985,7 +985,7 @@ html.link-tool-active .moonlight-gate{display:none!important}
   content:"";position:absolute;inset:auto 0 0;height:36%;
   background:linear-gradient(180deg,transparent,rgba(5,12,13,.56));
 }
-.moonlight-gate__moon{
+.moonlight-gate__celestial{
   position:absolute;left:50%;top:8.5%;
   width:clamp(72px,11vw,112px);aspect-ratio:1;border-radius:50%;
   transform:translateX(-50%);
@@ -1115,7 +1115,7 @@ html.link-tool-active .moonlight-gate{display:none!important}
     height:min(69svh,590px);
     min-height:470px;
   }
-  .moonlight-gate__moon{top:9%;width:76px}
+  .moonlight-gate__celestial{top:9%;width:76px}
   #waxOpenButton{width:70px;height:70px;top:59%}
   .moonlight-gate__hint{bottom:max(20px,3svh);font-size:9px;letter-spacing:.18em}
 }
@@ -1223,4 +1223,53 @@ html.link-tool-active .moonlight-gate{display:none!important}
   .moonlight-gate__arch{
     box-shadow:0 0 0 1px rgba(242,220,167,.15),0 0 22px rgba(181,145,82,.1);
   }
+}
+
+
+/* Moonlight Gate participates in the global Light/Dark appearance. */
+.moonlight-gate__celestial{
+  z-index:7;
+  pointer-events:none;
+}
+html[data-theme="dark"] .moonlight-gate__celestial{
+  background:
+    radial-gradient(circle at 36% 33%,rgba(183,195,195,.28) 0 5%,transparent 6%),
+    radial-gradient(circle at 62% 58%,rgba(176,189,190,.22) 0 8%,transparent 9%),
+    linear-gradient(145deg,#f5f1dc,#cfd9d8);
+  box-shadow:0 0 24px rgba(230,237,225,.42),0 0 72px rgba(181,207,204,.2);
+}
+html[data-theme="light"] .moonlight-gate__backdrop{
+  background:
+    radial-gradient(circle at 50% 17%,rgba(255,224,159,.24),transparent 22%),
+    linear-gradient(180deg,#cbdde0 0%,#dfe7df 42%,#efe4cf 100%);
+}
+html[data-theme="light"] .moonlight-gate__backdrop:after{
+  background:linear-gradient(180deg,transparent,rgba(213,188,146,.24));
+}
+html[data-theme="light"] .moonlight-gate__celestial{
+  background:radial-gradient(circle at 36% 32%,#fffbe7 0 18%,#ffd991 58%,#eab861 100%);
+  box-shadow:0 0 30px rgba(255,220,142,.75),0 0 90px rgba(238,188,95,.38);
+}
+html[data-theme="light"] .moonlight-gate__stars{opacity:0}
+html[data-theme="light"] .moonlight-gate__door{
+  background:
+    linear-gradient(90deg,rgba(182,136,69,.09),transparent 20%,transparent 80%,rgba(182,136,69,.08)),
+    linear-gradient(180deg,#f3ebdc,#ded2bf 58%,#d4c2a8);
+  border-color:rgba(150,111,61,.62);
+  box-shadow:inset 0 0 30px rgba(116,91,54,.13);
+}
+html[data-theme="light"] .moonlight-gate__arch{
+  border-color:rgba(146,108,57,.82);
+  box-shadow:0 0 0 1px rgba(255,248,224,.56),0 0 32px rgba(164,124,65,.14),
+    inset 0 0 25px rgba(116,91,54,.12);
+}
+html[data-theme="light"] .moonlight-gate__door-inlay{
+  border-color:rgba(150,111,61,.48);
+}
+html[data-theme="light"] .moonlight-gate__hint{color:rgba(71,77,67,.78)}
+html[data-theme="light"] #waxOpenButton{
+  border-color:#9c7740;color:#344a3a;
+  background:radial-gradient(circle at 35% 28%,#ead7a4 0 11%,#c6a76c 38%,#a98b55 74%,#8e734a 100%);
+  box-shadow:0 10px 28px rgba(88,67,37,.2),0 0 0 4px rgba(176,142,79,.15),
+    inset 0 2px 4px rgba(255,247,221,.52);
 }

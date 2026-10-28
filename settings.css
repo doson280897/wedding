@@ -649,3 +649,14 @@ html[data-theme="light"] footer{background:#eae2d5;color:#506354;border-top:1px 
 @media(prefers-reduced-motion:reduce){
   html[data-theme="light"] :is(.map-button,.calendar-button){transition:none}
 }
+
+
+/* Settings must remain operable while the cinematic gate is present. */
+html.wax-pending .language-switch.settings-hub,
+html.wax-pending .language-switch.settings-hub.floating-control{
+  z-index:12050!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+html.wax-pending .settings-hub .settings-panel{z-index:3}
