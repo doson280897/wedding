@@ -131,10 +131,39 @@ jobs:
         with:
           enablement: true
 
+      # Publish only runtime files; keep source, tests, workflows, and originals
+      # in GitHub without copying them into the public Pages artifact.
+      - name: Stage minimal public website
+        run: |
+          mkdir -p site/images
+          cp index.html link-tool.html ./*.css ./*.js ./favicon*.svg version.json site/
+          if [ -f og-preview.jpg ]; then cp og-preview.jpg site/; fi
+          cp images/manifest.json site/images/manifest.json
+          cp -R images/optimized site/images/optimized
+          python3 - <<'PY'
+          from pathlib import Path
+          from urllib.parse import urlparse, unquote
+          import json
+          import shutil
+          import tempfile
+
+          info = json.loads((Path(tempfile.gettempdir()) / "wedding-deploy-info.json").read_text(encoding="utf-8"))
+          source = info["site"].get("socialImage", "og-preview.jpg")
+          parsed = urlparse(source)
+          if parsed.scheme in ("https", "http") or source == "og-preview.jpg":
+              raise SystemExit(0)
+          path = Path(unquote(parsed.path))
+          if path.is_absolute() or ".." in path.parts or not path.is_file():
+              raise SystemExit("Invalid local socialImage: " + source)
+          target = Path("site") / path
+          target.parent.mkdir(parents=True, exist_ok=True)
+          shutil.copy2(path, target)
+          PY
+
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: site
 
       - name: Deploy
         id: deployment
