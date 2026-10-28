@@ -11,6 +11,7 @@
 
   const i18n = window.WeddingI18n;
   const t = key => i18n ? i18n.t(key) : key;
+  const coupleLabel = () => window.WEDDING_INFO.couple.bride.short + " & " + window.WEDDING_INFO.couple.groom.short;
   const guestInput = document.getElementById("linkToolGuest");
   const partySelect = document.getElementById("linkToolParty");
   const result = document.getElementById("linkToolResult");
@@ -69,7 +70,7 @@
     }
     if (open) {
       previouslyFocused = document.activeElement;
-      document.title = t("link.title") + " | Tố Nga & Thành Sơn";
+      document.title = t("link.title") + " | " + coupleLabel();
       requestAnimationFrame(() => guestInput.focus({ preventScroll: true }));
     } else {
       const party = new URLSearchParams(location.search).get("party");
@@ -133,7 +134,7 @@
   share.addEventListener("click", async () => {
     if (!invitation || typeof navigator.share !== "function") return;
     try {
-      await navigator.share({ title: "Thiệp cưới Tố Nga & Thành Sơn", url: invitation });
+      await navigator.share({ title: t("page.title"), url: invitation });
     } catch (error) {
       if (error?.name !== "AbortError") setFeedback("link.shareFail");
     }
@@ -146,7 +147,7 @@
     } else if (feedbackKey) {
       setFeedback(feedbackKey);
     }
-    if (!screen.hidden) document.title = t("link.title") + " | Tố Nga & Thành Sơn";
+    if (!screen.hidden) document.title = t("link.title") + " | " + coupleLabel();
   });
 
   // The in-page dialog remains keyboard accessible alongside the ONE
