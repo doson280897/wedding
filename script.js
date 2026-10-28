@@ -390,6 +390,42 @@
   let musicEnabled = false;
   let musicStarting = false;
   let bubbleActionsOpen = false;
+  let musicWantsPlayback = false;
+  let musicPlaybackFailed = false;
+  let musicRequestId = 0;
+  let musicStartTimer = 0;
+  let musicStatePoll = 0;
+
+  const clearMusicWait = () => {
+    clearTimeout(musicStartTimer);
+    clearInterval(musicStatePoll);
+    musicStartTimer = 0;
+    musicStatePoll = 0;
+  };
+
+  // PLAYING is confirmed by YouTube's event or getPlayerState(), never by
+  // merely showing the bubble. The watchdog prevents endless "Loading".
+  const confirmMusicPlaying = () => {
+    if (!musicEnabled || !musicWantsPlayback) return;
+    clearMusicWait();
+    musicPlaying = true;
+    musicStarting = false;
+    musicPlaybackFailed = false;
+    setMusicUI();
+  };
+
+  const failMusicAttempt = requestId => {
+    if (!musicEnabled || requestId !== musicRequestId) return;
+    ++musicRequestId;
+    clearMusicWait();
+    musicWantsPlayback = false;
+    musicPlaying = false;
+    musicStarting = false;
+    musicPlaybackFailed = true;
+    setMusicUI();
+    // If a delayed play command eventually takes effect, silence it.
+    try { if (youtubePlayerReady) youtubePlayer?.pauseVideo(); } catch (_) {}
+  };
 
   const setBubbleActionsOpen = open => {
     bubbleActionsOpen = Boolean(open && musicEnabled && musicBubble && !musicBubble.hidden);
@@ -410,7 +446,8 @@
       const label = musicButton.querySelector(".music-label");
       if (label) label.textContent = tr(
         !musicEnabled ? "music.off" : musicPlaying ? "music.on" :
-        musicStarting ? "music.loading" : "music.paused"
+        musicStarting ? "music.loading" :
+        musicPlaybackFailed ? "music.retry" : "music.paused"
       );
     }
     if (musicBubble) {
@@ -423,10 +460,12 @@
       musicBubbleTrigger.setAttribute("title", tr("music.bubbleTitle"));
     }
     if (musicBubblePause) {
-      const key = musicPlaying ? "music.pauseAria" : "music.resumeAria";
+      const key = musicStarting ? "music.cancelAria" :
+        musicPlaying ? "music.pauseAria" : "music.resumeAria";
       musicBubblePause.setAttribute("aria-label", tr(key));
       musicBubblePause.setAttribute("title", tr(key));
-      musicBubblePause.disabled = musicStarting;
+      // Never lock Pause while YouTube is buffering or API-ready is pending.
+      musicBubblePause.disabled = false;
     }
     if (musicBubbleStop) {
       musicBubbleStop.setAttribute("aria-label", tr("music.stopAria"));
@@ -435,6 +474,10 @@
   }
 
   const stopMusic = () => {
+    ++musicRequestId;
+    clearMusicWait();
+    musicWantsPlayback = false;
+    musicPlaybackFailed = false;
     musicEnabled = false;
     musicPlaying = false;
     musicStarting = false;
@@ -449,36 +492,58 @@
   };
 
   const requestMusicPlayback = () => {
-    if (!selectedParty) return;
+    if (!selectedParty || musicStarting || musicPlaying) return;
+    const requestId = ++musicRequestId;
+    clearMusicWait();
     musicEnabled = true;
-    musicStarting = !musicPlaying;
+    musicWantsPlayback = true;
+    musicPlaybackFailed = false;
+    musicStarting = true;
     setMusicUI();
-    const play = player => {
-      if (!musicEnabled) return; // Stop may have been pressed during startup.
-      try { player.playVideo(); }
-      catch (_) {
-        musicStarting = false;
-        musicPlaying = false;
-        setMusicUI();
+
+    musicStartTimer = setTimeout(() => {
+      // Some mobile browsers block YouTube playback without sending PLAYING.
+      // Switch to a retryable paused orb instead of spinning indefinitely.
+      failMusicAttempt(requestId);
+    }, 10000);
+
+    musicStatePoll = setInterval(() => {
+      if (!musicEnabled || !musicWantsPlayback || requestId !== musicRequestId) {
+        clearMusicWait();
+        return;
       }
+      try {
+        if (youtubePlayerReady &&
+            typeof youtubePlayer?.getPlayerState === "function" &&
+            youtubePlayer.getPlayerState() === window.YT?.PlayerState?.PLAYING) {
+          confirmMusicPlaying();
+        }
+      } catch (_) {}
+    }, 600);
+
+    const play = player => {
+      if (!musicEnabled || !musicWantsPlayback || requestId !== musicRequestId) return;
+      try { player.playVideo(); } // Synchronous when already ready for iOS gestures.
+      catch (_) { failMusicAttempt(requestId); }
     };
     if (youtubePlayerReady && youtubePlayer) {
-      play(youtubePlayer); // Keep this synchronous for iOS user gestures.
+      play(youtubePlayer);
     } else {
-      initYouTubeMusicPlayer().then(play).catch(() => {
-        if (musicEnabled) stopMusic();
-      });
+      initYouTubeMusicPlayer().then(play).catch(() => failMusicAttempt(requestId));
     }
   };
 
   const pauseMusic = () => {
-    if (!musicEnabled || !musicPlaying || !youtubePlayerReady) return;
+    if (!musicEnabled || (!musicPlaying && !musicStarting)) return;
+    ++musicRequestId; // Cancel even if the YouTube iframe isn't ready yet.
+    clearMusicWait();
+    musicWantsPlayback = false;
+    musicPlaying = false;
+    musicStarting = false;
+    musicPlaybackFailed = false;
+    setMusicUI();
     try {
-      youtubePlayer.pauseVideo();
-      // Immediate visual feedback; the YouTube state event will confirm it.
-      musicPlaying = false;
-      musicStarting = false;
-      setMusicUI();
+      if (youtubePlayerReady && youtubePlayer) youtubePlayer.pauseVideo();
     } catch (_) {}
   };
 
@@ -486,8 +551,8 @@
     if (musicEnabled) setBubbleActionsOpen(!bubbleActionsOpen);
   });
   musicBubblePause?.addEventListener("click", () => {
-    if (musicPlaying) pauseMusic();
-    else if (!musicStarting) requestMusicPlayback();
+    if (musicPlaying || musicStarting) pauseMusic();
+    else requestMusicPlayback();
     // Return to the single unobtrusive orb after pause or resume.
     setBubbleActionsOpen(false);
   });
@@ -569,22 +634,31 @@
             resolve(event.target);
           },
           onStateChange: event => {
-            // Ignore late callbacks after Stop so the bubble cannot reappear.
             if (!musicEnabled) return;
             if (event.data === window.YT.PlayerState.PLAYING) {
-              musicPlaying = true;
-              musicStarting = false;
+              if (!musicWantsPlayback) {
+                // A delayed start must not restart after Pause/Stop/timeout.
+                try { event.target.pauseVideo(); } catch (_) {}
+                return;
+              }
+              confirmMusicPlaying();
             } else if (
               event.data === window.YT.PlayerState.PAUSED ||
               event.data === window.YT.PlayerState.ENDED
             ) {
+              // Initial PAUSED may arrive during an in-flight play request.
+              // Wait for PLAYING or timeout rather than flashing the icon.
+              if (musicStarting && musicWantsPlayback) return;
+              ++musicRequestId;
+              clearMusicWait();
+              musicWantsPlayback = false;
               musicPlaying = false;
               musicStarting = false;
+              setMusicUI();
             }
-            setMusicUI();
           },
           onError: error => {
-            stopMusic();
+            failMusicAttempt(musicRequestId);
             reject(new Error("YouTube player error " + error.data));
           }
         }
@@ -608,8 +682,8 @@
   // Settings is the entry point for activating music. The contextual bubble
   // handles Pause/Resume and Stop without adding another permanently visible button.
   musicButton?.addEventListener("click", () => {
-    if (musicEnabled && musicPlaying) stopMusic();
-    else if (!musicStarting) requestMusicPlayback();
+    if (musicEnabled && (musicPlaying || musicStarting)) stopMusic();
+    else requestMusicPlayback();
   });
 
   function applyPartyDomOrder() {
