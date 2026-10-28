@@ -255,11 +255,12 @@
   const moonlightGate = document.getElementById("moonlightGate");
   const waxOpenButton = document.getElementById("waxOpenButton");
   const reducedGateMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // Door fully swings first, scene rests for 1.5s, then crossfades to the real hero.
+  // After the doors finish, briefly reveal the names, then zoom the sky and
+  // names OUT as the real hero zooms IN. The two scenes crossfade together.
   const GATE_AWAKEN_MS = 240;
   const GATE_DOOR_MS = 2900;
-  const GATE_PAUSE_MS = 1500;
-  const GATE_HANDOFF_MS = 1250;
+  const GATE_REVEAL_BEAT_MS = 220;
+  const GATE_HANDOFF_MS = 1350;
   let gateOpening = false;
   let doorSettled = false;
   const leftGateDoor = moonlightGate?.querySelector(".moonlight-gate__door--left");
@@ -283,7 +284,7 @@
     leftGateDoor?.removeEventListener("transitionend", onDoorTransitionEnd);
     moonlightGate.hidden = true;
     moonlightGate.classList.remove(
-      "is-awakening", "is-opening", "is-opened", "is-leaving"
+      "is-awakening", "is-opening", "is-opened", "is-handoff", "is-leaving"
     );
     document.documentElement.classList.remove("wax-pending", "gate-hero-revealing");
     setContentBrowserTheme();
@@ -298,7 +299,9 @@
       completeMoonlightGate();
       return;
     }
-    moonlightGate.classList.add("is-leaving");
+    // Animate the cover itself, the sky/title and the underlying hero in one
+    // uninterrupted handoff. Keep the cover until the final animation frame.
+    moonlightGate.classList.add("is-handoff");
     scheduleGate(completeMoonlightGate, GATE_HANDOFF_MS);
   };
   const settleOpenDoor = () => {
@@ -306,8 +309,8 @@
     doorSettled = true;
     leftGateDoor?.removeEventListener("transitionend", onDoorTransitionEnd);
     moonlightGate.classList.add("is-opened");
-    // The pause begins at the actual end of the 3D hinge transition.
-    scheduleGate(finishMoonlightGate, GATE_PAUSE_MS);
+    // No stationary 1.5s hold: only a tiny beat for the names to register.
+    scheduleGate(finishMoonlightGate, GATE_REVEAL_BEAT_MS);
   };
   function onDoorTransitionEnd(event) {
     if (event.target === leftGateDoor && event.propertyName === "transform") {

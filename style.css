@@ -962,19 +962,23 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 /* FEAT 04 — the personal names are written into view by a single gold sweep. */
 #heroNames{position:relative;isolation:isolate}
 
-/* CELESTIAL GATE — vector-only luxury doors, with a distinct open-door pause.
-   The hero remains invisible until the 1.5s hold has elapsed. */
+/* CELESTIAL GATE — the opening doors lead straight into a layered sky/title
+   zoom-out and hero zoom-in crossfade; no stationary post-opening pause. */
 html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate{
   --gate-gold:#d8b477;
   --gate-seal-y:56%;
   position:fixed;inset:0;z-index:10000;isolation:isolate;overflow:hidden;
   background:#0a101d;perspective:1150px;perspective-origin:50% 50%;
+  opacity:1;
 }
 .moonlight-gate[hidden],html.party-pending .moonlight-gate,html.link-tool-active .moonlight-gate{display:none!important}
 .moonlight-gate__backdrop{
   position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
   background:radial-gradient(ellipse at 50% 68%,#91613b 0%,#47383d 17%,#20283b 46%,#090f1d 83%);
+  transform:scale(1);
+  transition:transform 1.35s cubic-bezier(.22,.72,.2,1);
+  transform-origin:50% 50%;
 }
 .moonlight-gate__backdrop:after{
   content:"";position:absolute;inset:auto 0 0;height:42%;
@@ -997,9 +1001,10 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 }
 .moonlight-gate__celestial{
   position:absolute;z-index:1;top:16%;left:50%;width:clamp(160px,24vw,290px);
-  aspect-ratio:1;transform:translateX(-50%);border:1px solid #e1bb7a5e;
+  aspect-ratio:1;transform:translateX(-50%) scale(1);border:1px solid #e1bb7a5e;
   border-radius:50%;pointer-events:none;
   box-shadow:0 0 0 34px #e0b4720b,0 0 0 70px #e0b47208,0 0 85px #e5b36c28;
+  transition:transform 1.35s cubic-bezier(.22,.72,.2,1);
 }
 .moonlight-gate__reveal{
   position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;
@@ -1128,10 +1133,32 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate.is-opened .moonlight-gate__reveal{
   opacity:1;transform:scale(1);transition-delay:0s;
 }
-.moonlight-gate.is-leaving{opacity:0;pointer-events:none;transition:opacity 1.25s cubic-bezier(.18,.62,.2,1)}
+/* The gate opacity exposes the actual hero underneath while the foreground
+   scenery scales toward the guest. All durations match the JS handoff clock. */
+.moonlight-gate.is-handoff{
+  opacity:0;pointer-events:none;
+  transition:opacity 1.35s cubic-bezier(.22,.72,.2,1);
+}
+.moonlight-gate.is-handoff .moonlight-gate__backdrop{
+  transform:scale(1.14);
+}
+.moonlight-gate.is-handoff .moonlight-gate__celestial{
+  transform:translateX(-50%) scale(1.12);
+}
+.moonlight-gate.is-handoff .moonlight-gate__reveal{
+  opacity:0;transform:scale(1.18);
+  transition:opacity 1.35s cubic-bezier(.22,.72,.2,1),
+             transform 1.35s cubic-bezier(.22,.72,.2,1);
+  transition-delay:0s;
+}
+.moonlight-gate.is-handoff .moonlight-gate__scene{
+  opacity:0;
+  transition:opacity .65s ease;
+}
 html.wax-pending .hero{
-  opacity:0;transform:scale(1.018);
-  transition:opacity 1.25s cubic-bezier(.18,.62,.2,1),transform 1.25s cubic-bezier(.18,.62,.2,1);
+  opacity:0;transform:scale(1.08);
+  transition:opacity 1.35s cubic-bezier(.22,.72,.2,1),
+             transform 1.35s cubic-bezier(.22,.72,.2,1);
 }
 html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
 /* Light mode keeps the same handoff while using champagne door panels. */

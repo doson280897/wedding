@@ -383,12 +383,36 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(page.locator("#wqToggle")).toBeHidden();
   const finalHinge = await leftDoor.evaluate(node => getComputedStyle(node).transform);
   expect(finalHinge).toContain("matrix3d(");
-  // The real hero must stay hidden during the deliberate 1.5s pause.
-  await expect(page.locator("html")).not.toHaveClass(/gate-hero-revealing/);
-  await expect(page.locator(".hero")).toHaveCSS("opacity", "0");
-  await page.waitForTimeout(550);
-  await expect(page.locator("html")).not.toHaveClass(/gate-hero-revealing/);
-  await expect(page.locator("html")).toHaveClass(/gate-hero-revealing/, { timeout:4000 });
+  // A brief ~220ms beat replaces the old 1.5s hold; the sky/title zoom
+  // out WHILE the actual hero zooms in and both layers crossfade.
+  await expect(gate).toHaveClass(/is-handoff/, { timeout:2500 });
+  await expect(page.locator("html")).toHaveClass(/gate-hero-revealing/);
+  const zoomConfig = await page.evaluate(() => {
+    const sky = document.querySelector(".moonlight-gate__backdrop");
+    const title = document.querySelector(".moonlight-gate__reveal");
+    const hero = document.querySelector(".hero");
+    const cover = document.getElementById("moonlightGate");
+    const rules = [...document.styleSheets].flatMap(sheet => {
+      try { return [...sheet.cssRules]; } catch (_) { return []; }
+    });
+    const getRule = selector => rules.find(rule => rule.selectorText === selector)?.cssText || "";
+    return {
+      gateDuration:parseFloat(getComputedStyle(cover).transitionDuration),
+      skyRule:getRule(".moonlight-gate.is-handoff .moonlight-gate__backdrop"),
+      titleRule:getRule(".moonlight-gate.is-handoff .moonlight-gate__reveal"),
+      heroRule:getRule("html.wax-pending .hero"),
+      skyTransition:getComputedStyle(sky).transitionDuration,
+      titleTransition:getComputedStyle(title).transitionDuration,
+      heroTransition:getComputedStyle(hero).transitionDuration
+    };
+  });
+  expect(zoomConfig.gateDuration).toBeGreaterThanOrEqual(1.3);
+  expect(zoomConfig.skyRule).toContain("scale(1.14)");
+  expect(zoomConfig.titleRule).toContain("scale(1.18)");
+  expect(zoomConfig.heroRule).toContain("scale(1.08)");
+  expect(zoomConfig.skyTransition).toContain("1.35s");
+  expect(zoomConfig.titleTransition).toContain("1.35s");
+  expect(zoomConfig.heroTransition).toContain("1.35s");
   await expect(page.locator(".hero")).toHaveCSS("opacity","1");
   await expect(gate).toBeHidden({ timeout:9000 });
   await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
