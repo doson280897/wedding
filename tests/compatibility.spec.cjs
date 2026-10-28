@@ -244,6 +244,25 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator(".invitation-card")).toBeHidden();
   await expect(page.locator("#envelopeStageHit")).toBeVisible();
   await expect(page.locator(".envelope-seal")).toBeVisible();
+  // The original diamond flap pointed upward as if already opened.
+  // A sealed envelope must have its triangular flap pointing DOWN,
+  // layered above the paper pocket and aligned with the wax seal.
+  const sealedFlap = await page.locator(".envelope-flap").evaluate(node => {
+    const flap = node.getBoundingClientRect();
+    const wax = document.querySelector(".envelope-seal").getBoundingClientRect();
+    const front = document.querySelector(".envelope-front");
+    const style = getComputedStyle(node);
+    return {
+      path: style.clipPath,
+      flapLayer: Number(style.zIndex),
+      frontLayer: Number(getComputedStyle(front).zIndex),
+      waxCenterY: wax.top + wax.height / 2,
+      flapTipY: flap.top + flap.height * .62
+    };
+  });
+  expect(sealedFlap.path).toContain("50% 62%");
+  expect(sealedFlap.flapLayer).toBeGreaterThan(sealedFlap.frontLayer);
+  expect(Math.abs(sealedFlap.waxCenterY - sealedFlap.flapTipY)).toBeLessThan(6);
 
   // The seal emits one burst; the exit flash bridges into the hero.
   // They must never replay on F5 in the same tab.
@@ -300,6 +319,7 @@ test("reduced motion opens the envelope without particles or flash", async ({ pa
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeVisible();
   await expect(page.locator("#envelopeBurst")).toBeHidden();
+  await expect(page.locator(".envelope-flap")).toHaveCSS("opacity", "0");
   await expect(page.locator(".envelope-burst-particle")).toHaveCount(0);
   await page.locator("#closeInvitation").click();
   await expect(page.locator("#envelopeIntro")).toBeHidden();
