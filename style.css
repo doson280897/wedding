@@ -394,7 +394,7 @@ html.envelope-pending body>.language-switch{visibility:visible!important;pointer
   border:1px solid rgba(139,124,91,.48);
   clip-path:polygon(0 0,100% 0,50% 62%);
   transform-origin:50% 0%;backface-visibility:visible;pointer-events:none;
-  transform:translate3d(0,0,0) scaleY(1);
+  transform:scaleY(1);
   /* A 2D hinged fold avoids the back-face culling that made the flap vanish
      on iOS/WebKit. The flap stays solid and visible when folded up. */
   transition:transform .62s cubic-bezier(.24,.72,.2,1);
@@ -493,7 +493,7 @@ html.envelope-pending body>.language-switch{visibility:visible!important;pointer
 }
 .envelope-intro{opacity:1;transition:opacity .26s cubic-bezier(.4,0,.2,1)}
 .envelope-inner{will-change:transform,opacity}
-.envelope-intro.is-flap-open .envelope-flap{transform:translate3d(0,0,0) scaleY(-1);opacity:1;z-index:1}
+.envelope-intro.is-flap-open .envelope-flap{transform:scaleY(-1);opacity:1;z-index:1}
 .envelope-intro.is-flap-open .envelope-seal{transform:translate3d(-50%,-58%,0) scale(.88);opacity:0}
 .envelope-intro.is-card-lifted .invitation-card{transform:translate3d(0,-12%,0)}
 .envelope-intro.is-card-lifted .envelope-front{transform:translate3d(0,14px,0);opacity:.58}
@@ -1226,108 +1226,21 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 }
 
 
-/* GOLDEN REVEAL — a single champagne foil bloom at the moment the seal breaks.
-   Decorative layers never intercept pointer events or trap focus. */
-.envelope-burst[hidden],.invitation-reveal[hidden]{display:none!important}
-.envelope-burst{
-  position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;
-  contain:layout style paint;
-  --burst-x:50%;--burst-y:54%;
-}
-.envelope-burst-glow,.envelope-burst-halo,.envelope-burst-rays,.envelope-burst-particle{
-  position:absolute;left:var(--burst-x);top:var(--burst-y);pointer-events:none;
-}
-.envelope-burst-glow{
-  width:220px;height:220px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,252,233,.94) 0%,rgba(249,221,164,.71) 17%,rgba(222,173,100,.19) 47%,transparent 72%);
-  filter:blur(3px);opacity:0;
-}
-.envelope-burst-halo{
-  width:100px;height:100px;border:2px solid rgba(250,227,180,.85);
-  border-radius:50%;box-shadow:0 0 17px rgba(218,173,106,.52),inset 0 0 16px rgba(255,241,202,.32);
-  opacity:0;
-}
-.envelope-burst-rays{
-  width:360px;height:360px;border-radius:50%;opacity:0;
-  background:repeating-conic-gradient(from 5deg,rgba(251,225,166,.25) 0deg,transparent 3.5deg,transparent 23deg);
-  -webkit-mask-image:radial-gradient(circle,transparent 0 19%,#000 32%,transparent 71%);
-  mask-image:radial-gradient(circle,transparent 0 19%,#000 32%,transparent 71%);
-}
-.envelope-burst-particle{
-  width:var(--particle-size,4px);height:calc(var(--particle-size,4px) * 2.4);
-  border-radius:60% 60% 30% 30%;
-  background:linear-gradient(180deg,#fff8d9 0%,#e5bb74 44%,rgba(181,123,61,.45) 100%);
-  box-shadow:0 0 10px rgba(245,210,148,.6);
-  opacity:0;
-}
-.envelope-burst-particle.is-petal{
-  width:var(--particle-size,10px);height:calc(var(--particle-size,10px) * 1.6);
-  border-radius:90% 4% 90% 8%;
-  background:linear-gradient(135deg,#fff7e9,#e8ceac 55%,#d6a96f);
-  box-shadow:0 0 9px rgba(239,212,166,.3);
-}
-.envelope-burst.is-active .envelope-burst-glow{
-  animation:weddingSealGlow 1.25s cubic-bezier(.12,.55,.2,1) both;
-}
-.envelope-burst.is-active .envelope-burst-halo{
-  animation:weddingSealHalo 1.3s cubic-bezier(.12,.54,.2,1) both;
-}
-.envelope-burst.is-active .envelope-burst-rays{
-  animation:weddingSealRays 1.35s cubic-bezier(.12,.54,.2,1) both;
-}
-.envelope-burst.is-active .envelope-burst-particle{
-  animation:weddingSealFoil 1.5s cubic-bezier(.1,.54,.22,1) var(--burst-delay,0ms) both;
-}
-@keyframes weddingSealGlow{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.13)}
-  20%{opacity:1}
-  53%{opacity:.52}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(2.6)}
-}
-@keyframes weddingSealHalo{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}
-  20%{opacity:.87}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(7)}
-}
-@keyframes weddingSealRays{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(-9deg)}
-  24%{opacity:.64}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(1.6) rotate(14deg)}
-}
-@keyframes weddingSealFoil{
-  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(0) scale(.4)}
-  16%{opacity:1}
-  58%{opacity:.84}
-  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(var(--travel)) scale(.12)}
-}
-/* Second act: cinematic warm flare when entering the revealed invitation. */
+/* A single lightweight entrance wash. No canvas, particles or filter animation. */
+.invitation-reveal[hidden]{display:none!important}
 .invitation-reveal{
   position:fixed;inset:0;z-index:4000;pointer-events:none;opacity:0;
-  background:
-    radial-gradient(ellipse at 50% 46%,rgba(255,250,230,.95) 0%,rgba(241,212,164,.76) 19%,rgba(184,135,74,.19) 45%,transparent 76%),
-    linear-gradient(90deg,rgba(54,43,28,.08),transparent 24%,transparent 76%,rgba(54,43,28,.08));
+  background:rgba(229,206,165,.38);
 }
 .invitation-reveal.is-active{
-  animation:weddingInvitationReveal 1s cubic-bezier(.2,.66,.2,1) both;
+  animation:luxSoftReveal .68s ease-out both;
 }
-@keyframes weddingInvitationReveal{
-  0%{opacity:0}
-  29%{opacity:1}
-  55%{opacity:.34}
-  100%{opacity:0}
+@keyframes luxSoftReveal{
+  0%,100%{opacity:0}
+  25%{opacity:1}
+  60%{opacity:.35}
 }
-@media(max-width:650px){
-  .envelope-burst-glow{width:170px;height:170px}
-  .envelope-burst-rays{width:260px;height:260px}
-  .invitation-reveal{
-    background:radial-gradient(ellipse at 50% 44%,rgba(255,249,228,.93),rgba(239,211,167,.59) 24%,transparent 72%);
-  }
-}
-@media(prefers-reduced-motion:reduce){
-  .envelope-burst,.invitation-reveal{display:none!important}
-  .envelope-burst *, .invitation-reveal{animation:none!important}
-}
-
+@media(prefers-reduced-motion:reduce){.invitation-reveal{display:none!important}}
 
 /* FEAT 01 — seal fracture: quick warm fissures precede the gold burst. */
 .envelope-seal{isolation:isolate}
@@ -1393,57 +1306,6 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 }
 
 
-/* FEAT 03 — seamless warm portal: the paper becomes the entrance to the hero. */
-.invitation-portal[hidden]{display:none!important}
-.invitation-portal{
-  position:fixed;inset:0;z-index:4001;overflow:hidden;pointer-events:none;
-  --portal-x:50%;--portal-y:50%;
-}
-.invitation-portal-core,.invitation-portal-ring{
-  position:absolute;left:var(--portal-x);top:var(--portal-y);border-radius:50%;
-  pointer-events:none;opacity:0;
-}
-.invitation-portal-core{
-  width:240px;height:240px;
-  background:radial-gradient(circle,#fff7df 0%,#f3dcb0 23%,rgba(211,171,116,.85) 42%,rgba(142,103,62,.2) 65%,transparent 74%);
-  mix-blend-mode:screen;
-}
-.invitation-portal-ring{
-  width:180px;height:180px;border:2px solid rgba(255,233,192,.67);
-  box-shadow:0 0 40px rgba(255,233,189,.65),inset 0 0 40px rgba(233,181,110,.38);
-}
-.invitation-portal.is-active .invitation-portal-core{
-  animation:luxPortalBloom 1250ms cubic-bezier(.18,.63,.21,1) both;
-}
-.invitation-portal.is-active .invitation-portal-ring{
-  animation:luxPortalRing 1100ms cubic-bezier(.14,.72,.2,1) both;
-}
-@keyframes luxPortalBloom{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.12)}
-  20%{opacity:.95}
-  52%{opacity:.85}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(8)}
-}
-@keyframes luxPortalRing{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
-  25%{opacity:1}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(9)}
-}
-@media(prefers-reduced-motion:no-preference){
-  html.portal-entering .hero-photo{
-    animation:luxPortalCamera 1200ms cubic-bezier(.16,.7,.21,1) both!important;
-  }
-}
-@keyframes luxPortalCamera{
-  from{transform:scale(1.15);filter:brightness(1.16) saturate(1.04)}
-  to{transform:scale(1.09);filter:brightness(1) saturate(1)}
-}
-@media(max-width:650px){.invitation-portal-core{width:180px;height:180px}}
-@media(prefers-reduced-motion:reduce){
-  .invitation-portal,.invitation-portal *{display:none!important;animation:none!important}
-}
-
-
 /* FEAT 04 — the personal names are written into view by a single gold sweep. */
 #heroNames{position:relative;isolation:isolate}
 @media(prefers-reduced-motion:no-preference){
@@ -1459,9 +1321,8 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   }
 }
 @keyframes luxGoldenSignature{
-  0%{opacity:.45;clip-path:inset(0 100% 0 0);filter:brightness(1.38)}
-  55%{opacity:1;filter:brightness(1.12)}
-  100%{opacity:1;clip-path:inset(0 0 0 0);filter:none}
+  from{opacity:0;transform:translate3d(0,8px,0)}
+  to{opacity:1;transform:none}
 }
 @keyframes luxSignatureGlint{
   0%,10%{opacity:0;transform:translate3d(-100%,0,0)}
@@ -1476,69 +1337,14 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 }
 
 
-/* FEAT 05 — sparse ivory petals drift past the envelope into the hero. */
-.floating-petals[hidden]{display:none!important}
-.floating-petals{
-  position:fixed;inset:0;z-index:3500;pointer-events:none;overflow:hidden;
-  contain:layout style paint;--petal-x:50%;--petal-y:50%;
-}
-.floating-petal{
-  position:absolute;left:var(--petal-x);top:var(--petal-y);
-  width:9px;height:16px;opacity:0;pointer-events:none;
-  border-radius:90% 6% 85% 12%;
-  background:linear-gradient(135deg,#fff8eb 0%,#e9d8bd 52%,#cfa773 100%);
-  box-shadow:0 1px 6px rgba(161,132,94,.15);
-  will-change:transform,opacity;
-}
-.floating-petal:nth-child(3n){width:7px;height:13px;background:linear-gradient(140deg,#fffaf0,#efd6b3)}
-.floating-petals.is-active .floating-petal{
-  animation:luxFloatingPetal 2150ms cubic-bezier(.2,.58,.38,1) var(--petal-delay,420ms) both;
-}
-@keyframes luxFloatingPetal{
-  0%{opacity:0;transform:translate(-50%,-50%) rotate(0deg) scale(.45)}
-  16%{opacity:.88}
-  58%{opacity:.72}
-  100%{opacity:0;transform:translate(calc(-50% + var(--petal-dx)),calc(-50% + var(--petal-dy))) rotate(var(--petal-rotate)) scale(.8)}
-}
-@media(prefers-reduced-motion:reduce){
-  .floating-petals,.floating-petal{display:none!important;animation:none!important}
-}
-
-
-/* PERF — envelope animation budget for phones and Safari.
-   Avoid expensive filtered/composited surfaces and massive radial zooms. */
+/* Matte paper shadows remain static; only transforms/opacity animate. */
 .envelope-shell{filter:none}
 .envelope-back{box-shadow:0 18px 32px rgba(48,45,37,.12)}
-.envelope-burst-glow,.seal-fracture{filter:none}
-.envelope-burst-particle,.floating-petal{box-shadow:none;will-change:auto}
-.envelope-burst-rays{background:repeating-conic-gradient(from 5deg,rgba(251,225,166,.20) 0deg,transparent 2.5deg,transparent 29deg)}
-.invitation-portal-core{mix-blend-mode:normal}
-.invitation-portal-ring{box-shadow:0 0 18px rgba(255,233,189,.3)}
-@keyframes luxPortalBloom{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.12)}
-  22%{opacity:.78}
-  60%{opacity:.4}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(3.8)}
-}
-@keyframes luxPortalRing{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
-  25%{opacity:.82}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(4.4)}
-}
-@keyframes luxPortalCamera{
-  from{transform:scale(1.12)}
-  to{transform:scale(1.09)}
-}
 @keyframes luxSealFracture{
   0%,100%{transform:translate3d(-50%,-50%,0)}
   38%{transform:translate3d(calc(-50% - 1px),-50%,0) scale(1.025)}
   70%{transform:translate3d(calc(-50% + 1px),-50%,0) scale(.99)}
 }
-@media(max-width:650px){
-  .envelope-burst-rays{display:none}
-  .invitation-portal-ring{box-shadow:none}
-}
-
 
 /* SEALED ENVELOPE — until opened, the letter is completely inside.
    No card artwork or personalized names bleed through the wax-sealed flap. */

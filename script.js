@@ -258,10 +258,7 @@
   const envelopeStageHit = document.getElementById("envelopeStageHit");
   const closeInvitation = document.getElementById("closeInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
-  const envelopeBurst = document.getElementById("envelopeBurst");
   const invitationReveal = document.getElementById("invitationReveal");
-  const invitationPortal = document.getElementById("invitationPortal");
-  const floatingPetals = document.getElementById("floatingPetals");
   const envelopeCooldown = document.getElementById("envelopeCooldown");
   const envelopeCooldownValue = document.getElementById("envelopeCooldownValue");
   // A reload in the same tab resumes the invitation without replaying its
@@ -284,101 +281,21 @@
     let leaving = false;
     let autoCloseTimer = 0;
     let cooldownTickTimer = 0;
-    let burstCleanupTimer = 0;
     let revealCleanupTimer = 0;
-    let portalCleanupTimer = 0;
-    let petalsCleanupTimer = 0;
     const prefersReducedMotion = () =>
       matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // One short, user-triggered burst of champagne foil from the actual seal.
-    // Geometry is measured BEFORE the flap moves so mobile stays centered.
-    const burstFromSeal = center => {
-      if (!envelopeBurst || prefersReducedMotion() || !center) return;
-      envelopeBurst.style.setProperty("--burst-x", center.x + "px");
-      envelopeBurst.style.setProperty("--burst-y", center.y + "px");
-      const compact = matchMedia("(max-width: 650px)").matches;
-      const saveData = navigator.connection?.saveData === true;
-      // Avoid dozens of independently composited layers on iOS Safari.
-      const count = saveData ? 4 : compact ? 8 : 12;
-      const fragment = document.createDocumentFragment();
-      for (let i = 0; i < count; i++) {
-        const particle = document.createElement("span");
-        const petal = i % 4 === 0;
-        particle.className = "envelope-burst-particle" + (petal ? " is-petal" : "");
-        particle.style.setProperty("--angle", ((360 / count) * i + 9) + "deg");
-        particle.style.setProperty("--travel", "-" + (compact ? 92 + (i % 5) * 17 : 138 + (i % 6) * 25) + "px");
-        particle.style.setProperty("--particle-size", (petal ? 10 : 3 + (i % 3) * 2) + "px");
-        particle.style.setProperty("--burst-delay", ((i % 5) * 24) + "ms");
-        fragment.append(particle);
-      }
-      envelopeBurst.querySelectorAll(".envelope-burst-particle").forEach(node => node.remove());
-      envelopeBurst.append(fragment);
-      envelopeBurst.hidden = false;
-      envelopeBurst.classList.add("is-active");
-      window.clearTimeout(burstCleanupTimer);
-      burstCleanupTimer = window.setTimeout(() => {
-        envelopeBurst.hidden = true;
-        envelopeBurst.classList.remove("is-active");
-        envelopeBurst.querySelectorAll(".envelope-burst-particle").forEach(node => node.remove());
-      }, 1850);
-    };
-
-    // Petals float after the initial foil burst. A separate overlay allows
-    // them to continue drifting when the user enters the hero immediately.
-    const releaseFloatingPetals = center => {
-      if (!floatingPetals || prefersReducedMotion() || !center) return;
-      const compact = matchMedia("(max-width: 650px)").matches;
-      const count = navigator.connection?.saveData ? 2 : compact ? 4 : 6;
-      floatingPetals.style.setProperty("--petal-x", center.x + "px");
-      floatingPetals.style.setProperty("--petal-y", center.y + "px");
-      const fragment = document.createDocumentFragment();
-      for (let i = 0; i < count; i++) {
-        const petal = document.createElement("span");
-        petal.className = "floating-petal";
-        const direction = i % 2 ? 1 : -1;
-        petal.style.setProperty("--petal-dx", (direction * (25 + (i % 5) * (compact ? 15 : 24))) + "px");
-        petal.style.setProperty("--petal-dy", "-" + (compact ? 75 + (i % 4) * 30 : 110 + (i % 5) * 38) + "px");
-        petal.style.setProperty("--petal-rotate", (direction * (65 + (i % 4) * 45)) + "deg");
-        petal.style.setProperty("--petal-delay", (420 + (i % 5) * 85) + "ms");
-        fragment.append(petal);
-      }
-      floatingPetals.replaceChildren(fragment);
-      floatingPetals.hidden = false;
-      floatingPetals.classList.add("is-active");
-      window.clearTimeout(petalsCleanupTimer);
-      petalsCleanupTimer = window.setTimeout(() => {
-        floatingPetals.hidden = true;
-        floatingPetals.classList.remove("is-active");
-        floatingPetals.replaceChildren();
-      }, 3000);
-    };
-
-    // A single champagne light wash bridges the closing envelope and hero.
-    // Skip and reduce-motion remain instant; no fake loading or autoplay.
+    // One composited opacity wash replaces the GPU-heavy foil particles,
+    // drifting petals, blurred radial flares and zoom portal.
     const showInvitationReveal = () => {
       if (!invitationReveal || prefersReducedMotion()) return;
       invitationReveal.hidden = false;
       invitationReveal.classList.add("is-active");
-      if (invitationPortal) {
-        const rect = intro.querySelector(".invitation-card")?.getBoundingClientRect();
-        invitationPortal.style.setProperty("--portal-x", (rect ? rect.left + rect.width / 2 : innerWidth / 2) + "px");
-        invitationPortal.style.setProperty("--portal-y", (rect ? rect.top + rect.height / 2 : innerHeight / 2) + "px");
-        invitationPortal.hidden = false;
-        invitationPortal.classList.add("is-active");
-        document.documentElement.classList.add("portal-entering");
-        window.clearTimeout(portalCleanupTimer);
-        portalCleanupTimer = window.setTimeout(() => {
-          invitationPortal.hidden = true;
-          invitationPortal.classList.remove("is-active");
-          document.documentElement.classList.remove("portal-entering");
-        }, 1300);
-      }
       window.clearTimeout(revealCleanupTimer);
       revealCleanupTimer = window.setTimeout(() => {
         invitationReveal.hidden = true;
         invitationReveal.classList.remove("is-active");
-      }, 1050);
+      }, 720);
     };
 
     const stopAutoClose = () => {
@@ -457,13 +374,6 @@
       envelopeStageHit?.setAttribute("disabled", "");
       skipInvitation?.setAttribute("disabled", "");
 
-      // Capture the seal position BEFORE rotating the flap. Do not force
-      // layout reads while the 3D transform is actively animating.
-      const sealRect = intro.querySelector(".envelope-seal")?.getBoundingClientRect();
-      const center = sealRect && {
-        x: sealRect.left + sealRect.width / 2,
-        y: sealRect.top + sealRect.height / 2
-      };
       const reduced = prefersReducedMotion();
 
       const raiseCard = () => {
@@ -472,13 +382,6 @@
         intro.classList.add("is-card-lifted", "is-opened");
         startAutoClose();
         closeInvitation?.focus({preventScroll:true});
-        if (!reduced) {
-          // Petals are intentionally postponed until AFTER the paper's
-          // main transform, so they cannot make the lift stutter.
-          window.setTimeout(() => {
-            if (!leaving) releaseFloatingPetals(center);
-          }, 950);
-        }
       };
 
       const unfoldFlap = () => {
@@ -511,8 +414,6 @@
         intro.classList.add("is-seal-cracking");
         window.setTimeout(() => {
           if (leaving) return;
-          // The small foil accent ends before the card starts moving.
-          burstFromSeal(center);
           unfoldFlap();
         }, 230);
       }
@@ -1013,12 +914,20 @@
   const hero = document.querySelector(".hero");
   const heroPhoto = document.querySelector(".hero-photo");
   if (hero && heroPhoto && "IntersectionObserver" in window) {
-    const heroAnimationObserver = new IntersectionObserver(entries => {
-      const visible = entries[0]?.isIntersecting !== false;
+    let heroInViewport = false;
+    const updateHeroMotion = () => {
+      // No costly hero zoom behind an opaque, unopened envelope.
+      const visible = heroInViewport && !document.body.classList.contains("envelope-locked");
       heroPhoto.style.animationPlayState = visible ? "running" : "paused";
       heroPhoto.style.willChange = visible ? "transform" : "auto";
+    };
+    const heroAnimationObserver = new IntersectionObserver(entries => {
+      heroInViewport = entries[0]?.isIntersecting !== false;
+      updateHeroMotion();
     }, {threshold:0});
     heroAnimationObserver.observe(hero);
+    document.addEventListener("wedding:envelopeexit", updateHeroMotion);
+    updateHeroMotion();
   }
 
   const reveal = document.querySelectorAll(".reveal");
