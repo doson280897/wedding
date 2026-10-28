@@ -394,10 +394,7 @@ html.envelope-pending body>.language-switch{visibility:visible!important;pointer
   border:1px solid rgba(139,124,91,.48);
   clip-path:polygon(0 0,100% 0,50% 62%);
   transform-origin:50% 0%;backface-visibility:visible;pointer-events:none;
-  transform:scaleY(1);
-  /* A 2D hinged fold avoids the back-face culling that made the flap vanish
-     on iOS/WebKit. The flap stays solid and visible when folded up. */
-  transition:transform .62s cubic-bezier(.24,.72,.2,1);
+  transform:translate3d(0,0,0);
 }
 .invitation-card{
   position:absolute;z-index:2;left:8%;right:8%;top:2%;height:78%;overflow:hidden;
@@ -407,8 +404,8 @@ html.envelope-pending body>.language-switch{visibility:visible!important;pointer
     linear-gradient(135deg,#fbf8f0,#f4efe4);
   border:1px solid rgba(146,127,89,.48);box-shadow:0 20px 48px rgba(72,64,50,.14);
   color:#334c3c;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  transform:translate3d(0,16%,0);will-change:transform,opacity;
-  transition:transform .68s cubic-bezier(.16,.82,.24,1),opacity .34s linear;
+  transform:none;
+  transition:none;
 }
 .invitation-card:before{
   content:"";position:absolute;inset:12px;border:1px solid rgba(160,139,96,.28);pointer-events:none;
@@ -440,7 +437,7 @@ html.envelope-pending body>.language-switch{visibility:visible!important;pointer
 .botanical-top{left:-10px;top:-8px}
 .botanical-bottom{right:-12px;bottom:-8px;transform:rotate(180deg)}
 .botanical-flower{filter:drop-shadow(0 1px 1px rgba(61,79,61,.08))}
-.envelope-front{position:absolute;z-index:4;left:3%;right:3%;bottom:0;height:55%;overflow:hidden;pointer-events:none;will-change:transform,opacity;transform:translate3d(0,0,0);transition:transform .56s cubic-bezier(.22,.78,.22,1),opacity .42s linear}
+.envelope-front{position:absolute;z-index:4;left:3%;right:3%;bottom:0;height:55%;overflow:hidden;pointer-events:none;transform:translate3d(0,0,0)}
 .envelope-front-left,.envelope-front-right,.envelope-front-bottom{position:absolute;inset:0}
 .envelope-front-left{
   background:linear-gradient(150deg,#f3ede1,#e8e0d1);
@@ -458,8 +455,7 @@ html.envelope-pending body>.language-switch{visibility:visible!important;pointer
   border-bottom:1px solid rgba(139,124,91,.45);
 }
 .envelope-seal{
-  position:absolute;z-index:6;left:50%;top:79%;transform:translate3d(-50%,-50%,0);will-change:transform,opacity;
-  transition:transform .38s cubic-bezier(.22,.78,.22,1),opacity .3s linear;
+  position:absolute;z-index:6;left:50%;top:79%;transform:translate3d(-50%,-50%,0);
   width:62px;height:62px;border-radius:50%;display:grid;place-items:center;
   background:radial-gradient(circle at 32% 24%,#d5c596,#aa996d 68%,#8d7d56);
   border:1px solid #8d7b51;box-shadow:0 6px 12px rgba(86,72,45,.22),inset 0 0 0 4px rgba(245,237,210,.22);
@@ -493,10 +489,6 @@ html.envelope-pending body>.language-switch{visibility:visible!important;pointer
 }
 .envelope-intro{opacity:1;transition:opacity .26s cubic-bezier(.4,0,.2,1)}
 .envelope-inner{will-change:transform,opacity}
-.envelope-intro.is-flap-open .envelope-flap{transform:scaleY(-1);opacity:1;z-index:1}
-.envelope-intro.is-flap-open .envelope-seal{transform:translate3d(-50%,-58%,0) scale(.88);opacity:0}
-.envelope-intro.is-card-lifted .invitation-card{transform:translate3d(0,-12%,0)}
-.envelope-intro.is-card-lifted .envelope-front{transform:translate3d(0,14px,0);opacity:.58}
 .envelope-intro.is-leaving{opacity:0;pointer-events:none}
 .envelope-intro.is-leaving .invitation-card{transform:translate3d(0,-9%,0) scale(.992)}
 .envelope-intro.is-leaving .envelope-inner{transform:translate3d(0,-4px,0)}
@@ -510,8 +502,8 @@ body.envelope-locked{overflow:hidden}
   .envelope-shell{filter:none}
   .invitation-card{box-shadow:0 16px 30px rgba(72,64,50,.12)}
   .envelope-inner{width:100%;padding-top:0}
-  .envelope-stage{width:min(390px,94vw);height:min(590px,72svh);min-height:500px;margin-bottom:15px}
-  .invitation-card{left:7%;right:7%;top:1%;height:78%;padding:37px 28px 34px;transform:translateY(15%)}
+  .envelope-stage{width:min(390px,90vw);height:min(570px,68svh);min-height:470px;margin-bottom:15px}
+  .invitation-card{left:7%;right:7%;top:7%;height:72%;padding:37px 28px 34px;transform:none}
   .botanical{width:120px;height:120px}
   .botanical-top{left:-10px;top:-7px}
   .botanical-bottom{right:-10px;bottom:-8px}
@@ -1276,36 +1268,6 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 }
 
 
-/* FEAT 02 — the embossed invitation lifts into the scene, then settles.
-   Transform-only: no WebGL, raster effects, or extra image assets. */
-@media(prefers-reduced-motion:no-preference){
-  .envelope-intro.is-card-lifted:not(.is-leaving) .invitation-card{
-    transform-origin:50% 70%;
-    animation:luxInvitationFlight 950ms cubic-bezier(.2,.68,.22,1) both;
-    transition:none;
-  }
-}
-@keyframes luxInvitationFlight{
-  0%{opacity:0;transform:translate3d(0,28%,0)}
-  24%{opacity:1;transform:translate3d(0,8%,0)}
-  78%{opacity:1;transform:translate3d(0,-13%,0)}
-  100%{opacity:1;transform:translate3d(0,-12%,0)}
-}
-@media(max-width:650px){
-  @keyframes luxInvitationFlight{
-    0%{opacity:0;transform:translate3d(0,28%,0)}
-    24%{opacity:1;transform:translate3d(0,8%,0)}
-    78%{opacity:1;transform:translate3d(0,-13%,0)}
-    100%{opacity:1;transform:translate3d(0,-12%,0)}
-  }
-}
-@media(prefers-reduced-motion:reduce){
-  .envelope-intro.is-card-lifted .invitation-card{
-    animation:none!important;transform:translate3d(0,-12%,0)!important;
-  }
-}
-
-
 /* FEAT 04 — the personal names are written into view by a single gold sweep. */
 #heroNames{position:relative;isolation:isolate}
 @media(prefers-reduced-motion:no-preference){
@@ -1345,38 +1307,6 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   38%{transform:translate3d(calc(-50% - 1px),-50%,0) scale(1.025)}
   70%{transform:translate3d(calc(-50% + 1px),-50%,0) scale(.99)}
 }
-
-/* SEALED ENVELOPE — until opened, the letter is completely inside.
-   No card artwork or personalized names bleed through the wax-sealed flap. */
-.envelope-intro:not(.is-card-lifted) .invitation-card{
-  visibility:hidden;
-  opacity:0;
-  transform:translate3d(0,34%,0) scale(.96);
-  transition:none;
-}
-.envelope-intro.is-card-lifted .invitation-card{
-  visibility:visible;
-  opacity:1;
-}
-.envelope-stage-hit{
-  position:absolute;inset:0;z-index:8;
-  width:100%;height:100%;margin:0;padding:0;
-  border:0;background:transparent;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-.envelope-stage-hit:focus-visible{
-  outline:2px solid #a68b5c;outline-offset:5px;border-radius:5px;
-}
-.envelope-intro.is-flap-open .envelope-stage-hit{display:none}
-@media(prefers-reduced-motion:reduce){
-  .envelope-intro:not(.is-card-lifted) .invitation-card{
-    visibility:hidden!important;opacity:0!important;
-  }
-  .envelope-intro.is-card-lifted .invitation-card{
-    visibility:visible!important;opacity:1!important;
-  }
-}
-
 
 /* ENVELOPE CONTRAST & MOBILE SMOOTHNESS — matte dark-olive stage, warm
    stationery pocket and a distinct pearl-ivory card. No background animation. */
@@ -1569,65 +1499,6 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
 }
 
 
-/* PAPER PROXY EXTRACTION
-   Safari no longer animates the complex text/SVG card. A single opaque
-   unfiltered paper layer moves, then swaps with the already-laid-out card. */
-.invitation-paper-proxy{
-  position:absolute;z-index:2;left:8%;right:8%;top:2%;height:78%;
-  box-sizing:border-box;overflow:hidden;pointer-events:none;
-  display:grid;place-items:center;
-  background:#fffaf0;
-  border:1px solid rgba(159,121,65,.66);
-  box-shadow:0 12px 20px rgba(12,20,14,.14);
-  color:rgba(167,130,78,.55);
-  transform:translate3d(0,28%,0);
-  visibility:hidden;backface-visibility:hidden;
-  contain:layout paint;
-}
-.invitation-paper-proxy:before{
-  content:"";position:absolute;inset:12px;
-  border:1px solid rgba(174,141,86,.32);
-}
-.invitation-paper-proxy-mark{
-  font:400 36px 'Cormorant Garamond',serif;
-  pointer-events:none;
-}
-.envelope-intro.is-paper-rising .invitation-paper-proxy{
-  visibility:visible;
-  transform:translate3d(0,-12%,0);
-  transition:transform .78s cubic-bezier(.2,.68,.22,1);
-  will-change:transform;
-}
-.envelope-intro.is-card-lifted .invitation-paper-proxy{
-  visibility:hidden;transition:none;will-change:auto;
-}
-.envelope-intro:not(.is-card-lifted) .invitation-card{
-  animation:none!important;
-  transition:none!important;
-}
-.envelope-intro.is-card-prepared:not(.is-card-lifted) .invitation-card{
-  transform:translate3d(0,-12%,0);
-  opacity:.001;
-}
-.envelope-intro.is-card-lifted:not(.is-leaving) .invitation-card{
-  animation:none!important;
-  transform:translate3d(0,-12%,0);
-  opacity:1;
-  transition:none;
-  will-change:auto;
-}
-@media(max-width:650px){
-  .invitation-paper-proxy{left:7%;right:7%;top:1%}
-  .invitation-paper-proxy-mark{font-size:30px}
-}
-@media(prefers-reduced-motion:reduce){
-  .invitation-paper-proxy{display:none!important}
-  .envelope-intro.is-card-lifted:not(.is-leaving) .invitation-card{
-    animation:none!important;transform:translate3d(0,-12%,0);
-  }
-}
-
-
 /* TWO ACT GOLDEN LIGHT — the warm flare returns without glitter storms.
    Both scenes use just one prepainted gradient and animate opacity/transform. */
 .envelope-seal-light{
@@ -1667,67 +1538,6 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
 @media(prefers-reduced-motion:reduce){
   .envelope-seal-light{display:none!important}
   .invitation-reveal{display:none!important}
-}
-
-
-/* PROFESSIONAL MOTION FACE — same hierarchy as the real invitation, but only
-   lightweight text/rules move. The decorative SVGs remain stationary. */
-.invitation-paper-proxy{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:46px 48px 40px;
-}
-.invitation-paper-proxy-rule{
-  width:54%;height:1px;margin-bottom:14px;
-  background:linear-gradient(90deg,transparent,#9d8c68,transparent);
-}
-.invitation-paper-proxy-eyebrow{
-  position:relative;margin:0;color:#374f3e;
-  font:500 clamp(17px,2.8vw,23px) 'Cormorant Garamond',serif;
-  letter-spacing:.12em;text-transform:uppercase;
-}
-.invitation-paper-proxy-leaf{
-  display:block;margin:4px 0 1px;color:#758c72;
-  font:23px 'Cormorant Garamond',serif;transform:rotate(-18deg);
-}
-.invitation-paper-proxy-leaf-small{font-size:17px;margin:8px 0 5px}
-.invitation-paper-proxy-names{
-  margin:0;display:flex;flex-direction:column;align-items:center;
-  font:400 clamp(42px,8vw,68px)/.92 'Great Vibes',cursive;
-  color:#315946;white-space:normal;text-shadow:0 1px 0 #fff;
-}
-.invitation-paper-proxy-names>span{display:block}
-.invitation-paper-proxy-names em{
-  font:400 .52em/1 'Cormorant Garamond',serif;color:#7c8e72;
-  margin:6px 0 5px;
-}
-.invitation-paper-proxy-date{
-  margin:18px 0 2px;color:#aa956c;
-  font:600 11px Montserrat,sans-serif;letter-spacing:.15em;
-}
-.invitation-paper-proxy-invite{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:2px;margin:7px 0 0;max-width:88%;padding:0 8px 7px;
-  border-bottom:1px dotted rgba(81,94,81,.55);
-}
-.invitation-paper-proxy-label{
-  color:#5b685c;font:500 12px/1.4 Montserrat,sans-serif;
-  letter-spacing:.13em;text-transform:uppercase;text-align:center;
-}
-.invitation-paper-proxy-guest{
-  color:#315b47;font:700 clamp(20px,3.3vw,32px)/1.16 Georgia,'Times New Roman',serif;
-  letter-spacing:.015em;text-align:center;max-width:100%;overflow-wrap:anywhere;
-}
-.invitation-paper-proxy-guest[hidden]{display:none}
-@media(max-width:650px){
-  .invitation-paper-proxy{padding:37px 28px 34px}
-  .invitation-paper-proxy-names{font-size:clamp(39px,12.7vw,57px)}
-  .invitation-paper-proxy-eyebrow{font-size:16px}
-  .invitation-paper-proxy-date{font-size:9px;letter-spacing:.11em;margin-top:15px}
-  .invitation-paper-proxy-label{font-size:11px}
-  .invitation-paper-proxy-guest{font-size:clamp(20px,6vw,29px)}
-}
-@media(max-width:380px){
-  .invitation-paper-proxy{padding-left:20px;padding-right:20px}
 }
 
 
@@ -1842,44 +1652,19 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
 }
 
 
-/* SEAMLESS HANDOFF — motion face and full card overlap at the exact final
-   transform for 180ms; only opacity changes while SVG details fade in. */
-.envelope-intro.is-card-lifted .invitation-paper-proxy{
-  visibility:visible!important;
-  opacity:0;
-  transition:opacity .18s ease-out!important;
-  will-change:opacity;
-}
-.envelope-intro.is-card-lifted .invitation-card{
-  opacity:1;
-}
-.envelope-intro.is-card-settling .invitation-paper-proxy{
-  visibility:visible!important;
-  opacity:1;
-}
-.envelope-intro.is-card-settled .invitation-paper-proxy{
-  visibility:hidden!important;
-  opacity:0;
-  transition:none!important;
-  will-change:auto;
-}
-@media(prefers-reduced-motion:reduce){
-  .envelope-intro.is-card-lifted .invitation-paper-proxy{display:none!important}
-}
-
-
-/* PREWARM THE MOTION FACE while the flap is opening. It sits behind the
-   envelope front (z2 vs z4), so its text is rasterized before extraction. */
-.envelope-intro.is-card-prepared:not(.is-card-lifted) .invitation-paper-proxy{
+/* SIMPLE ENVELOPE REVEAL
+   The invitation never moves. After the wax cracks, every physical envelope
+   piece slides down together until it leaves the viewport. */
+.invitation-card{
   visibility:visible;
   opacity:1;
-  transform:translate3d(0,28%,0);
-  will-change:transform;
+  z-index:2;
+  top:8%;
+  height:72%;
+  transform:none!important;
+  animation:none!important;
+  will-change:auto!important;
 }
-
-
-/* POCKET SEAL — make the envelope front physically opaque. The prior three
-   clipped triangles left tiny uncovered wedges where the motion face leaked. */
 .envelope-front{
   background:linear-gradient(180deg,#e6d2b4 0%,#d4bd9d 100%);
   border:1px solid rgba(122,95,60,.34);
@@ -1889,61 +1674,54 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
 html[data-theme="light"] .envelope-front{
   background:linear-gradient(180deg,#eadac2 0%,#d8c3a6 100%);
 }
-
-/* Start fully inside the pocket. Keep the lower edge within the stage so
-   nothing can peek below the envelope while the flap is opening. */
-.envelope-intro.is-card-prepared:not(.is-card-lifted) .invitation-paper-proxy{
-  transform:translate3d(0,20%,0);
+.envelope-shell,
+.envelope-front,
+.envelope-flap,
+.envelope-seal{
+  transition:
+    transform 1.08s cubic-bezier(.22,.72,.18,1),
+    opacity .28s ease .76s;
+  will-change:transform,opacity;
 }
-.envelope-intro.is-paper-rising .invitation-paper-proxy{
-  transform:translate3d(0,-12%,0);
+.envelope-intro.is-envelope-dropping .envelope-shell,
+.envelope-intro.is-envelope-dropping .envelope-front,
+.envelope-intro.is-envelope-dropping .envelope-flap{
+  transform:translate3d(0,105vh,0);
+  opacity:0;
 }
-
-/* TRUE CROSSFADE — both faces share the final transform. The detailed card
-   fades up under the lightweight moving face; there is no one-frame pop. */
-.envelope-intro.is-card-settling .invitation-card{
-  visibility:visible!important;
-  opacity:0!important;
-  transform:translate3d(0,-12%,0)!important;
-  transition:opacity .32s ease-out!important;
+.envelope-intro.is-envelope-dropping .envelope-seal{
+  transform:translate3d(-50%,calc(-50% + 105vh),0);
+  opacity:0;
 }
-.envelope-intro.is-card-settling .invitation-paper-proxy{
-  visibility:visible!important;
-  opacity:1!important;
-  transform:translate3d(0,-12%,0)!important;
-  transition:opacity .32s ease-out!important;
+.envelope-intro.is-envelope-dropping .envelope-seal-light{
+  opacity:0;
 }
-.envelope-intro.is-card-crossfading .invitation-card{
-  opacity:1!important;
+.envelope-intro.is-envelope-cleared .envelope-shell,
+.envelope-intro.is-envelope-cleared .envelope-front,
+.envelope-intro.is-envelope-cleared .envelope-flap,
+.envelope-intro.is-envelope-cleared .envelope-seal{
+  visibility:hidden;
 }
-.envelope-intro.is-card-crossfading .invitation-paper-proxy{
-  opacity:0!important;
-}
-.envelope-intro.is-card-settled .invitation-card{
-  opacity:1!important;
-}
-.envelope-intro.is-card-settled .invitation-paper-proxy{
-  visibility:hidden!important;opacity:0!important;transition:none!important;
-}
-
-
-/* OPENING COMPOSITION — drop the physical envelope slightly once unsealed.
-   This creates headroom for both upper invitation corners without moving
-   floating controls or the fixed countdown badge. */
-.envelope-stage{
-  --open-stage-shift:clamp(22px,3.6vh,32px);
-  transform:translate3d(0,0,0);
-  transition:transform .62s cubic-bezier(.24,.72,.2,1);
-}
-.envelope-intro.is-flap-open .envelope-stage{
-  transform:translate3d(0,var(--open-stage-shift),0);
+.envelope-intro:not(.is-envelope-cleared) .envelope-close,
+.envelope-intro:not(.is-envelope-cleared) .envelope-cooldown{
+  display:none!important;
 }
 @media(max-width:650px){
-  .envelope-stage{--open-stage-shift:clamp(26px,4.2svh,36px)}
+  .invitation-card{left:7%;right:7%;top:7%;height:72%;padding:34px 25px 31px}
 }
-@media(max-height:620px){
-  .envelope-stage{--open-stage-shift:20px}
+@media(max-width:380px){
+  .invitation-card{top:8%;height:70%;padding-left:20px;padding-right:20px}
 }
 @media(prefers-reduced-motion:reduce){
-  .envelope-stage{transition:none!important}
+  .envelope-shell,.envelope-front,.envelope-flap,.envelope-seal{
+    transition:none!important;
+  }
+  .envelope-intro.is-envelope-dropping .envelope-shell,
+  .envelope-intro.is-envelope-dropping .envelope-front,
+  .envelope-intro.is-envelope-dropping .envelope-flap{
+    transform:translate3d(0,105vh,0)!important;opacity:0!important;
+  }
+  .envelope-intro.is-envelope-dropping .envelope-seal{
+    transform:translate3d(-50%,calc(-50% + 105vh),0)!important;opacity:0!important;
+  }
 }

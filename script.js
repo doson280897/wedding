@@ -409,126 +409,59 @@
       envelopeSealButton?.setAttribute("disabled", "");
 
       const reduced = prefersReducedMotion();
-
-      // Copy the already-resolved personalized invitation into the lightweight
-      // moving face. It looks like the real card while avoiding moving its
-      // decorative SVG tree and complex layout during extraction.
-      const motionCard = intro.querySelector(".invitation-paper-proxy");
-      const realCard = intro.querySelector(".invitation-card");
-      if (motionCard && realCard) {
-        const copyText = (targetSelector, sourceSelector) => {
-          const target = motionCard.querySelector(targetSelector);
-          const source = realCard.querySelector(sourceSelector);
-          if (target && source) target.textContent = source.textContent.trim();
-        };
-        copyText(".invitation-paper-proxy-eyebrow", ".envelope-eyebrow");
-        copyText(".invitation-paper-proxy-label", "#envelopeGuestLabel");
-        const motionDate = motionCard.querySelector(".invitation-paper-proxy-date");
-        const selectedDate = realCard.querySelector('[data-party-date="' + selectedParty + '"]');
-        if (motionDate) motionDate.textContent = selectedDate?.textContent.trim() || "";
-        const motionNames = motionCard.querySelector(".invitation-paper-proxy-names");
-        const realNames = realCard.querySelector("#envelopeTitle");
-        if (motionNames && realNames) motionNames.innerHTML = realNames.innerHTML;
-        const motionGuest = motionCard.querySelector(".invitation-paper-proxy-guest");
-        const realGuest = realCard.querySelector("#envelopeGuest");
-        if (motionGuest && realGuest) {
-          motionGuest.textContent = realGuest.textContent;
-          motionGuest.hidden = realGuest.hidden;
-        }
-      }
-
-      // One geometry read before the paper or seal moves; no forced layout
-      // during the transform animation.
-      const seal = intro.querySelector(".envelope-seal")?.getBoundingClientRect();
-      const petalOrigin = seal && {
-        x: seal.left + seal.width / 2,
-        y: seal.top + seal.height / 2
+      const card = intro.querySelector(".invitation-card");
+      const movingEnvelope = intro.querySelector(".envelope-front");
+      const sealRect = envelopeSealButton?.getBoundingClientRect();
+      const petalOrigin = sealRect && {
+        x: sealRect.left + sealRect.width / 2,
+        y: sealRect.top + sealRect.height / 2
       };
 
-      const raiseCard = () => {
+      const revealCard = () => {
         if (leaving) return;
-        const paper = intro.querySelector(".invitation-paper-proxy");
-        let completed = false;
-        let fallbackTimer = 0;
-        const finishPaper = event => {
-          if (event && (event.target !== paper || event.propertyName !== "transform")) return;
-          if (completed || leaving) return;
-          completed = true;
-          paper?.removeEventListener("transitionend", finishPaper);
-          window.clearTimeout(fallbackTimer);
-          // The fully typeset card has been painted stationary behind the
-          // proxy. Swap layers only once the cheap paper sheet has settled.
-          intro.querySelector(".invitation-card")?.removeAttribute("aria-hidden");
-          intro.classList.add("is-card-lifted", "is-card-settling", "is-opened");
-          if (!reduced) {
-            // Keep both layers at the same final coordinates. First paint the
-            // full invitation invisibly, then crossfade instead of swapping.
-            requestAnimationFrame(() => {
-              if (leaving) return;
-              intro.classList.add("is-card-crossfading");
-            });
-            window.setTimeout(() => {
-              intro.classList.remove("is-card-settling", "is-card-crossfading");
-              intro.classList.add("is-card-settled");
-            }, 360);
-          } else {
-            intro.classList.add("is-card-settled");
-          }
-          if (reduced) startAutoClose();
-          else requestAnimationFrame(startAutoClose);
-          closeInvitation?.focus({preventScroll:true});
-        };
-        if (reduced || !paper) {
-          finishPaper();
+        card?.removeAttribute("aria-hidden");
+        intro.classList.add("is-envelope-cleared", "is-opened");
+        if (reduced) startAutoClose();
+        else requestAnimationFrame(startAutoClose);
+        closeInvitation?.focus({ preventScroll:true });
+      };
+
+      const dropEnvelope = () => {
+        if (leaving) return;
+        if (reduced) {
+          intro.classList.add("is-envelope-dropping");
+          revealCard();
           return;
         }
-        paper.addEventListener("transitionend", finishPaper);
-        intro.classList.add("is-paper-rising");
-        // Stagger decorative petals after the first sheet movement frame.
+
+        let finished = false;
+        let fallbackTimer = 0;
+        const finishDrop = event => {
+          if (event && (event.target !== movingEnvelope || event.propertyName !== "transform")) return;
+          if (finished || leaving) return;
+          finished = true;
+          movingEnvelope?.removeEventListener("transitionend", finishDrop);
+          window.clearTimeout(fallbackTimer);
+          revealCard();
+        };
+
+        movingEnvelope?.addEventListener("transitionend", finishDrop);
+        intro.classList.add("is-envelope-dropping");
         requestAnimationFrame(() => {
           if (!leaving) releasePetals(petalOrigin);
         });
-        fallbackTimer = window.setTimeout(finishPaper, 980);
-      };
-
-      const unfoldFlap = () => {
-        if (leaving) return;
-        intro.classList.add("is-flap-open");
-        if (!reduced) {
-          // Prepare the typography and botanical artwork while the paper
-          // flap is opening so it isn't first rasterized mid-rise.
-          requestAnimationFrame(() => intro.classList.add("is-card-prepared"));
-        }
-        if (reduced) {
-          raiseCard();
-          return;
-        }
-
-        const flap = intro.querySelector(".envelope-flap");
-        let finished = false;
-        let fallbackTimer = 0;
-        const finishFlap = event => {
-          if (event && (event.target !== flap || event.propertyName !== "transform")) return;
-          if (finished) return;
-          finished = true;
-          flap?.removeEventListener("transitionend", finishFlap);
-          window.clearTimeout(fallbackTimer);
-          raiseCard();
-        };
-        flap?.addEventListener("transitionend", finishFlap);
-        // A bounded fallback also covers interrupted transitions and Safari.
-        fallbackTimer = window.setTimeout(finishFlap, 760);
+        fallbackTimer = window.setTimeout(finishDrop, 1350);
       };
 
       if (reduced) {
-        unfoldFlap();
-      } else {
-        intro.classList.add("is-seal-cracking");
-        window.setTimeout(() => {
-          if (leaving) return;
-          unfoldFlap();
-        }, 230);
+        dropEnvelope();
+        return;
       }
+
+      intro.classList.add("is-seal-cracking");
+      window.setTimeout(() => {
+        if (!leaving) dropEnvelope();
+      }, 260);
     };
 
     envelopeSealButton?.addEventListener("click", openEnvelope);
