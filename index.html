@@ -57,24 +57,12 @@
   const singleMode = settings?.wedding?.mode === "single";
   const party = singleMode ? "single" : params.get("party");
   document.documentElement.dataset.weddingMode = singleMode ? "single" : "double";
-  // history.state survives F5 in this tab but isn't shared with newly opened tabs.
-  // Include the party and personalized guest so opening a different invitation
-  // does not incorrectly skip its envelope.
-  const invitationKey = JSON.stringify([party, params.get("to") || ""]);
-  const alreadyEntered = history.state?.weddingEnvelopeOpened === invitationKey;
-  const theme = document.getElementById("themeColor");
   const favicon = document.getElementById("siteFavicon");
   if (party === "bride" || party === "groom" || party === "single") {
     if (favicon && settings?.parties?.[party]?.images?.favicon) favicon.href = settings.parties[party].images.favicon + "?v=__BUILD_ID__";
     document.documentElement.dataset.party = party;
-    if (alreadyEntered || params.get("tool") === "links") {
-      // Skip the envelope on a same-tab F5 or the direct link-generator URL.
-      // A single-reception site has no separate party-choice landing screen.
-      document.documentElement.classList.add("envelope-resumed");
-      if (theme) theme.setAttribute("content", "#0b0e0e");
-    } else {
-      document.documentElement.classList.add("envelope-theme", "envelope-pending");
-      if (theme) theme.setAttribute("content", "#496957");
+    if (params.get("tool") !== "links") {
+      document.documentElement.classList.add("wax-pending");
     }
 
     const heroPreload = document.createElement("link");
@@ -184,96 +172,9 @@
     <p class="link-tool-note" data-i18n="link.note">Công cụ tạo link ngay trên thiết bị, không lưu danh sách khách. Tên khách xuất hiện trong URL, nên chỉ chia sẻ với đúng người nhận.</p>
   </div>
 </section>
-<div class="envelope-intro" id="envelopeIntro" role="dialog" aria-modal="true" aria-labelledby="envelopeTitle">
-  <div class="envelope-cooldown" id="envelopeCooldown" hidden role="timer" data-i18n-aria="envelope.autoCloseAria" aria-label="Tự động vào thiệp sau 5 giây">
-    <svg viewBox="0 0 42 42" aria-hidden="true">
-      <circle class="envelope-cooldown-track" cx="21" cy="21" r="15.9155"></circle>
-      <circle class="envelope-cooldown-progress" cx="21" cy="21" r="15.9155"></circle>
-    </svg>
-    <span id="envelopeCooldownValue" aria-hidden="true">5</span>
-  </div>
-  <div class="envelope-inner">
-    <div class="envelope-stage">
-      <div class="envelope-shell" aria-hidden="true">
-        <div class="envelope-back"></div>
-      </div>
-
-      <article class="invitation-card" aria-hidden="true">
-        <svg class="botanical botanical-top" viewBox="0 0 180 180" aria-hidden="true">
-          <g fill="none" stroke="currentColor" stroke-linecap="round">
-            <path d="M18 145c42-18 66-58 80-112" stroke-width="2"/>
-            <path d="M52 117c-20-7-30-21-31-37 19 1 33 10 40 27" stroke-width="1.6"/>
-            <path d="M72 88c-17-11-22-27-18-42 18 5 29 16 32 34" stroke-width="1.6"/>
-            <path d="M94 57c-7-15-5-29 4-39 13 10 17 23 12 38" stroke-width="1.6"/>
-          </g>
-          <g fill="currentColor" opacity=".2">
-            <ellipse cx="36" cy="104" rx="14" ry="26" transform="rotate(-42 36 104)"/>
-            <ellipse cx="69" cy="69" rx="12" ry="24" transform="rotate(-26 69 69)"/>
-            <ellipse cx="101" cy="38" rx="10" ry="20" transform="rotate(12 101 38)"/>
-          </g>
-          <g class="botanical-flower">
-            <circle cx="72" cy="126" r="11" fill="#f9f6ed"/>
-            <circle cx="61" cy="121" r="10" fill="#f7f3e8"/>
-            <circle cx="62" cy="136" r="10" fill="#fbf8ef"/>
-            <circle cx="80" cy="139" r="10" fill="#f6f1e6"/>
-            <circle cx="84" cy="122" r="10" fill="#fcfaf3"/>
-            <circle cx="72" cy="130" r="4" fill="#b89b6a"/>
-          </g>
-        </svg>
-
-        <svg class="botanical botanical-bottom" viewBox="0 0 180 180" aria-hidden="true">
-          <g fill="none" stroke="currentColor" stroke-linecap="round">
-            <path d="M18 145c42-18 66-58 80-112" stroke-width="2"/>
-            <path d="M52 117c-20-7-30-21-31-37 19 1 33 10 40 27" stroke-width="1.6"/>
-            <path d="M72 88c-17-11-22-27-18-42 18 5 29 16 32 34" stroke-width="1.6"/>
-            <path d="M94 57c-7-15-5-29 4-39 13 10 17 23 12 38" stroke-width="1.6"/>
-          </g>
-          <g fill="currentColor" opacity=".18">
-            <ellipse cx="36" cy="104" rx="14" ry="26" transform="rotate(-42 36 104)"/>
-            <ellipse cx="69" cy="69" rx="12" ry="24" transform="rotate(-26 69 69)"/>
-            <ellipse cx="101" cy="38" rx="10" ry="20" transform="rotate(12 101 38)"/>
-          </g>
-          <g class="botanical-flower">
-            <circle cx="72" cy="126" r="11" fill="#f9f6ed"/>
-            <circle cx="61" cy="121" r="10" fill="#f7f3e8"/>
-            <circle cx="62" cy="136" r="10" fill="#fbf8ef"/>
-            <circle cx="80" cy="139" r="10" fill="#f6f1e6"/>
-            <circle cx="84" cy="122" r="10" fill="#fcfaf3"/>
-            <circle cx="72" cy="130" r="4" fill="#b89b6a"/>
-          </g>
-        </svg>
-
-        <div class="invitation-card-rule"></div>
-        <p class="envelope-eyebrow" data-i18n="envelope.eyebrow">SAVE THE DATE</p>
-        <span class="invitation-leaf" aria-hidden="true">❧</span>
-        <h2 id="envelopeTitle" data-party-name-pair="envelope"></h2>
-        <p class="envelope-date"><span data-party-date="bride"></span><span class="party-date-separator">—</span><span data-party-date="groom"></span><span data-party-date="single"></span></p>
-        <div class="invitation-leaf invitation-leaf-small" aria-hidden="true">❧</div>
-        <div class="envelope-invite" id="envelopeInviteBlock">
-          <span class="envelope-recipient-label" id="envelopeGuestLabel" data-i18n="envelope.invite">Trân trọng kính mời</span>
-          <strong class="envelope-recipient-name" id="envelopeGuest" hidden></strong>
-        </div>
-      </article>
-
-      <div class="envelope-front" aria-hidden="true">
-        <div class="envelope-front-left"></div>
-        <div class="envelope-front-right"></div>
-        <div class="envelope-front-bottom"></div>
-      </div>
-      <div class="envelope-flap" aria-hidden="true"></div>
-      <button type="button" class="envelope-seal" id="envelopeSealButton"
-        aria-label="Chạm con dấu để mở thiệp cưới">
-        <span class="seal-monogram" id="envelopeMonogram" aria-hidden="true"></span>
-        <span class="seal-fracture" aria-hidden="true"></span>
-      </button>
-      <span class="envelope-seal-light" aria-hidden="true"></span>
-    </div>
-
-    <button type="button" id="closeInvitation" class="envelope-close" data-i18n="envelope.close">ĐÓNG &amp; VÀO THIỆP</button>
-  </div>
-</div>
-<div class="invitation-reveal" id="invitationReveal" hidden aria-hidden="true"></div>
-<div class="floating-petals" id="floatingPetals" hidden aria-hidden="true"></div>
+<button type="button" class="wax-open-button" id="waxOpenButton" aria-label="Mở thiệp cưới">
+  <span class="wax-monogram" id="waxMonogram" aria-hidden="true"></span>
+</button>
 <header class="hero" id="home">
   <div class="hero-photo"></div><div class="hero-shade"></div>
   <div class="topbar"><a class="monogram" id="heroMonogram" href="#home"></a></div>

@@ -299,229 +299,18 @@ html[data-party="groom"] .closing {
   .hero-photo { background-position: 42% center; }
 }
 
-
-/* ANDROID EDGE-TO-EDGE ENVELOPE THEME */
-html.envelope-theme,
-html.envelope-theme body{
-  background-color:#496957;
-}
-
 /* WEDDING EXPERIENCE ENHANCEMENTS */
-.couple-section,.family-section,.album-section,.events-section,.closing{content-visibility:auto;contain-intrinsic-size:800px}
-
-.calendar-button:focus-visible,.music-toggle:focus-visible,.envelope-open:focus-visible,.envelope-skip:focus-visible{outline:2px solid #eccf98;outline-offset:3px}
+.couple-section,.family-section,.album-section,.events-section,.closing{content-visibility:auto;contain-intrinsic-size:800px}.calendar-button:focus-visible,
+.music-toggle:focus-visible{outline:2px solid #eccf98;outline-offset:3px}
 .calendar-button{display:inline-block;margin:15px 0 0 8px;padding:10px 15px;border:1px solid #ba9d7199;border-radius:30px;background:#0a0e0c;color:#efd8b4;font:500 10px Montserrat,sans-serif;letter-spacing:.1em;cursor:pointer}
 .calendar-button:hover{background:#b99b7035}
 .music-toggle{position:fixed;left:20px;bottom:24px;z-index:1003;border:1px solid #bfa47888;border-radius:50px;background:#171b19ed;color:#eed7ac;padding:11px 14px;display:flex;align-items:center;gap:8px;font:500 10px Montserrat,sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 10px 36px #0009;backdrop-filter:blur(7px)}
 .music-toggle[aria-pressed=true]{border-color:#e8c789;background:#343024ed;box-shadow:0 10px 36px #0009,0 0 24px #d0aa6b1e}
-.envelope-intro[hidden]{display:none!important}
-/* Previously entered in THIS tab: do not flash the envelope during an F5 reload. */
-html.envelope-resumed #envelopeIntro{display:none!important}
-html.party-pending #envelopeIntro{display:none!important}
-html.envelope-pending body{overflow:hidden;background:#f2eee4}
-html.envelope-pending body> :not(#envelopeIntro):not(.language-switch):not(#musicBubble):not(#invitationReveal):not(#floatingPetals){visibility:hidden!important}
-html.envelope-pending #envelopeIntro{visibility:visible!important}
-html.envelope-pending body>.language-switch{visibility:visible!important;pointer-events:auto!important}
-.envelope-intro{
-  position:fixed;inset:0;z-index:2000;display:grid;place-items:center;overflow:auto;
-  padding:22px 16px 28px;text-align:center;color:#33483b;
-  background:
-    radial-gradient(circle at 10% 5%,rgba(112,132,107,.13),transparent 18%),
-    radial-gradient(circle at 92% 92%,rgba(112,132,107,.11),transparent 20%),
-    linear-gradient(135deg,#f8f5ed 0%,#f2eee4 52%,#ece8dd 100%);
-}
-.envelope-intro:before,.envelope-intro:after{
-  content:"";position:fixed;width:220px;height:220px;pointer-events:none;opacity:.18;
-  background:
-    radial-gradient(ellipse at 35% 50%,#789078 0 13%,transparent 14%),
-    radial-gradient(ellipse at 61% 34%,#9bad95 0 11%,transparent 12%),
-    radial-gradient(ellipse at 70% 68%,#6f8a72 0 12%,transparent 13%);
-  filter:blur(5px);
-}
-.envelope-intro:before{left:-65px;top:-68px;transform:rotate(24deg)}
-.envelope-intro:after{right:-72px;bottom:-78px;transform:rotate(205deg)}
-.envelope-cooldown{
-  position:fixed;
-  left:max(18px,calc(env(safe-area-inset-left) + 12px));
-  top:max(18px,calc(env(safe-area-inset-top) + 12px));
-  z-index:3;
-  width:54px;height:54px;
-  display:grid;place-items:center;
-  border-radius:50%;
-  color:#3f5b49;
-  background:rgba(248,245,237,.86);
-  border:1px solid rgba(73,105,87,.24);
-  box-shadow:0 9px 28px rgba(57,76,61,.12);
-  backdrop-filter:blur(5px);
-}
-.envelope-cooldown[hidden]{display:none!important}
-.envelope-cooldown svg{position:absolute;inset:5px;width:44px;height:44px;transform:rotate(-90deg)}
-.envelope-cooldown circle{fill:none;stroke-width:2.25}
-.envelope-cooldown-track{stroke:rgba(73,105,87,.18)}
-.envelope-cooldown-progress{
-  stroke:#496957;
-  stroke-linecap:round;
-  stroke-dasharray:100;
-  stroke-dashoffset:0;
-}
-.envelope-cooldown.is-active .envelope-cooldown-progress{
-  animation:envelopeCooldownRing 5s linear forwards;
-}
-.envelope-cooldown span{
-  position:relative;z-index:1;
-  font:600 15px/1 Montserrat,sans-serif;
-  font-variant-numeric:tabular-nums;
-}
-@keyframes envelopeCooldownRing{to{stroke-dashoffset:100}}
-.envelope-inner{
-  position:relative;z-index:1;width:min(620px,calc(100vw - 24px));padding:12px 0 8px;
-  animation:envelopeFade .7s cubic-bezier(.2,.8,.2,1) both;
-}
-.envelope-stage{
-  --paper:#f7f2e7;--paper-dark:#e8e1d2;--sage:#496957;--gold:#a99467;
-  position:relative;width:min(520px,92vw);height:min(650px,72vh);min-height:520px;margin:0 auto 20px;
-  perspective:1200px;isolation:isolate;
-}
-.envelope-shell{position:absolute;left:3%;right:3%;bottom:0;height:55%;z-index:1;filter:drop-shadow(0 26px 32px rgba(48,45,37,.17))}
-.envelope-back{
-  position:absolute;inset:0;background:linear-gradient(145deg,#f2ecdf,#e8e1d3);
-  border:1px solid rgba(139,124,91,.45);border-radius:4px;
-}
-.envelope-flap{
-  /* The sealed flap points DOWN across the envelope front. */
-  position:absolute;left:3%;right:3%;bottom:0;height:55%;z-index:5;
-  background:linear-gradient(157deg,#f8f2e8 0%,#e7dccb 55%,#d9c9b2 100%);
-  border:1px solid rgba(139,124,91,.48);
-  clip-path:polygon(0 0,100% 0,50% 62%);
-  transform-origin:50% 0%;backface-visibility:visible;pointer-events:none;
-  transform:translate3d(0,0,0);
-}
-.invitation-card{
-  position:absolute;z-index:2;left:8%;right:8%;top:2%;height:78%;overflow:hidden;
-  padding:46px 48px 40px;background:
-    radial-gradient(circle at 20% 15%,rgba(116,144,118,.09),transparent 23%),
-    radial-gradient(circle at 83% 77%,rgba(116,144,118,.08),transparent 22%),
-    linear-gradient(135deg,#fbf8f0,#f4efe4);
-  border:1px solid rgba(146,127,89,.48);box-shadow:0 20px 48px rgba(72,64,50,.14);
-  color:#334c3c;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  transform:none;
-  transition:none;
-}
-.invitation-card:before{
-  content:"";position:absolute;inset:12px;border:1px solid rgba(160,139,96,.28);pointer-events:none;
-}
-.invitation-card-rule{width:54%;height:1px;margin-bottom:14px;background:linear-gradient(90deg,transparent,#9d8c68,transparent)}
-.envelope-eyebrow{
-  position:relative;z-index:2;margin:0;color:#374f3e;
-  font:500 clamp(17px,2.8vw,23px) 'Cormorant Garamond',serif;letter-spacing:.12em;text-transform:uppercase;
-}
-.invitation-leaf{display:block;margin:4px 0 1px;color:#758c72;font:23px 'Cormorant Garamond',serif;transform:rotate(-18deg)}
-.invitation-leaf-small{font-size:17px;margin:8px 0 5px}
-.invitation-card h2{
-  position:relative;z-index:2;margin:0;display:flex;flex-direction:column;align-items:center;
-  font:400 clamp(42px,8vw,68px)/.92 'Great Vibes',cursive;color:#315946;white-space:normal;
-  text-shadow:0 1px 0 #fff;
-}
-.invitation-card h2 em{font:400 .52em/1 'Cormorant Garamond',serif;color:#7c8e72;margin:6px 0 5px}
-.envelope-date{
-  position:relative;z-index:2;margin:18px 0 2px;color:#4f5f50;
-  font:600 11px Montserrat,sans-serif;letter-spacing:.15em;
-}
-.envelope-date span{color:#aa956c;margin:0 4px}
-.envelope-invite{
-  position:relative;z-index:2;margin:7px 0 0;max-width:78%;padding:0 8px 7px;
-  color:#59655a;border-bottom:1px dotted rgba(81,94,81,.55);
-  font:500 13px/1.5 'Cormorant Garamond',serif;letter-spacing:.05em;
-}
-.botanical{position:absolute;z-index:1;width:155px;height:155px;color:#71886f;opacity:.94;pointer-events:none}
-.botanical-top{left:-10px;top:-8px}
-.botanical-bottom{right:-12px;bottom:-8px;transform:rotate(180deg)}
-.botanical-flower{filter:drop-shadow(0 1px 1px rgba(61,79,61,.08))}
-.envelope-front{position:absolute;z-index:4;left:3%;right:3%;bottom:0;height:55%;overflow:hidden;pointer-events:none;transform:translate3d(0,0,0)}
-.envelope-front-left,.envelope-front-right,.envelope-front-bottom{position:absolute;inset:0}
-.envelope-front-left{
-  background:linear-gradient(150deg,#f3ede1,#e8e0d1);
-  clip-path:polygon(0 0,52% 56%,0 100%);
-  border-left:1px solid rgba(139,124,91,.42);
-}
-.envelope-front-right{
-  background:linear-gradient(210deg,#f4eee3,#e9e1d2);
-  clip-path:polygon(100% 0,48% 56%,100% 100%);
-  border-right:1px solid rgba(139,124,91,.42);
-}
-.envelope-front-bottom{
-  background:linear-gradient(180deg,#eee7da,#e4dccd);
-  clip-path:polygon(0 100%,50% 42%,100% 100%);
-  border-bottom:1px solid rgba(139,124,91,.45);
-}
-.envelope-seal{
-  position:absolute;z-index:6;left:50%;top:79%;transform:translate3d(-50%,-50%,0);
-  width:62px;height:62px;border-radius:50%;display:grid;place-items:center;
-  background:radial-gradient(circle at 32% 24%,#d5c596,#aa996d 68%,#8d7d56);
-  border:1px solid #8d7b51;box-shadow:0 6px 12px rgba(86,72,45,.22),inset 0 0 0 4px rgba(245,237,210,.22);
-  color:#5e684f;
-}
-.envelope-seal svg{width:34px;height:34px}
-.envelope-open{
-  display:inline-flex;align-items:center;justify-content:center;gap:17px;min-width:min(330px,80vw);
-  margin:0 auto;border:1px solid #9e8c63;border-radius:999px;
-  background:linear-gradient(180deg,#647b68,#526957);color:#fffaf0;
-  box-shadow:0 12px 28px rgba(57,76,61,.18);
-  font:500 11px Montserrat,sans-serif;letter-spacing:.19em;padding:15px 28px;cursor:pointer;
-  transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
-}
-.envelope-open:hover{transform:translateY(-2px);box-shadow:0 16px 32px rgba(57,76,61,.24);background:#486050}
-.envelope-open:focus-visible,.envelope-close:focus-visible,.envelope-skip:focus-visible{outline:2px solid #789174;outline-offset:4px}
-.envelope-open span{font-size:18px;line-height:1;margin-top:-2px}
-.envelope-close{
-  display:none;align-items:center;justify-content:center;min-width:min(260px,72vw);
-  margin:0 auto;border:1px solid #9e8c63;border-radius:999px;
-  background:linear-gradient(180deg,#647b68,#526957);color:#fffaf0;
-  box-shadow:0 12px 28px rgba(57,76,61,.18);
-  font:500 11px Montserrat,sans-serif;letter-spacing:.19em;padding:15px 28px;cursor:pointer;
-}
-.envelope-intro.is-opened .envelope-open,
-.envelope-intro.is-opened .envelope-skip{display:none}
-.envelope-intro.is-opened .envelope-close{display:inline-flex}
-.envelope-skip{
-  display:block;margin:11px auto 0;border:0;background:none;color:#7d8477;
-  font:10px Montserrat,sans-serif;letter-spacing:.08em;text-decoration:underline;text-underline-offset:4px;cursor:pointer;
-}
-.envelope-intro{opacity:1;transition:opacity .26s cubic-bezier(.4,0,.2,1)}
-.envelope-inner{will-change:transform,opacity}
-.envelope-intro.is-leaving{opacity:0;pointer-events:none}
-.envelope-intro.is-leaving .invitation-card{transform:translate3d(0,-9%,0) scale(.992)}
-.envelope-intro.is-leaving .envelope-inner{transform:translate3d(0,-4px,0)}
-body.envelope-locked{overflow:hidden}
-@keyframes envelopeFade{from{opacity:0;transform:translate3d(0,8px,0) scale(.995)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
 @media(max-width:650px){
   .calendar-button{margin-left:0}
   .music-toggle{left:14px;bottom:14px;font-size:9px;padding:11px 12px}
-  .envelope-intro{padding:14px 10px 20px}
-  .envelope-intro:before,.envelope-intro:after{filter:none;opacity:.1}
-  .envelope-shell{filter:none}
-  .invitation-card{box-shadow:0 16px 30px rgba(72,64,50,.12)}
-  .envelope-inner{width:100%;padding-top:0}
-  .envelope-stage{width:min(390px,90vw);height:min(570px,68svh);min-height:470px;margin-bottom:15px}
-  .invitation-card{left:7%;right:7%;top:7%;height:72%;padding:37px 28px 34px;transform:none}
-  .botanical{width:120px;height:120px}
-  .botanical-top{left:-10px;top:-7px}
-  .botanical-bottom{right:-10px;bottom:-8px}
-  .invitation-card h2{font-size:clamp(39px,12.7vw,57px)}
-  .envelope-eyebrow{font-size:16px}
-  .envelope-date{font-size:9px;letter-spacing:.11em;margin-top:15px}
-  .envelope-invite{font-size:12px;max-width:90%}
-  .envelope-seal{width:54px;height:54px}
-  .envelope-seal svg{width:29px;height:29px}
-  .envelope-open,.envelope-close{min-width:min(300px,82vw);padding:14px 24px;font-size:10px}
-}
-@media(max-width:380px){
-  .envelope-stage{height:min(540px,69svh);min-height:470px}
-  .invitation-card{padding-left:20px;padding-right:20px}
-  .botanical{width:105px;height:105px}
 }
 @media(prefers-reduced-motion:reduce){
-  .envelope-inner,.envelope-intro,.envelope-flap,.invitation-card,.envelope-front,.envelope-seal,.envelope-cooldown-progress{animation:none!important;transition:none!important}
   .hero-photo{will-change:auto}
 }
 
@@ -535,31 +324,6 @@ body.envelope-locked{overflow:hidden}
 @media(max-width:650px){
   .language-switch,.music-toggle{backdrop-filter:none}
   .language-switch{top:14px;right:14px;padding:6px 8px}
-  body.envelope-locked .language-switch{
-    top:max(8px,calc(env(safe-area-inset-top) + 5px));
-    right:max(8px,calc(env(safe-area-inset-right) + 5px));
-    gap:2px;
-    padding:3px 5px;
-    border-radius:999px;
-    font-size:8px;
-    letter-spacing:.04em;
-    box-shadow:0 4px 14px #0004;
-  }
-  body.envelope-locked .language-option{
-    padding:2px;
-    font-size:8px;
-    letter-spacing:.04em;
-  }
-  .envelope-cooldown{
-    left:max(8px,calc(env(safe-area-inset-left) + 5px));
-    top:max(8px,calc(env(safe-area-inset-top) + 5px));
-    width:38px;
-    height:38px;
-    box-shadow:0 4px 14px rgba(57,76,61,.10);
-  }
-  .envelope-cooldown svg{inset:4px;width:30px;height:30px}
-  .envelope-cooldown circle{stroke-width:2}
-  .envelope-cooldown span{font-size:11px}
   .topbar{padding-right:90px}
   .top-link{display:none}
 }
@@ -626,7 +390,6 @@ html[data-party] .location-grid{grid-template-columns:minmax(0,720px);justify-co
 
 /* LANGUAGE ALWAYS AVAILABLE */
 html.party-pending body>.language-switch{visibility:visible!important;pointer-events:auto!important}
-body.envelope-locked .language-switch{visibility:visible!important;pointer-events:auto!important}
 
 
 /* PARTY SIDE PRIORITY
@@ -990,12 +753,6 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
   .party-selector-card {
     margin-block: auto;
   }
-  .envelope-intro {
-    align-items: start;
-  }
-  .envelope-inner {
-    margin-block: auto;
-  }
 }
 @media (hover: none) and (pointer: coarse) {
   .language-option {
@@ -1020,7 +777,6 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
   .album-lightbox-stage { height: 100vh; }
   @media (max-width: 700px) {
     .hero { height: 90vh; }
-    .envelope-stage { height: min(590px, 72vh); }
   }
   @media (max-width: 900px) {
     .hero { --hero-photo-height: min(66vh, 680px); height: auto; }
@@ -1089,20 +845,6 @@ html[data-party="single"] .location-grid {
 }
 @media(hover:hover){.topbar .monogram:hover:after{transform:translateX(120%)}}
 .topbar .monogram:focus-visible{outline:2px solid #ead5a5;outline-offset:4px}
-.envelope-seal {
-  background:radial-gradient(circle at 30% 22%,#f6ebc7 0%,#e0ca99 27%,#b59a66 65%,#7f6848 100%);
-  border:1px solid #89734c;color:#55472f;
-  box-shadow:0 8px 16px rgba(86,72,45,.25),inset 0 2px 2px rgba(255,251,231,.66),inset 0 -3px 4px rgba(94,68,36,.26);
-}
-.envelope-seal:after {
-  content:"";position:absolute;inset:5px;border:1px solid rgba(255,244,212,.64);
-  border-radius:50%;pointer-events:none;box-shadow:0 1px 1px rgba(68,54,31,.2);
-}
-.seal-monogram {
-  position:relative;z-index:1;white-space:nowrap;
-  font:600 21px/1 'Cormorant Garamond',Georgia,serif;
-  letter-spacing:-.025em;text-shadow:0 1px rgba(255,248,219,.7),0 -1px rgba(100,74,39,.18);
-}
 @media(max-width:650px){.topbar .monogram{padding:4px 10px 5px;min-height:40px}}
 @media(prefers-reduced-motion:reduce){.topbar .monogram:after{transition:none;display:none}}
 
@@ -1218,478 +960,39 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 }
 
 
-/* A single lightweight entrance wash. No canvas, particles or filter animation. */
-.invitation-reveal[hidden]{display:none!important}
-.invitation-reveal{
-  position:fixed;inset:0;z-index:4000;pointer-events:none;opacity:0;
-  background:rgba(229,206,165,.38);
-}
-.invitation-reveal.is-active{
-  animation:luxSoftReveal .68s ease-out both;
-}
-@keyframes luxSoftReveal{
-  0%,100%{opacity:0}
-  25%{opacity:1}
-  60%{opacity:.35}
-}
-@media(prefers-reduced-motion:reduce){.invitation-reveal{display:none!important}}
-
-/* FEAT 01 — seal fracture: quick warm fissures precede the gold burst. */
-.envelope-seal{isolation:isolate}
-.seal-fracture{
-  position:absolute;inset:8px;z-index:3;border-radius:50%;pointer-events:none;
-  background:
-    linear-gradient(115deg,transparent 43%,rgba(255,252,224,.96) 44% 47%,transparent 48%) 40% 0/45% 55% no-repeat,
-    linear-gradient(55deg,transparent 43%,rgba(255,243,188,.96) 44% 47%,transparent 48%) 63% 55%/43% 50% no-repeat,
-    linear-gradient(137deg,transparent 42%,rgba(107,76,39,.78) 44% 48%,transparent 49%) 15% 67%/65% 34% no-repeat;
-  filter:drop-shadow(0 0 4px rgba(255,244,184,.72));
-  opacity:0;transform:scale(.5);
-}
-.envelope-intro.is-seal-cracking .envelope-seal{
-  animation:luxSealFracture 260ms cubic-bezier(.25,.65,.35,1) both;
-}
-.envelope-intro.is-seal-cracking .seal-fracture{
-  animation:luxFractureGlow 260ms ease-out both;
-}
-@keyframes luxSealFracture{
-  0%,100%{filter:brightness(1);transform:translate3d(-50%,-50%,0)}
-  38%{filter:brightness(1.55);transform:translate3d(calc(-50% - 1px),-50%,0) scale(1.04)}
-  70%{filter:brightness(1.3);transform:translate3d(calc(-50% + 1px),-50%,0) scale(.99)}
-}
-@keyframes luxFractureGlow{
-  0%{opacity:0;transform:scale(.5)}
-  35%{opacity:.95;transform:scale(.92)}
-  70%{opacity:1;transform:scale(1.07)}
-  100%{opacity:0;transform:scale(1.22)}
-}
-@media(prefers-reduced-motion:reduce){
-  .envelope-intro.is-seal-cracking .envelope-seal,
-  .envelope-intro.is-seal-cracking .seal-fracture{animation:none!important}
-}
-
-
 /* FEAT 04 — the personal names are written into view by a single gold sweep. */
 #heroNames{position:relative;isolation:isolate}
-@media(prefers-reduced-motion:no-preference){
-  html.golden-signature-entered .hero-copy > #heroNames{
-    animation:luxGoldenSignature 1300ms cubic-bezier(.16,.79,.18,1) both;
-  }
-  html.golden-signature-entered #heroNames:after{
-    content:"";position:absolute;inset:-8px -10px;pointer-events:none;z-index:2;
-    background:linear-gradient(100deg,transparent 0%,transparent 40%,
-      rgba(255,248,220,.04) 47%,rgba(255,227,160,.32) 51%,transparent 58%,transparent 100%);
-    mix-blend-mode:screen;
-    animation:luxSignatureGlint 1320ms cubic-bezier(.14,.66,.23,1) both;
-  }
-}
-@keyframes luxGoldenSignature{
-  from{opacity:0;transform:translate3d(0,8px,0)}
-  to{opacity:1;transform:none}
-}
-@keyframes luxSignatureGlint{
-  0%,10%{opacity:0;transform:translate3d(-100%,0,0)}
-  32%{opacity:.9}
-  85%{opacity:.7}
-  100%{opacity:0;transform:translate3d(100%,0,0)}
-}
-@media(prefers-reduced-motion:reduce){
-  html.golden-signature-entered .hero-copy > #heroNames{
-    animation:none!important;clip-path:none!important;filter:none!important;
-  }
-}
 
 
-/* Matte paper shadows remain static; only transforms/opacity animate. */
-.envelope-shell{filter:none}
-.envelope-back{box-shadow:0 18px 32px rgba(48,45,37,.12)}
-@keyframes luxSealFracture{
-  0%,100%{transform:translate3d(-50%,-50%,0)}
-  38%{transform:translate3d(calc(-50% - 1px),-50%,0) scale(1.025)}
-  70%{transform:translate3d(calc(-50% + 1px),-50%,0) scale(.99)}
+/* TEMPORARY WAX GATE — intentionally minimal while the intro is rebuilt. */
+html.wax-pending,
+html.wax-pending body{overflow:hidden}
+html.wax-pending body{
+  background:#23372d;
 }
-
-/* ENVELOPE CONTRAST & MOBILE SMOOTHNESS — matte dark-olive stage, warm
-   stationery pocket and a distinct pearl-ivory card. No background animation. */
-/* Envelope also obeys the global appearance setting. Both palettes use
-   quiet, warm mid-tones rather than the previous near-black stage. */
-html[data-theme="dark"] .envelope-intro{
-  background-color:#61766a;
-  background-image:
-    radial-gradient(ellipse at 51% 42%,rgba(250,231,190,.23),transparent 64%),
-    linear-gradient(150deg,#829688 0%,#61776c 56%,#485f54 100%);
-  color:#fff6e5;
+html[data-theme="light"].wax-pending body{
+  background:#efe8de;
 }
-html[data-theme="light"] .envelope-intro{
-  background-color:#eee6dc;
-  background-image:
-    radial-gradient(ellipse at 48% 40%,rgba(255,255,249,.88),transparent 62%),
-    linear-gradient(145deg,#f6f1e9 0%,#eee2d5 58%,#e4d7cd 100%);
-  color:#384b40;
+html.wax-pending body > :not(#waxOpenButton){
+  visibility:hidden!important;
 }
-.envelope-intro:before,.envelope-intro:after{opacity:.055}
-.envelope-shell .envelope-back{
-  background:linear-gradient(145deg,#e6d6bb,#d6c2a4);
-  border-color:rgba(123,98,64,.45);
-}
-.envelope-flap{
-  background:linear-gradient(162deg,#ebddc6,#d2bb9a 80%);
-  border-color:rgba(122,95,60,.42);
-}
-.envelope-front-left{
-  background:linear-gradient(150deg,#e4d3b9,#cdb899);
-}
-.envelope-front-right{
-  background:linear-gradient(210deg,#e8d8be,#d1bea2);
-}
-.envelope-front-bottom{
-  background:linear-gradient(180deg,#e1ceb0,#cdb597);
-}
-.invitation-card{
-  background-color:#fffaf0;
-  background-image:linear-gradient(157deg,#fffefa 0%,#fff9ef 54%,#f5e8d5 100%);
-  color:#283e31;
-  border:1px solid rgba(159,121,65,.66);
-  box-shadow:0 24px 42px rgba(12,20,14,.27),0 4px 12px rgba(40,33,22,.12),
-    inset 0 1px 0 rgba(255,255,255,.92);
-}
-.invitation-card:before{border-color:rgba(174,141,86,.38)}
-.invitation-card-rule{
-  background:linear-gradient(90deg,transparent,#ae8955,transparent);
-}
-.envelope-open,.envelope-close{
-  background:linear-gradient(180deg,#e8d0a0,#cfae74);
-  color:#243429;border-color:#b7935e;
-  box-shadow:0 11px 26px rgba(0,0,0,.19);
-}
-.envelope-open:hover{
-  background:linear-gradient(180deg,#f0ddba,#d9b982);
-  box-shadow:0 13px 29px rgba(0,0,0,.24);
-}
-.envelope-skip{color:#e3d6bd}
-.envelope-cooldown span{color:#faf1db}
-.envelope-cooldown-track{stroke:rgba(255,235,197,.3)}
-.envelope-cooldown-progress{stroke:#ead09b}
-@media(max-width:650px){
-  .invitation-card{
-    box-shadow:0 18px 30px rgba(12,20,14,.28),
-      0 3px 11px rgba(40,33,22,.1);
-  }
-  .envelope-intro:before,.envelope-intro:after{display:none}
-}
-/* ACCESSIBLE INTRO CONTROLS — opaque countdown, ivory digits, brass ring.
-   No backdrop blur or bright-on-bright text on mobile. */
-.envelope-cooldown{
-  color:#fbf5e7;background:#213629;border:1px solid #bfa476;
-  box-shadow:0 5px 16px rgba(4,16,10,.23);
-  backdrop-filter:none;-webkit-backdrop-filter:none;
-}
-.envelope-cooldown span{color:#fbf5e7;font-weight:700;text-shadow:none}
-.envelope-cooldown-track{stroke:#6d826f}
-.envelope-cooldown-progress{stroke:#f1d59e}
-.envelope-open:focus-visible,.envelope-close:focus-visible,
-.envelope-skip:focus-visible{
-  outline:3px solid #f5dca9;outline-offset:4px;
-}
-@media(max-width:650px){
-  .envelope-cooldown{width:44px;height:44px;box-shadow:0 4px 12px rgba(4,16,10,.2)}
-  .envelope-cooldown svg{width:36px;height:36px}
-  .envelope-cooldown span{font-size:14px}
-}
-
-/* Intro controls stay legible in each theme without changing global panels. */
-html[data-theme="dark"] .envelope-skip{color:#fff6e6}
-html[data-theme="light"] .envelope-skip{color:#58665b}
-html[data-theme="light"] .envelope-cooldown{
-  background:#fffaf2;border-color:#aa956e;color:#354e40;
-}
-html[data-theme="light"] .envelope-cooldown span{color:#354e40}
-html[data-theme="light"] .envelope-cooldown-track{stroke:#d3d8cc}
-html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
-
-/* Lightweight ivory petal bloom restored by request. No filters, shadows,
-   gradients with blurs or persistent RAF loops. */
-.floating-petals[hidden]{display:none!important}
-.floating-petals{
-  position:fixed;inset:0;z-index:3500;overflow:hidden;pointer-events:none;
-  contain:layout style paint;--petal-x:50%;--petal-y:50%;
-}
-.floating-petal{
-  position:absolute;left:var(--petal-x);top:var(--petal-y);
-  width:9px;height:15px;opacity:0;pointer-events:none;
-  background:linear-gradient(140deg,#fffaf0,#dcbda1);
-  border-radius:80% 8% 85% 12%;
-}
-.floating-petal:nth-child(even){width:7px;height:12px;background:#f6e5cf}
-.floating-petals.is-active .floating-petal{
-  animation:ivoryPetalBloom 1.45s cubic-bezier(.16,.72,.22,1) var(--petal-delay,0ms) both;
-}
-@keyframes ivoryPetalBloom{
-  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--petal-angle)) translateY(0) scale(.5)}
-  17%{opacity:.85}
-  68%{opacity:.65}
-  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--petal-angle)) translateY(var(--petal-distance)) scale(.7)}
-}
-@media(prefers-reduced-motion:reduce){.floating-petals{display:none!important}}
-
-/* COUNTDOWN GEOMETRY — timer digit and SVG share exactly the same center.
-   Previous inset + fixed SVG dimensions drifted at mobile breakpoints. */
-.envelope-cooldown{
-  position:fixed;display:grid;place-items:center;
-  padding:0;box-sizing:border-box;
-}
-.envelope-cooldown svg{
-  position:absolute;inset:0;width:100%;height:100%;
-  margin:0;padding:0;transform:rotate(-90deg);transform-origin:50% 50%;
-}
-.envelope-cooldown span{
-  position:absolute;inset:0;width:100%;height:100%;
-  display:grid;place-items:center;margin:0;padding:0;
-  line-height:1;letter-spacing:0;transform:none;
-  font-variant-numeric:tabular-nums;
-}
-@media(max-width:650px){
-  .envelope-cooldown svg{inset:0;width:100%;height:100%}
-  .envelope-cooldown span{font-size:14px}
-}
-
-/* One deliberate action: the personalized wax seal is the only way to open. */
-#envelopeSealButton{
-  appearance:none;-webkit-appearance:none;padding:0;margin:0;
-  cursor:pointer;touch-action:manipulation;
+#waxOpenButton{
+  position:fixed;left:50%;top:50%;z-index:10000;
+  width:72px;height:72px;padding:0;margin:0;
+  display:grid;place-items:center;
+  transform:translate(-50%,-50%);
+  border:1px solid #8d7b51;border-radius:50%;
+  background:radial-gradient(circle at 32% 24%,#d8c99b,#aa996d 68%,#8d7d56);
+  box-shadow:0 10px 26px rgba(42,35,23,.24),inset 0 0 0 4px rgba(245,237,210,.22);
+  color:#4f5e49;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
   -webkit-tap-highlight-color:transparent;
 }
-#envelopeSealButton:focus-visible{
-  outline:3px solid #fff0ca;outline-offset:6px;
-}
-#envelopeSealButton:disabled{cursor:default}
-@media(hover:hover){
-  #envelopeSealButton:not(:disabled):hover{box-shadow:0 8px 18px rgba(86,72,45,.25),inset 0 0 0 4px rgba(245,237,210,.22)}
-}
-
-
-/* TWO ACT GOLDEN LIGHT — the warm flare returns without glitter storms.
-   Both scenes use just one prepainted gradient and animate opacity/transform. */
-.envelope-seal-light{
-  position:absolute;left:50%;top:79%;z-index:7;pointer-events:none;
-  width:235px;height:235px;border-radius:50%;opacity:0;
-  background:radial-gradient(circle,rgba(255,249,221,.97) 0%,
-    rgba(255,233,179,.82) 12%,rgba(236,194,126,.36) 35%,transparent 70%);
-  transform:translate(-50%,-50%) scale(.25);
-}
-.envelope-intro.is-seal-cracking .envelope-seal-light{
-  animation:sealLightReveal 900ms cubic-bezier(.18,.72,.2,1) both;
-}
-@keyframes sealLightReveal{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}
-  23%{opacity:1}
-  55%{opacity:.7}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(1.32)}
-}
-.invitation-reveal{
-  background:radial-gradient(ellipse at 50% 47%,
-    rgba(255,251,236,.98) 0%,rgba(248,222,175,.88) 18%,
-    rgba(219,172,108,.42) 43%,rgba(177,126,68,.12) 64%,transparent 80%);
-  transform:scale(.94);
-}
-.invitation-reveal.is-active{
-  animation:weddingWarmHeroReveal 1080ms cubic-bezier(.16,.69,.25,1) both;
-}
-@keyframes weddingWarmHeroReveal{
-  0%{opacity:0;transform:scale(.94)}
-  27%{opacity:1}
-  55%{opacity:.65}
-  100%{opacity:0;transform:scale(1.10)}
-}
-@media(max-width:650px){
-  .envelope-seal-light{width:185px;height:185px}
-}
-@media(prefers-reduced-motion:reduce){
-  .envelope-seal-light{display:none!important}
-  .invitation-reveal{display:none!important}
-}
-
-
-/* CEREMONIAL PETAL BURST — larger silk petals with a wider throw, still
-   transform/opacity only so the visual scale does not add layout work. */
-.floating-petal{
-  width:16px;height:28px;
-  border-radius:88% 8% 82% 15%;
-  transform-origin:50% 68%;
-}
-.floating-petal:nth-child(even){width:13px;height:23px}
-.floating-petal:nth-child(3n){width:18px;height:30px;background:linear-gradient(145deg,#fffdf5,#e6c8a6)}
-.floating-petals.is-active .floating-petal{
-  animation:ivoryPetalBloomGrand 1.8s cubic-bezier(.15,.72,.2,1) var(--petal-delay,0ms) both;
-}
-@keyframes ivoryPetalBloomGrand{
-  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--petal-angle)) translateY(0) scale(.22)}
-  12%{opacity:.96}
-  42%{opacity:.9}
-  72%{opacity:.68}
-  100%{opacity:0;transform:translate(-50%,-50%) rotate(calc(var(--petal-angle) + 115deg)) translateY(var(--petal-distance)) scale(.94)}
-}
-@media(max-width:650px){
-  .floating-petal{width:14px;height:24px}
-  .floating-petal:nth-child(even){width:11px;height:20px}
-  .floating-petal:nth-child(3n){width:15px;height:26px}
-}
-
-
-/* LOCALIZED GOLD BURST — no full-screen white wash. */
-.envelope-seal-light{
-  width:310px;height:310px;
-  background:radial-gradient(circle,
-    rgba(255,251,227,.96) 0 5%,
-    rgba(255,224,158,.78) 11%,
-    rgba(229,177,99,.38) 28%,
-    rgba(197,137,68,.12) 48%,
-    transparent 68%);
-  transform:translate(-50%,-50%) scale(.12);
-}
-.envelope-seal-light:before,
-.envelope-seal-light:after{
-  content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
-}
-.envelope-seal-light:before{
-  inset:13%;
-  background:repeating-conic-gradient(from 4deg,
-    rgba(255,237,188,.75) 0 1.2deg,
-    transparent 1.2deg 16deg);
-  -webkit-mask:radial-gradient(circle,transparent 0 28%,#000 37% 55%,transparent 73%);
-  mask:radial-gradient(circle,transparent 0 28%,#000 37% 55%,transparent 73%);
-}
-.envelope-seal-light:after{
-  inset:27%;
-  border:1.5px solid rgba(255,230,174,.88);
-}
-.envelope-intro.is-seal-cracking .envelope-seal-light{
-  animation:sealLocalizedBurst 1050ms cubic-bezier(.12,.76,.2,1) both;
-}
-@keyframes sealLocalizedBurst{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.10)}
-  14%{opacity:1}
-  42%{opacity:.96}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(1.55)}
-}
-
-/* Entering the site uses a gold ring expanding from the card, not a white
-   fullscreen flash. The overlay itself stays transparent. */
-.invitation-reveal{
-  background:none!important;
-  transform:none!important;
-  overflow:hidden;
-}
-.invitation-reveal:before,
-.invitation-reveal:after{
-  content:"";position:absolute;left:50%;top:50%;border-radius:50%;
-  pointer-events:none;opacity:0;
-}
-.invitation-reveal:before{
-  width:300px;height:300px;
-  background:radial-gradient(circle,
-    rgba(255,240,201,.64) 0 12%,
-    rgba(226,180,112,.32) 30%,
-    rgba(190,126,62,.11) 50%,
-    transparent 70%);
-}
-.invitation-reveal:after{
-  width:210px;height:210px;border:2px solid rgba(244,207,143,.72);
-}
-.invitation-reveal.is-active{animation:none!important}
-.invitation-reveal.is-active:before{
-  animation:heroLocalizedBurst 980ms cubic-bezier(.13,.7,.2,1) both;
-}
-.invitation-reveal.is-active:after{
-  animation:heroLocalizedRing 900ms cubic-bezier(.13,.7,.2,1) both;
-}
-@keyframes heroLocalizedBurst{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.18)}
-  18%{opacity:.9}
-  56%{opacity:.48}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(3.2)}
-}
-@keyframes heroLocalizedRing{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}
-  20%{opacity:.9}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(4.4)}
-}
-@media(max-width:650px){
-  .envelope-seal-light{width:255px;height:255px}
-  .invitation-reveal:before{width:220px;height:220px}
-  .invitation-reveal:after{width:160px;height:160px}
-}
-
-
-/* SIMPLE ENVELOPE REVEAL
-   The invitation never moves. After the wax cracks, every physical envelope
-   piece slides down together until it leaves the viewport. */
-.invitation-card{
-  visibility:visible;
-  opacity:1;
-  z-index:2;
-  top:8%;
-  height:72%;
-  transform:none!important;
-  animation:none!important;
-  will-change:auto!important;
-}
-.envelope-front{
-  background:linear-gradient(180deg,#e6d2b4 0%,#d4bd9d 100%);
-  border:1px solid rgba(122,95,60,.34);
-  border-top:0;
-  border-radius:0 0 4px 4px;
-}
-html[data-theme="light"] .envelope-front{
-  background:linear-gradient(180deg,#eadac2 0%,#d8c3a6 100%);
-}
-.envelope-shell,
-.envelope-front,
-.envelope-flap,
-.envelope-seal{
-  transition:
-    transform 1.08s cubic-bezier(.22,.72,.18,1),
-    opacity .28s ease .76s;
-  will-change:transform,opacity;
-}
-.envelope-intro.is-envelope-dropping .envelope-shell,
-.envelope-intro.is-envelope-dropping .envelope-front,
-.envelope-intro.is-envelope-dropping .envelope-flap{
-  transform:translate3d(0,105vh,0);
-  opacity:0;
-}
-.envelope-intro.is-envelope-dropping .envelope-seal{
-  transform:translate3d(-50%,calc(-50% + 105vh),0);
-  opacity:0;
-}
-.envelope-intro.is-envelope-dropping .envelope-seal-light{
-  opacity:0;
-}
-.envelope-intro.is-envelope-cleared .envelope-shell,
-.envelope-intro.is-envelope-cleared .envelope-front,
-.envelope-intro.is-envelope-cleared .envelope-flap,
-.envelope-intro.is-envelope-cleared .envelope-seal{
-  visibility:hidden;
-}
-.envelope-intro:not(.is-envelope-cleared) .envelope-close,
-.envelope-intro:not(.is-envelope-cleared) .envelope-cooldown{
-  display:none!important;
-}
-@media(max-width:650px){
-  .invitation-card{left:7%;right:7%;top:7%;height:72%;padding:34px 25px 31px}
-}
-@media(max-width:380px){
-  .invitation-card{top:8%;height:70%;padding-left:20px;padding-right:20px}
-}
-@media(prefers-reduced-motion:reduce){
-  .envelope-shell,.envelope-front,.envelope-flap,.envelope-seal{
-    transition:none!important;
-  }
-  .envelope-intro.is-envelope-dropping .envelope-shell,
-  .envelope-intro.is-envelope-dropping .envelope-front,
-  .envelope-intro.is-envelope-dropping .envelope-flap{
-    transform:translate3d(0,105vh,0)!important;opacity:0!important;
-  }
-  .envelope-intro.is-envelope-dropping .envelope-seal{
-    transform:translate3d(-50%,calc(-50% + 105vh),0)!important;opacity:0!important;
-  }
+#waxOpenButton:focus-visible{outline:3px solid #f2dfb5;outline-offset:6px}
+#waxOpenButton[hidden],
+html.party-pending #waxOpenButton,
+html.link-tool-active #waxOpenButton{display:none!important}
+.wax-monogram{
+  display:block;font:600 14px/1 Montserrat,sans-serif;
+  letter-spacing:.08em;text-transform:uppercase;
 }

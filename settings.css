@@ -160,36 +160,6 @@ html.link-tool-active .settings-music-row {display:none!important}
 @media(prefers-reduced-motion:reduce) {
   .settings-hub .settings-trigger-label { transition:none; }
 }
-
-/* Personalized invitation: the recipient has a genuine typographic hierarchy. */
-.envelope-invite {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:2px;
-  margin-top:8px;
-  max-width:94%;
-  width:100%;
-  padding:0 7px 7px;
-}
-.envelope-recipient-label {
-  display:block;
-  color:#5b685c;
-  font:500 12px/1.4 Montserrat,sans-serif;
-  letter-spacing:.13em;
-  text-transform:uppercase;
-}
-.envelope-recipient-name {
-  display:block;
-  max-width:100%;
-  color:#315b47;
-  font:700 clamp(20px,3.3vw,32px)/1.16 Georgia,'Times New Roman',serif;
-  letter-spacing:.015em;
-  overflow-wrap:anywhere;
-  text-wrap:balance;
-}
-.envelope-recipient-name[hidden] {display:none}
 .guest-greeting {
   display:flex;
   flex-direction:column;
@@ -219,13 +189,8 @@ html.link-tool-active .settings-music-row {display:none!important}
 }
 .hero-recipient-name[hidden] {display:none}
 @media (max-width:650px) {
-  .envelope-recipient-name {font-size:clamp(20px,6vw,29px)}
   .hero-recipient-name {font-size:clamp(22px,6.1vw,32px)}
   .hero-recipient-label {font-size:10px}
-}
-@media (max-height:650px) {
-  .envelope-invite {margin-top:4px}
-  .envelope-recipient-name {font-size:clamp(18px,4vh,26px)}
 }
 
 /* Warm ivory / sage palette. Photos and cinema lightbox remain naturally dark.
@@ -559,18 +524,6 @@ html[data-theme="light"] .music-float-action:hover {background:#e2d1b4}
   .music-float .music-float-note svg,
   .music-float .music-float-trigger::before {animation:none!important}
   .music-float-trigger {transition:none}
-}
-
-
-/* The invitation's full-screen envelope deliberately hides page content.
-   Keep the music orb above that overlay as well, so users can stop/pause
-   audio even before choosing "Open Invitation". The settings dock remains
-   one layer higher and is still accessible. */
-html.envelope-pending body > #musicBubble,
-body.envelope-locked > #musicBubble {
-  visibility:visible!important;
-  pointer-events:auto!important;
-  z-index:3000;
 }
 
 

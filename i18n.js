@@ -103,7 +103,7 @@
       if (src && node.dataset.src !== src) node.dataset.src = src;
     });
     document.querySelectorAll("[data-party-date]").forEach(node => {
-      const style = node.closest(".envelope-date") ? "spaced" : "dots";
+      const style = "dots";
       node.textContent = formatDate(node.dataset.partyDate, style);
     });
     document.querySelectorAll("[data-party-event-date]").forEach(node => {
