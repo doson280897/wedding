@@ -194,3 +194,42 @@ body.wg-open{overflow:hidden}
     min-height:34px;
   }
 }
+
+
+/* Collapsed navigation: center the actual SVG within the entire touch target,
+   not within a leftover inline span. Keep 44px minimum for iOS/Android taps. */
+.wq-toggle.floating-control.is-idle {
+  box-sizing:border-box;
+  display:grid;
+  place-items:center;
+  inline-size:44px;
+  min-inline-size:44px;
+  block-size:44px;
+  min-block-size:44px;
+  padding:0;
+  gap:0;
+}
+.wq-toggle.floating-control.is-idle .wq-toggle-glyph {
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  inline-size:100%;
+  block-size:100%;
+  transform:none;
+  margin:0;
+}
+.wq-toggle.floating-control.is-idle .wq-toggle-glyph svg {
+  display:block;
+  width:20px;
+  height:20px;
+  margin:0;
+}
+@media(max-width:650px) {
+  .wq-toggle.floating-control.is-idle {
+    width:44px;
+    min-width:44px;
+    height:44px;
+    min-height:44px;
+  }
+}
