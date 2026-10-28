@@ -900,6 +900,10 @@ test("reduced-motion album can switch, close and reopen without losing its image
   await expect(page.locator("#moonlightGate")).toBeHidden();
   const viewport = page.locator("#albumViewport");
   await viewport.scrollIntoViewIfNeeded();
+  // A late load/pageshow must not undo a guest's scroll after entering.
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  await page.evaluate(() => window.dispatchEvent(new Event("pageshow")));
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
   await expect(page.locator(".album-card.is-main")).toHaveCount(1);
   await viewport.focus();
   await page.keyboard.press("Enter");

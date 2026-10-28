@@ -21,7 +21,11 @@
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   const resetInvitationScroll = () => window.scrollTo({ top:0, left:0, behavior:"instant" });
   resetInvitationScroll();
-  window.addEventListener("pageshow", resetInvitationScroll);
+  window.addEventListener("pageshow", () => {
+    // Slow external resources can delay pageshow until after a reduced-motion
+    // entrance has finished. Never pull a guest back from content they opened.
+    if (document.documentElement.classList.contains("wax-pending")) resetInvitationScroll();
+  });
 
 
   if (selectedParty) {
