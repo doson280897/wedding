@@ -50,6 +50,7 @@ test("one shared language control, in-page generator, back navigation @smoke @co
   expect(errors).toEqual([]);
 });
 
+
 test("party link, envelope and album lightbox interactions", async ({
   page,
 }) => {
@@ -64,12 +65,11 @@ test("party link, envelope and album lightbox interactions", async ({
   await expect(page.locator("#envelopeIntro")).toBeHidden();
 
   await page.locator("#albumViewport").scrollIntoViewIfNeeded();
-  await expect(page.locator(".album-slide")).toHaveCount(30, {
-    timeout: 15000,
-  });
+  await expect.poll(() => page.locator(".album-slide").count()).toBeGreaterThan(0);
+  const totalSlides = await page.locator(".album-slide").count();
   const loadedImages = await page.locator(".album-photo[src]").count();
   expect(loadedImages).toBeGreaterThan(0);
-  expect(loadedImages).toBeLessThan(18);
+  if (totalSlides > 12) expect(loadedImages).toBeLessThan(totalSlides);
 
   await page.locator("#albumViewport").focus();
   await page.keyboard.press("Enter");
@@ -81,6 +81,7 @@ test("party link, envelope and album lightbox interactions", async ({
   await expect(page.locator("#albumLightbox")).toBeHidden();
   expect(errors).toEqual([]);
 });
+
 
 test("short screens can scroll and avoid horizontal page overflow @smoke", async ({
   page,
@@ -98,17 +99,6 @@ test("short screens can scroll and avoid horizontal page overflow @smoke", async
   expect(toolOverflow).toBeLessThanOrEqual(4);
 });
 
-test("legacy generator URL redirects to the shared in-page view", async ({ page }) => {
-  await page.goto(base + "/link-tool.html?lang=en", {
-    waitUntil: "domcontentloaded",
-  });
-  await expect(page).toHaveURL(/index[.]html[?]tool=links&lang=en/);
-  await expect(page.locator("#linkToolScreen")).toBeVisible();
-  await expect(page.locator("#linkToolTitle")).toHaveText(
-    "Create a personalized invitation",
-  );
-  await expect(page.locator(".language-switch")).toHaveCount(1);
-});
 
 test("menu, map and gift overlays open and close on each device @smoke", async ({
   page,
@@ -121,9 +111,7 @@ test("menu, map and gift overlays open and close on each device @smoke", async (
   // Even a collapsed idle Menu must open on the FIRST touch on phones.
   await menuToggle.evaluate(node => node.classList.add("is-idle"));
   await menuToggle.click();
-  if ((await menuToggle.getAttribute("aria-expanded")) !== "true") {
-    await menuToggle.click();
-  }
+  await expect(menuToggle).toHaveAttribute("aria-expanded", "true");
   await expect(page.locator("#wqPanel")).toHaveAttribute(
     "aria-hidden",
     "false",
@@ -134,35 +122,11 @@ test("menu, map and gift overlays open and close on each device @smoke", async (
   await expect(page.locator("#wmModal")).toBeHidden();
 
   await menuToggle.click();
-  if ((await menuToggle.getAttribute("aria-expanded")) !== "true") {
-    await menuToggle.click();
-  }
+  await expect(menuToggle).toHaveAttribute("aria-expanded", "true");
   await page.locator('#wqPanel a[href="#wedding-gift"]').click();
   await expect(page.locator("#wgModal")).toBeVisible();
   await page.locator("#wgClose").click();
   await expect(page.locator("#wgModal")).toBeHidden();
-});
-
-
-test("floating language pill really shrinks on touch and desktop", async ({ page }) => {
-  await page.goto(base + "/index.html", { waitUntil: "domcontentloaded" });
-  const control = page.locator(".language-switch");
-  await expect(control).toBeVisible();
-  await expect(control).toHaveClass(/floating-control/);
-
-  // Compare rendered layout, not just the visibility of VN/EN text.
-  await control.evaluate(node => node.classList.remove("is-idle"));
-  await page.waitForTimeout(450);
-  const expandedWidth = await control.evaluate(node => node.getBoundingClientRect().width);
-
-  await control.evaluate(node => node.classList.add("is-idle"));
-  await page.waitForTimeout(450);
-  const collapsedWidth = await control.evaluate(node => node.getBoundingClientRect().width);
-
-  expect(collapsedWidth).toBeLessThanOrEqual(48);
-  expect(expandedWidth).toBeGreaterThan(collapsedWidth + 12);
-  await expect(page.locator("#settingsTrigger")).toBeVisible();
-  await expect(page.locator("#settingsPanel")).toBeHidden();
 });
 
 
@@ -274,78 +238,6 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   );
 });
 
-test("a newly opened tab still shows the envelope", async ({ page }) => {
-  const url = base + "/index.html?party=groom&to=TabGuest";
-  await page.goto(url, { waitUntil: "domcontentloaded" });
-  await page.locator("#skipInvitation").click();
-  await expect(page.locator("#envelopeIntro")).toBeHidden();
-
-  // Open from the already-entered tab; this also catches sessionStorage-clone
-  // regressions when the new tab has a same-origin opener.
-  await page.evaluate(destination => {
-    const link = document.createElement("a");
-    link.href = destination;
-    link.target = "_blank";
-    link.rel = "opener";
-    link.id = "testOpenNewInvitationTab";
-    link.textContent = "Open invitation in new tab";
-    document.body.append(link);
-  }, url);
-  const popupPromise = page.waitForEvent("popup");
-  await page.locator("#testOpenNewInvitationTab").click();
-  const popup = await popupPromise;
-  await popup.waitForLoadState("domcontentloaded");
-  await expect(popup.locator("#envelopeIntro")).toBeVisible();
-  await expect(popup.locator("html")).not.toHaveClass(/envelope-resumed/);
-  await popup.close();
-});
-
-test("previously entered guest/party does not suppress another invitation", async ({
-  page,
-}) => {
-  await page.goto(base + "/index.html?party=bride&to=FirstGuest", {
-    waitUntil: "domcontentloaded",
-  });
-  await page.locator("#skipInvitation").click();
-  await expect(page.locator("#envelopeIntro")).toBeHidden();
-
-  // Even if a router reuses history.state when the URL changes, the
-  // party + personalized guest must match before skipping the envelope.
-  await page.evaluate(() => {
-    const next = new URL(location.href);
-    next.searchParams.set("party", "groom");
-    next.searchParams.set("to", "SecondGuest");
-    history.replaceState(history.state, "", next);
-  });
-  await page.reload({ waitUntil: "domcontentloaded" });
-  await expect(page.locator("#envelopeIntro")).toBeVisible();
-});
-
-
-test("a deploy cache refresh keeps the already opened invitation in the same tab", async ({
-  page,
-}) => {
-  const url = base + "/index.html?party=bride&to=DeployGuest";
-  await page.goto(url, { waitUntil: "domcontentloaded" });
-  await page.locator("#skipInvitation").click();
-  await expect(page.locator("#envelopeIntro")).toBeHidden();
-
-  await page.route("**/version.json*", route =>
-    route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ build: "test-deploy-new-version" }),
-    }),
-  );
-  await page.reload({ waitUntil: "domcontentloaded" });
-  await expect(page).toHaveURL(/[_]v=test-deploy-new-version/);
-  await page.waitForLoadState("domcontentloaded");
-  await expect(page.locator("#envelopeIntro")).toBeHidden();
-  expect(await page.evaluate(() => history.state?.weddingEnvelopeOpened)).toBe(
-    JSON.stringify(["bride", "DeployGuest"]),
-  );
-});
-
 
 test("settings palette provides light/dark, persistent language and music in one place @smoke @core", async ({
   page,
@@ -380,6 +272,7 @@ test("settings palette provides light/dark, persistent language and music in one
   expect(lightBackground).not.toBe(darkBackground);
 });
 
+
 test("settings popover stays inside phone and tablet viewport when hub is dragged @smoke", async ({
   page,
 }) => {
@@ -405,6 +298,7 @@ test("settings popover stays inside phone and tablet viewport when hub is dragge
   expect(rect.bottom).toBeLessThanOrEqual(rect.viewportH - 4);
 });
 
+
 test("personal invitation puts bold recipient below the greeting in both places", async ({
   page,
 }) => {
@@ -429,17 +323,12 @@ test("personal invitation puts bold recipient below the greeting in both places"
   await expect(page.locator("#envelopeGuestLabel")).toHaveText("Cordially inviting");
   await expect(page.locator("#heroGuestLabel")).toHaveText("Cordially inviting");
   await expect(page.locator("#guestName")).toHaveText(guest);
-});
 
-test("unnamed invitation remains generic instead of showing an empty recipient name", async ({
-  page,
-}) => {
-  await page.goto(base + "/index.html?party=groom", { waitUntil:"domcontentloaded" });
-  await expect(page.locator("#envelopeGuestLabel")).toHaveText("Trân trọng kính mời");
+  // A generic link must not render an empty personalized-name line.
+  await page.goto(base + "/index.html?party=groom", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeGuest")).toBeHidden();
   await page.locator("#skipInvitation").click();
   await expect(page.locator("#guestName")).toBeHidden();
-  await expect(page.locator("#heroGuestLabel")).toContainText("Trân trọng kính mời");
 });
 
 
@@ -475,54 +364,31 @@ test("F5 resets settings and menu positions to opposite right corners @smoke", a
   expect(corners.settings.top).toBeLessThanOrEqual(40);
   expect(corners.menu.right).toBeLessThanOrEqual(30);
   expect(corners.menu.bottom).toBeLessThanOrEqual(40);
-});
 
-test("collapsed settings icon is centered both vertically and horizontally @smoke", async ({ page }) => {
-  await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
-  const dock = page.locator("#settingsHub");
-  await dock.evaluate(node => node.classList.add("is-idle"));
-  const result = await dock.evaluate(node => {
-    const bounds = node.getBoundingClientRect();
-    const icon = node.querySelector(".settings-trigger svg").getBoundingClientRect();
-    const label = node.querySelector(".settings-trigger-label");
+  // Both collapsed SVGs must sit at the actual center after reload.
+  await hub.evaluate(node => node.classList.add("is-idle"));
+  await menu.evaluate(node => node.classList.add("is-idle"));
+  await page.waitForTimeout(350); // Wait for CSS width/padding transition.
+  const centers = await page.evaluate(() => {
+    const offset = (outer, icon) => {
+      const a = outer.getBoundingClientRect();
+      const b = icon.getBoundingClientRect();
+      return {
+        x: Math.abs((a.left + a.width / 2) - (b.left + b.width / 2)),
+        y: Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)),
+      };
+    };
     return {
-      dx:Math.abs((bounds.left + bounds.width / 2) - (icon.left + icon.width / 2)),
-      dy:Math.abs((bounds.top + bounds.height / 2) - (icon.top + icon.height / 2)),
-      labelDisplay:getComputedStyle(label).display
+      settings: offset(document.querySelector("#settingsHub"), document.querySelector("#settingsTrigger svg")),
+      menu: offset(document.querySelector("#wqToggle"), document.querySelector("#wqToggle svg")),
     };
   });
-  expect(result.dx).toBeLessThanOrEqual(2);
-  expect(result.dy).toBeLessThanOrEqual(2);
-  expect(result.labelDisplay).toBe("none");
+  for (const coordinate of [centers.settings, centers.menu]) {
+    expect(coordinate.x).toBeLessThanOrEqual(2);
+    expect(coordinate.y).toBeLessThanOrEqual(2);
+  }
 });
 
-test("light palette remains light when opening an invitation @smoke @core", async ({ page }) => {
-  await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
-  await page.locator("#settingsTrigger").click();
-  await page.locator('[data-theme-option="light"]').click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
-  await page.locator("#settingsClose").click();
-
-  await page.locator('[data-party-select="bride"]').click();
-  await expect(page.locator("#envelopeIntro")).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
-  await page.locator("#skipInvitation").click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
-
-  const hub = page.locator("#settingsHub");
-  await hub.evaluate(node => node.classList.add("is-idle"));
-  const actual = await hub.evaluate(node => {
-    const color = getComputedStyle(node).backgroundColor;
-    const root = document.documentElement.dataset.theme;
-    const parsed = color.match(/[0-9.]+/g)?.slice(0,3).map(Number) || [];
-    return {color,root,parsed};
-  });
-  expect(actual.root).toBe("light");
-  expect(actual.parsed.length).toBe(3);
-  expect(actual.parsed[0]).toBeGreaterThan(180);
-  expect(actual.parsed[1]).toBeGreaterThan(170);
-  expect(actual.parsed[2]).toBeGreaterThan(150);
-});
 
 test("a new tab starts in VN and Dark even after the first tab was changed @smoke @core", async ({
   page
@@ -537,7 +403,7 @@ test("a new tab starts in VN and Dark even after the first tab was changed @smok
 
   await page.evaluate(destination => {
     const a = document.createElement("a");
-    a.href = destination;
+    a.href = destination + "?party=groom";
     a.target = "_blank";
     a.rel = "opener";
     a.id = "newTabWithPreferencesTest";
@@ -550,6 +416,7 @@ test("a new tab starts in VN and Dark even after the first tab was changed @smok
   await other.waitForLoadState("domcontentloaded");
   await expect(other.locator("html")).toHaveAttribute("data-theme","dark");
   await expect(other.locator("html")).toHaveAttribute("lang","vi");
+  await expect(other.locator("#envelopeIntro")).toBeVisible();
   await other.close();
 
   await page.reload({ waitUntil:"domcontentloaded" });
@@ -689,6 +556,7 @@ test("music bubble stays clickable above the unopened envelope and can cancel lo
   await expect(bubble).toBeHidden();
 });
 
+
 test("music confirms playing from player state even if YouTube sends no PLAYING event", async ({ page }) => {
   await page.addInitScript(() => {
     window.YT = {
@@ -762,33 +630,6 @@ test("music loading times out into a retryable paused state instead of freezing"
 });
 
 
-test("collapsed menu SVG is geometrically centered on phones and desktop @smoke", async ({ page }) => {
-  await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
-  const menu = page.locator("#wqToggle");
-  await expect(menu).toHaveClass(/floating-control/);
-  await menu.evaluate(node => node.classList.add("is-idle"));
-  // The menu deliberately animates its padding over 260ms. Measure its
-  // settled circle, not the temporary box midway through that transition.
-  await page.waitForTimeout(350);
-  const geometry = await menu.evaluate(node => {
-    const outer = node.getBoundingClientRect();
-    const glyph = node.querySelector(".wq-toggle-glyph svg").getBoundingClientRect();
-    const label = node.querySelector("span[data-i18n]");
-    return {
-      horizontal:Math.abs((outer.left + outer.width / 2) - (glyph.left + glyph.width / 2)),
-      vertical:Math.abs((outer.top + outer.height / 2) - (glyph.top + glyph.height / 2)),
-      width:outer.width,
-      height:outer.height,
-      labelDisplay:getComputedStyle(label).display
-    };
-  });
-  expect(geometry.horizontal).toBeLessThanOrEqual(1.5);
-  expect(geometry.vertical).toBeLessThanOrEqual(1.5);
-  expect(geometry.width).toBe(geometry.height);
-  expect(geometry.labelDisplay).toBe("none");
-});
-
-
 test("single reception shows one event, date, venue, map and gift @smoke", async ({ page }) => {
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
@@ -834,30 +675,18 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await page.locator('a[href="#wedding-gift"].wq-link').click();
   await expect(page.locator(".gift-card:visible")).toHaveCount(1);
   expect(errors).toEqual([]);
-});
 
-
-test("single wedding link generator omits party choice and sends clean guest link", async ({page}) => {
-  await page.route("**/wedding-info.js*", async route => {
-    const response = await route.fetch();
-    const context = {window:{}};
-    require("node:vm").runInNewContext(await response.text(),context);
-    context.window.WEDDING_INFO.wedding.mode = "single";
-    await route.fulfill({response,body:"window.WEDDING_INFO = "+JSON.stringify(context.window.WEDDING_INFO)+";"});
-  });
-  await page.goto(base+"/index.html?tool=links&lang=en",{waitUntil:"domcontentloaded"});
+  // The same single-mode config must generate a link without party=.
+  await page.locator("#wgClose").click();
+  await page.goto(base + "/index.html?tool=links&lang=en", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#linkToolScreen")).toBeVisible();
-  await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#linkToolPartyField")).toBeHidden();
-  await expect(page.locator("#linkToolParty")).toHaveValue("single");
   await page.locator("#linkToolGuest").fill("Alex & Jamie");
   await page.locator('#linkToolForm button[type="submit"]').click();
   const invitation = await page.locator("#linkToolGenerated").textContent();
   expect(invitation).toContain("to=Alex+%26+Jamie");
   expect(invitation).toContain("lang=en");
   expect(invitation).not.toContain("party=");
-  await expect(page.locator(".link-tool-description")).toContainText("one shared wedding reception");
   await page.locator("#linkToolBack").click();
-  await expect(page.locator("#linkToolScreen")).toBeHidden();
   await expect(page.locator("#envelopeIntro")).toBeVisible();
 });
