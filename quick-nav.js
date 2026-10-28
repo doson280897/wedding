@@ -89,6 +89,13 @@
     if (!giftModal || !giftBackdrop || !giftClose) return;
     if (value) {
       giftPreviousFocus = panel.contains(document.activeElement) ? toggle : document.activeElement;
+      // Loading only the active celebration's QR avoids hidden bank-image traffic.
+      giftModal.querySelectorAll(".gift-card[data-party-scope] .gift-qr[data-src]").forEach(image => {
+        if (image.closest("[data-party-scope]")?.dataset.partyScope !==
+            document.documentElement.dataset.party) return;
+        image.src = image.dataset.src;
+        image.removeAttribute("data-src");
+      });
       giftOpen = true;
       giftModal.hidden = false;
       giftBackdrop.hidden = false;

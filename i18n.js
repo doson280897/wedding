@@ -95,6 +95,12 @@
       const src = getInfo(node.dataset.infoSrc);
       if (!src) return;
       const url = withVersion(src);
+      // QR codes belong to a hidden popup; defer their download until opened.
+      if (node.classList.contains("gift-qr") &&
+          document.getElementById("wgModal")?.hidden) {
+        node.dataset.src = url.href;
+        return;
+      }
       if (node.getAttribute("src") !== url.href) node.src = url.href;
     });
     document.querySelectorAll("[data-info-href]").forEach(node => {

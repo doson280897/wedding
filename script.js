@@ -678,11 +678,14 @@
     return youtubePlayerPromise;
   }
 
-  // Preload the YouTube player without autoplay. On Safari this keeps the actual
-  // playVideo() call inside a later user tap instead of creating the iframe after the tap.
-  // Avoid network requests, iframes and CPU work on the admin landing/tool screens.
-  // For guests, preload after a celebration has been selected to improve Safari playback.
-  if (selectedParty && !linkToolInitial) initYouTubeMusicPlayer().catch(() => {});
+  // Create the silent YouTube player only after the entrance has finished.
+  // This keeps its iframe/network work off the 3D door transition while still
+  // preparing it before the guest later taps the music control (iOS Safari).
+  if (selectedParty && !linkToolInitial) {
+    document.addEventListener("wedding:waxopen", () => {
+      initYouTubeMusicPlayer().catch(() => {});
+    }, { once:true });
+  }
 
   // Settings is the entry point for activating music. The contextual bubble
   // handles Pause/Resume and Stop without adding another permanently visible button.
