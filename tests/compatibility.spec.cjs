@@ -249,3 +249,71 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
   await expect(page.locator(".link-tool-eyebrow")).toContainText("2027");
   expect(errors).toEqual([]);
 });
+
+
+test("F5 keeps the invitation open within the same tab", async ({ page }) => {
+  const url = base + "/index.html?party=bride&to=ReloadGuest&lang=vi";
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#envelopeIntro")).toBeVisible();
+
+  // A real envelope open + close should persist only for this tab.
+  await page.locator("#openInvitation").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await page.locator("#closeInvitation").click();
+  await expect(page.locator("#envelopeIntro")).toBeHidden();
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.locator("#envelopeIntro")).toBeHidden();
+  await expect(page.locator("html")).toHaveClass(/envelope-resumed/);
+  await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
+  expect(await page.evaluate(() => history.state?.weddingEnvelopeOpened)).toBe(
+    JSON.stringify(["bride", "ReloadGuest"]),
+  );
+});
+
+test("a newly opened tab still shows the envelope", async ({ page }) => {
+  const url = base + "/index.html?party=groom&to=TabGuest";
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+  await page.locator("#skipInvitation").click();
+  await expect(page.locator("#envelopeIntro")).toBeHidden();
+
+  // Open from the already-entered tab; this also catches sessionStorage-clone
+  // regressions when the new tab has a same-origin opener.
+  await page.evaluate(destination => {
+    const link = document.createElement("a");
+    link.href = destination;
+    link.target = "_blank";
+    link.rel = "opener";
+    link.id = "testOpenNewInvitationTab";
+    link.textContent = "Open invitation in new tab";
+    document.body.append(link);
+  }, url);
+  const popupPromise = page.waitForEvent("popup");
+  await page.locator("#testOpenNewInvitationTab").click();
+  const popup = await popupPromise;
+  await popup.waitForLoadState("domcontentloaded");
+  await expect(popup.locator("#envelopeIntro")).toBeVisible();
+  await expect(popup.locator("html")).not.toHaveClass(/envelope-resumed/);
+  await popup.close();
+});
+
+test("previously entered guest/party does not suppress another invitation", async ({
+  page,
+}) => {
+  await page.goto(base + "/index.html?party=bride&to=FirstGuest", {
+    waitUntil: "domcontentloaded",
+  });
+  await page.locator("#skipInvitation").click();
+  await expect(page.locator("#envelopeIntro")).toBeHidden();
+
+  // Even if a router reuses history.state when the URL changes, the
+  // party + personalized guest must match before skipping the envelope.
+  await page.evaluate(() => {
+    const next = new URL(location.href);
+    next.searchParams.set("party", "groom");
+    next.searchParams.set("to", "SecondGuest");
+    history.replaceState(history.state, "", next);
+  });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.locator("#envelopeIntro")).toBeVisible();
+});
