@@ -1636,3 +1636,9 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 @media(prefers-reduced-motion:reduce){
   .envelope-intro.is-card-lifted .invitation-card{will-change:auto}
 }
+
+
+/* Reduced-motion entrance is immediate, including the folded flap. */
+@media(prefers-reduced-motion:reduce){
+  .envelope-intro.is-flap-open .envelope-flap{opacity:0!important;transform:none!important}
+}
