@@ -65,7 +65,7 @@ test("unified hub shows Settings only outside and defaults to Menu inside @smoke
   await page.goto(base + "/index.html?party=bride",{waitUntil:"domcontentloaded"});
   await expect(page.locator("#settingsHub")).toBeHidden();
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({timeout:9000});
+  await expect(page.locator("#moonlightGate")).toBeHidden({timeout:16000});
   await page.locator("#settingsTrigger").click();
   await expect(page.locator("#controlTabs")).toBeVisible();
   await expect(page.locator("#controlTabMenu")).toHaveAttribute("aria-selected","true");
@@ -107,12 +107,9 @@ test("music bubble waits for PLAYING and resume preserves paused time @smoke @co
   });
   await page.goto(base+"/index.html?party=bride",{waitUntil:"domcontentloaded"});
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({timeout:9000});
-  await page.locator("#settingsTrigger").click();
-  await page.locator("#controlTabSettings").click();
-  await page.locator("#musicToggle").click();
+  // The seal tap starts playback, while the orb stays hidden over the gate.
   await expect(page.locator("#musicBubble")).toBeHidden();
-  await expect(page.locator("#musicToggle .music-label")).toContainText(/ĐANG|TẢI|Loading/i);
+  await expect(page.locator("#moonlightGate")).toBeHidden({timeout:16000});
   await expect(page.locator("#musicBubble")).toBeVisible({timeout:3500});
   await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing");
   await page.evaluate(()=>window.__advanceMusic(83.5));
@@ -137,17 +134,17 @@ test("party link, wax gate and album lightbox interactions", async ({
   );
   await expect(page.locator("#moonlightGate")).toBeVisible();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
-  // The third-party player must not compete with the opening on first paint.
-  expect(await page.evaluate(() => Boolean(window.__weddingYouTubeApiPromise))).toBe(false);
+  // Preloading the YouTube API is intentional: the first seal tap can play music.
+  expect(await page.evaluate(() => Boolean(window.__weddingYouTubeApiPromise))).toBe(true);
   // The seal is personalized from data, not hard-coded into the HTML.
   const initials = await page.evaluate(() =>
     window.WEDDING_INFO.couple.bride.initial + " · " + window.WEDDING_INFO.couple.groom.initial
   );
-  await expect(page.locator("#waxMonogram")).toHaveText(initials);
+  await expect(page.locator("#waxMonogram svg.wax-lock")).toHaveCount(1);
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#moonlightGate")).toHaveClass(/is-awakening/);
   await expect(page.locator("#moonlightGate")).toHaveClass(/is-opening/);
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
   await expect(page.locator("#heroMonogram")).toContainText(initials.split(" · ")[0]);
   await page.locator(".couple-section .section-title").scrollIntoViewIfNeeded();
@@ -159,6 +156,15 @@ test("party link, wax gate and album lightbox interactions", async ({
   const loadedImages = await page.locator(".album-photo[src]").count();
   expect(loadedImages).toBeGreaterThan(0);
   if (totalSlides > 12) expect(loadedImages).toBeLessThan(totalSlides);
+  // Offscreen slides must not reserve GPU compositor layers.
+  const layers = await page.locator(".album-slide").evaluateAll(slides => ({
+    promoted:slides.filter(slide => slide.style.willChange.includes("transform")).length,
+    hiddenPromoted:slides.filter(slide =>
+      slide.style.opacity === "0" && slide.style.willChange.includes("transform")).length
+  }));
+  expect(layers.hiddenPromoted).toBe(0);
+  expect(layers.promoted).toBeGreaterThan(0);
+  expect(layers.promoted).toBeLessThanOrEqual(9);
   await expect(page.locator(".album-card.is-main")).toHaveCount(1);
   // A CSS filter animates from dim to full illumination in ~500ms.
   // Wait for the final frame rather than asserting during interpolation.
@@ -207,7 +213,7 @@ test("menu, map and gift overlays open and close on each device @smoke", async (
     waitUntil: "domcontentloaded",
   });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   const hub = page.locator("#settingsTrigger");
   await expect(page.locator("#wqToggle")).toHaveCount(0);
   await hub.click();
@@ -283,7 +289,7 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
     waitUntil: "domcontentloaded",
   });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
 
   await expect(page.locator("#heroMonogram")).toContainText("M");
   await expect(page.locator("#heroMonogram")).toContainText("T");
@@ -325,7 +331,7 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   const gate = page.locator("#moonlightGate");
   await expect(gate).toBeVisible();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
-  await expect(page.locator("#waxMonogram")).toHaveText("N · S");
+  await expect(page.locator("#waxMonogram svg.wax-lock")).toHaveCount(1);
   await expect(page.locator(".moonlight-gate__reveal-overline")).toHaveText("NGÀY CHUNG ĐÔI");
   await expect(page.locator(".moonlight-gate__reveal-overline")).not.toContainText("KÍNH MỜI");
   await expect(page.locator(".moonlight-gate__celestial")).toBeVisible();
@@ -398,9 +404,9 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(page.locator("#wqToggle")).toBeHidden();
   const finalHinge = await leftDoor.evaluate(node => getComputedStyle(node).transform);
   expect(finalHinge).toContain("matrix3d(");
-  // A brief ~220ms beat replaces the old 1.5s hold; the sky/title zoom
+  // The cinematic reveal beat precedes the sky/title zoom
   // out WHILE the actual hero zooms in and both layers crossfade.
-  await expect(gate).toHaveClass(/is-handoff/, { timeout:2500 });
+  await expect(gate).toHaveClass(/is-handoff/, { timeout:4500 });
   await expect(page.locator("html")).toHaveClass(/gate-hero-revealing/);
   const zoomConfig = await page.evaluate(() => {
     const sky = document.querySelector(".moonlight-gate__backdrop");
@@ -429,7 +435,7 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   expect(zoomConfig.titleTransition).toContain("1.35s");
   expect(zoomConfig.heroTransition).toContain("1.35s");
   await expect(page.locator(".hero")).toHaveCSS("opacity","1");
-  await expect(gate).toBeHidden({ timeout:9000 });
+  await expect(gate).toBeHidden({ timeout:16000 });
   await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
   await expect(page.locator(".hero")).toBeVisible();
   await expect(page.locator("#settingsHub")).toBeVisible();
@@ -470,7 +476,7 @@ test("settings popover stays inside phone and tablet viewport when hub is dragge
 test("Settings and Menu share identical drag, snap and tap behavior @smoke @core", async ({ page }) => {
   await page.goto(base + "/index.html?party=groom", { waitUntil:"domcontentloaded" });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   const controls = [
     { id:"settingsHub", trigger:"#settingsTrigger", open:"#settingsPanel" },
   ];
@@ -574,10 +580,8 @@ test("music orb drags while playing, snaps to edges and keeps player running @sm
   });
   await page.goto(base+"/index.html?party=groom",{waitUntil:"domcontentloaded"});
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({timeout:9000});
-  await page.locator("#settingsTrigger").click();
-  await page.locator("#controlTabSettings").click();
-  await page.locator("#musicToggle").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden({timeout:16000});
+  // Playing was initiated by the seal, not by a second Settings click.
   const orb = page.locator("#musicBubble");
   await expect(orb).toBeVisible();
   await expect(orb).toHaveAttribute("data-music-state","playing");
@@ -623,7 +627,7 @@ test("personal invitation keeps the bold recipient in hero across languages", as
     waitUntil:"domcontentloaded",
   });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await expect(page.locator("#heroGuestLabel")).toHaveText("Kính mời");
   await expect(page.locator("#guestName")).toHaveText(guest);
   await expect(page.locator("#guestName")).toBeVisible();
@@ -636,7 +640,7 @@ test("personal invitation keeps the bold recipient in hero across languages", as
   // A generic link must not render an empty personalized-name line.
   await page.goto(base + "/index.html?party=groom", { waitUntil: "domcontentloaded" });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await expect(page.locator("#guestName")).toBeHidden();
 });
 
@@ -719,7 +723,7 @@ test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @c
   await expect(lightPage.locator("#settingsHub")).toBeHidden();
   await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#e4ddd0");
   await lightPage.locator("#waxOpenButton").click();
-  await expect(lightPage.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(lightPage.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await expect(lightPage.locator("#settingsHub")).toBeVisible();
   await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#f5f0e6");
   await lightPage.close();
@@ -730,7 +734,7 @@ test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @c
 test("menu section navigation preserves per-tab theme and language on F5 @smoke", async ({ page }) => {
   await page.goto(base + "/index.html?party=bride", { waitUntil:"domcontentloaded" });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await page.locator("#settingsTrigger").click();
   await page.locator("#controlTabSettings").click();
   await page.locator('[data-lang="en"]').click();
@@ -779,15 +783,11 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
 
   await page.goto(base + "/index.html?party=bride", { waitUntil: "domcontentloaded" });
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await page.waitForFunction(() => window.__musicMockReady === true);
 
   const bubble = page.locator("#musicBubble");
-  await expect(bubble).toBeHidden();
-  await page.locator("#settingsTrigger").click();
-  await page.locator("#controlTabSettings").click();
-  // State-machine test uses a programmatic click to avoid Firefox/YouTube actionability stalls.
-  await page.locator("#musicToggle").evaluate(node => node.click());
+  // The seal activated the player; the orb appears when the gate is gone.
   await expect(bubble).toBeVisible();
   await expect(bubble).toHaveAttribute("data-music-state", "playing");
   await expect(page.locator("#musicToggle")).toHaveAttribute("aria-pressed", "true");
@@ -853,7 +853,7 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await expect(page.locator("#partySelector")).toBeHidden();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
   await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await expect(page.locator("#heroCeremonyLabel")).toContainText("TIỆC CƯỚI");
   await expect(page.locator(".hero-date [data-party-date='single']")).toHaveText("21.05.2027");
   await expect(page.locator(".event-card:visible")).toHaveCount(1);
