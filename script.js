@@ -488,6 +488,8 @@
   musicBubblePause?.addEventListener("click", () => {
     if (musicPlaying) pauseMusic();
     else if (!musicStarting) requestMusicPlayback();
+    // Return to the single unobtrusive orb after pause or resume.
+    setBubbleActionsOpen(false);
   });
   musicBubbleStop?.addEventListener("click", stopMusic);
 
