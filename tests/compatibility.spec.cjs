@@ -360,7 +360,9 @@ test("settings popover stays inside phone and tablet viewport when hub is dragge
 
 
 test("Settings and Menu share identical drag, snap and tap behavior @smoke @core", async ({ page }) => {
-  await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
+  await page.goto(base + "/index.html?party=groom", { waitUntil:"domcontentloaded" });
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
   const controls = [
     { id:"settingsHub", trigger:"#settingsTrigger", open:"#settingsPanel" },
     { id:"wqToggle", trigger:"#wqToggle", open:"#wqPanel" },
