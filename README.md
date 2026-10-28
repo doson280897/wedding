@@ -1,164 +1,112 @@
-# Thiệp cưới Thành Sơn & Tố Nga
+# Wedding Invitation Template — Thiệp cưới dùng lại
 
-Website thiệp cưới phong cách **Cinematic Editorial / Dark Luxury**, chạy trên GitHub Pages.
+Website thiệp cưới **Cinematic Editorial / Dark Luxury** triển khai bằng GitHub Pages.
+Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, nhạc, lịch, bản đồ, QR và tiếng Việt / Anh.
 
-**Live:** https://doson280897.github.io/wedding/
+## ⭐ Chỉ sửa một file khi làm thiệp mới
 
-## Cấu trúc repository
+**[wedding-info.js](wedding-info.js)** là **file thông tin duy nhất** phải cập nhật khi làm thiệp cho cặp đôi khác.
+Không chỉnh tên, ngày, chữ viết tắt, nhạc hoặc lời mời trực tiếp trong HTML/CSS/JS nữa.
 
-```text
-wedding/
-├── .github/workflows/deploy.yml
-├── images/
-│   ├── original/
-│   │   ├── assets/        # hero, ending, chân dung gốc — local only
-│   │   └── album/         # album gốc — local only
-│   ├── optimized/
-│   │   ├── assets/        # WebP dùng trực tiếp trên website
-│   │   └── album/         # WebP album
-│   └── manifest.json      # danh sách album
-├── gallery.js
-├── generate_gallery.py
-├── i18n.js
-├── index.html
-├── quick-nav.css
-├── quick-nav.js
-├── requirements.txt
-├── script.js
-└── style.css
+| Mục trong `wedding-info.js` | Nội dung bạn đổi |
+| --- | --- |
+| `site` | URL website, mô tả khi chia sẻ, múi giờ, ảnh chia sẻ |
+| `couple.bride`, `couple.groom` | Tên hiển thị, họ tên đầy đủ, chữ viết tắt (`initial` như **N**, **S**) |
+| `families.bride`, `families.groom` | Họ tên cha mẹ, địa chỉ hai gia đình (VI/EN) |
+| `parties.bride`, `parties.groom` | Ngày (YYYY-MM-DD), giờ lễ/tiệc, ngày âm lịch và địa điểm |
+| `parties.*.venue` | Tên sảnh/nhà hàng, địa chỉ, URL Google Maps, URL bản đồ nhúng |
+| `parties.*.music.youtubeId` | Mã video nhạc YouTube cho từng lễ |
+| `parties.*.images` | Ảnh hero, ảnh kết, chân dung, favicon |
+| `parties.*.gift` | Tên ngân hàng, chủ tài khoản, số tài khoản, mã QR |
+| `gallery` | File manifest album hoặc danh sách ảnh tự chọn |
+| `text.vi` và `text.en` | **Toàn bộ lời mời, câu chữ, thông báo, tiêu đề** của cả hai ngôn ngữ |
+
+### Ví dụ đổi tên và chữ viết tắt
+
+Trong `wedding-info.js` chỉ cần thay dữ liệu:
+
+```js
+"couple": {
+  "bride": { "short": "Mai", "full": "Nguyễn Thị Mai", "initial": "M" },
+  "groom": { "short": "An", "full": "Trần Văn An", "initial": "A" }
+}
 ```
 
-Ảnh gốc nằm trong `images/original/` và bị ignore bởi Git. GitHub chỉ cần `images/optimized/` cùng `images/manifest.json`.
+Lúc vào nhà gái, monogram sẽ là **M & A**; vào nhà trai là **A & M**.
+Tên trên phong bì, hero, thông tin gia đình, chân trang, đường dẫn tạo thiệp, lịch và tiêu đề chia sẻ đều lấy từ cấu hình.
+Không cần đổi một ký tự trong `script.js`, `i18n.js` hay `index.html`.
 
-## Tính năng chính
+Mẫu `{{couple.bride.short}}`, `{{parties.groom.dateDots}}`, `{{parties.bride.venue.name}}` trong phần `text` tự động đọc trường cấu hình. Không xóa dấu ngoặc của chúng nếu muốn chữ tự thay theo dữ liệu.
 
-- Thiệp cá nhân hoá bằng `?to=`.
-- Tách đúng tiệc bằng `?party=bride` (Lễ Vu Quy) hoặc `?party=groom` (Lễ Tân Hôn); thiếu `party` sẽ hiện màn chọn tiệc.
-- VN / EN luôn khả dụng từ màn chọn tiệc, phong bì và trong thiệp.
-- Phong thư mở đầu kiểu **botanical ivory**; mỗi lần reload đều mở lại từ đầu.
-- Countdown, lịch ICS, bản đồ, thứ tự cô dâu/chú rể và QR mừng cưới đều bám theo `party`.
-- Album 3D dạng **ribbon vô hạn** dùng native momentum + scroll-snap.
-- Ring buffer cố định 31 slide, phù hợp album 100+ ảnh mà không render toàn bộ.
-- Decode album theo hàng đợi tối đa 4 ảnh song song; mobile chỉ transform vùng card gần viewport.
-- Google Maps chỉ tải khi mở popup.
-- Nhạc nền YouTube IFrame API tuỳ chọn, không autoplay.
-- Cache-busting theo commit SHA khi deploy.
-- Open Graph preview được GitHub Actions tạo từ hero tối ưu.
+### Ngày giờ và nhạc
 
-## Quản lý ảnh
+- `date`: định dạng `YYYY-MM-DD`, ví dụ `2027-03-15`.
+- `ceremonyTime`, `ceremonyEnd`, `receptionTime`, `receptionEnd`: giờ 24h như `09:00`.
+- `site.timezone`: dạng `+07:00`. Countdown và lịch ICS đều đọc từ đó.
+- `music.youtubeId`: phần ID của link `youtube.com/watch?v=...`, **không** nhập cả URL.
 
-### Ảnh chính
+### Hình ảnh, QR và album
 
-Mỗi lễ dùng hero và ending riêng:
+Các file hình là tài nguyên vật lý: **phải upload ảnh/QR mới**, rồi thay đường dẫn của chúng trong `wedding-info.js`.
+Chỉ thay chữ trong config không thể biến ảnh cưới cũ thành ảnh mới.
 
-```text
-hero_bride.jpg      # Vu Quy / nhà gái
-ending_bride.jpg
-hero_groom.jpg      # Tân Hôn / nhà trai
-ending_groom.jpg
+Nếu giữ `gallery.photos: null`, album sẽ tự đọc `gallery.manifest` (mặc định `images/manifest.json`) do pipeline tạo.
+Nếu muốn hoàn toàn chọn danh sách ảnh ngay trong file thông tin, điền:
+
+```js
+"gallery": {
+  "manifest": "images/manifest.json",
+  "photos": [
+    { "src": "images/optimized/album/anh-1.webp", "width": 640, "height": 960 },
+    { "src": "images/optimized/album/anh-2.webp", "width": 960, "height": 640 }
+  ]
+}
 ```
 
-Đặt ảnh gốc trong `images/original/assets/` rồi chạy generator; output tương ứng:
-
-```text
-images/optimized/assets/hero_bride.webp
-images/optimized/assets/ending_bride.webp
-images/optimized/assets/hero_groom.webp
-images/optimized/assets/ending_groom.webp
-```
-
-Bốn ảnh theo lễ là asset bắt buộc của production; website không còn dùng hero/ending chung làm fallback.
-
-Các asset chân dung dùng chung:
-
-```text
-son-1.jpg
-son-2.jpg
-nga-1.jpg
-nga-2.jpg
-```
-
-QR mừng cưới dùng cùng convention tên file:
-
-```text
-images/optimized/assets/gift-qr-bride.svg
-images/optimized/assets/gift-qr-groom.png
-```
-
-### Album
-
-Đặt ảnh cưới gốc vào:
-
-```text
-images/original/album/
-```
-
-Có thể có thư mục con. Generator giữ thứ tự tự nhiên theo tên file.
-
-### Generate ảnh web
+Để tối ưu ảnh tự động trên máy cá nhân (không thay đổi ảnh gốc Google Drive):
 
 ```powershell
 python -m pip install -r requirements.txt
 python generate_gallery.py
 ```
 
-Output:
+Ảnh gốc `images/original/` được Git ignore. File ảnh tối ưu nằm trong `images/optimized/`; manifest là file kỹ thuật tự sinh, **không phải file nội dung cần chỉnh tay**.
 
-```text
-images/optimized/assets/*.webp
-images/optimized/album/**/*.webp
-images/manifest.json
+## Các file khác chỉ là template / engine
+
+- `index.html`: cấu trúc giao diện, không chứa dữ liệu cưới cố định.
+- `style.css`, `quick-nav.css`, `link-tool.css`: giao diện responsive.
+- `i18n.js`: máy dịch VN/EN; đọc `text` và trường thông tin từ `wedding-info.js`.
+- `script.js`: phong bì, tên, monogram, countdown, ICS, nhạc.
+- `link-tool.js`: tạo link thiệp cá nhân hóa ngay trong trang chính, dùng chung nút VN/EN.
+- `gallery.js`: album 3D và fullscreen.
+- `quick-nav.js`: nút nổi, popup menu, bản đồ, QR.
+- `build-wedding.cjs`: sinh metadata Open Graph và favicon từ cấu hình.
+- `generate_gallery.py`: quy trình tối ưu ảnh.
+- `tests/compatibility.spec.cjs`: bộ test thiết bị/desktop.
+
+## Chạy và deploy
+
+Source được deploy khi push lên nhánh `main` thông qua `.github/workflows/deploy.yml`.
+Khi deploy, GitHub Actions sẽ đọc **chính `wedding-info.js`** để tạo tiêu đề trang, favicon monogram, ảnh xem trước khi chia sẻ, thông số cache và website.
+
+```bash
+node --check wedding-info.js
+node --check i18n.js
+node --check script.js
+node --check link-tool.js
+node build-wedding.cjs
 ```
 
-Album tối đa 960px, WebP quality 80. Mỗi thumbnail có fingerprint riêng để ảnh không đổi tiếp tục dùng browser cache.
+Lưu ý: `node build-wedding.cjs` sinh ra các file build trong thư mục hiện tại, thường chạy trên runner GitHub Actions thay vì sửa source đã commit.
 
-Generator không phá dữ liệu khi chạy trên clone chỉ có ảnh tối ưu: nếu thiếu ảnh gốc, output hiện có được giữ nguyên.
+## Các đường dẫn
 
-## Commit ảnh
+- Trang chọn tiệc: `/`
+- Công cụ tạo lời mời: `/?tool=links`
+- Nhà gái: `/?party=bride`
+- Nhà trai: `/?party=groom`
+- Thiệp riêng: `/?party=bride&to=Anh+Minh`
+- Tiếng Anh: `?lang=en`
 
-Chỉ commit:
-
-```text
-images/optimized/assets/
-images/optimized/album/
-images/manifest.json
-```
-
-Không commit ảnh trong `images/original/`.
-
-Sau khi cập nhật ảnh:
-
-```powershell
-git add images/optimized images/manifest.json
-git commit -m "Update wedding images"
-git push origin main
-```
-
-## Deploy
-
-Workflow `.github/workflows/deploy.yml`:
-
-1. Checkout source.
-2. Tạo `og-preview.jpg` từ `images/optimized/assets/hero_bride.webp`.
-3. Stamp build ID để cache-busting CSS/JS/ảnh chính.
-4. Upload và deploy GitHub Pages.
-
-Workflow không cần ảnh gốc.
-
-## Runtime files
-
-- `index.html`: markup chính.
-- `style.css`: giao diện và responsive.
-- `script.js`: guest name, countdown, envelope, calendar, music, progress/reveal.
-- `gallery.js`: album ribbon vô hạn.
-- `i18n.js`: VN/EN.
-- `quick-nav.js`, `quick-nav.css`: menu nổi và popup bản đồ.
-- `generate_gallery.py`: pipeline ảnh chạy local.
-
-## Ghi chú
-
-- `version.json` và `og-preview.jpg` được tạo lúc deploy, không commit.
-- Nếu ảnh 404, kiểm tra `images/optimized/` và `images/manifest.json`.
-- Link Vu Quy mẫu: `?to=Anh+Minh&party=bride`.
-- Link Tân Hôn mẫu: `?to=Anh+Minh&party=groom`.
-- Open Graph dùng preview chung cho cả hai lễ; title trong trình duyệt mới đổi theo `party`.
+**Nguyên tắc bảo trì:** Cập nhật thông tin khách hàng **chỉ trong `wedding-info.js`**. Sửa các file còn lại **chỉ khi muốn nâng cấp giao diện hoặc tính năng**.
