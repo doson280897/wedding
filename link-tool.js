@@ -21,7 +21,11 @@
   const share = document.getElementById("linkToolShare");
   const feedback = document.getElementById("linkToolFeedback");
   const partySelector = document.getElementById("partySelector");
-  const languageButtons = [...document.querySelectorAll(".language-switch [data-lang]")];
+  const settingsControls = () => {
+    const trigger = document.getElementById("settingsTrigger");
+    const panel = document.getElementById("settingsPanel");
+    return [trigger, ...(!panel?.hidden ? panel.querySelectorAll("button") : [])];
+  };
 
   let invitation = "";
   let feedbackKey = "";
@@ -161,7 +165,7 @@
     }
     if (event.key !== "Tab") return;
     const fields = [
-      ...languageButtons,
+      ...settingsControls(),
       back,
       guestInput,
       partySelect,
