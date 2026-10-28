@@ -199,10 +199,8 @@
     if (!visible(node)) return;
     const rect = node.getBoundingClientRect();
     const initialEdge = node === hub ? "right" : "left";
-    const offset = node === hub ? 0 : 0;
-    anchor(node,initialEdge,bounds(rect).bottom - offset);
+    anchor(node,initialEdge,bounds(rect).bottom);
   };
-  const controls = [hub,musicDock].filter(Boolean);
   const setupFloating = (node,handle) => {
     if (!handle) return;
     node.classList.add("floating-control");
@@ -213,7 +211,9 @@
     let glideTimer = 0;
     let glideFrame = 0;
     let idleTimer = 0;
-    let suppressClickUntil = 0;
+    // Consume only the synthetic click produced by a drag release.
+    // A NEW pointerdown must always be allowed to activate immediately.
+    let suppressDragClick = false;
     let tapStartedIdle = false;
 
     const cancelGlide = () => {
@@ -343,7 +343,7 @@
       window.removeEventListener("pointercancel",end,true);
       if (moved) {
         node.dataset.userMoved = "true";
-        suppressClickUntil = performance.now() + 450;
+        suppressDragClick = true;
         glide();
       } else {
         scheduleIdle();
@@ -353,6 +353,8 @@
       if (event.button != null && event.button !== 0) return;
       if (!visible(node) || drag) return;
       cancelGlide();
+      // A new gesture is not the trailing click from the previous drag.
+      suppressDragClick = false;
       tapStartedIdle = node.classList.contains("is-idle");
       // Do not expand a collapsed hit target underneath the pointer.
       if (!tapStartedIdle && node === hub) wake();
@@ -370,7 +372,8 @@
     // or the music action menu, without interfering with normal taps.
     node.addEventListener("click",event => {
       if (event.target.closest(".settings-panel,.music-float-actions")) return;
-      if (performance.now() < suppressClickUntil) {
+      if (suppressDragClick) {
+        suppressDragClick = false;
         event.preventDefault();
         event.stopImmediatePropagation();
         return;

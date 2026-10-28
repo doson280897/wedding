@@ -20,6 +20,9 @@ test("one shared language control, in-page generator, back navigation @smoke @co
   await expect(page.locator(".party-admin-link")).toContainText(
     "CREATE PERSONALIZED",
   );
+  // Dismiss the popover before activating a link behind it. On compact
+  // mobile viewports the popover can physically cover the chooser link.
+  await page.locator("#settingsClose").click();
 
   const oldControl = await languageControl.elementHandle();
   await page.locator(".party-admin-link").click();
@@ -520,6 +523,24 @@ test("Settings and Menu share identical drag, snap and tap behavior @smoke @core
 });
 
 
+test("tap immediately after a drag is not swallowed on touch screens @smoke @core", async ({page}) => {
+  await page.goto(base+"/index.html",{waitUntil:"domcontentloaded"});
+  const trigger=page.locator("#settingsTrigger");
+  await page.evaluate(() => {
+    const handle=document.getElementById("settingsTrigger");
+    const rect=handle.getBoundingClientRect();
+    const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
+    const props={bubbles:true,cancelable:true,pointerId:77,pointerType:"touch",isPrimary:true,button:0};
+    handle.dispatchEvent(new PointerEvent("pointerdown",{...props,clientX:x,clientY:y}));
+    window.dispatchEvent(new PointerEvent("pointermove",{...props,clientX:15,clientY:Math.max(80,y-130)}));
+    window.dispatchEvent(new PointerEvent("pointerup",{...props,clientX:15,clientY:Math.max(80,y-130)}));
+  });
+  await expect(page.locator("#settingsHub")).toHaveAttribute("data-float-edge","left");
+  await page.waitForTimeout(420); // Let the edge snap settle.
+  await trigger.click();
+  await expect(page.locator("#settingsPanel")).toBeVisible();
+});
+
 test("music orb drags while playing, snaps to edges and keeps player running @smoke @core", async ({page}) => {
   await page.addInitScript(() => {
     window.YT = {
@@ -650,6 +671,7 @@ test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @c
   await page.locator('[data-theme-option="light"]').click();
   await expect(page.locator("html")).toHaveAttribute("data-theme","light");
   await expect(page.locator("html")).toHaveAttribute("lang","en");
+  await page.locator("#settingsClose").click();
 
   await page.evaluate(destination => {
     const a = document.createElement("a");

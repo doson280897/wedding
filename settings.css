@@ -279,7 +279,6 @@ html[data-theme="light"] .party-admin-link {color:#6b552f;border-color:#ab9064}
 html[data-theme="light"] .party-admin-link:hover {background:#e9ddc9}
 
 /* Main navigation and modal surfaces. */
-html[data-theme="light"] .wq-toggle.floating-control {background:#f5ebdc;color:#344d3d;border-color:#b89a67;box-shadow:0 8px 24px #43351b30}
 html[data-theme="light"] .wq-panel {background:linear-gradient(145deg,#fffaf0,#eae2d4);color:#2a4234;border-color:#c9b087;box-shadow:0 24px 65px #44391d38}
 html[data-theme="light"] .wq-heading {color:#2a4234}
 html[data-theme="light"] .wq-heading em,
@@ -641,7 +640,7 @@ html[data-theme="light"] .settings-options{background:#ebe2d4;border-color:#bda7
 html[data-theme="light"] .settings-hub .settings-options :is(.language-option,.theme-option).is-active{
   background:#425f4a;color:#fff9ed;box-shadow:0 2px 8px rgba(42,68,48,.15);
 }
-html[data-theme="light"] :is(.settings-hub.language-switch,.wq-toggle.floating-control){
+html[data-theme="light"] .settings-hub.language-switch{
   background:#faf4e9;border-color:#b79b70;color:#395341;
   box-shadow:0 7px 25px rgba(75,59,37,.15);
 }
@@ -656,7 +655,7 @@ html[data-theme="light"] footer{background:#eae2d5;color:#506354;border-top:1px 
    the hero has completed its reveal. Keep layout dimensions for edge snapping.
    The party chooser and personalized-link generator remain interactive. */
 html.wax-pending:not(.party-pending):not(.link-tool-active)
-:is(#settingsHub,#wqToggle,#wqPanel,#wqBackdrop,#musicBubble){
+:is(#settingsHub,#musicBubble){
   visibility:hidden!important;
   opacity:0!important;
   pointer-events:none!important;

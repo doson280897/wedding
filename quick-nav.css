@@ -1,15 +1,8 @@
-
-/* Floating wedding quick navigation */
-.wq-toggle{position:fixed;right:20px;bottom:24px;z-index:1003;border:1px solid rgba(211,179,117,.65);border-radius:999px;background:#191b19;color:#e9d3a9;padding:14px 19px;font:500 11px Montserrat,sans-serif;letter-spacing:.15em;box-shadow:0 10px 40px #0009;cursor:pointer;display:flex;align-items:center;gap:10px}
-.wq-toggle:hover,.wq-toggle:focus-visible{background:#302b22;outline:2px solid #d2b780;outline-offset:3px}
-.wq-toggle-glyph{font-size:20px;line-height:12px}
-.wq-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.63);backdrop-filter:blur(5px)}
-.wq-backdrop[hidden]{display:none}
-.wq-panel{position:fixed;right:18px;bottom:82px;z-index:1002;width:min(405px,calc(100vw - 36px));max-height:calc(100vh - 106px);max-height:calc(100dvh - 106px);overflow-y:auto;background:linear-gradient(145deg,#292822,#121715);border:1px solid rgba(212,184,129,.38);border-radius:17px;padding:29px 26px 22px;box-shadow:0 25px 80px #000b;color:#f0e8d7;opacity:0;visibility:hidden;transform:translateY(15px) scale(.97);transition:opacity .24s,transform .24s,visibility .24s}
-.wq-panel.is-open{opacity:1;visibility:visible;transform:none}
+/* Navigation now lives inside the single Settings hub tab.
+   Standalone Menu button, backdrop and close affordance were removed. */
+.wq-panel{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .wq-panel-top{display:flex;justify-content:space-between;align-items:center}
 .wq-kicker{font:500 10px Montserrat,sans-serif;letter-spacing:.2em;color:#c2aa7a}
-.wq-close{border:0;background:transparent;color:#dfc99f;font-size:27px;cursor:pointer;line-height:1}
 .wq-heading{font:500 clamp(30px,5vw,39px) 'Cormorant Garamond',serif;margin:15px 0 2px}
 .wq-heading em{color:#dabf86;font-weight:400}
 .wq-description{font-size:12px;color:#beb8ad;margin:0 0 21px}
@@ -23,8 +16,7 @@
 .wq-arrow{margin-left:auto;color:#bca16c}
 .wq-footnote{text-align:center;font:500 10px Montserrat,sans-serif;letter-spacing:.18em;color:#ad966c;margin-top:25px}
 .wq-footnote span{color:#d4b980;padding:0 8px}
-@media(max-width:500px){.wq-toggle{right:14px;bottom:14px}.wq-panel{right:12px;bottom:75px;width:calc(100vw - 24px);padding:23px 20px}}
-@media(prefers-reduced-motion:reduce){.wq-panel,.wq-link{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.wq-link{transition:none!important}}
 
 /* FIND YOUR WAY modal: no longer shown inline on the invitation */
 .wm-backdrop{position:fixed;inset:0;z-index:1010;background:rgba(0,0,0,.81);backdrop-filter:blur(9px)}
@@ -44,7 +36,7 @@ body.wm-open{overflow:hidden}
 @media(max-width:650px){.wm-modal{padding:8px}.wm-dialog{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}.wm-dialog .locations-section{padding:16px 12px 24px!important}.wm-dialog .location-card iframe{height:210px}.wm-dialog .location-info{padding:18px 12px}}
 
 @media(max-width:650px){
-  .wq-backdrop,.wm-backdrop,.wm-header{backdrop-filter:none}
+  .wm-backdrop,.wm-header{backdrop-filter:none}
 }
 
 
@@ -61,79 +53,11 @@ body.wg-open{overflow:hidden}
 @media(max-width:650px){.wg-backdrop,.wg-header{backdrop-filter:none}}
 
 
-/* Draggable / auto-collapsing menu control */
-.wq-toggle.floating-control{
-  min-width:38px;
-  overflow:hidden;
-  transition:
-    padding .26s cubic-bezier(.2,.75,.2,1),
-    gap .26s cubic-bezier(.2,.75,.2,1),
-    opacity .22s ease,
-    background .22s ease,
-    border-color .22s ease,
-    box-shadow .22s ease,
-    left .30s cubic-bezier(.2,.8,.2,1),
-    top .30s cubic-bezier(.2,.8,.2,1);
-  touch-action:none;
-  -webkit-user-select:none;
-  user-select:none;
-}
-
-.wq-toggle.floating-control > span[data-i18n]{
-  display:inline-block;
-  max-width:150px;
-  opacity:1;
-  overflow:hidden;
-  white-space:nowrap;
-  transition:
-    max-width .28s cubic-bezier(.2,.75,.2,1),
-    opacity .18s ease;
-}
-
-.wq-toggle.floating-control.is-idle{
-  height:38px;
-  min-width:38px;
-  padding:0;
-  gap:0;
-  justify-content:center;
-  border-radius:50%;
-  opacity:.78;
-}
-
-.wq-toggle.floating-control.is-idle > span[data-i18n]{
-  max-width:0;
-  opacity:0;
-}
-
-.wq-toggle.floating-control.is-idle .wq-toggle-glyph{
-  font-size:18px;
-  line-height:1;
-}
-
-.wq-toggle.floating-control.is-dragging{
-  transition:none!important;
-  cursor:grabbing!important;
-  opacity:.96;
-}
-
-@media(max-width:650px){
-  .wq-toggle.floating-control{
-    right:8px;
-    bottom:12px;
-    min-width:34px;
-  }
-
-  .wq-toggle.floating-control.is-idle{
-    height:34px;
-    min-width:34px;
-  }
-}
-
 /* Account for notches/home indicators in Android and iOS modal dialogs. */
 .wm-dialog,.wg-dialog { padding-bottom: env(safe-area-inset-bottom, 0px); }
-.wq-panel { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 
-/* Keep modal close buttons clear of the always-floating VN/EN control. */
+
+/* Keep modal close buttons comfortably sized on touch devices. */
 @media (max-width: 700px) {
   .wm-header, .wg-header {
     padding-right: max(76px, calc(env(safe-area-inset-right) + 66px));
@@ -144,92 +68,5 @@ body.wg-open{overflow:hidden}
     display: inline-grid;
     place-items: center;
     flex-shrink: 0;
-  }
-}
-
-/* The Unicode menu symbol has uneven font side-bearings on Safari/Android.
-   A geometric SVG and a single-cell collapsed layout center it exactly. */
-.wq-toggle .wq-toggle-glyph {
-  display:grid;
-  place-items:center;
-  flex:0 0 20px;
-  width:20px;
-  height:20px;
-  line-height:1;
-}
-.wq-toggle .wq-toggle-glyph svg {
-  display:block;
-  width:20px;
-  height:20px;
-}
-.wq-toggle.floating-control.is-idle {
-  box-sizing:border-box;
-  width:38px;
-  min-width:38px;
-  height:38px;
-  min-height:38px;
-  padding:0;
-  gap:0;
-  display:grid;
-  place-items:center;
-}
-.wq-toggle.floating-control.is-idle > span[data-i18n] {
-  display:none;
-}
-.wq-toggle.floating-control.is-idle .wq-toggle-glyph {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:20px;
-  height:20px;
-  margin:0;
-  flex:none;
-}
-@media(max-width:650px) {
-  .wq-toggle.floating-control.is-idle {
-    width:34px;
-    min-width:34px;
-    height:34px;
-    min-height:34px;
-  }
-}
-
-
-/* Collapsed navigation: center the actual SVG within the entire touch target,
-   not within a leftover inline span. Keep 44px minimum for iOS/Android taps. */
-.wq-toggle.floating-control.is-idle {
-  box-sizing:border-box;
-  display:grid;
-  place-items:center;
-  inline-size:44px;
-  min-inline-size:44px;
-  block-size:44px;
-  min-block-size:44px;
-  padding:0;
-  gap:0;
-}
-.wq-toggle.floating-control.is-idle .wq-toggle-glyph {
-  position:absolute;
-  inset:0;
-  display:grid;
-  place-items:center;
-  inline-size:100%;
-  block-size:100%;
-  transform:none;
-  margin:0;
-}
-.wq-toggle.floating-control.is-idle .wq-toggle-glyph svg {
-  display:block;
-  width:20px;
-  height:20px;
-  margin:0;
-}
-@media(max-width:650px) {
-  .wq-toggle.floating-control.is-idle {
-    width:44px;
-    min-width:44px;
-    height:44px;
-    min-height:44px;
   }
 }

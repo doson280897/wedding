@@ -250,7 +250,6 @@
   };
   document.addEventListener("wedding:themechange", setContentBrowserTheme);
   setContentBrowserTheme();
-  setContentBrowserTheme();
 
   const moonlightGate = document.getElementById("moonlightGate");
   const waxOpenButton = document.getElementById("waxOpenButton");
