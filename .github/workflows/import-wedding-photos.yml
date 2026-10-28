@@ -20,7 +20,7 @@ jobs:
           import json
           import re
           source = Path("wedding-info.js").read_text(encoding="utf-8")
-          match = re.search(r"window\\.WEDDING_INFO\\s*=\\s*", source)
+          match = re.search(r"window\.WEDDING_INFO\s*=\s*", source)
           if not match:
               raise RuntimeError("wedding-info.js has no window.WEDDING_INFO")
           config, _ = json.JSONDecoder().raw_decode(source[match.end():].lstrip())
@@ -30,7 +30,7 @@ jobs:
           for item in items:
               name = item.get("name", "")
               file_id = item.get("fileId", "")
-              if not file_id or Path(name).name != name or not re.fullmatch(r"[\\w. -]+\\.(?:jpg|jpeg|png|webp|avif)", name, re.I):
+              if not file_id or Path(name).name != name or not re.fullmatch(r"[\w. -]+\.(?:jpg|jpeg|png|webp|avif)", name, re.I):
                   raise ValueError("Invalid gallery.imports entry: " + repr(name))
               path = Path("images/original/album") / name
               if path.exists():
