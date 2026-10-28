@@ -255,6 +255,11 @@
   const moonlightGate = document.getElementById("moonlightGate");
   const waxOpenButton = document.getElementById("waxOpenButton");
   const reducedGateMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Door fully swings first, scene rests for 1.5s, then crossfades to the real hero.
+  const GATE_AWAKEN_MS = 240;
+  const GATE_DOOR_MS = 3550;
+  const GATE_PAUSE_MS = 1500;
+  const GATE_HANDOFF_MS = 1250;
   let gateOpening = false;
   const gateTimers = new Set();
   const scheduleGate = (callback, delay) => {
@@ -275,42 +280,28 @@
     clearGateTimers();
     moonlightGate.hidden = true;
     moonlightGate.classList.remove(
-      "is-awakening", "is-opening", "is-blooming",
-      "is-hero-revealing", "is-leaving"
+      "is-awakening", "is-opening", "is-opened", "is-leaving"
     );
     document.documentElement.classList.remove("wax-pending", "gate-hero-revealing");
     setContentBrowserTheme();
     resetInvitationScroll();
-
-    // Start persistent hero motion only after the gate is fully gone, so it
-    // cannot compete with the final crossfade on iOS/WebKit.
-    requestAnimationFrame(() => {
-      document.dispatchEvent(new Event("wedding:waxopen"));
-    });
+    // Defer music/hero background activity until the visual handoff is complete.
+    requestAnimationFrame(() => document.dispatchEvent(new Event("wedding:waxopen")));
   };
-
   const finishMoonlightGate = () => {
     if (!moonlightGate || moonlightGate.hidden) return;
+    document.documentElement.classList.add("gate-hero-revealing", "cinematic-entered");
     if (reducedGateMotion) {
-      document.documentElement.classList.add("gate-hero-revealing", "cinematic-entered");
       completeMoonlightGate();
       return;
     }
-
-    // Do not wait for the doors to stop. Fade the gate while they are still
-    // moving so the viewer never sees a hard "door finished -> scene changed"
-    // boundary.
-    if (!moonlightGate.classList.contains("is-leaving")) {
-      moonlightGate.classList.add("is-leaving");
-    }
-    scheduleGate(completeMoonlightGate, 1080);
+    moonlightGate.classList.add("is-leaving");
+    scheduleGate(completeMoonlightGate, GATE_HANDOFF_MS);
   };
-
   const openFromWax = () => {
     if (!moonlightGate || !waxOpenButton || gateOpening || moonlightGate.hidden) return;
     gateOpening = true;
     waxOpenButton.disabled = true;
-
     if (reducedGateMotion) {
       finishMoonlightGate();
       return;
@@ -318,30 +309,18 @@
 
     moonlightGate.classList.add("is-awakening");
     scheduleGate(() => {
-      if (!moonlightGate || moonlightGate.hidden) return;
+      if (moonlightGate.hidden) return;
       moonlightGate.classList.add("is-opening");
 
-      // Light starts leaking through while the doors are still near closed.
+      // The sky is revealed through the opening, without exposing the hero.
       scheduleGate(() => {
-        if (!moonlightGate.hidden) moonlightGate.classList.add("is-blooming");
-      }, 420);
-
-      // Hero and its text enter together as one visual reveal.
-      scheduleGate(() => {
-        if (!moonlightGate.hidden) {
-          moonlightGate.classList.add("is-hero-revealing");
-          document.documentElement.classList.add("gate-hero-revealing", "cinematic-entered");
-        }
-      }, 700);
-
-      // Begin dissolving the gate before the 1.62s hinge motion completes.
-      scheduleGate(finishMoonlightGate, 1180);
-
-      // Safety completion in case a browser throttles an intermediate timer.
-      scheduleGate(completeMoonlightGate, 2380);
-    }, 240);
+        if (moonlightGate.hidden) return;
+        moonlightGate.classList.add("is-opened");
+        // Hold the fully open scene for an intentional 1.5-second breath.
+        scheduleGate(finishMoonlightGate, GATE_PAUSE_MS);
+      }, GATE_DOOR_MS);
+    }, GATE_AWAKEN_MS);
   };
-
   if (moonlightGate && waxOpenButton) {
     if (selectedParty && !linkToolInitial) {
       moonlightGate.hidden = false;
@@ -352,7 +331,6 @@
       moonlightGate.hidden = true;
     }
   }
-
   const musicButton = document.getElementById("musicToggle");
   const musicBubble = document.getElementById("musicBubble");
   const musicBubbleTrigger = document.getElementById("musicBubbleTrigger");
@@ -742,6 +720,7 @@
 
     const pairs = {
       hero: pair(upper(first.short), upper(second.short), "&amp;"),
+      gate: pair(first.short, second.short, "&amp;"),
       closing: pair(first.short, second.short, "&amp;"),
       footer: "© " + new Date(partyInfo(selectedParty).date + "T00:00:00Z").getUTCFullYear() +
         " " + pair(upper(first.short), upper(second.short), "&amp;"),
