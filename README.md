@@ -6,7 +6,7 @@ Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, 
 ### Giao diện và khách mời cá nhân hóa
 
 - Nút nổi **Tùy chỉnh** (có thể kéo thả) gom **VN / EN**, **Sáng / Tối** và **nhạc nền** vào một bảng; nút **Mục lục** vẫn riêng để truy cập nhanh các phần thiệp. Nhạc chỉ hiển thị khi đã vào thiệp của một bên.
-- Chế độ **Sáng** dùng nền kem và màu xanh lá dịu; **Tối** giữ phong cách dark luxury. Album 3D và ảnh bìa vẫn tối có chủ đích để ảnh rõ chiều sâu, không bị lóa. Chế độ hiển thị được ghi nhớ trên trình duyệt qua `wedding-theme`.
+- Chế độ **Sáng** dùng nền kem và màu xanh lá dịu; **Tối** giữ phong cách dark luxury. Album 3D và ảnh bìa vẫn tối có chủ đích để ảnh rõ chiều sâu, không bị lóa. Ngôn ngữ và chế độ hiển thị được ghi nhớ **trong tab đang xem** qua trạng thái lịch sử trình duyệt: F5 giữ lựa chọn, mở tab mới bắt đầu với **VN + Tối** (trừ link có `lang=en`).
 - Với link có `?to=Tên+khách`, cả phong bì và hero hiển thị **Kính mời** phía trên, **tên người nhận** ở dòng dưới bằng font serif đậm. Có thể sửa nhãn trong `wedding-info.js` → `text.vi["guest.recipientLabel"]` / `text.en["guest.recipientLabel"]`. Link không có tên vẫn giữ lời mời chung.
 
 
@@ -94,7 +94,9 @@ python generate_gallery.py
 - `link-tool.js`: tạo link thiệp cá nhân hóa ngay trong trang chính, dùng chung nút VN/EN.
 - `gallery.js`: album 3D và fullscreen.
 - `quick-nav.js`: cơ chế kéo thả nút nổi, popup menu, bản đồ, QR.
+- `preferences.js`: trạng thái ngôn ngữ và giao diện riêng của tab, được giữ khi F5 nhưng không truyền sang tab mới.
 - `settings.js`: cùng một bảng tùy chỉnh ngôn ngữ, light/dark, âm nhạc và lưu sở thích.
+- `quick-nav.js`: nút Tùy chỉnh mặc định góc trên phải và Mục lục góc dưới phải mỗi lần tải lại. Có thể kéo đến nơi khác trong phiên xem hiện tại.
 - `build-wedding.cjs`: sinh metadata Open Graph và favicon từ cấu hình.
 - `generate_gallery.py`: quy trình tối ưu ảnh.
 - `tests/compatibility.spec.cjs`: bộ test thiết bị/desktop.
@@ -107,6 +109,8 @@ Khi deploy, GitHub Actions sẽ đọc **chính `wedding-info.js`** để tạo 
 ```bash
 node --check wedding-info.js
 node --check i18n.js
+node --check preferences.js
+node --check settings.js
 node --check script.js
 node --check link-tool.js
 node build-wedding.cjs
