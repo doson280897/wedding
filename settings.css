@@ -415,3 +415,148 @@ html[data-theme="light"] .language-switch.settings-hub.floating-control.is-open 
   color:#36513f;
   box-shadow:0 8px 24px rgba(67,53,27,.19);
 }
+
+
+/* Contextual music orb: only visible after playback was explicitly enabled.
+   The stop button dismisses the orb until music is enabled in Settings again. */
+.music-float {
+  position:fixed;
+  left:max(12px, env(safe-area-inset-left, 0px));
+  bottom:max(15px, env(safe-area-inset-bottom, 0px));
+  z-index:1004;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:50px;
+  height:50px;
+  font-family:Montserrat,system-ui,sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+.music-float[hidden],
+.music-float-actions[hidden] { display:none!important; }
+.music-float-trigger {
+  position:relative;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  width:48px;
+  height:48px;
+  padding:0;
+  border:1px solid rgba(219,186,124,.76);
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 25%, #42432d, #17251c 70%);
+  color:#f2d393;
+  box-shadow:0 6px 25px rgba(0,0,0,.35), inset 0 0 0 3px rgba(250,210,130,.06);
+  cursor:pointer;
+  touch-action:manipulation;
+  transition:background .24s, color .24s, border-color .24s, box-shadow .24s;
+}
+.music-float-trigger::before {
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border:1px solid rgba(230,184,97,.44);
+  border-radius:50%;
+  opacity:.75;
+  pointer-events:none;
+}
+.music-float-note { display:grid;place-items:center;width:26px;height:26px; }
+.music-float-note svg { display:block;width:25px;height:25px;transform-origin:center }
+.music-float[data-music-state="playing"] .music-float-note svg {
+  animation:musicFloatSway 1.8s ease-in-out infinite;
+  filter:drop-shadow(0 0 4px rgba(245,206,120,.56));
+}
+.music-float[data-music-state="playing"] .music-float-trigger::before {
+  animation:musicFloatHalo 2.8s ease-in-out infinite;
+}
+.music-float[data-music-state="paused"] .music-float-trigger {
+  background:linear-gradient(145deg,#47545a,#222c35);
+  color:#a8c2d2;
+  border-color:rgba(165,193,208,.7);
+  box-shadow:0 6px 22px rgba(0,0,0,.28);
+}
+.music-float[data-music-state="paused"] .music-float-trigger::before {
+  border-color:rgba(155,184,204,.35);
+  opacity:.55;
+}
+.music-float[data-music-state="starting"] .music-float-trigger {
+  background:#26342b;
+  color:#bbad83;
+}
+.music-float[data-music-state="starting"] .music-float-trigger::before {
+  animation:musicFloatHalo 1.4s ease-in-out infinite;
+}
+.music-float-actions {
+  position:absolute;
+  left:calc(100% + 9px);
+  bottom:2px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-height:46px;
+  padding:5px 7px;
+  border:1px solid rgba(207,171,115,.5);
+  border-radius:999px;
+  background:rgba(22,30,25,.97);
+  box-shadow:0 12px 32px rgba(0,0,0,.34);
+  backdrop-filter:blur(7px);
+}
+.music-float-action {
+  display:grid;
+  place-items:center;
+  min-width:37px;
+  min-height:37px;
+  width:37px;
+  height:37px;
+  padding:7px;
+  border:0;
+  border-radius:50%;
+  background:rgba(223,194,144,.10);
+  color:#efcf9b;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+.music-float-action svg {width:20px;height:20px;display:block}
+.music-float-action:hover,
+.music-float-action:focus-visible {background:rgba(229,198,143,.24);outline:2px solid rgba(234,202,147,.7);outline-offset:2px}
+.music-float-stop {color:#e4ad9b}
+.music-float-stop:hover {background:rgba(194,89,67,.22)}
+.music-float[data-music-state="playing"] .music-float-play-icon,
+.music-float:not([data-music-state="playing"]) .music-float-pause-icon {display:none}
+.music-float[data-music-state="starting"] .music-float-play-icon {opacity:.48}
+.music-float-action:disabled {opacity:.5;cursor:progress}
+.music-float-trigger:focus-visible {outline:2px solid #f1d49f;outline-offset:4px}
+html[data-theme="light"] .music-float-trigger {
+  background:linear-gradient(140deg,#fff6e3,#dfc8a2);
+  color:#5a6e4e;
+  border-color:#a68b61;
+  box-shadow:0 7px 24px rgba(65,50,27,.24);
+}
+html[data-theme="light"] .music-float[data-music-state="paused"] .music-float-trigger {
+  background:#dce5ea;
+  color:#567080;
+  border-color:#8ba6b5;
+}
+html[data-theme="light"] .music-float-actions {background:#f8f1e5;border-color:#b8a07a}
+html[data-theme="light"] .music-float-action {background:#eee1c8;color:#516b52}
+html[data-theme="light"] .music-float-stop {color:#996450}
+html[data-theme="light"] .music-float-action:hover {background:#e2d1b4}
+@keyframes musicFloatSway {
+  0%,100% {transform:rotate(-10deg) translateY(1px)}
+  50% {transform:rotate(10deg) translateY(-2px)}
+}
+@keyframes musicFloatHalo {
+  0%,100% {transform:scale(.98);opacity:.40}
+  50% {transform:scale(1.13);opacity:.86}
+}
+@media (max-width:650px) {
+  .music-float {width:46px;height:46px}
+  .music-float-trigger {width:44px;height:44px}
+  .music-float-actions {left:calc(100% + 7px);bottom:0}
+  .music-float-action {min-height:40px;min-width:40px;width:40px;height:40px}
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-float .music-float-note svg,
+  .music-float .music-float-trigger::before {animation:none!important}
+  .music-float-trigger {transition:none}
+}
