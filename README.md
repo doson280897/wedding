@@ -6,6 +6,7 @@ Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, 
 ### Giao diện và khách mời cá nhân hóa
 
 - Nút nổi **Tùy chỉnh** (có thể kéo thả) gom **VN / EN**, **Sáng / Tối** và **nhạc nền** vào một bảng; nút **Mục lục** vẫn riêng để truy cập nhanh các phần thiệp. Nhạc chỉ hiển thị khi đã vào thiệp của một bên.
+- Khi khách bật nhạc trong Tùy chỉnh, một **bong bóng nốt nhạc** xuất hiện ở góc dưới trái và lắc nhẹ lúc đang phát. Chạm bong bóng để mở các icon **Tạm dừng / Phát tiếp** và **Stop**. Pause giữ bong bóng nhưng cho icon đứng yên và đổi màu; Stop dừng hẳn, ẩn bong bóng, và chỉ có thể bật lại từ bảng Tùy chỉnh. Bong bóng không hiện khi nhạc chưa được bật.
 - Chế độ **Sáng** dùng nền kem và màu xanh lá dịu; **Tối** giữ phong cách dark luxury. Album 3D và ảnh bìa vẫn tối có chủ đích để ảnh rõ chiều sâu, không bị lóa. Ngôn ngữ và chế độ hiển thị được ghi nhớ **trong tab đang xem** qua trạng thái lịch sử trình duyệt: F5 giữ lựa chọn, mở tab mới bắt đầu với **VN + Tối** (trừ link có `lang=en`).
 - Với link có `?to=Tên+khách`, cả phong bì và hero hiển thị **Kính mời** phía trên, **tên người nhận** ở dòng dưới bằng font serif đậm. Có thể sửa nhãn trong `wedding-info.js` → `text.vi["guest.recipientLabel"]` / `text.en["guest.recipientLabel"]`. Link không có tên vẫn giữ lời mời chung.
 
