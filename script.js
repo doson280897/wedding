@@ -457,34 +457,64 @@
       envelopeStageHit?.setAttribute("disabled", "");
       skipInvitation?.setAttribute("disabled", "");
 
-      const releaseEnvelope = () => {
+      // Capture the seal position BEFORE rotating the flap. Do not force
+      // layout reads while the 3D transform is actively animating.
+      const sealRect = intro.querySelector(".envelope-seal")?.getBoundingClientRect();
+      const center = sealRect && {
+        x: sealRect.left + sealRect.width / 2,
+        y: sealRect.top + sealRect.height / 2
+      };
+      const reduced = prefersReducedMotion();
+
+      const raiseCard = () => {
         if (leaving) return;
-        // Read layout once, before any DOM writes, and share the origin.
-        // Previously the second geometry read forced a synchronous relayout.
-        const sealRect = intro.querySelector(".envelope-seal")?.getBoundingClientRect();
-        const center = sealRect && {
-          x: sealRect.left + sealRect.width / 2,
-          y: sealRect.top + sealRect.height / 2
-        };
-        burstFromSeal(center);
-        releaseFloatingPetals(center);
-        // First unfold the paper flap. Only then let the card slide out.
-        // Prevents the letter appearing on top of a still sealed envelope.
+        // Nothing from the invitation is visible until the flap has finished.
+        intro.classList.add("is-card-lifted", "is-opened");
+        startAutoClose();
+        closeInvitation?.focus({preventScroll:true});
+        if (!reduced) {
+          // Petals are intentionally postponed until AFTER the paper's
+          // main transform, so they cannot make the lift stutter.
+          window.setTimeout(() => {
+            if (!leaving) releaseFloatingPetals(center);
+          }, 950);
+        }
+      };
+
+      const unfoldFlap = () => {
+        if (leaving) return;
         intro.classList.add("is-flap-open");
+        if (reduced) {
+          raiseCard();
+          return;
+        }
+
+        const flap = intro.querySelector(".envelope-flap");
+        let finished = false;
+        let fallbackTimer = 0;
+        const finishFlap = event => {
+          if (event && (event.target !== flap || event.propertyName !== "transform")) return;
+          if (finished) return;
+          finished = true;
+          flap?.removeEventListener("transitionend", finishFlap);
+          window.clearTimeout(fallbackTimer);
+          raiseCard();
+        };
+        flap?.addEventListener("transitionend", finishFlap);
+        // A bounded fallback also covers interrupted transitions and Safari.
+        fallbackTimer = window.setTimeout(finishFlap, 760);
+      };
+
+      if (reduced) {
+        unfoldFlap();
+      } else {
+        intro.classList.add("is-seal-cracking");
         window.setTimeout(() => {
           if (leaving) return;
-          intro.classList.add("is-card-lifted", "is-opened");
-          startAutoClose();
-          closeInvitation?.focus({preventScroll:true});
-        }, prefersReducedMotion() ? 0 : 160);
-      };
-      if (prefersReducedMotion()) {
-        releaseEnvelope();
-      } else {
-        // A brief fracture makes the existing champagne burst feel earned.
-        // Never postpone the user's first visual response.
-        intro.classList.add("is-seal-cracking");
-        window.setTimeout(releaseEnvelope, 260);
+          // The small foil accent ends before the card starts moving.
+          burstFromSeal(center);
+          unfoldFlap();
+        }, 230);
       }
     };
 

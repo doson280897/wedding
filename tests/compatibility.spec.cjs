@@ -269,11 +269,14 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await page.locator("#openInvitation").click();
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
   await expect(page.locator("#envelopeBurst")).toBeVisible();
+  await expect(page.locator("#envelopeIntro")).toHaveClass(/is-flap-open/);
+  // Critical regression: flap must complete its transform BEFORE the card
+  // appears, not the 160ms overlap used previously.
+  await expect(page.locator(".invitation-card")).toBeHidden();
+  expect(await page.locator(".envelope-flap").evaluate(node =>
+    getComputedStyle(node).transitionDuration
+  )).toContain("0.65s");
   await expect(page.locator("#envelopeBurst")).toHaveClass(/is-active/);
-  await expect(page.locator("#floatingPetals")).toBeVisible();
-  const petals = await page.locator(".floating-petal").count();
-  expect(petals).toBeGreaterThanOrEqual(2);
-  expect(petals).toBeLessThanOrEqual(6);
   const foil = await page.locator(".envelope-burst-particle").count();
   expect(foil).toBeGreaterThanOrEqual(4);
   expect(foil).toBeLessThanOrEqual(12);
@@ -289,7 +292,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden({ timeout: 3000 });
   await expect(page.locator("#invitationPortal")).toBeHidden({ timeout: 3000 });
-  await expect(page.locator("#floatingPetals")).toBeHidden({ timeout: 4000 });
+  await expect(page.locator("#floatingPetals")).toBeHidden({ timeout: 4500 });
   await expect(page.locator(".floating-petal")).toHaveCount(0);
   await expect(page.locator("html")).toHaveClass(/golden-signature-entered/);
   const brideShort = await page.evaluate(() => window.WEDDING_INFO.couple.bride.short.toLocaleUpperCase("vi-VN"));
