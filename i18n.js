@@ -47,11 +47,10 @@
   };
   const renderText = (template, language = locale) =>
     String(template ?? "").replace(/\{\{([\w.]+)\}\}/g, (_, path) => getInfo(path, language));
-  const params = new URLSearchParams(window.location.search);
-  let stored = "";
-  try { stored = localStorage.getItem("wedding-language") || ""; } catch (_) {}
-  const requested = params.get("lang");
-  let locale = requested === "en" || requested === "vi" ? requested : (stored === "en" ? "en" : "vi");
+  const prefs = window.WeddingPreferences;
+  // On an ordinary new tab the default is VN. An explicit ?lang=en link
+  // intentionally remains English, and a user's choice persists on F5.
+  let locale = prefs?.getLanguage() || "vi";
 
   const t = key => renderText((translations[locale] && translations[locale][key]) || translations.vi[key] || key);
 
@@ -133,9 +132,7 @@
   function setLocale(next, persist = true) {
     if (next !== "vi" && next !== "en") return;
     locale = next;
-    if (persist) {
-      try { localStorage.setItem("wedding-language", locale); } catch (_) {}
-    }
+    if (persist) prefs?.setLanguage(locale);
     apply();
     document.dispatchEvent(new CustomEvent("wedding:languagechange", {detail:{locale}}));
   }
