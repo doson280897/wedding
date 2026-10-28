@@ -58,7 +58,8 @@ jobs:
               print("Using configured local social image:", social_path)
               raise SystemExit(0)
 
-          source = Path(parties["bride"]["images"]["hero"])
+          selected = "single" if wedding.get("wedding", {}).get("mode") == "single" else "bride"
+          source = Path(parties[selected]["images"]["hero"])
           if not source.exists():
               raise SystemExit(f"Missing configured hero image: {source}")
 
@@ -116,7 +117,8 @@ jobs:
           draw.line((left, 210, 1115, 210), fill=(209, 174, 117, 150), width=1)
           draw.text((left, 236), groom_name, font=fitted_font("serif:style=Bold", groom_name, 58), fill=cream)
           draw.text((left, 311), bride_name, font=fitted_font("serif", bride_name, 42), fill=gold)
-          date_label = date_dots("bride") + "  —  " + date_dots("groom")
+          date_label = (date_dots("single") if selected == "single"
+                        else date_dots("bride") + "  —  " + date_dots("groom"))
           draw.text((left, 390), date_label, font=fitted_font("sans", date_label, 25), fill=muted)
           draw.text((left, 442), wedding["text"]["vi"]["envelope.invite"], font=small, fill=cream)
 
