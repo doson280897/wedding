@@ -495,6 +495,9 @@
   let youtubePlayerReady = false;
   let youtubePlayerPromise = null;
   let musicPlaying = false;
+  // The seal click is the real playback gesture. Keep the track quiet during
+  // the gate, then raise its volume when the hero is visible.
+  let musicHeroEntered = false;
   let musicEnabled = false;
   let musicHasStarted = false;
   let musicPausePosition = 0;
@@ -804,7 +807,7 @@
             readySettled = true;
             clearTimeout(readyTimeout);
             youtubePlayerReady = true;
-            try { event.target.setVolume(70); } catch (_) {}
+            try { event.target.setVolume(musicHeroEntered ? 70 : 12); } catch (_) {}
             resolve(event.target);
           },
           onStateChange: event => {
@@ -855,16 +858,30 @@
     return youtubePlayerPromise;
   }
 
-  // The wax is an intentional entry gesture. Prepare YouTube while the
-  // cinematic plays, then start playback automatically when Hero arrives.
-  // Some browsers (especially iOS Safari) may still block sound autoplay;
-  // Settings remains a one-tap retry without falsely showing PLAYING.
+  // iOS Safari commonly rejects playVideo() called several seconds after a
+  // tap: a delayed wedding:waxopen event is NOT a user gesture. Prepare the
+  // silent iframe while the guest is viewing the closed gate, then issue
+  // playVideo() synchronously from the actual seal click when it is ready.
+  // Start quietly and raise the volume on Hero; never restart the track.
+  // On slow networks, the existing retry in Settings remains necessary if
+  // the YouTube iframe was not ready in time for that first gesture.
   if (selectedParty && !linkToolInitial) {
+    window.setTimeout(() => {
+      if (!moonlightGate?.hidden) initYouTubeMusicPlayer().catch(() => {});
+    }, 250);
     waxOpenButton?.addEventListener("click", () => {
-      initYouTubeMusicPlayer().catch(() => {});
+      if (youtubePlayerReady && youtubePlayer) {
+        try { youtubePlayer.setVolume(12); } catch (_) {}
+      }
+      // No setTimeout, Promise.then or requestAnimationFrame before playVideo
+      // when the player is ready: preserve the browser's user activation.
+      requestMusicPlayback();
     }, { once:true });
     document.addEventListener("wedding:waxopen", () => {
-      requestMusicPlayback();
+      musicHeroEntered = true;
+      try {
+        if (youtubePlayerReady) youtubePlayer?.setVolume(70);
+      } catch (_) {}
     }, { once:true });
   }
 
