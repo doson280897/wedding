@@ -6,7 +6,14 @@
   const partyInfo = side => info.parties[side];
   const params = new URLSearchParams(window.location.search);
   const partyParam = params.get("party");
-  const selectedParty = partyParam === "bride" || partyParam === "groom" ? partyParam : null;
+  const singleMode = info.wedding?.mode === "single";
+  const linkToolInitial = params.get("tool") === "links";
+  // In a single-reception wedding, old ?party=bride/groom links remain usable
+  // but always resolve to the only celebration rather than a party selector.
+  const selectedParty = singleMode
+    ? "single"
+    : (partyParam === "bride" || partyParam === "groom" ? partyParam : null);
+  document.documentElement.dataset.weddingMode = singleMode ? "single" : "double";
   const invitationKey = JSON.stringify([selectedParty, params.get("to") || ""]);
   const alreadyEntered = !!selectedParty && history.state?.weddingEnvelopeOpened === invitationKey;
   const partySelector = document.getElementById("partySelector");
@@ -80,7 +87,9 @@
   function updateGuest() {
     const named = Boolean(displayGuest);
     const label = tr("guest.recipientLabel");
-    const heroTemplate = tr(selectedParty === "bride" ? "guest.heroBride" : "guest.heroGroom");
+    const heroKey = selectedParty === "single" ? "guest.heroSingle" :
+      selectedParty === "bride" ? "guest.heroBride" : "guest.heroGroom";
+    const heroTemplate = tr(heroKey);
     // Only personalized invitations use the two-line typographic treatment.
     // Unnamed links keep the original generic invitation message.
     if (heroGuestLabel) heroGuestLabel.textContent = named
@@ -96,21 +105,22 @@
     }
   }
 
+  const makeWeddingDate = (side, targetTime, titleKey, ariaKey) => ({
+    time: new Date(
+      partyInfo(side).date + "T" + partyInfo(side)[targetTime] + ":00" + info.site.timezone
+    ).getTime(),
+    titleKey,
+    ariaKey
+  });
   const weddingDates = {
-    bride: {
-      time: new Date(partyInfo("bride").date + "T" + partyInfo("bride").ceremonyTime + ":00" + info.site.timezone).getTime(),
-      titleKey: "countdown.brideTitle",
-      ariaKey: "countdown.brideAria"
-    },
-    groom: {
-      time: new Date(partyInfo("groom").date + "T" + partyInfo("groom").ceremonyTime + ":00" + info.site.timezone).getTime(),
-      titleKey: "countdown.groomTitle",
-      ariaKey: "countdown.groomAria"
-    }
+    bride: makeWeddingDate("bride","ceremonyTime","countdown.brideTitle","countdown.brideAria"),
+    groom: makeWeddingDate("groom","ceremonyTime","countdown.groomTitle","countdown.groomAria"),
+    single: makeWeddingDate("single","receptionTime","countdown.singleTitle","countdown.singleAria")
   };
   const timer = document.getElementById("timer");
   const countdownTitle = document.getElementById("countdownTitle");
-  const selectedWedding = selectedParty || (Date.now() < weddingDates.bride.time ? "bride" : "groom");
+  const selectedWedding = selectedParty ||
+    (Date.now() < weddingDates.bride.time ? "bride" : "groom");
 
   function ensureTimerBoxes() {
     if (!timer) return;
@@ -172,6 +182,18 @@
 
   function buildSchedule(side) {
     const details = partyInfo(side);
+    if (side === "single") {
+      return {
+        filename: tr("calendar.singleFile"),
+        events: [{
+          title:tr("calendar.singleReceptionTitle"),
+          start:toCalendarUTC("single",details.receptionTime),
+          end:toCalendarUTC("single",details.receptionEnd),
+          place:tr("calendar.singleReceptionPlace"),
+          note:tr("calendar.singleReceptionNote")
+        }]
+      };
+    }
     const ceremonyPlace = side === "bride" ? "calendar.brideCeremonyPlace" : "calendar.groomPlace";
     const receptionPlace = side === "bride" ? "calendar.brideReceptionPlace" : "calendar.groomPlace";
     return {
@@ -239,14 +261,14 @@
   const envelopeCooldownValue = document.getElementById("envelopeCooldownValue");
   // A reload in the same tab resumes the invitation without replaying its
   // envelope. New tabs and a different party/guest still begin at the envelope.
-  if (intro && alreadyEntered) {
+  if (intro && (alreadyEntered || linkToolInitial)) {
     intro.hidden = true;
     document.body.classList.remove("envelope-locked");
     document.documentElement.classList.remove("envelope-theme", "envelope-pending");
     setContentBrowserTheme();
   }
 
-  if (intro && selectedParty && !alreadyEntered) {
+  if (intro && selectedParty && !alreadyEntered && !linkToolInitial) {
     setBrowserTheme("#496957");
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
@@ -783,22 +805,27 @@
 
     const ceremonyLabel = document.getElementById("heroCeremonyLabel");
     if (ceremonyLabel) {
-      ceremonyLabel.textContent = tr(selectedParty === "bride" ? "hero.brideOverline" : "hero.groomOverline");
+      const key = selectedParty === "single" ? "hero.singleOverline" :
+        selectedParty === "bride" ? "hero.brideOverline" : "hero.groomOverline";
+      ceremonyLabel.textContent = tr(key);
     }
 
     const brideFirst = selectedParty === "bride";
     const coupleHeading = document.getElementById("coupleHeading");
     if (coupleHeading) {
-      coupleHeading.innerHTML = tr(brideFirst ? "couple.headingBrideFirst" : "couple.headingGroomFirst");
+      coupleHeading.innerHTML = tr(singleMode ? "couple.headingSingle" :
+        brideFirst ? "couple.headingBrideFirst" : "couple.headingGroomFirst");
     }
 
     const menuCoupleLabel = document.getElementById("menuCoupleLabel");
     if (menuCoupleLabel) {
-      menuCoupleLabel.textContent = tr(brideFirst ? "menu.coupleBrideFirst" : "menu.coupleGroomFirst");
+      menuCoupleLabel.textContent = tr(singleMode ? "menu.singleCouple" :
+        brideFirst ? "menu.coupleBrideFirst" : "menu.coupleGroomFirst");
     }
 
 
-    document.title = tr(brideFirst ? "page.titleBride" : "page.titleGroom");
+    document.title = tr(singleMode ? "page.titleSingle" :
+      brideFirst ? "page.titleBride" : "page.titleGroom");
   }
 
   function refreshDynamicLanguage() {
