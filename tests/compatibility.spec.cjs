@@ -51,6 +51,78 @@ test("one shared language control, in-page generator, back navigation @smoke @co
 });
 
 
+test("unified hub shows Settings only outside and defaults to Menu inside @smoke @core", async ({page}) => {
+  await page.goto(base + "/index.html",{waitUntil:"domcontentloaded"});
+  await page.locator("#settingsTrigger").click();
+  await expect(page.locator("#settingsTabContent")).toBeVisible();
+  await expect(page.locator("#controlTabs")).toBeHidden();
+  await expect(page.locator("#wqPanel")).toBeHidden();
+  await page.locator("#settingsClose").click();
+
+  await page.goto(base + "/index.html?party=bride",{waitUntil:"domcontentloaded"});
+  await expect(page.locator("#settingsHub")).toBeHidden();
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden({timeout:9000});
+  await page.locator("#settingsTrigger").click();
+  await expect(page.locator("#controlTabs")).toBeVisible();
+  await expect(page.locator("#controlTabMenu")).toHaveAttribute("aria-selected","true");
+  await expect(page.locator("#wqPanel")).toBeVisible();
+  await expect(page.locator("#settingsTabContent")).toBeHidden();
+  await page.locator("#controlTabSettings").click();
+  await expect(page.locator("#settingsTabContent")).toBeVisible();
+  await page.locator("#settingsClose").click();
+  await page.locator("#settingsTrigger").click();
+  await expect(page.locator("#controlTabMenu")).toHaveAttribute("aria-selected","true");
+});
+
+test("music bubble waits for PLAYING and resume preserves paused time @smoke @core", async ({page}) => {
+  await page.addInitScript(() => {
+    window.YT = {
+      PlayerState:{PLAYING:1,PAUSED:2,ENDED:0,BUFFERING:3},
+      Player:function(_host,options) {
+        let playbackTime=0;
+        const player={
+          setVolume(){},
+          getCurrentTime(){return playbackTime;},
+          seekTo(time){playbackTime=time;window.__seeks=(window.__seeks||[]).concat(time);},
+          playVideo(){
+            window.__plays=(window.__plays||0)+1;
+            options.events.onStateChange({data:3});
+            setTimeout(()=>options.events.onStateChange({data:1}),400);
+          },
+          pauseVideo(){
+            playbackTime=0; // Simulate an iframe that loses time while buffering.
+            options.events.onStateChange({data:2});
+          },
+          stopVideo(){options.events.onStateChange({data:0});}
+        };
+        window.__advanceMusic = value => {playbackTime=value;};
+        queueMicrotask(()=>options.events.onReady({target:player}));
+        return player;
+      }
+    };
+  });
+  await page.goto(base+"/index.html?party=bride",{waitUntil:"domcontentloaded"});
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden({timeout:9000});
+  await page.locator("#settingsTrigger").click();
+  await page.locator("#controlTabSettings").click();
+  await page.locator("#musicToggle").click();
+  await expect(page.locator("#musicBubble")).toBeHidden();
+  await expect(page.locator("#musicToggle .music-label")).toContainText(/ĐANG|TẢI|Loading/i);
+  await expect(page.locator("#musicBubble")).toBeVisible({timeout:3500});
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing");
+  await page.evaluate(()=>window.__advanceMusic(83.5));
+  await page.locator("#musicBubbleTrigger").click();
+  await page.locator("#musicBubblePause").click();
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","paused");
+  await page.locator("#musicBubbleTrigger").click();
+  await page.locator("#musicBubblePause").click();
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing",{timeout:3500});
+  const seek=await page.evaluate(()=>window.__seeks||[]);
+  expect(seek.some(time=>Math.abs(time-83.5)<.01)).toBe(true);
+});
+
 test("party link, wax gate and album lightbox interactions", async ({
   page,
 }) => {
@@ -133,22 +205,18 @@ test("menu, map and gift overlays open and close on each device @smoke", async (
   });
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
-  const menuToggle = page.locator("#wqToggle");
-  // Even a collapsed idle Menu must open on the FIRST touch on phones.
-  await menuToggle.evaluate(node => node.classList.add("is-idle"));
-  await menuToggle.click();
-  await expect(menuToggle).toHaveAttribute("aria-expanded", "true");
-  await expect(page.locator("#wqPanel")).toHaveAttribute(
-    "aria-hidden",
-    "false",
-  );
+  const hub = page.locator("#settingsTrigger");
+  await expect(page.locator("#wqToggle")).toHaveCount(0);
+  await hub.click();
+  await expect(page.locator("#controlTabMenu")).toHaveAttribute("aria-selected","true");
+  await expect(page.locator("#wqPanel")).toBeVisible();
   await page.locator('#wqPanel a[href="#locations"]').click();
   await expect(page.locator("#wmModal")).toBeVisible();
   await page.locator("#wmClose").click();
   await expect(page.locator("#wmModal")).toBeHidden();
 
-  await menuToggle.click();
-  await expect(menuToggle).toHaveAttribute("aria-expanded", "true");
+  await hub.click();
+  await expect(page.locator("#controlTabMenu")).toHaveAttribute("aria-selected","true");
   // A hidden gift popup should not fetch bank QR images on first paint.
   const activeQR = page.locator(".gift-card[data-party-scope='groom'] .gift-qr");
   await expect(activeQR).not.toHaveAttribute("src", /.+/);
@@ -365,7 +433,6 @@ test("Settings and Menu share identical drag, snap and tap behavior @smoke @core
   await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
   const controls = [
     { id:"settingsHub", trigger:"#settingsTrigger", open:"#settingsPanel" },
-    { id:"wqToggle", trigger:"#wqToggle", open:"#wqPanel" },
   ];
 
   for (const control of controls) {
@@ -420,15 +487,10 @@ test("Settings and Menu share identical drag, snap and tap behavior @smoke @core
     expect(afterRight.right).toBeLessThanOrEqual(24);
 
     // Dragging must not accidentally open the panel; a subsequent tap does.
-    if (control.id === "settingsHub") {
-      await expect(page.locator("#settingsPanel")).toBeHidden();
-    } else {
-      await expect(page.locator("#wqPanel")).toHaveAttribute("aria-hidden", "true");
-    }
+    await expect(page.locator("#settingsPanel")).toBeHidden();
     await page.locator(control.trigger).click();
     await expect(page.locator(control.open)).toBeVisible();
-    if (control.id === "settingsHub") await page.locator("#settingsClose").click();
-    else await page.locator("#wqClose").click();
+    await page.locator("#settingsClose").click();
   }
 });
 
@@ -445,6 +507,7 @@ test("personal invitation keeps the bold recipient in hero across languages", as
   await expect(page.locator("#guestName")).toHaveText(guest);
   await expect(page.locator("#guestName")).toBeVisible();
   await page.locator("#settingsTrigger").click();
+  await page.locator("#controlTabSettings").click();
   await page.locator('[data-lang="en"]').click();
   await expect(page.locator("#heroGuestLabel")).toHaveText("Cordially inviting");
   await expect(page.locator("#guestName")).toHaveText(guest);
@@ -457,61 +520,34 @@ test("personal invitation keeps the bold recipient in hero across languages", as
 });
 
 
-test("F5 resets settings and menu positions to opposite right corners @smoke", async ({ page }) => {
+test("F5 resets the single floating hub and keeps its icon centered @smoke", async ({ page }) => {
   await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
   const hub = page.locator("#settingsHub");
-  const menu = page.locator("#wqToggle");
   await expect(hub).toHaveClass(/floating-control/);
-  await expect(menu).toHaveClass(/floating-control/);
-
-  // Simulate actual drag placement and check it does NOT survive F5.
-  for (const control of [hub, menu]) {
-    await control.evaluate(node => {
-      node.dataset.userMoved = "true";
-      node.dataset.floatEdge = "left";
-      node.style.top = Math.round(innerHeight * .43) + "px";
-      node.style.left = "8px";
-      node.style.right = "auto";
-      node.style.bottom = "auto";
-    });
-  }
+  await expect(page.locator("#wqToggle")).toHaveCount(0);
+  await hub.evaluate(node => {
+    node.dataset.userMoved = "true";
+    node.dataset.floatEdge = "left";
+    node.style.top = Math.round(innerHeight * .43) + "px";
+    node.style.left = "8px";
+    node.style.right = "auto";
+  });
   await page.reload({ waitUntil:"domcontentloaded" });
-
-  const corners = await page.evaluate(() => {
-    const settings = document.getElementById("settingsHub").getBoundingClientRect();
-    const menu = document.getElementById("wqToggle").getBoundingClientRect();
-    return {
-      settings: { right: innerWidth - settings.right, top:settings.top },
-      menu: { right:innerWidth - menu.right, bottom:innerHeight - menu.bottom }
-    };
+  const corner = await hub.evaluate(node => {
+    const r=node.getBoundingClientRect();
+    return { right:innerWidth-r.right,top:r.top };
   });
-  expect(corners.settings.right).toBeLessThanOrEqual(30);
-  expect(corners.settings.top).toBeLessThanOrEqual(40);
-  expect(corners.menu.right).toBeLessThanOrEqual(30);
-  expect(corners.menu.bottom).toBeLessThanOrEqual(40);
-
-  // Both collapsed SVGs must sit at the actual center after reload.
+  expect(corner.right).toBeLessThanOrEqual(30);
+  expect(corner.top).toBeLessThanOrEqual(40);
   await hub.evaluate(node => node.classList.add("is-idle"));
-  await menu.evaluate(node => node.classList.add("is-idle"));
-  await page.waitForTimeout(350); // Wait for CSS width/padding transition.
-  const centers = await page.evaluate(() => {
-    const offset = (outer, icon) => {
-      const a = outer.getBoundingClientRect();
-      const b = icon.getBoundingClientRect();
-      return {
-        x: Math.abs((a.left + a.width / 2) - (b.left + b.width / 2)),
-        y: Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)),
-      };
-    };
-    return {
-      settings: offset(document.querySelector("#settingsHub"), document.querySelector("#settingsTrigger svg")),
-      menu: offset(document.querySelector("#wqToggle"), document.querySelector("#wqToggle svg")),
-    };
+  await page.waitForTimeout(350);
+  const centered = await hub.evaluate(node => {
+    const a=node.getBoundingClientRect();
+    const b=node.querySelector("#settingsTrigger svg").getBoundingClientRect();
+    return {x:Math.abs((a.left+a.width/2)-(b.left+b.width/2)),y:Math.abs((a.top+a.height/2)-(b.top+b.height/2))};
   });
-  for (const coordinate of [centers.settings, centers.menu]) {
-    expect(coordinate.x).toBeLessThanOrEqual(2);
-    expect(coordinate.y).toBeLessThanOrEqual(2);
-  }
+  expect(centered.x).toBeLessThanOrEqual(2);
+  expect(centered.y).toBeLessThanOrEqual(2);
 });
 
 
@@ -574,11 +610,13 @@ test("menu section navigation preserves per-tab theme and language on F5 @smoke"
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:9000 });
   await page.locator("#settingsTrigger").click();
+  await page.locator("#controlTabSettings").click();
   await page.locator('[data-lang="en"]').click();
   await page.locator('[data-theme-option="light"]').click();
   await page.locator("#settingsClose").click();
 
-  await page.locator("#wqToggle").click();
+  await page.locator("#settingsTrigger").click();
+  await expect(page.locator("#controlTabMenu")).toHaveAttribute("aria-selected","true");
   await page.locator('#wqPanel a[href="#album"]').click();
   await expect(page).toHaveURL(/#album$/);
   await page.reload({ waitUntil:"domcontentloaded" });
@@ -625,6 +663,7 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
   const bubble = page.locator("#musicBubble");
   await expect(bubble).toBeHidden();
   await page.locator("#settingsTrigger").click();
+  await page.locator("#controlTabSettings").click();
   // State-machine test uses a programmatic click to avoid Firefox/YouTube actionability stalls.
   await page.locator("#musicToggle").evaluate(node => node.click());
   await expect(bubble).toBeVisible();
@@ -664,6 +703,7 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
 
   // The stopped bubble cannot start music itself; guests must use Settings.
   await page.locator("#settingsTrigger").click();
+  await page.locator("#controlTabSettings").click();
   await page.locator("#musicToggle").evaluate(node => node.click());
   await expect(bubble).toBeVisible();
   await expect(bubble).toHaveAttribute("data-music-state", "playing");
@@ -706,12 +746,9 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await expect(page.locator("#map-single h3")).toHaveText("Trung Tâm Tiệc Cưới Sen Vàng");
   await expect(page.locator("#map-groom")).toBeHidden();
   await page.locator("#wmClose").click();
-  const navigationToggle = page.locator("#wqToggle");
-  await navigationToggle.evaluate(node => node.classList.add("is-idle"));
-  await navigationToggle.click();
-  // A genuine one-tap action on mobile must open the panel even while the
-  // toggle is collapsed; previous tests only noticed after a 30s timeout.
-  await expect(page.locator("#wqPanel")).toHaveClass(/is-open/);
+  await page.locator("#settingsTrigger").click();
+  await expect(page.locator("#controlTabMenu")).toHaveAttribute("aria-selected","true");
+  await expect(page.locator("#wqPanel")).toBeVisible();
   await expect(page.locator('a[href="#wedding-gift"].wq-link')).toBeVisible();
   await page.locator('a[href="#wedding-gift"].wq-link').click();
   await expect(page.locator(".gift-card:visible")).toHaveCount(1);
