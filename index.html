@@ -88,16 +88,48 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+(() => {
+  let theme = "dark";
+  try { if (localStorage.getItem("wedding-theme") === "light") theme = "light"; } catch (_) {}
+  document.documentElement.dataset.theme = theme;
+})();
+</script>
 <link rel="stylesheet" href="style.css?v=__BUILD_ID__">
 <link rel="stylesheet" href="quick-nav.css?v=__BUILD_ID__">
 <link rel="stylesheet" href="link-tool.css?v=__BUILD_ID__">
 </head>
 <body>
 <div class="reading-progress" id="progress"></div>
-<div class="language-switch" role="group" aria-label="Chọn ngôn ngữ" data-i18n-aria="language.label">
-  <button type="button" class="language-option is-active" data-lang="vi" aria-pressed="true">VN</button>
-  <span aria-hidden="true">/</span>
-  <button type="button" class="language-option" data-lang="en" aria-pressed="false">EN</button>
+<div class="language-switch settings-hub" id="settingsHub" role="group" aria-label="Tùy chỉnh thiệp" data-i18n-aria="settings.title">
+  <button type="button" class="settings-trigger" id="settingsTrigger" aria-controls="settingsPanel" aria-expanded="false" data-i18n-aria="settings.open" aria-label="Tùy chỉnh hiển thị">
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"/><circle cx="9" cy="7" r="2" fill="currentColor" stroke="none"/><circle cx="15" cy="17" r="2" fill="currentColor" stroke="none"/></svg>
+    <span class="settings-trigger-label" data-i18n="settings.short">TÙY CHỈNH</span>
+  </button>
+  <div class="settings-panel" id="settingsPanel" role="group" aria-label="Tùy chọn hiển thị" data-i18n-aria="settings.title" hidden>
+    <div class="settings-panel-heading">
+      <span data-i18n="settings.title">TÙY CHỈNH THIỆP</span>
+      <button type="button" class="settings-close" id="settingsClose" data-i18n-aria="settings.close" aria-label="Đóng tùy chỉnh">×</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-row-label" data-i18n="settings.language">Ngôn ngữ</span>
+      <div class="settings-options" role="group" aria-label="Chọn ngôn ngữ" data-i18n-aria="language.label">
+        <button type="button" class="language-option is-active" data-lang="vi" aria-pressed="true">VN</button>
+        <button type="button" class="language-option" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <div class="settings-row">
+      <span class="settings-row-label" data-i18n="settings.theme">Giao diện</span>
+      <div class="settings-options" role="group" aria-label="Giao diện sáng hoặc tối" data-i18n-aria="settings.theme">
+        <button type="button" class="theme-option is-active" data-theme-option="dark" aria-pressed="true" data-i18n="settings.dark">☾ Tối</button>
+        <button type="button" class="theme-option" data-theme-option="light" aria-pressed="false" data-i18n="settings.light">☀ Sáng</button>
+      </div>
+    </div>
+    <div class="settings-row settings-music-row">
+      <span class="settings-row-label" data-i18n="settings.music">Âm nhạc</span>
+      <button class="music-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="Bật nhạc nền dịu nhẹ" title="Bật/tắt nhạc nền"><span class="music-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5.7L20 3v12.3"/><ellipse cx="6" cy="18" rx="3" ry="2.1" transform="rotate(-18 6 18)"/><ellipse cx="17" cy="15.3" rx="3" ry="2.1" transform="rotate(-18 17 15.3)"/><path d="M9 9.2 20 6.5"/></svg></span><span class="music-label">NHẠC: TẮT</span></button>
+    </div>
+  </div>
 </div>
 <div class="party-selector" id="partySelector" role="dialog" aria-modal="true" aria-labelledby="partySelectorTitle" aria-describedby="partySelectorLead">
   <div class="party-selector-backdrop" aria-hidden="true"></div>
@@ -217,7 +249,10 @@
         <h2 id="envelopeTitle" data-party-name-pair="envelope"></h2>
         <p class="envelope-date"><span data-party-date="bride"></span><span class="party-date-separator">—</span><span data-party-date="groom"></span></p>
         <div class="invitation-leaf invitation-leaf-small" aria-hidden="true">❧</div>
-        <p class="envelope-invite" id="envelopeGuest" data-i18n="envelope.invite">Trân trọng kính mời</p>
+        <div class="envelope-invite" id="envelopeInviteBlock">
+          <span class="envelope-recipient-label" id="envelopeGuestLabel" data-i18n="envelope.invite">Trân trọng kính mời</span>
+          <strong class="envelope-recipient-name" id="envelopeGuest" hidden></strong>
+        </div>
       </article>
 
       <div class="envelope-front" aria-hidden="true">
@@ -244,7 +279,10 @@
     <div class="hero-spacer"></div>
     <div class="hero-copy">
       <div class="overline" id="heroCeremonyLabel" data-i18n="hero.overline">— LỄ THÀNH HÔN —</div>
-      <p class="guest-greeting" id="guestName">Trân trọng kính mời bạn tham dự ngày vui của chúng mình</p>
+      <div class="guest-greeting" id="heroGreeting">
+        <span class="hero-recipient-label" id="heroGuestLabel"></span>
+        <strong class="hero-recipient-name" id="guestName" hidden></strong>
+      </div>
       <h1 id="heroNames" data-party-name-pair="hero"></h1>
       <div class="fine-flourish">✧</div>
       <p class="handwriting" data-i18n="hero.handwriting">Cùng nhau viết tiếp những ngày hạnh phúc...</p>
@@ -396,9 +434,9 @@
   </div>
   <div class="wq-footnote" id="menuNames" data-party-name-pair="menu"></div>
 </nav>
-<button class="music-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="Bật nhạc nền dịu nhẹ" title="Bật/tắt nhạc nền"><span class="music-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5.7L20 3v12.3"/><ellipse cx="6" cy="18" rx="3" ry="2.1" transform="rotate(-18 6 18)"/><ellipse cx="17" cy="15.3" rx="3" ry="2.1" transform="rotate(-18 17 15.3)"/><path d="M9 9.2 20 6.5"/></svg></span><span class="music-label">NHẠC: TẮT</span></button>
 <button type="button" class="wq-toggle" id="wqToggle" aria-label="Mở mục lục thiệp cưới" aria-controls="wqPanel" aria-expanded="false"><span class="wq-toggle-glyph" aria-hidden="true">☷</span><span data-i18n="menu.toggle">MỤC LỤC</span></button>
 <script src="quick-nav.js?v=__BUILD_ID__" defer></script>
+<script src="settings.js?v=__BUILD_ID__" defer></script>
 <script src="link-tool.js?v=__BUILD_ID__" defer></script>
 </body>
 </html>
