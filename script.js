@@ -735,7 +735,7 @@
   // playVideo() call inside a later user tap instead of creating the iframe after the tap.
   // Avoid network requests, iframes and CPU work on the admin landing/tool screens.
   // For guests, preload after a celebration has been selected to improve Safari playback.
-  if (selectedParty) initYouTubeMusicPlayer().catch(() => {});
+  if (selectedParty && !linkToolInitial) initYouTubeMusicPlayer().catch(() => {});
 
   // Settings is the entry point for activating music. The contextual bubble
   // handles Pause/Resume and Stop without adding another permanently visible button.
