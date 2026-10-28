@@ -758,3 +758,27 @@ test("music loading times out into a retryable paused state instead of freezing"
   await page.locator("#musicBubblePause").click();
   await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing", {timeout:3000});
 });
+
+
+test("collapsed menu SVG is geometrically centered on phones and desktop @smoke", async ({ page }) => {
+  await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
+  const menu = page.locator("#wqToggle");
+  await expect(menu).toHaveClass(/floating-control/);
+  await menu.evaluate(node => node.classList.add("is-idle"));
+  const geometry = await menu.evaluate(node => {
+    const outer = node.getBoundingClientRect();
+    const glyph = node.querySelector(".wq-toggle-glyph svg").getBoundingClientRect();
+    const label = node.querySelector("span[data-i18n]");
+    return {
+      horizontal:Math.abs((outer.left + outer.width / 2) - (glyph.left + glyph.width / 2)),
+      vertical:Math.abs((outer.top + outer.height / 2) - (glyph.top + glyph.height / 2)),
+      width:outer.width,
+      height:outer.height,
+      labelDisplay:getComputedStyle(label).display
+    };
+  });
+  expect(geometry.horizontal).toBeLessThanOrEqual(1.5);
+  expect(geometry.vertical).toBeLessThanOrEqual(1.5);
+  expect(geometry.width).toBe(geometry.height);
+  expect(geometry.labelDisplay).toBe("none");
+});
