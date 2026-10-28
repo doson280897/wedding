@@ -419,11 +419,13 @@
         const copyText = (targetSelector, sourceSelector) => {
           const target = motionCard.querySelector(targetSelector);
           const source = realCard.querySelector(sourceSelector);
-          if (target && source) target.textContent = source.innerText.trim();
+          if (target && source) target.textContent = source.textContent.trim();
         };
         copyText(".invitation-paper-proxy-eyebrow", ".envelope-eyebrow");
-        copyText(".invitation-paper-proxy-date", ".envelope-date");
         copyText(".invitation-paper-proxy-label", "#envelopeGuestLabel");
+        const motionDate = motionCard.querySelector(".invitation-paper-proxy-date");
+        const selectedDate = realCard.querySelector('[data-party-date="' + selectedParty + '"]');
+        if (motionDate) motionDate.textContent = selectedDate?.textContent.trim() || "";
         const motionNames = motionCard.querySelector(".invitation-paper-proxy-names");
         const realNames = realCard.querySelector("#envelopeTitle");
         if (motionNames && realNames) motionNames.innerHTML = realNames.innerHTML;
