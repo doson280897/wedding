@@ -1840,3 +1840,29 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
   .invitation-reveal:before{width:220px;height:220px}
   .invitation-reveal:after{width:160px;height:160px}
 }
+
+
+/* SEAMLESS HANDOFF — motion face and full card overlap at the exact final
+   transform for 180ms; only opacity changes while SVG details fade in. */
+.envelope-intro.is-card-lifted .invitation-paper-proxy{
+  visibility:visible!important;
+  opacity:0;
+  transition:opacity .18s ease-out!important;
+  will-change:opacity;
+}
+.envelope-intro.is-card-lifted .invitation-card{
+  opacity:1;
+}
+.envelope-intro.is-card-settling .invitation-paper-proxy{
+  visibility:visible!important;
+  opacity:1;
+}
+.envelope-intro.is-card-settled .invitation-paper-proxy{
+  visibility:hidden!important;
+  opacity:0;
+  transition:none!important;
+  will-change:auto;
+}
+@media(prefers-reduced-motion:reduce){
+  .envelope-intro.is-card-lifted .invitation-paper-proxy{display:none!important}
+}

@@ -457,7 +457,15 @@
           // The fully typeset card has been painted stationary behind the
           // proxy. Swap layers only once the cheap paper sheet has settled.
           intro.querySelector(".invitation-card")?.removeAttribute("aria-hidden");
-          intro.classList.add("is-card-lifted", "is-opened");
+          intro.classList.add("is-card-lifted", "is-card-settling", "is-opened");
+          if (!reduced) {
+            window.setTimeout(() => {
+              intro.classList.remove("is-card-settling");
+              intro.classList.add("is-card-settled");
+            }, 180);
+          } else {
+            intro.classList.add("is-card-settled");
+          }
           if (reduced) startAutoClose();
           else requestAnimationFrame(startAutoClose);
           closeInvitation?.focus({preventScroll:true});

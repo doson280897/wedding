@@ -328,6 +328,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeVisible();
   await expect(page.locator(".invitation-card")).not.toHaveAttribute("aria-hidden", "true");
+  await expect(page.locator("#envelopeIntro")).toHaveClass(/is-card-settled/);
   await expect(page.locator(".invitation-paper-proxy")).toBeHidden();
   await expect(page.locator(".invitation-card")).toHaveCSS("animation-name","none");
   await expect(page.locator("#floatingPetals")).toBeVisible();
