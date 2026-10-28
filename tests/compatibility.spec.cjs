@@ -383,11 +383,16 @@ test("settings popover stays inside phone and tablet viewport when hub is dragge
 }) => {
   await page.goto(base + "/index.html", { waitUntil: "domcontentloaded" });
   await page.locator("#settingsHub").evaluate(node => {
+    // Real dragging marks the hub as user-moved; without this flag the
+    // pointerdown handler correctly snaps it back to its default corner.
+    node.dataset.userMoved = "true";
+    node.dataset.floatEdge = "left";
     node.style.top = Math.max(10, innerHeight - 64) + "px";
     node.style.left = Math.floor(innerWidth / 2) + "px";
     node.style.right = "auto";
   });
   await page.locator("#settingsTrigger").click();
+  await expect(page.locator("#settingsPanel")).toBeVisible();
   const rect = await page.locator("#settingsPanel").evaluate(node => {
     const r = node.getBoundingClientRect();
     return { left:r.left, right:r.right, top:r.top, bottom:r.bottom, viewportW:innerWidth, viewportH:innerHeight };
