@@ -2,7 +2,7 @@
   "use strict";
   const panel = document.getElementById("wqPanel");
   if (!panel) return;
-  const links = [...panel.querySelectorAll(".wq-link")];
+  const links = [...document.querySelectorAll("#wqPanel .wq-link, [data-guest-action]")];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const settingsTrigger = document.getElementById("settingsTrigger");
   const settingsFocusable = () => [settingsTrigger, ...document.querySelectorAll(

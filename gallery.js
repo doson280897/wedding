@@ -555,6 +555,12 @@
 
   function updateLightboxMeta() {
     if (!photos.length || !lightboxImage || !lightboxCounter) return;
+    const caption = document.getElementById("albumLightboxCaption");
+    const language = document.documentElement.lang === "en" ? "en" : "vi";
+    const custom = photos[lightboxIndex]?.caption;
+    const cycle = captions[language] || captions.vi || [];
+    if (caption) caption.textContent = (typeof custom === "string" ? custom : custom?.[language]) ||
+      (cycle.length ? cycle[lightboxIndex % cycle.length] : "");
     lightboxImage.alt = lightboxAlt(lightboxIndex);
     lightboxCounter.textContent =
       String(lightboxIndex + 1).padStart(2, "0") +
@@ -632,7 +638,7 @@
     });
 
     const incomingAnimation = incoming.animate([
-      { transform:"translate(-50%,-50%) translate3d(" + (direction * 6.2) + "vw,0,0) scale(.992)", opacity:.65 },
+      { transform:"translate(-50%,-50%) translate3d(" + (direction * 6.2) + "vw,0,0) scale(.992)", opacity:0 },
       { transform:"translate(-50%,-50%) translate3d(0,0,0) scale(1)", opacity:1 }
     ], {
       duration:360,

@@ -441,6 +441,8 @@
     }
     leftGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.hidden = true;
+    const skip = document.getElementById("gateSkip");
+    if (skip) skip.hidden = true;
     moonlightGate.classList.remove(
       "is-unlocking", "is-awakening", "is-opening", "is-opened", "is-handoff", "is-leaving"
     );
@@ -463,6 +465,7 @@
     heroPreparation = image.decode ? image.decode().catch(() => {}) : Promise.resolve();
   };
   let handoffStarted = false;
+  document.getElementById("gateSkip")?.addEventListener("click", completeMoonlightGate);
   const finishMoonlightGate = async () => {
     if (!moonlightGate || moonlightGate.hidden) return;
     if (handoffStarted) return;
@@ -991,7 +994,15 @@
     });
 
     const monogram = document.getElementById("heroMonogram");
-    if (monogram) monogram.innerHTML = escapeHtml(first.initial) + " <span>&amp;</span> " + escapeHtml(second.initial);
+    const crest = '<span class="crest-first">' + escapeHtml(first.initial) + '</span><span class="crest-join">&amp;</span><span class="crest-second">' + escapeHtml(second.initial) + '</span>';
+    if (monogram) {
+      monogram.classList.add("wedding-crest");
+      monogram.innerHTML = crest;
+      monogram.setAttribute("aria-label", first.short + " & " + second.short);
+    }
+    document.querySelectorAll("[data-wedding-crest]").forEach(node => { node.innerHTML = crest; });
+    const promise = document.getElementById("invitationPromise");
+    if (promise) promise.textContent = tr(selectedParty === "bride" ? "invitation.promiseBride" : selectedParty === "groom" ? "invitation.promiseGroom" : "invitation.promiseSingle");
     // The wax seal is a shared antique lock for both ceremonies. The couple's
     // initials remain in the hero and other personalized locations.
   }

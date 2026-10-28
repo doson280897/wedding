@@ -301,6 +301,7 @@
     </button>
   </div>
 </section>
+<button type="button" class="gate-skip" id="gateSkip" data-i18n="gate.skip">Vào xem thiệp</button>
 <header class="hero" id="home">
   <div class="hero-photo"></div><div class="hero-shade"></div>
   <div class="hero-arrival-light" aria-hidden="true"></div>
@@ -316,6 +317,7 @@
       <h1 id="heroNames" data-party-name-pair="hero"></h1>
       <div class="fine-flourish">✧</div>
       <p class="handwriting" data-i18n="hero.handwriting">Cùng nhau viết tiếp những ngày hạnh phúc...</p>
+      <p class="invitation-promise" id="invitationPromise"></p>
       <div class="hero-date"><span data-party-date="bride"></span><span class="party-date-separator">—</span><span data-party-date="groom"></span><span data-party-date="single"></span></div>
       <div class="hero-count-title" id="countdownTitle">ĐẾM NGƯỢC ĐẾN LỄ VU QUY</div>
       <div class="countdown" id="timer" aria-label="Đếm ngược đến lễ Vu Quy">
@@ -326,8 +328,10 @@
       </div>
     </div>
   </div>
+
   <a class="scroll-cue" href="#couple" data-i18n="hero.scroll">CUỘN ĐỂ KHÁM PHÁ ↓</a>
 </header>
+  <nav class="invitation-actions" aria-label="Thông tin thiệp" data-i18n-aria="invitation.details"><a href="#events" data-i18n="invitation.details">Thời gian &amp; địa điểm</a><a href="#locations" data-guest-action data-i18n="invitation.directions">Chỉ đường</a></nav>
 <main>
 <section class="couple-section" id="couple">
   <p class="overline gold center" data-i18n="couple.eyebrow">HAI TRÁI TIM · MỘT HÀNH TRÌNH</p>
@@ -350,6 +354,7 @@
       </div>
     </article>
   </div>
+  <div class="promise-story" aria-labelledby="promiseTitle"><div class="section-head"><p class="overline gold" data-i18n="story.eyebrow"></p><h2 class="section-title" id="promiseTitle" data-i18n-html="story.title"></h2></div><div class="promise-grid"><article class="promise-card reveal"><div class="promise-photo"><img data-info-src="parties.groom.images.portraitMain" alt="" loading="lazy" decoding="async"></div><div class="promise-copy"><span class="promise-number" aria-hidden="true">01</span><h3 data-i18n="story.1.title"></h3><p data-i18n="story.1.text"></p></div></article><article class="promise-card reveal"><div class="promise-photo"><img data-info-src="parties.bride.images.portraitMain" alt="" loading="lazy" decoding="async"></div><div class="promise-copy"><span class="promise-number" aria-hidden="true">02</span><h3 data-i18n="story.2.title"></h3><p data-i18n="story.2.text"></p></div></article><article class="promise-card reveal"><div class="promise-photo"><img data-info-src="parties.bride.images.portraitSecondary" alt="" loading="lazy" decoding="async"></div><div class="promise-copy"><span class="promise-number" aria-hidden="true">03</span><h3 data-i18n="story.3.title"></h3><p data-i18n="story.3.text"></p></div></article></div></div>
 </section>
 <section class="family-section" id="family">
   <div class="section-head"><p class="overline gold" data-i18n="family.eyebrow">CÙNG HAI GIA ĐÌNH</p><h2 class="section-title" data-i18n="family.title">Trân trọng báo tin vui</h2><p class="section-lead" data-i18n="family.lead">Sự hiện diện của bạn là niềm hạnh phúc của hai gia đình</p></div>
@@ -395,10 +400,11 @@
     <img id="albumLightboxImage" alt="" draggable="false" decoding="async">
   </div>
   <button type="button" class="album-lightbox-nav album-lightbox-next" id="albumLightboxNext" aria-label="Ảnh tiếp theo" data-i18n-aria="album.nextAria">›</button>
+  <p class="album-lightbox-caption" id="albumLightboxCaption" aria-label="Lời tựa của bức ảnh" data-i18n-aria="album.captionLabel"></p>
   <div class="album-lightbox-counter" id="albumLightboxCounter" aria-live="polite">01 / 01</div>
 </div>
 
-<section class="closing"><div class="closing-overlay"></div><div class="closing-content"><p class="overline gold" data-i18n="closing.eyebrow">CẢM ƠN BẠN ĐÃ ĐẾN</p><h2 data-i18n-html="closing.title">Hẹn gặp bạn<br>trong ngày hạnh phúc</h2><p class="closing-names" id="closingNames" data-party-name-pair="closing"></p></div></section>
+<section class="closing"><div class="closing-overlay"></div><div class="closing-content"><div class="wedding-crest closing-crest" data-wedding-crest aria-hidden="true"></div><p class="overline gold" data-i18n="closing.eyebrow">CẢM ƠN BẠN ĐÃ ĐẾN</p><h2 data-i18n-html="closing.title">Hẹn gặp bạn<br>trong ngày hạnh phúc</h2><p class="closing-note" data-i18n="closing.note"></p><p class="closing-names" id="closingNames" data-party-name-pair="closing"></p></div></section>
 </main>
 <footer><span id="footerNames" data-party-name-pair="footer"></span><span data-i18n="footer.love">GỬI TRỌN YÊU THƯƠNG ♡</span></footer>
 <script src="i18n.js?v=__BUILD_ID__" defer></script><script src="script.js?v=__BUILD_ID__" defer></script><script src="gallery.js?v=__BUILD_ID__" defer></script>
