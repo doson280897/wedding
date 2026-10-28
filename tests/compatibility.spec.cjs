@@ -245,6 +245,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   // The seal emits one burst; the exit flash bridges into the hero.
   // They must never replay on F5 in the same tab.
   await page.locator("#openInvitation").click();
+  await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
   await expect(page.locator("#envelopeBurst")).toBeVisible();
   await expect(page.locator("#envelopeBurst")).toHaveClass(/is-active/);
   const foil = await page.locator(".envelope-burst-particle").count();

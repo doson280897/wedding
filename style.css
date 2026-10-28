@@ -1325,3 +1325,37 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   .envelope-burst,.invitation-reveal{display:none!important}
   .envelope-burst *, .invitation-reveal{animation:none!important}
 }
+
+
+/* FEAT 01 — seal fracture: quick warm fissures precede the gold burst. */
+.envelope-seal{isolation:isolate}
+.seal-fracture{
+  position:absolute;inset:8px;z-index:3;border-radius:50%;pointer-events:none;
+  background:
+    linear-gradient(115deg,transparent 43%,rgba(255,252,224,.96) 44% 47%,transparent 48%) 40% 0/45% 55% no-repeat,
+    linear-gradient(55deg,transparent 43%,rgba(255,243,188,.96) 44% 47%,transparent 48%) 63% 55%/43% 50% no-repeat,
+    linear-gradient(137deg,transparent 42%,rgba(107,76,39,.78) 44% 48%,transparent 49%) 15% 67%/65% 34% no-repeat;
+  filter:drop-shadow(0 0 4px rgba(255,244,184,.72));
+  opacity:0;transform:scale(.5);
+}
+.envelope-intro.is-seal-cracking:not(.is-flap-open) .envelope-seal{
+  animation:luxSealFracture 260ms cubic-bezier(.25,.65,.35,1) both;
+}
+.envelope-intro.is-seal-cracking:not(.is-flap-open) .seal-fracture{
+  animation:luxFractureGlow 260ms ease-out both;
+}
+@keyframes luxSealFracture{
+  0%,100%{filter:brightness(1);transform:translate3d(-50%,-50%,0)}
+  38%{filter:brightness(1.55);transform:translate3d(calc(-50% - 1px),-50%,0) scale(1.04)}
+  70%{filter:brightness(1.3);transform:translate3d(calc(-50% + 1px),-50%,0) scale(.99)}
+}
+@keyframes luxFractureGlow{
+  0%{opacity:0;transform:scale(.5)}
+  35%{opacity:.95;transform:scale(.92)}
+  70%{opacity:1;transform:scale(1.07)}
+  100%{opacity:0;transform:scale(1.22)}
+}
+@media(prefers-reduced-motion:reduce){
+  .envelope-intro.is-seal-cracking .envelope-seal,
+  .envelope-intro.is-seal-cracking .seal-fracture{animation:none!important}
+}

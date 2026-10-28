@@ -405,16 +405,24 @@
     const openEnvelope = () => {
       if (opened || leaving) return;
       opened = true;
-      burstFromSeal();
+      openInvitation?.setAttribute("disabled", "");
+      skipInvitation?.setAttribute("disabled", "");
 
-      // Open flap and lift the card in the same frame: no staged delays or auto-close timer.
-      requestAnimationFrame(() => {
+      const releaseEnvelope = () => {
+        if (leaving) return;
+        burstFromSeal();
         intro.classList.add("is-flap-open", "is-card-lifted", "is-opened");
-        openInvitation?.setAttribute("disabled", "");
-        skipInvitation?.setAttribute("disabled", "");
         startAutoClose();
         closeInvitation?.focus({preventScroll:true});
-      });
+      };
+      if (prefersReducedMotion()) {
+        releaseEnvelope();
+      } else {
+        // A brief fracture makes the existing champagne burst feel earned.
+        // Never postpone the user's first visual response.
+        intro.classList.add("is-seal-cracking");
+        window.setTimeout(releaseEnvelope, 260);
+      }
     };
 
     openInvitation?.addEventListener("click", openEnvelope);
