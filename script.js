@@ -921,8 +921,8 @@
 
     const monogram = document.getElementById("heroMonogram");
     if (monogram) monogram.innerHTML = escapeHtml(first.initial) + " <span>&amp;</span> " + escapeHtml(second.initial);
-    const wax = document.getElementById("waxMonogram");
-    if (wax) wax.textContent = first.initial + " · " + second.initial;
+    // The wax seal is a shared antique lock for both ceremonies. The couple's
+    // initials remain in the hero and other personalized locations.
   }
 
   function refreshPartyLabels() {

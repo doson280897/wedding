@@ -1163,11 +1163,28 @@ html[data-theme="light"] .moonlight-gate__magic{filter:brightness(.76) sepia(.16
   font:12px Georgia,serif;letter-spacing:.55em;color:#c8a365;
 }
 .moonlight-gate__seam{
-  position:absolute;z-index:5;top:5%;bottom:4%;left:50%;width:2px;
+  position:absolute;z-index:5;top:5%;bottom:4%;left:50%;width:4px;
   opacity:0;transform:translateX(-50%) scaleY(.08);transform-origin:50% 56%;
-  pointer-events:none;background:linear-gradient(transparent,#fff0c9 50%,transparent);
-  box-shadow:0 0 16px #ebca95a1;
-  transition:opacity .28s ease,transform .5s cubic-bezier(.18,.72,.18,1);
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent 0%,#ffebbf 24%,#fff9df 53%,#e9b877 80%,transparent 100%);
+  box-shadow:0 0 17px 3px #ffe0a4c4,0 0 46px 9px #ebb56a76;
+  transition:opacity .36s ease,transform .58s cubic-bezier(.18,.72,.18,1);
+}
+.moonlight-gate__seam::before,
+.moonlight-gate__seam::after{
+  content:"";position:absolute;pointer-events:none;
+  left:50%;top:50%;transform:translate(-50%,-50%);
+}
+.moonlight-gate__seam::before{
+  width:clamp(55px,10vw,180px);height:88%;
+  border-radius:50%;
+  background:radial-gradient(ellipse,#fff1ca9e 0%,#f5c78458 28%,transparent 74%);
+  filter:blur(17px);
+}
+.moonlight-gate__seam::after{
+  width:clamp(115px,19vw,320px);height:56%;
+  background:radial-gradient(ellipse,#ffeac462,transparent 72%);
+  filter:blur(24px);
 }
 .moonlight-gate__top-caption,.moonlight-gate__bottom-caption{
   position:absolute;z-index:5;left:0;width:100%;text-align:center;
@@ -1193,8 +1210,17 @@ html[data-theme="light"] .moonlight-gate__magic{filter:brightness(.76) sepia(.16
 }
 #waxOpenButton:focus-visible{outline:3px solid #f1d9a4;outline-offset:11px}
 .wax-monogram{
-  position:relative;font:600 clamp(13px,1.25vw,18px)/1 Montserrat,sans-serif;
-  letter-spacing:.04em;white-space:nowrap;
+  position:relative;display:grid;place-items:center;
+  width:52%;height:64%;
+  color:#fbe2af;filter:drop-shadow(0 1px 4px #4c2324a6);
+}
+.wax-lock{display:block;width:100%;height:100%;overflow:visible}
+.wax-lock__shackle{
+  transform-origin:12px 24px;
+  transition:transform .48s cubic-bezier(.2,.7,.22,1);
+}
+.moonlight-gate.is-awakening .wax-lock__shackle{
+  transform:translateY(-5px) rotate(-18deg);
 }
 .moonlight-gate.is-awakening .moonlight-gate__seam{
   opacity:1;transform:translateX(-50%) scaleY(1);
@@ -1202,7 +1228,16 @@ html[data-theme="light"] .moonlight-gate__magic{filter:brightness(.76) sepia(.16
 .moonlight-gate.is-opening .moonlight-gate__door--left{transform:rotateY(-82deg)}
 .moonlight-gate.is-opening .moonlight-gate__door--right{transform:rotateY(82deg)}
 .moonlight-gate.is-opening #waxOpenButton{opacity:0;transform:translate(-50%,-50%) scale(.7)}
-.moonlight-gate.is-opening .moonlight-gate__seam{opacity:0}
+.moonlight-gate.is-opening .moonlight-gate__seam{
+  animation:gateSeamRelease 2.55s ease-out both;
+}
+@keyframes gateSeamRelease{
+  0%{opacity:.96;transform:translateX(-50%) scaleY(1)}
+  18%{opacity:1;transform:translateX(-50%) scaleY(1.08)}
+  52%{opacity:.92;transform:translateX(-50%) scaleY(1.1)}
+  77%{opacity:.58;transform:translateX(-50%) scaleY(1.08)}
+  100%{opacity:0;transform:translateX(-50%) scaleY(1.02)}
+}
 .moonlight-gate.is-opening .moonlight-gate__top-caption,
 .moonlight-gate.is-opening .moonlight-gate__bottom-caption{opacity:0}
 /* Names rise into view while the door gap widens, without an empty dead beat. */
