@@ -421,6 +421,9 @@
     });
     control.addEventListener("focusin", wake);
     control.addEventListener("focusout", () => scheduleIdle());
+    if (control.classList.contains("settings-hub")) {
+      document.addEventListener("wedding:settingsclosed", () => scheduleIdle(1250));
+    }
 
     scheduleIdle(1500);
   };
