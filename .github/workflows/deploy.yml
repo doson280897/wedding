@@ -120,7 +120,7 @@ jobs:
           date_label = (date_dots("single") if selected == "single"
                         else date_dots("bride") + "  —  " + date_dots("groom"))
           draw.text((left, 390), date_label, font=fitted_font("sans", date_label, 25), fill=muted)
-          draw.text((left, 442), wedding["text"]["vi"]["envelope.invite"], font=small, fill=cream)
+          draw.text((left, 442), wedding["text"]["vi"]["guest.recipientLabel"], font=small, fill=cream)
 
           image.convert("RGB").save("og-preview.jpg", "JPEG", quality=88, optimize=True, progressive=True)
           print("Created og-preview.jpg", Path("og-preview.jpg").stat().st_size, "bytes")
