@@ -1925,3 +1925,25 @@ html[data-theme="light"] .envelope-front{
 .envelope-intro.is-card-settled .invitation-paper-proxy{
   visibility:hidden!important;opacity:0!important;transition:none!important;
 }
+
+
+/* OPENING COMPOSITION — drop the physical envelope slightly once unsealed.
+   This creates headroom for both upper invitation corners without moving
+   floating controls or the fixed countdown badge. */
+.envelope-stage{
+  --open-stage-shift:clamp(22px,3.6vh,32px);
+  transform:translate3d(0,0,0);
+  transition:transform .62s cubic-bezier(.24,.72,.2,1);
+}
+.envelope-intro.is-flap-open .envelope-stage{
+  transform:translate3d(0,var(--open-stage-shift),0);
+}
+@media(max-width:650px){
+  .envelope-stage{--open-stage-shift:clamp(26px,4.2svh,36px)}
+}
+@media(max-height:620px){
+  .envelope-stage{--open-stage-shift:20px}
+}
+@media(prefers-reduced-motion:reduce){
+  .envelope-stage{transition:none!important}
+}

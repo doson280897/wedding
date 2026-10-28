@@ -294,11 +294,16 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
 
   // The seal emits one burst; the exit flash bridges into the hero.
   // They must never replay on F5 in the same tab.
+  const closedStageTop = (await page.locator(".envelope-stage").boundingBox()).y;
   await page.locator("#envelopeSealButton").click();
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
   await expect(page.locator(".envelope-seal-light")).toBeVisible();
   await expect(page.locator(".envelope-seal-light")).toHaveCSS("animation-name", "sealLocalizedBurst");
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-flap-open/);
+  await expect.poll(async () => {
+    const box = await page.locator(".envelope-stage").boundingBox();
+    return box.y - closedStageTop;
+  }).toBeGreaterThanOrEqual(18);
   await expect(page.locator("#envelopeBurst")).toHaveCount(0);
   await expect(page.locator("#floatingPetals")).toBeHidden();
   // The flap stays present while it folds ABOVE the sealed pocket. No
