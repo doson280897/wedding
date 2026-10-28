@@ -1019,7 +1019,8 @@
   if (hero && heroPhoto && "IntersectionObserver" in window) {
     let heroInViewport = false;
     const updateHeroMotion = () => {
-      const visible = heroInViewport && !document.documentElement.classList.contains("wax-pending");
+      const visible = heroInViewport && !document.hidden &&
+        !document.documentElement.classList.contains("wax-pending");
       heroPhoto.style.animationPlayState = visible ? "running" : "paused";
       heroPhoto.style.willChange = visible ? "transform" : "auto";
     };
@@ -1029,6 +1030,7 @@
     }, {threshold:0});
     heroAnimationObserver.observe(hero);
     document.addEventListener("wedding:waxopen", updateHeroMotion);
+    document.addEventListener("visibilitychange", updateHeroMotion);
     updateHeroMotion();
   }
 

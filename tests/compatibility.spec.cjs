@@ -394,7 +394,7 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   expect(hingeState.leftOrigin).toBeCloseTo(0, 0);
   expect(hingeState.rightOrigin).toBeGreaterThan(100);
   const hingeDuration = await page.locator(".moonlight-gate__door--left").evaluate(node =>
-    parseFloat(getComputedStyle(node).transitionDuration) * 1000
+    parseFloat(getComputedStyle(node).animationDuration) * 1000
   );
   expect(hingeDuration).toBeGreaterThanOrEqual(1400);
   await expect(gate).toHaveClass(/is-opened/, { timeout:6000 });
@@ -585,7 +585,7 @@ test("music orb drags while playing, snaps to edges and keeps player running @sm
   const orb = page.locator("#musicBubble");
   await expect(orb).toBeVisible();
   await expect(orb).toHaveAttribute("data-music-state","playing");
-  await page.locator("#settingsClose").click();
+  await expect(page.locator("#settingsPanel")).toBeHidden();
 
   const dragTo = async (toLeft,id) => page.evaluate(({toLeft,id}) => {
     const node=document.getElementById("musicBubble");

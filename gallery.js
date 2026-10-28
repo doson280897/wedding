@@ -32,7 +32,7 @@
   let cachedMetrics = null;
   let loadedImageCount = 0;
 
-  // Camera state. Images never change src while browsing; only transforms move.
+  // Camera state; nearby images stay warm while transforms move.
   let position = 0;
   let targetPosition = 0;
   let sceneFrame = 0;
@@ -154,6 +154,8 @@
       card,
       img,
       photoIndex,
+      floatY:Math.sin((photoIndex + 1) * 1.73),
+      floatTilt:Math.sin((photoIndex + 1) * 2.31) * 5.2,
       ratio:photo.ratio || .78,
       isMain:false,
       hidden:true,
@@ -290,9 +292,8 @@
 
       // Stable per-photo offsets. They never jump when the camera crosses
       // half/integer boundaries; only the continuous relative value changes.
-      const seed = item.photoIndex + 1;
-      const floatY = Math.sin(seed * 1.73) * (metrics.compact ? 62 : 104);
-      const floatTilt = Math.sin(seed * 2.31) * 5.2;
+      const floatY = item.floatY * (metrics.compact ? 62 : 104);
+      const floatTilt = item.floatTilt;
       const floatMix = Math.min(1, abs * .90);
 
       // Continuous spatial curve: neighbors stay closer to each other and
@@ -376,7 +377,8 @@
 
     renderScene();
 
-    if (drag || Math.abs(targetPosition - position) > .0015) {
+    // Pointer events request frames while dragging; a stationary finger needs none.
+    if (!drag && Math.abs(targetPosition - position) > .0015) {
       requestSceneFrame();
     }
   }
@@ -412,6 +414,9 @@
       lastTime:performance.now(),
       velocityX:0,
       startPosition:position,
+      step:sceneMetrics().width < 700
+        ? Math.max(145, sceneMetrics().width * .43)
+        : Math.max(220, sceneMetrics().width * .22),
       moved:false,
       cancelled:false
     };
@@ -445,11 +450,7 @@
     drag.lastX = event.clientX;
     drag.lastTime = now;
 
-    const step = viewport.clientWidth < 700
-      ? Math.max(145, viewport.clientWidth * .43)
-      : Math.max(220, viewport.clientWidth * .22);
-
-    position = drag.startPosition - dx / step;
+    position = drag.startPosition - dx / drag.step;
     targetPosition = position;
     requestSceneFrame();
   }, { passive:false });
@@ -848,8 +849,7 @@
       // Album data lives only in images/manifest.json.
       const manifestUrl = new URL("images/manifest.json", document.baseURI);
       manifestUrl.searchParams.set("v", buildId);
-      manifestUrl.searchParams.set("t", String(Date.now()));
-      const response = await fetch(manifestUrl, { cache:"no-store" });
+      const response = await fetch(manifestUrl, { cache:"no-cache" });
       if (!response.ok) throw new Error("Album manifest HTTP " + response.status);
       const manifest = await response.json();
       if (!manifest || !Array.isArray(manifest.photos))
