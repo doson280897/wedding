@@ -373,7 +373,17 @@ window.WEDDING_INFO = {
       "link.invalid": "Vui lòng nhập tên khách và chọn tiệc.",
       "link.copied": "Đã sao chép link!",
       "link.copyFail": "Không thể sao chép tự động. Hãy chọn và sao chép link phía trên.",
-      "link.shareFail": "Không thể chia sẻ. Hãy dùng nút Sao chép link."
+      "link.shareFail": "Không thể chia sẻ. Hãy dùng nút Sao chép link.",
+      "guest.recipientLabel": "Kính mời",
+      "settings.title": "TÙY CHỈNH THIỆP",
+      "settings.open": "Mở tùy chỉnh ngôn ngữ, giao diện và nhạc",
+      "settings.close": "Đóng tùy chỉnh",
+      "settings.short": "TÙY CHỈNH",
+      "settings.language": "Ngôn ngữ",
+      "settings.theme": "Giao diện",
+      "settings.dark": "☾ Tối",
+      "settings.light": "☀ Sáng",
+      "settings.music": "Âm nhạc"
     },
     "en": {
       "page.title": "{{site.titlePrefix}} | {{couple.bride.short}} · {{couple.groom.short}}",
@@ -562,7 +572,17 @@ window.WEDDING_INFO = {
       "link.invalid": "Please enter a guest name and select a celebration.",
       "link.copied": "Link copied!",
       "link.copyFail": "Automatic copying failed. Please select and copy the link above.",
-      "link.shareFail": "Sharing failed. Please use Copy link."
+      "link.shareFail": "Sharing failed. Please use Copy link.",
+      "guest.recipientLabel": "Cordially inviting",
+      "settings.title": "INVITATION SETTINGS",
+      "settings.open": "Customize language, appearance and music",
+      "settings.close": "Close settings",
+      "settings.short": "SETTINGS",
+      "settings.language": "Language",
+      "settings.theme": "Appearance",
+      "settings.dark": "☾ Dark",
+      "settings.light": "☀ Light",
+      "settings.music": "Music"
     }
   }
 };
