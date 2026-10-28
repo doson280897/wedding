@@ -1,5 +1,4 @@
-/* Unified wedding controls: a single draggable palette for language, theme & music.
-   Navigation remains a separate deliberate shortcut at the bottom. */
+/* One draggable hub: Settings outside, Menu then Settings tabs inside. */
 .language-switch.settings-hub,
 .language-switch.settings-hub.floating-control,
 .language-switch.settings-hub.floating-control.is-idle {
@@ -663,3 +662,23 @@ html.wax-pending:not(.party-pending):not(.link-tool-active)
   opacity:0!important;
   pointer-events:none!important;
 }
+
+/* Shared menu and settings panel */
+.settings-hub .settings-panel{width:min(385px,calc(100vw - 20px))}
+.settings-hub .control-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:0 0 12px;border:1px solid rgba(199,167,114,.3);border-radius:12px;background:rgba(0,0,0,.18)}
+.settings-hub .control-tabs[hidden],.settings-hub [role="tabpanel"][hidden]{display:none!important}
+.settings-hub .control-tab{border:0;border-radius:9px;min-height:39px;padding:8px 6px;color:#c8b998;background:transparent;cursor:pointer;font:600 10px Montserrat,system-ui,sans-serif;letter-spacing:.08em}
+.settings-hub .control-tab[aria-selected="true"]{background:#c9a86e;color:#182019}
+.settings-hub .control-tab:focus-visible{outline:2px solid #e9c68f;outline-offset:2px}
+.settings-hub .wq-panel,.settings-hub .wq-panel.is-open{position:static;display:block;width:100%;max-height:none;overflow:visible;padding:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:inherit;opacity:1;visibility:visible;transform:none;transition:none}
+.settings-hub .wq-heading{font-size:clamp(27px,5vw,34px);margin:12px 0 2px}
+.settings-hub .wq-description{margin-bottom:14px}
+.settings-hub .wq-link{padding:12px 2px;font-size:12px;gap:10px}
+.settings-hub .wq-footnote{margin-top:16px}
+html[data-theme="light"] .settings-hub .control-tabs{background:#eee5d6;border-color:#baa37c}
+html[data-theme="light"] .settings-hub .control-tab{color:#465c49}
+html[data-theme="light"] .settings-hub .control-tab[aria-selected="true"]{background:#435e4a;color:#fff8ec}
+html[data-theme="light"] .settings-hub .wq-panel{background:transparent;color:#395341;box-shadow:none}
+html[data-theme="light"] .settings-hub .wq-link{color:#395341}
+html[data-theme="light"] .settings-hub .wq-description{color:#67776b}
+@media(max-width:650px){.settings-hub .settings-panel{padding:16px}}

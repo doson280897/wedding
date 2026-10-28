@@ -1,19 +1,13 @@
 (() => {
   "use strict";
-  const toggle = document.getElementById("wqToggle");
   const panel = document.getElementById("wqPanel");
-  const backdrop = document.getElementById("wqBackdrop");
-  const closeBtn = document.getElementById("wqClose");
-  if (!toggle || !panel || !backdrop || !closeBtn) return;
+  if (!panel) return;
   const links = [...panel.querySelectorAll(".wq-link")];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const tr = key => window.WeddingI18n ? window.WeddingI18n.t(key) : key;
-  const settingsFocusable = () => {
-    const trigger = document.getElementById("settingsTrigger");
-    const options = document.getElementById("settingsPanel");
-    return [trigger, ...(!options?.hidden ? options.querySelectorAll("button") : [])];
-  };
-
+  const settingsTrigger = document.getElementById("settingsTrigger");
+  const settingsFocusable = () => [settingsTrigger, ...document.querySelectorAll(
+    '.settings-hub .settings-panel:not([hidden]) button:not([hidden])'
+  )];
   const mapModal = document.getElementById("wmModal");
   const mapBackdrop = document.getElementById("wmBackdrop");
   const mapClose = document.getElementById("wmClose");
@@ -88,7 +82,7 @@
   const setGiftOpen = value => {
     if (!giftModal || !giftBackdrop || !giftClose) return;
     if (value) {
-      giftPreviousFocus = panel.contains(document.activeElement) ? toggle : document.activeElement;
+      giftPreviousFocus = panel.contains(document.activeElement) ? settingsTrigger : document.activeElement;
       // Loading only the active celebration's QR avoids hidden bank-image traffic.
       giftModal.querySelectorAll(".gift-card[data-party-scope] .gift-qr[data-src]").forEach(image => {
         if (image.closest("[data-party-scope]")?.dataset.partyScope !==
@@ -109,61 +103,30 @@
       giftModal.setAttribute("aria-hidden", "true");
       document.body.classList.remove("wg-open");
       if (giftPreviousFocus && document.contains(giftPreviousFocus)) giftPreviousFocus.focus({preventScroll:true});
-      else toggle.focus({preventScroll:true});
+      else settingsTrigger?.focus({preventScroll:true});
     }
   };
   giftClose?.addEventListener("click", () => setGiftOpen(false));
   giftBackdrop?.addEventListener("click", () => setGiftOpen(false));
 
-  let open = false;
-  const setOpen = (value, restoreFocus = true) => {
-    if (open === value) return;
-    open = value;
-    panel.classList.toggle("is-open", value);
-    backdrop.hidden = !value;
-    panel.setAttribute("aria-hidden", String(!value));
-    panel.inert = !value;
-    toggle.setAttribute("aria-expanded", String(value));
-    toggle.setAttribute("aria-label", tr(value ? "menu.closeAria" : "menu.openAria"));
-    document.body.classList.toggle("wq-menu-open", value);
-    if (value) closeBtn.focus({preventScroll:true});
-    else if (restoreFocus) toggle.focus({preventScroll:true});
-  };
-  toggle.addEventListener("click", () => setOpen(!open));
-  closeBtn.addEventListener("click", () => setOpen(false));
-  backdrop.addEventListener("click", () => setOpen(false));
+  // The unified hub owns opening, closing, and tab state.
   document.addEventListener("keydown", event => {
     if (giftOpen) {
       if (event.key === "Escape") {event.preventDefault();setGiftOpen(false);return;}
-      if (event.key === "Tab") {
-        trapFocus(event, [giftClose, ...giftModal.querySelectorAll('a[href]'), ...settingsFocusable()]);
-      }
+      if (event.key === "Tab") trapFocus(event, [giftClose, ...giftModal.querySelectorAll('a[href]'), ...settingsFocusable()]);
       return;
     }
     if (mapOpen) {
       if (event.key === "Escape") {event.preventDefault();setMapOpen(false);return;}
-      if (event.key === "Tab") {
-        trapFocus(event, [mapClose, ...mapModal.querySelectorAll('a[href]'), ...settingsFocusable()]);
-      }
-      return;
+      if (event.key === "Tab") trapFocus(event, [mapClose, ...mapModal.querySelectorAll('a[href]'), ...settingsFocusable()]);
     }
-    if (!open) return;
-    if (event.key === "Escape") {event.preventDefault();setOpen(false);return;}
-    if (event.key !== "Tab") return;
-    trapFocus(event, [closeBtn, ...links, ...settingsFocusable()]);
   });
-  const refreshLanguage = () => {
-    toggle.setAttribute("aria-label", tr(open ? "menu.closeAria" : "menu.openAria"));
-  };
-  document.addEventListener("wedding:languagechange", refreshLanguage);
-  refreshLanguage();
-
   links.forEach(link => link.addEventListener("click", event => {
     const id = link.getAttribute("href")?.slice(1);
     const target = id && document.getElementById(id);
     if (!target) return;
     event.preventDefault();
-    setOpen(false,false);
+    window.WeddingControlHub?.close(false);
     if (id === "locations") {
       const activeParty = document.documentElement.dataset.party;
       setMapOpen(true, ["bride", "groom", "single"].includes(activeParty) ? "map-" + activeParty : null);
@@ -175,14 +138,8 @@
     links.forEach(item => item.setAttribute("aria-current", String(item===link)));
   }));
 
-  // Draggable floating controls: hover on desktop, two-tap activation on touch.
-  // Music now lives inside the unified settings palette, not as a separate
-  // draggable button scattered across the invitation.
-  const floatingControls = [
-    document.querySelector(".language-switch"),
-    toggle
-  ].filter(Boolean);
-
+  // One draggable control on all screens, with the existing edge-snap physics.
+  const floatingControls = [document.getElementById("settingsHub")].filter(Boolean);
   const FLOAT_EDGE = 8;
   const FLOAT_IDLE_DELAY = 2600;
   const coarsePointer = window.matchMedia("(hover: none), (pointer: coarse)");
@@ -210,14 +167,8 @@
   // Every F5/navigation resets to top-right (settings) and bottom-right
   // (menu), so no previous tab's position can be restored.
   const defaultPosition = control => {
-    const rect = control.getBoundingClientRect();
-    const margin = FLOAT_EDGE + (control === toggle ? safeArea.bottom : safeArea.top);
-    const top = control === toggle
-      ? Math.max(FLOAT_EDGE, innerHeight - rect.height - margin)
-      : margin;
-    setEdgeAnchor(control, "right", top);
+    setEdgeAnchor(control, "right", FLOAT_EDGE + safeArea.top);
   };
-
   const clampTop = (control, top) => {
     const rect = control.getBoundingClientRect();
     return Math.max(FLOAT_EDGE, Math.min(Math.max(FLOAT_EDGE, innerHeight - rect.height - FLOAT_EDGE), top));

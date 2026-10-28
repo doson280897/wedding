@@ -5,7 +5,18 @@
   const trigger = document.getElementById("settingsTrigger");
   const panel = document.getElementById("settingsPanel");
   const closeButton = document.getElementById("settingsClose");
-  if (!hub || !trigger || !panel || !closeButton) return;
+  const menuTab = document.getElementById("controlTabMenu");
+  const settingsTab = document.getElementById("controlTabSettings");
+  const tabs = document.getElementById("controlTabs");
+  const menuContent = document.getElementById("wqPanel");
+  const settingsContent = document.getElementById("settingsTabContent");
+  const panelTitle = document.getElementById("controlPanelTitle");
+  if (!hub || !trigger || !panel || !closeButton || !menuTab || !settingsTab ||
+      !tabs || !menuContent || !settingsContent) return;
+  const tr = key => window.WeddingI18n?.t(key) || key;
+  const hasMenu = () => Boolean(document.documentElement.dataset.party) &&
+    !document.documentElement.classList.contains("party-pending") &&
+    !document.documentElement.classList.contains("link-tool-active");
 
   const themeButtons = [...panel.querySelectorAll("[data-theme-option]")];
 
@@ -52,14 +63,33 @@
     panel.style.bottom = "auto";
   };
 
+  const setTab = name => {
+    const showMenu = name === "menu" && hasMenu();
+    tabs.hidden = !hasMenu();
+    menuTab.hidden = !hasMenu();
+    settingsContent.hidden = showMenu;
+    menuContent.hidden = !showMenu;
+    menuContent.inert = !showMenu;
+    menuContent.setAttribute("aria-hidden", String(!showMenu));
+    menuTab.setAttribute("aria-selected", String(showMenu));
+    menuTab.tabIndex = showMenu ? 0 : -1;
+    settingsTab.setAttribute("aria-selected", String(!showMenu));
+    settingsTab.tabIndex = showMenu ? -1 : 0;
+    if (panelTitle) panelTitle.textContent = tr(showMenu ? "menu.toggle" : "settings.title");
+    if (!panel.hidden) {panel.scrollTop = 0;positionPanel();}
+  };
   const setOpen = (open, restoreFocus = false) => {
-    panel.hidden = !open;
-    hub.classList.toggle("is-open", open);
-    trigger.setAttribute("aria-expanded", String(open));
     if (open) {
+      setTab(hasMenu() ? "menu" : "settings");
+      panel.hidden = false;
+      hub.classList.add("is-open");
+      trigger.setAttribute("aria-expanded", "true");
       hub.classList.remove("is-idle");
       positionPanel();
     } else {
+      panel.hidden = true;
+      hub.classList.remove("is-open");
+      trigger.setAttribute("aria-expanded", "false");
       panel.style.left = "";
       panel.style.top = "";
       panel.style.right = "";
@@ -68,10 +98,25 @@
       if (restoreFocus) trigger.focus({ preventScroll: true });
     }
   };
-
   trigger.addEventListener("click", () => setOpen(panel.hidden));
   closeButton.addEventListener("click", () => setOpen(false, true));
-
+  menuTab.addEventListener("click", () => setTab("menu"));
+  settingsTab.addEventListener("click", () => setTab("settings"));
+  for (const [tab,peer,next] of [[menuTab,settingsTab,"settings"],[settingsTab,menuTab,"menu"]]) {
+    tab.addEventListener("keydown", event => {
+      if (!hasMenu() || !["ArrowLeft","ArrowRight"].includes(event.key)) return;
+      event.preventDefault();setTab(next);peer.focus({preventScroll:true});
+    });
+  }
+  window.WeddingControlHub = {
+    close: restoreFocus => setOpen(false, restoreFocus !== false),
+    showMenu: () => {if (panel.hidden) setOpen(true);setTab("menu");},
+    showSettings: () => {if (panel.hidden) setOpen(true);setTab("settings");}
+  };
+  document.addEventListener("wedding:languagechange", () => {
+    if (!panel.hidden && panelTitle) panelTitle.textContent =
+      tr(menuContent.hidden ? "settings.title" : "menu.toggle");
+  });
   themeButtons.forEach(button => button.addEventListener("click", () => {
     setTheme(button.dataset.themeOption);
   }));
@@ -90,8 +135,6 @@
     }
   }, true);
 
-  const navToggle = document.getElementById("wqToggle");
-  navToggle?.addEventListener("click", () => setOpen(false));
   document.querySelector(".party-admin-link")?.addEventListener("click", () => setOpen(false));
   window.addEventListener("popstate", () => setOpen(false));
   // A dragging/scrolling settings palette can emit many events per frame.

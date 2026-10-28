@@ -355,6 +355,9 @@
   let youtubePlayerPromise = null;
   let musicPlaying = false;
   let musicEnabled = false;
+  let musicHasStarted = false;
+  let musicPausePosition = 0;
+  let musicResumePending = false;
   let musicStarting = false;
   let bubbleActionsOpen = false;
   let musicWantsPlayback = false;
@@ -378,6 +381,18 @@
     musicPlaying = true;
     musicStarting = false;
     musicPlaybackFailed = false;
+    musicHasStarted = true;
+    if (musicResumePending && musicPausePosition > 1) {
+      musicResumePending = false;
+      try {
+        const now = youtubePlayer?.getCurrentTime?.();
+        if (Number.isFinite(now) && now < musicPausePosition - 2) {
+          youtubePlayer?.seekTo?.(musicPausePosition, true);
+        }
+      } catch (_) {}
+    } else {
+      musicResumePending = false;
+    }
     setMusicUI();
   };
 
@@ -395,7 +410,7 @@
   };
 
   const setBubbleActionsOpen = open => {
-    bubbleActionsOpen = Boolean(open && musicEnabled && musicBubble && !musicBubble.hidden);
+    bubbleActionsOpen = Boolean(open && musicHasStarted && musicBubble && !musicBubble.hidden);
     if (musicBubbleActions) musicBubbleActions.hidden = !bubbleActionsOpen;
     if (musicBubbleTrigger) musicBubbleTrigger.setAttribute("aria-expanded", String(bubbleActionsOpen));
     musicBubble?.classList.toggle("is-expanded", bubbleActionsOpen);
@@ -418,7 +433,7 @@
       );
     }
     if (musicBubble) {
-      musicBubble.hidden = !musicEnabled;
+      musicBubble.hidden = !musicHasStarted;
       musicBubble.dataset.musicState = state;
     }
     if (!musicEnabled) setBubbleActionsOpen(false);
@@ -448,6 +463,9 @@
     musicEnabled = false;
     musicPlaying = false;
     musicStarting = false;
+    musicHasStarted = false;
+    musicPausePosition = 0;
+    musicResumePending = false;
     setBubbleActionsOpen(false);
     setMusicUI();
     try {
@@ -466,6 +484,7 @@
     musicWantsPlayback = true;
     musicPlaybackFailed = false;
     musicStarting = true;
+    musicResumePending = musicHasStarted && musicPausePosition > 1;
     setMusicUI();
 
     musicStartTimer = setTimeout(() => {
@@ -490,8 +509,17 @@
 
     const play = player => {
       if (!musicEnabled || !musicWantsPlayback || requestId !== musicRequestId) return;
-      try { player.playVideo(); } // Synchronous when already ready for iOS gestures.
-      catch (_) { failMusicAttempt(requestId); }
+      try {
+        if (musicResumePending && musicPausePosition > 1 &&
+            typeof player.getCurrentTime === "function" &&
+            typeof player.seekTo === "function") {
+          const current = player.getCurrentTime();
+          if (Number.isFinite(current) && current < musicPausePosition - 2) {
+            player.seekTo(musicPausePosition, true);
+          }
+        }
+        player.playVideo(); // Keep the same iframe and playback position.
+      } catch (_) { failMusicAttempt(requestId); }
     };
     if (youtubePlayerReady && youtubePlayer) {
       play(youtubePlayer);
@@ -508,6 +536,11 @@
     musicPlaying = false;
     musicStarting = false;
     musicPlaybackFailed = false;
+    try {
+      const current = youtubePlayerReady ? youtubePlayer?.getCurrentTime?.() : undefined;
+      if (Number.isFinite(current) && current > 0) musicPausePosition = current;
+    } catch (_) {}
+    musicResumePending = false;
     setMusicUI();
     try {
       if (youtubePlayerReady && youtubePlayer) youtubePlayer.pauseVideo();
@@ -634,7 +667,11 @@
           },
           onStateChange: event => {
             if (!musicEnabled) return;
-            if (event.data === window.YT.PlayerState.PLAYING) {
+            if (event.data === window.YT.PlayerState.BUFFERING && musicWantsPlayback) {
+              musicPlaying = false;
+              musicStarting = true;
+              setMusicUI();
+            } else if (event.data === window.YT.PlayerState.PLAYING) {
               if (!musicWantsPlayback) {
                 // A delayed start must not restart after Pause/Stop/timeout.
                 try { event.target.pauseVideo(); } catch (_) {}
