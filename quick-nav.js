@@ -78,7 +78,7 @@
   };
   mapClose?.addEventListener("click", () => setMapOpen(false));
   mapBackdrop?.addEventListener("click", () => setMapOpen(false));
-  document.querySelectorAll('a[href="#map-bride"],a[href="#map-groom"]').forEach(link => {
+  document.querySelectorAll('a[href="#map-bride"],a[href="#map-groom"],a[href="#map-single"]').forEach(link => {
     link.addEventListener("click", event => {
       event.preventDefault();
       setMapOpen(true, link.getAttribute("href").slice(1));
@@ -159,7 +159,7 @@
     setOpen(false,false);
     if (id === "locations") {
       const activeParty = document.documentElement.dataset.party;
-      setMapOpen(true, activeParty === "bride" || activeParty === "groom" ? "map-" + activeParty : null);
+      setMapOpen(true, ["bride", "groom", "single"].includes(activeParty) ? "map-" + activeParty : null);
       return;
     }
     if (id === "wedding-gift") { setGiftOpen(true); return; }
