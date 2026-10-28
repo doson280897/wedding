@@ -685,7 +685,11 @@ html[data-theme="light"] .settings-hub .wq-description{color:#67776b}
    Translate3d keeps dragging on the compositor, avoiding layout thrash. */
 .settings-hub.floating-control,
 .music-float.floating-control {
-  will-change:auto;
+  position:fixed;
+  /* Two persistent compositor layers keep fixed controls attached during
+     asynchronous iOS momentum scrolling. Animate coordinates only on release. */
+  will-change:transform;
+  transition:background .22s ease,border-color .22s ease,box-shadow .22s ease;
   touch-action:none;
 }
 .settings-hub.floating-control.is-dragging,

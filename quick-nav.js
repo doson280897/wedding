@@ -167,12 +167,17 @@
   const minLeft = () => FLOAT_EDGE + safeArea.left;
   const minTop = () => FLOAT_EDGE + safeArea.top;
   const clamp = (value, min, max) => Math.max(min, Math.min(Math.max(min, max), value));
-  const bounds = rect => ({
-    left:minLeft(),
-    right:Math.max(minLeft(), innerWidth - rect.width - FLOAT_EDGE - safeArea.right),
-    top:minTop(),
-    bottom:Math.max(minTop(), innerHeight - rect.height - FLOAT_EDGE - safeArea.bottom)
-  });
+  const bounds = rect => {
+    const viewport = window.visualViewport;
+    const top = (viewport?.offsetTop || 0) + minTop();
+    const bottom = (viewport?.offsetTop || 0) + (viewport?.height || innerHeight);
+    return {
+      left:minLeft(),
+      right:Math.max(minLeft(), innerWidth - rect.width - FLOAT_EDGE - safeArea.right),
+      top,
+      bottom:Math.max(top, bottom - rect.height - FLOAT_EDGE - safeArea.bottom)
+    };
+  };
   const visible = node => node?.isConnected && !node.hidden &&
     getComputedStyle(node).display !== "none";
 
@@ -197,9 +202,16 @@
 
   const initialPosition = node => {
     if (!visible(node)) return;
-    const rect = node.getBoundingClientRect();
-    const initialEdge = node === hub ? "right" : "left";
-    anchor(node,initialEdge,bounds(rect).bottom);
+    // Let the browser compositor keep the default docks at the viewport
+    // bottom during momentum scrolling and Safari toolbar expansion.
+    // Converting bottom into a cached top pixel value lets it fall offscreen.
+    const edge = node === hub ? "right" : "left";
+    node.dataset.floatEdge = edge;
+    node.style.transform = "none";
+    node.style.top = "auto";
+    node.style.bottom = "max(8px, env(safe-area-inset-bottom, 0px))";
+    node.style.left = edge === "left" ? "max(8px, env(safe-area-inset-left, 0px))" : "auto";
+    node.style.right = edge === "right" ? "max(8px, env(safe-area-inset-right, 0px))" : "auto";
   };
   const setupFloating = (node,handle) => {
     if (!handle) return;
@@ -401,7 +413,17 @@
         anchor(node,node.dataset.floatEdge || "right",node.getBoundingClientRect().top);
       } else initialPosition(node);
     };
-    window.addEventListener("resize",reset,{passive:true});
+    let viewportFrame = 0;
+    const scheduleViewportReset = () => {
+      if (viewportFrame) return;
+      viewportFrame = requestAnimationFrame(() => {
+        viewportFrame = 0;
+        reset();
+      });
+    };
+    window.addEventListener("resize",scheduleViewportReset,{passive:true});
+    window.visualViewport?.addEventListener("resize",scheduleViewportReset,{passive:true});
+    window.visualViewport?.addEventListener("scroll",scheduleViewportReset,{passive:true});
     if (node === musicDock) {
       // The orb is initially hidden; its first real PLAYING event gives it
       // dimensions and therefore a valid dock position.
