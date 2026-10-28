@@ -15,6 +15,7 @@ const read = file => fs.readFileSync(path.join(root, file), "utf8");
 
 test("one wedding-info.js holds all customer data", () => {
   assert.ok(info.site && info.couple && info.parties && info.families && info.text);
+  assert.ok(["single","double"].includes(info.wedding?.mode),"Wedding mode must be single or double");
   assert.ok(info.site.url.startsWith("https://"));
   for (const side of ["bride", "groom"]) {
     const person = info.couple[side];
@@ -38,6 +39,28 @@ test("one wedding-info.js holds all customer data", () => {
       party.gift.qrImage,
     ]) {
       assert.ok(fs.existsSync(path.join(root, asset)), "Missing asset: " + asset);
+    }
+  }
+});
+
+test("one-reception data is independent and complete without a second-party account", () => {
+  const party = info.parties.single;
+  assert.ok(party,"Single-reception config must exist");
+  assert.match(party.date,/^\\d{4}-\\d{2}-\\d{2}$/);
+  for (const key of ["receptionTime","receptionEnd"]) {
+    assert.match(party[key],/^\\d{2}:\\d{2}$/);
+  }
+  assert.ok(party.venue?.name && party.venue?.address);
+  assert.match(party.venue.mapUrl,/^https:\/\//);
+  assert.match(party.venue.embedUrl,/^https:\/\//);
+  assert.match(party.music.youtubeId,/^[\\w-]{11}$/);
+  assert.ok(party.gift.bank && party.gift.accountNumber && party.gift.qrImage);
+  for (const file of [...Object.values(party.images),party.gift.qrImage]) {
+    assert.ok(fs.existsSync(path.join(root,file)), "Missing single-party asset: "+file);
+  }
+  for (const locale of ["vi","en"]) {
+    for (const key of ["page.titleSingle","events.singleReception","calendar.singleFile","map.singleTitle","link.single"]) {
+      assert.ok(info.text[locale][key],"Missing single-reception translation: "+locale+"."+key);
     }
   }
 });
