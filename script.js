@@ -383,6 +383,7 @@
       const raiseCard = () => {
         if (leaving) return;
         // Nothing from the invitation is visible until the flap has finished.
+        intro.querySelector(".invitation-card")?.removeAttribute("aria-hidden");
         intro.classList.add("is-card-lifted", "is-opened");
         startAutoClose();
         closeInvitation?.focus({preventScroll:true});
@@ -391,6 +392,11 @@
       const unfoldFlap = () => {
         if (leaving) return;
         intro.classList.add("is-flap-open");
+        if (!reduced) {
+          // Prepare the typography and botanical artwork while the paper
+          // flap is opening so it isn't first rasterized mid-rise.
+          requestAnimationFrame(() => intro.classList.add("is-card-prepared"));
+        }
         if (reduced) {
           raiseCard();
           return;

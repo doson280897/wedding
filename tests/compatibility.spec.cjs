@@ -292,7 +292,10 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator("#floatingPetals")).toHaveCount(0);
   // The flap stays present while it folds ABOVE the sealed pocket. No
   // backface culling, even after the card is extracted.
-  await expect(page.locator(".invitation-card")).toBeHidden();
+  await expect(page.locator(".invitation-card")).toHaveAttribute("aria-hidden", "true");
+  const prepared = await page.locator(".invitation-card").evaluate(node =>
+    Number(getComputedStyle(node).opacity));
+  expect(prepared).toBeLessThanOrEqual(.01);
   await expect.poll(() => page.locator(".envelope-flap").evaluate(node =>
     getComputedStyle(node).transform
   )).toMatch(/matrix\(1, 0, 0, -1, 0, 0\)/);
@@ -307,6 +310,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   expect(openedFlap.foldedTop).toBeLessThan(openedFlap.pocketTop);
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeVisible();
+  await expect(page.locator(".invitation-card")).not.toHaveAttribute("aria-hidden", "true");
   await expect(page.locator("#envelopeCooldown")).toBeVisible();
   // Verify actual rendered contrast of the timer's digits against its surface.
   const timerContrast = await page.locator("#envelopeCooldown").evaluate(node => {
@@ -334,6 +338,13 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   expect(await page.locator(".invitation-card").evaluate(node =>
     getComputedStyle(node).animationName
   )).toContain("luxInvitationFlight");
+  // No scale or filter animation on the large card layer.
+  const riseKeyframes = await page.locator(".invitation-card").evaluate(node => {
+    const animation = node.getAnimations().find(a => a.animationName === "luxInvitationFlight");
+    return animation?.effect?.getKeyframes().map(frame => frame.transform) ?? [];
+  });
+  expect(riseKeyframes.length).toBeGreaterThan(0);
+  expect(riseKeyframes.every(transform => !/scale|rotate/i.test(transform))).toBe(true);
   await page.locator("#closeInvitation").click();
   await expect(page.locator("#invitationReveal")).toBeVisible();
   await expect(page.locator("#invitationPortal")).toHaveCount(0);

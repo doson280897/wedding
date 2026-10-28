@@ -1286,17 +1286,17 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   }
 }
 @keyframes luxInvitationFlight{
-  0%{opacity:0;transform:translate3d(0,28%,0) scale(.985)}
-  35%{opacity:.85;transform:translate3d(0,4%,0) scale(1)}
-  78%{opacity:1;transform:translate3d(0,-13%,0) scale(1)}
-  100%{opacity:1;transform:translate3d(0,-12%,0) scale(1)}
+  0%{opacity:0;transform:translate3d(0,28%,0)}
+  24%{opacity:1;transform:translate3d(0,8%,0)}
+  78%{opacity:1;transform:translate3d(0,-13%,0)}
+  100%{opacity:1;transform:translate3d(0,-12%,0)}
 }
 @media(max-width:650px){
   @keyframes luxInvitationFlight{
-    0%{opacity:0;transform:translate3d(0,27%,0) scale(.99)}
-    35%{opacity:.85;transform:translate3d(0,4%,0) scale(1)}
-    78%{opacity:1;transform:translate3d(0,-13%,0) scale(1)}
-    100%{opacity:1;transform:translate3d(0,-12%,0) scale(1)}
+    0%{opacity:0;transform:translate3d(0,28%,0)}
+    24%{opacity:1;transform:translate3d(0,8%,0)}
+    78%{opacity:1;transform:translate3d(0,-13%,0)}
+    100%{opacity:1;transform:translate3d(0,-12%,0)}
   }
 }
 @media(prefers-reduced-motion:reduce){
@@ -1491,3 +1491,19 @@ html[data-theme="light"] .envelope-cooldown{
 html[data-theme="light"] .envelope-cooldown span{color:#354e40}
 html[data-theme="light"] .envelope-cooldown-track{stroke:#d3d8cc}
 html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
+
+/* PRE-RASTERIZED PAPER RISE — retain one isolated paper surface, animate only
+   compositor transforms + opacity (no scale, blur or SVG filters). */
+.invitation-card{contain:layout paint;backface-visibility:hidden;will-change:transform,opacity}
+.invitation-card .botanical-flower{filter:none}
+.envelope-intro.is-card-prepared:not(.is-card-lifted) .invitation-card{
+  visibility:visible;
+  opacity:.001;
+  transform:translate3d(0,28%,0);
+}
+@media(prefers-reduced-motion:reduce){
+  .invitation-card{will-change:auto}
+  .envelope-intro.is-card-prepared:not(.is-card-lifted) .invitation-card{
+    visibility:hidden;opacity:0;
+  }
+}
