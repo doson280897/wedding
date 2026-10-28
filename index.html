@@ -67,8 +67,9 @@
   if (party === "bride" || party === "groom" || party === "single") {
     if (favicon && settings?.parties?.[party]?.images?.favicon) favicon.href = settings.parties[party].images.favicon + "?v=__BUILD_ID__";
     document.documentElement.dataset.party = party;
-    if (alreadyEntered) {
-      // Hide the envelope before the first paint, not only after deferred JS.
+    if (alreadyEntered || params.get("tool") === "links") {
+      // Skip the envelope on a same-tab F5 or the direct link-generator URL.
+      // A single-reception site has no separate party-choice landing screen.
       document.documentElement.classList.add("envelope-resumed");
       if (theme) theme.setAttribute("content", "#0b0e0e");
     } else {
