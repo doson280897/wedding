@@ -637,3 +637,82 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
   await expect(bubble).toHaveAttribute("data-music-state", "playing");
   expect(await page.evaluate(() => window.__musicTestPlayCalls)).toBe(3);
 });
+
+
+test("music bubble stays clickable above the unopened envelope and can cancel loading @smoke", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.YT = {
+      PlayerState: { PLAYING:1, PAUSED:2, ENDED:0 },
+      Player: function (_host, options) {
+        const player = {
+          setVolume() {},
+          playVideo() { window.__pendingPlays = (window.__pendingPlays || 0) + 1; },
+          pauseVideo() { window.__pauseCalls = (window.__pauseCalls || 0) + 1; },
+          stopVideo() { window.__stopCalls = (window.__stopCalls || 0) + 1; },
+          getPlayerState() { return -1; },
+        };
+        window.__emitLatePlaying = () => options.events.onStateChange({data:1,target:player});
+        queueMicrotask(() => options.events.onReady({target:player}));
+        return player;
+      },
+    };
+  });
+
+  await page.goto(base + "/index.html?party=bride", {waitUntil:"domcontentloaded"});
+  await expect(page.locator("#envelopeIntro")).toBeVisible();
+  await page.locator("#settingsTrigger").click();
+  await page.locator("#musicToggle").click();
+
+  const bubble = page.locator("#musicBubble");
+  await expect(bubble).toBeVisible();
+  await expect(bubble).toHaveAttribute("data-music-state","starting");
+  const note = bubble.locator(".music-float-note svg");
+  expect(await note.evaluate(node => getComputedStyle(node).animationName)).toBe("none");
+
+  // On the unopened envelope the orb must be interactable, not merely
+  // visible behind the overlay (Playwright performs a real hit-test).
+  await page.locator("#musicBubbleTrigger").click();
+  await expect(page.locator("#musicBubbleActions")).toBeVisible();
+  await expect(page.locator("#musicBubblePause")).toBeEnabled();
+  await expect(page.locator("#musicBubblePause .music-float-pause-icon")).toBeVisible();
+  await page.locator("#musicBubblePause").click();
+  await expect(bubble).toHaveAttribute("data-music-state","paused");
+  await expect(bubble).toBeVisible();
+
+  await page.locator("#musicBubbleTrigger").click();
+  await page.locator("#musicBubbleStop").click();
+  await expect(bubble).toBeHidden();
+  expect(await page.evaluate(() => window.__stopCalls)).toBe(1);
+  await page.evaluate(() => window.__emitLatePlaying());
+  await expect(bubble).toBeHidden();
+});
+
+test("music confirms playing from player state even if YouTube sends no PLAYING event", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.YT = {
+      PlayerState: { PLAYING:1, PAUSED:2, ENDED:0 },
+      Player: function (_host, options) {
+        let state = -1;
+        const player = {
+          setVolume() {},
+          playVideo() { state = 1; },
+          pauseVideo() { state = 2; },
+          stopVideo() { state = 0; },
+          getPlayerState() { return state; },
+        };
+        queueMicrotask(() => options.events.onReady({target:player}));
+        return player;
+      },
+    };
+  });
+
+  await page.goto(base + "/index.html?party=groom", {waitUntil:"domcontentloaded"});
+  await page.locator("#skipInvitation").click();
+  await page.locator("#settingsTrigger").click();
+  await page.locator("#musicToggle").click();
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing", {timeout:4000});
+  await expect(page.locator("#musicToggle .music-label")).not.toContainText("ĐANG TẢI");
+  await page.locator("#musicBubbleTrigger").click();
+  await page.locator("#musicBubblePause").click();
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","paused");
+});
