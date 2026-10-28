@@ -1245,10 +1245,10 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   filter:drop-shadow(0 0 4px rgba(255,244,184,.72));
   opacity:0;transform:scale(.5);
 }
-.envelope-intro.is-seal-cracking:not(.is-flap-open) .envelope-seal{
+.envelope-intro.is-seal-cracking .envelope-seal{
   animation:luxSealFracture 260ms cubic-bezier(.25,.65,.35,1) both;
 }
-.envelope-intro.is-seal-cracking:not(.is-flap-open) .seal-fracture{
+.envelope-intro.is-seal-cracking .seal-fracture{
   animation:luxFractureGlow 260ms ease-out both;
 }
 @keyframes luxSealFracture{
@@ -1356,10 +1356,6 @@ html[data-theme="light"] .envelope-intro{
 .invitation-card-rule{
   background:linear-gradient(90deg,transparent,#ae8955,transparent);
 }
-.envelope-intro.is-card-lifted .envelope-front{
-  /* Keep the pocket stationary while only the card travels upward. */
-  transform:none;opacity:1;transition:none;will-change:auto;
-}
 .envelope-open,.envelope-close{
   background:linear-gradient(180deg,#e8d0a0,#cfae74);
   color:#243429;border-color:#b7935e;
@@ -1373,7 +1369,6 @@ html[data-theme="light"] .envelope-intro{
 .envelope-cooldown span{color:#faf1db}
 .envelope-cooldown-track{stroke:rgba(255,235,197,.3)}
 .envelope-cooldown-progress{stroke:#ead09b}
-.envelope-intro.is-card-lifted .invitation-card{will-change:transform,opacity}
 @media(max-width:650px){
   .invitation-card{
     box-shadow:0 18px 30px rgba(12,20,14,.28),
@@ -1381,17 +1376,6 @@ html[data-theme="light"] .envelope-intro{
   }
   .envelope-intro:before,.envelope-intro:after{display:none}
 }
-@media(prefers-reduced-motion:reduce){
-  .envelope-intro.is-card-lifted .invitation-card{will-change:auto}
-}
-
-
-/* Reduced-motion entrance is immediate, including the folded flap. */
-@media(prefers-reduced-motion:reduce){
-  .envelope-intro.is-flap-open .envelope-flap{opacity:1!important;transform:scaleY(-1)!important}
-}
-
-
 /* ACCESSIBLE INTRO CONTROLS — opaque countdown, ivory digits, brass ring.
    No backdrop blur or bright-on-bright text on mobile. */
 .envelope-cooldown{
@@ -1403,7 +1387,7 @@ html[data-theme="light"] .envelope-intro{
 .envelope-cooldown-track{stroke:#6d826f}
 .envelope-cooldown-progress{stroke:#f1d59e}
 .envelope-open:focus-visible,.envelope-close:focus-visible,
-.envelope-skip:focus-visible,.envelope-stage-hit:focus-visible{
+.envelope-skip:focus-visible{
   outline:3px solid #f5dca9;outline-offset:4px;
 }
 @media(max-width:650px){
@@ -1421,22 +1405,6 @@ html[data-theme="light"] .envelope-cooldown{
 html[data-theme="light"] .envelope-cooldown span{color:#354e40}
 html[data-theme="light"] .envelope-cooldown-track{stroke:#d3d8cc}
 html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
-
-/* PRE-RASTERIZED PAPER RISE — retain one isolated paper surface, animate only
-   compositor transforms + opacity (no scale, blur or SVG filters). */
-.invitation-card{contain:layout paint;backface-visibility:hidden;will-change:transform,opacity}
-.invitation-card .botanical-flower{filter:none}
-.envelope-intro.is-card-prepared:not(.is-card-lifted) .invitation-card{
-  visibility:visible;
-  opacity:.001;
-  transform:translate3d(0,28%,0);
-}
-@media(prefers-reduced-motion:reduce){
-  .invitation-card{will-change:auto}
-  .envelope-intro.is-card-prepared:not(.is-card-lifted) .invitation-card{
-    visibility:hidden;opacity:0;
-  }
-}
 
 /* Lightweight ivory petal bloom restored by request. No filters, shadows,
    gradients with blurs or persistent RAF loops. */

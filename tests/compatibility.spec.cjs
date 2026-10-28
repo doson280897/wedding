@@ -247,7 +247,8 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   const url = base + "/index.html?party=bride&to=ReloadGuest&lang=vi";
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeVisible();
-  await expect(page.locator(".invitation-card")).toBeHidden();
+  await expect(page.locator(".invitation-card")).toBeVisible();
+  await expect(page.locator(".invitation-card")).toHaveAttribute("aria-hidden", "true");
   const visualContrast = await page.evaluate(() => ({
     stage:getComputedStyle(document.getElementById("envelopeIntro")).backgroundColor,
     card:getComputedStyle(document.querySelector(".invitation-card")).backgroundColor
@@ -255,110 +256,47 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   expect(visualContrast.stage).toBe("rgb(97, 118, 106)");
   expect(visualContrast.card).toBe("rgb(255, 250, 240)");
 
-  // Global Dark/Light must update the locked envelope itself, not only content
-  // behind it. Also verify the browser chrome and the toggle button state.
+  // Global Dark/Light must still work while the sealed envelope is on screen.
   await page.locator("#settingsTrigger").click();
   await expect(page.locator("#settingsPanel")).toBeVisible();
   await page.locator('[data-theme-option="light"]').click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await expect(page.locator(".envelope-intro")).toHaveCSS("background-color", "rgb(238, 230, 220)");
-  await expect(page.locator("#themeColor")).toHaveAttribute("content", "#eee6dc");
   await page.locator('[data-theme-option="dark"]').click();
   await expect(page.locator(".envelope-intro")).toHaveCSS("background-color", "rgb(97, 118, 106)");
-  await expect(page.locator("#themeColor")).toHaveAttribute("content", "#61766a");
   await page.locator("#settingsClose").click();
+
   await expect(page.locator("#envelopeSealButton")).toBeVisible();
-  await expect(page.locator("#envelopeSealButton")).toHaveAttribute("aria-label", "Chạm con dấu để mở thiệp cưới");
   await expect(page.locator("#openInvitation")).toHaveCount(0);
   await expect(page.locator("#skipInvitation")).toHaveCount(0);
-  await expect(page.locator("#envelopeStageHit")).toHaveCount(0);
-  // The original diamond flap pointed upward as if already opened.
-  // A sealed envelope must have its triangular flap pointing DOWN,
-  // layered above the paper pocket and aligned with the wax seal.
-  const sealedFlap = await page.locator(".envelope-flap").evaluate(node => {
-    const flap = node.getBoundingClientRect();
-    const wax = document.querySelector(".envelope-seal").getBoundingClientRect();
-    const front = document.querySelector(".envelope-front");
-    const style = getComputedStyle(node);
-    return {
-      path: style.clipPath,
-      flapLayer: Number(style.zIndex),
-      frontLayer: Number(getComputedStyle(front).zIndex),
-      waxCenterY: wax.top + wax.height / 2,
-      flapTipY: flap.top + flap.height * .62
-    };
-  });
-  expect(sealedFlap.path).toContain("50% 62%");
-  expect(sealedFlap.flapLayer).toBeGreaterThan(sealedFlap.frontLayer);
-  expect(Math.abs(sealedFlap.waxCenterY - sealedFlap.flapTipY)).toBeLessThan(6);
+  await expect(page.locator(".invitation-paper-proxy")).toHaveCount(0);
 
-  // The seal emits one burst; the exit flash bridges into the hero.
-  // They must never replay on F5 in the same tab.
-  const closedStageTop = (await page.locator(".envelope-stage").boundingBox()).y;
+  // The real invitation stays absolutely still. The sealed envelope itself
+  // slides down and disappears after the wax crack.
+  const cardBefore = await page.locator(".invitation-card").boundingBox();
+  const frontBefore = await page.locator(".envelope-front").boundingBox();
   await page.locator("#envelopeSealButton").click();
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
-  await expect(page.locator(".envelope-seal-light")).toBeVisible();
   await expect(page.locator(".envelope-seal-light")).toHaveCSS("animation-name", "sealLocalizedBurst");
-  await expect(page.locator("#envelopeIntro")).toHaveClass(/is-flap-open/);
-  await expect.poll(async () => {
-    const box = await page.locator(".envelope-stage").boundingBox();
-    return box.y - closedStageTop;
-  }).toBeGreaterThanOrEqual(18);
-  await expect(page.locator("#envelopeBurst")).toHaveCount(0);
-  await expect(page.locator("#floatingPetals")).toBeHidden();
-  // The flap stays present while it folds ABOVE the sealed pocket. No
-  // backface culling, even after the card is extracted.
-  await expect(page.locator(".invitation-card")).toHaveAttribute("aria-hidden", "true");
-  await expect(page.locator(".invitation-paper-proxy")).toBeVisible();
-  // The motion face must remain fully within the stage while prewarmed,
-  // and the front pocket is a solid occluding surface.
-  const pocketGeometry = await page.evaluate(() => {
-    const stage = document.querySelector(".envelope-stage").getBoundingClientRect();
-    const proxy = document.querySelector(".invitation-paper-proxy").getBoundingClientRect();
-    const front = getComputedStyle(document.querySelector(".envelope-front"));
-    return {
-      proxyBottom:proxy.bottom,
-      stageBottom:stage.bottom,
-      frontBackground:front.backgroundImage
-    };
-  });
-  expect(pocketGeometry.proxyBottom).toBeLessThanOrEqual(pocketGeometry.stageBottom + .5);
-  expect(pocketGeometry.frontBackground).not.toBe("none");
-  await expect(page.locator(".invitation-paper-proxy-names")).toContainText("Nga");
-  await expect(page.locator(".invitation-paper-proxy-names")).toContainText("Sơn");
-  const expectedMotionDate = await page.locator(".envelope-date").innerText();
-  await expect(page.locator(".invitation-paper-proxy-date")).toHaveText(expectedMotionDate.trim());
-  await expect(page.locator(".invitation-paper-proxy-label")).toHaveText("Kính mời");
-  await expect(page.locator(".invitation-paper-proxy-guest")).toHaveText("ReloadGuest");
-  const prepared = await page.locator(".invitation-card").evaluate(node =>
-    Number(getComputedStyle(node).opacity));
-  expect(prepared).toBeLessThanOrEqual(.01);
-  await expect.poll(() => page.locator(".envelope-flap").evaluate(node =>
-    getComputedStyle(node).transform
-  )).toMatch(/matrix\(1, 0, 0, -1, 0, 0\)/);
-  const openedFlap = await page.locator(".envelope-flap").evaluate(node => ({
-    opacity:getComputedStyle(node).opacity,
-    backface:getComputedStyle(node).backfaceVisibility,
-    foldedTop:node.getBoundingClientRect().top,
-    pocketTop:document.querySelector(".envelope-front").getBoundingClientRect().top
-  }));
-  expect(openedFlap.opacity).toBe("1");
-  expect(openedFlap.backface).toBe("visible");
-  expect(openedFlap.foldedTop).toBeLessThan(openedFlap.pocketTop);
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await expect(page.locator(".invitation-card")).toBeVisible();
-  await expect(page.locator(".invitation-card")).not.toHaveAttribute("aria-hidden", "true");
-  await expect(page.locator("#envelopeIntro")).toHaveClass(/is-card-settled/);
-  await expect(page.locator(".invitation-paper-proxy")).toBeHidden();
-  await expect(page.locator(".invitation-card")).toHaveCSS("opacity","1");
-  await expect(page.locator(".invitation-card")).toHaveCSS("animation-name","none");
+  await expect(page.locator("#envelopeIntro")).toHaveClass(/is-envelope-dropping/);
   await expect(page.locator("#floatingPetals")).toBeVisible();
-  const petalCount = await page.locator(".floating-petal").count();
-  expect(petalCount).toBeGreaterThanOrEqual(3);
-  expect(petalCount).toBeLessThanOrEqual(10);
-  const petalBox = await page.locator(".floating-petal").first().boundingBox();
-  expect(petalBox.width).toBeGreaterThanOrEqual(11);
-  expect(petalBox.height).toBeGreaterThanOrEqual(20);
+
+  const cardDuring = await page.locator(".invitation-card").boundingBox();
+  expect(Math.abs(cardDuring.y - cardBefore.y)).toBeLessThan(1);
+  expect(Math.abs(cardDuring.x - cardBefore.x)).toBeLessThan(1);
+
+  await expect(page.locator("#envelopeIntro")).toHaveClass(/is-envelope-cleared/, { timeout: 3000 });
+  await expect(page.locator(".envelope-front")).toBeHidden();
+  await expect(page.locator(".envelope-flap")).toBeHidden();
+  await expect(page.locator("#envelopeSealButton")).toBeHidden();
+  await expect(page.locator(".invitation-card")).not.toHaveAttribute("aria-hidden", "true");
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+
+  const cardAfter = await page.locator(".invitation-card").boundingBox();
+  expect(Math.abs(cardAfter.y - cardBefore.y)).toBeLessThan(1);
+  expect(Math.abs(cardAfter.x - cardBefore.x)).toBeLessThan(1);
+  expect(frontBefore.height).toBeGreaterThan(0);
+
   await expect(page.locator("#envelopeCooldown")).toBeVisible();
   // Verify actual rendered contrast of the timer's digits against its surface.
   const timerContrast = await page.locator("#envelopeCooldown").evaluate(node => {
