@@ -95,6 +95,23 @@
       const src = getInfo(node.dataset.infoSrc);
       if (!src) return;
       const url = withVersion(src);
+      // Story photos retain their full-size fallback. Let the browser select
+      // a correctly sized source before assigning src, avoiding a large first
+      // request followed by a second request for the responsive candidate.
+      if (node.dataset.infoResponsive) {
+        const image = node.dataset.infoResponsive.split(".").reduce(
+          (value, key) => value?.[key], info);
+        if (image && Array.isArray(image.variants)) {
+          if (image.width > 0 && image.height > 0) {
+            node.width = image.width;
+            node.height = image.height;
+          }
+          if (image.sizes) node.sizes = image.sizes;
+          const srcset = image.variants.filter(item => item.src && item.width > 0)
+            .map(item => withVersion(item.src).href + " " + item.width + "w").join(", ");
+          if (srcset && node.getAttribute("srcset") !== srcset) node.srcset = srcset;
+        }
+      }
       // QR codes belong to a hidden popup; defer their download until opened.
       if (node.classList.contains("gift-qr") &&
           document.getElementById("wgModal")?.hidden) {

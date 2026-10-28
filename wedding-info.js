@@ -728,21 +728,72 @@ window.WEDDING_INFO = {
         "alt": {
           "vi": "Sơn và Nga bên nhau trước cổng đá cổ",
           "en": "Sơn and Nga together in front of a historic stone gate"
-        }
+        },
+        "width": 1333,
+        "height": 2000,
+        "variants": [
+          {
+            "src": "images/optimized/assets/promise-7920-640.webp",
+            "width": 640
+          },
+          {
+            "src": "images/optimized/assets/promise-7920-1000.webp",
+            "width": 1000
+          },
+          {
+            "src": "images/optimized/assets/promise-7920.webp",
+            "width": 1333
+          }
+        ],
+        "sizes": "(max-width: 414px) calc(100vw - 34px), (max-width: 650px) 380px, (max-width: 1000px) 31vw, 365px"
       },
       "love": {
         "src": "images/optimized/assets/promise-7885.webp",
         "alt": {
           "vi": "Sơn và Nga dịu dàng bên hồ sen",
           "en": "Sơn and Nga sharing a quiet moment by the lotus pond"
-        }
+        },
+        "width": 2000,
+        "height": 1333,
+        "variants": [
+          {
+            "src": "images/optimized/assets/promise-7885-1200.webp",
+            "width": 1200
+          },
+          {
+            "src": "images/optimized/assets/promise-7885-1600.webp",
+            "width": 1600
+          },
+          {
+            "src": "images/optimized/assets/promise-7885.webp",
+            "width": 2000
+          }
+        ],
+        "sizes": "(max-width: 414px) calc(180vw - 62px), (max-width: 650px) 684px, (max-width: 1000px) 60vw, 690px"
       },
       "home": {
         "src": "images/optimized/assets/promise-7860.webp",
         "alt": {
           "vi": "Sơn che ô cho Nga dưới mái cổng gạch bên hồ",
           "en": "Sơn holding a parasol for Nga by the pond and brick pavilion"
-        }
+        },
+        "width": 1333,
+        "height": 2000,
+        "variants": [
+          {
+            "src": "images/optimized/assets/promise-7860-640.webp",
+            "width": 640
+          },
+          {
+            "src": "images/optimized/assets/promise-7860-1000.webp",
+            "width": 1000
+          },
+          {
+            "src": "images/optimized/assets/promise-7860.webp",
+            "width": 1333
+          }
+        ],
+        "sizes": "(max-width: 414px) calc(100vw - 34px), (max-width: 650px) 380px, (max-width: 1000px) 31vw, 365px"
       }
     }
   }
