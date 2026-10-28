@@ -3,7 +3,9 @@
  *
  * 1. site: domain và thông tin khi chia sẻ thiệp.
  * 2. couple / families: tên, chữ cái viết tắt (ví dụ S & N), cha mẹ và địa chỉ.
- * 3. parties.bride / parties.groom: ngày, giờ, Google Maps, nhạc YouTube, ảnh, tài khoản và QR.
+ * 3. wedding.mode: "double" (nhà gái & nhà trai) hoặc "single" (một tiệc chung).
+ *    Chọn "single": chỉ cần sửa parties.single (ngày/giờ/địa điểm/nhạc/ảnh/QR).
+ *    Chọn "double": sửa parties.bride và parties.groom như hiện nay.
  * 4. gallery: mode="append" giữ ảnh cũ, mode="replace" chỉ dùng ảnh mới;
  *    photos=null để dùng manifest tự tạo, hoặc nhập mảng {src, width, height}.
  * 5. text.vi / text.en: mọi nội dung hiển thị, lời mời và bản dịch. Dùng {{duong.dan}}
@@ -177,6 +179,59 @@ window.WEDDING_INFO = {
       "region": {
         "vi": "Đồng Nai",
         "en": "Đồng Nai"
+      }
+    },
+    "single": {
+      "date": "2026-11-14",
+      "receptionTime": "11:00",
+      "receptionEnd": "13:00",
+      "city": {
+        "vi": "Krông Ana, Đắk Lắk",
+        "en": "Krông Ana, Đắk Lắk"
+      },
+      "lunar": {
+        "vi": "Nhằm ngày 06 tháng 10 năm Bính Ngọ",
+        "en": "6th day of the 10th lunar month, Year of the Fire Horse"
+      },
+      "venue": {
+        "name": {
+          "vi": "Nhà Hàng Hương Lan",
+          "en": "Hương Lan Restaurant"
+        },
+        "address": {
+          "vi": "24 Hùng Vương, Krông Ana, Đắk Lắk",
+          "en": "24 Hùng Vương Street, Krông Ana, Đắk Lắk"
+        },
+        "calendarAddress": {
+          "vi": "{{parties.single.venue.name}}, {{parties.single.venue.address}}",
+          "en": "{{parties.single.venue.name}}, {{parties.single.venue.address}}"
+        },
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Nhà+Hàng+Hương+Lan+24+Hùng+Vương+Krông+Ana+Đắk+Lắk",
+        "embedUrl": "https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"
+      },
+      "music": {
+        "youtubeId": "TA1W-pHNKl8"
+      },
+      "images": {
+        "hero": "images/optimized/assets/hero_bride.webp",
+        "ending": "images/optimized/assets/ending_bride.webp",
+        "favicon": "favicon-groom.svg",
+        "portraitMain": "images/optimized/assets/nga-2.webp",
+        "portraitSecondary": "images/optimized/assets/nga-1.webp"
+      },
+      "gift": {
+        "bank": "MB",
+        "accountHolder": "{{couple.bride.fullUpper}}",
+        "accountNumber": "8789 3224 6384 9",
+        "qrImage": "images/optimized/assets/gift-qr-bride.svg",
+        "qrAlt": {
+          "vi": "Mã QR mừng cưới {{couple.groom.short}} & {{couple.bride.short}}",
+          "en": "Wedding gift QR for {{couple.groom.short}} & {{couple.bride.short}}"
+        }
+      },
+      "region": {
+        "vi": "Đắk Lắk",
+        "en": "Đắk Lắk"
       }
     }
   },
@@ -394,7 +449,31 @@ window.WEDDING_INFO = {
       "music.resumeAria": "Phát nhạc tiếp",
       "music.stopAria": "Dừng hẳn và ẩn nút nhạc",
       "music.retry": "NHẠC: CHƯA PHÁT · THỬ LẠI",
-      "music.cancelAria": "Hủy tải và tạm dừng nhạc"
+      "music.cancelAria": "Hủy tải và tạm dừng nhạc",
+      "page.titleSingle": "{{couple.groom.short}} & {{couple.bride.short}} | Tiệc cưới",
+      "hero.singleOverline": "— TIỆC CƯỚI —",
+      "guest.heroSingle": "Trân trọng kính mời {guest} tham dự tiệc cưới",
+      "couple.headingSingle": "Chuyện tình của chúng mình",
+      "events.singleLabel": "TIỆC CƯỚI · CHUNG VUI CÙNG HAI GIA ĐÌNH",
+      "events.singleReception": "<span>{{parties.single.receptionTime}}</span> Đón khách và khai tiệc tại {{parties.single.venue.name}}",
+      "events.singleAddress": "{{parties.single.venue.address}}",
+      "events.singleLunar": "{{parties.single.lunar}}",
+      "events.singleCalendarAria": "Lưu tiệc cưới vào lịch",
+      "map.singleLabel": "ĐỊA ĐIỂM TIỆC CƯỚI · {{parties.single.dateSlashes}}",
+      "map.singleTitle": "{{parties.single.venue.name}}",
+      "map.singleAddress": "{{parties.single.venue.address}}",
+      "map.singleFrameTitle": "Bản đồ địa điểm tiệc cưới",
+      "countdown.singleTitle": "ĐẾM NGƯỢC ĐẾN TIỆC CƯỚI",
+      "countdown.singleAria": "Đếm ngược đến ngày tổ chức tiệc cưới",
+      "calendar.singleFile": "tiec-cuoi-{{couple.groom.slug}}-{{couple.bride.slug}}.ics",
+      "calendar.singleReceptionTitle": "Tiệc cưới · {{couple.groom.short}} & {{couple.bride.short}}",
+      "calendar.singleReceptionPlace": "{{parties.single.venue.calendarAddress}}",
+      "calendar.singleReceptionNote": "{{parties.single.receptionTime}} · Tiệc cưới tại {{parties.single.venue.name}}",
+      "link.single": "Một tiệc cưới · {{parties.single.dateSlashes}} · {{parties.single.city}}",
+      "link.singleDescription": "Nhập tên khách để tạo thiệp cho một tiệc cưới chung. Không cần chọn nhà gái hoặc nhà trai.",
+      "link.singleBack": "← Quay lại thiệp cưới",
+      "link.singleBackAria": "Trở về thiệp cưới",
+      "menu.singleCouple": "Cô dâu & chú rể"
     },
     "en": {
       "page.title": "{{site.titlePrefix}} | {{couple.bride.short}} · {{couple.groom.short}}",
@@ -604,7 +683,34 @@ window.WEDDING_INFO = {
       "music.resumeAria": "Resume music",
       "music.stopAria": "Stop music and hide the floating button",
       "music.retry": "MUSIC: RETRY PLAYBACK",
-      "music.cancelAria": "Cancel loading and pause music"
+      "music.cancelAria": "Cancel loading and pause music",
+      "page.titleSingle": "{{couple.groom.short}} & {{couple.bride.short}} | Wedding Reception",
+      "hero.singleOverline": "— WEDDING RECEPTION —",
+      "guest.heroSingle": "You are cordially invited to our wedding reception, {guest}",
+      "couple.headingSingle": "Our love story",
+      "events.singleLabel": "WEDDING RECEPTION · BOTH FAMILIES",
+      "events.singleReception": "<span>{{parties.single.receptionTime}}</span> Reception at {{parties.single.venue.name}}",
+      "events.singleAddress": "{{parties.single.venue.address}}",
+      "events.singleLunar": "{{parties.single.lunar}}",
+      "events.singleCalendarAria": "Save our wedding reception to your calendar",
+      "map.singleLabel": "WEDDING RECEPTION · {{parties.single.dateSlashes}}",
+      "map.singleTitle": "{{parties.single.venue.name}}",
+      "map.singleAddress": "{{parties.single.venue.address}}",
+      "map.singleFrameTitle": "Wedding reception location",
+      "countdown.singleTitle": "COUNTDOWN TO OUR WEDDING",
+      "countdown.singleAria": "Countdown to our wedding reception",
+      "calendar.singleFile": "wedding-{{couple.groom.slug}}-{{couple.bride.slug}}.ics",
+      "calendar.singleReceptionTitle": "Wedding Reception · {{couple.groom.short}} & {{couple.bride.short}}",
+      "calendar.singleReceptionPlace": "{{parties.single.venue.calendarAddress}}",
+      "calendar.singleReceptionNote": "{{parties.single.receptionTime}} · Wedding reception at {{parties.single.venue.name}}",
+      "link.single": "Wedding reception · {{parties.single.dateEnglish}} · {{parties.single.city}}",
+      "link.singleDescription": "Enter your guest's name to create an invitation for one shared wedding reception.",
+      "link.singleBack": "← Back to the wedding invitation",
+      "link.singleBackAria": "Return to the wedding invitation",
+      "menu.singleCouple": "Bride & groom"
     }
+  },
+  "wedding": {
+    "mode": "double"
   }
 };
