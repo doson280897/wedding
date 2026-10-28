@@ -820,33 +820,15 @@ html[data-party="single"] .location-grid {
   --lux-foil-highlight: #f6e7be;
   --lux-foil-shadow: #876c45;
 }
-.topbar .monogram {
-  position:relative;isolation:isolate;display:inline-flex;align-items:center;gap:.19em;
-  min-height:44px;padding:4px 14px 6px;
-  border:1px solid rgba(222,192,143,.32);
-  border-radius:2px;
-  background:linear-gradient(145deg,rgba(12,17,14,.24),rgba(12,17,14,.04));
-  box-shadow:inset 0 1px rgba(255,245,221,.09),0 8px 28px rgba(0,0,0,.14);
-  font:500 clamp(27px,3vw,34px)/1 'Cormorant Garamond',Georgia,serif;
-  letter-spacing:.08em;white-space:nowrap;overflow:hidden;
-}
-.topbar .monogram,.topbar .monogram span {
+.topbar .monogram span {
   color:var(--lux-champagne);
   background-image:linear-gradient(115deg,#8c714a 5%,#d5b783 27%,#fff1cb 48%,#d4ae73 65%,#92774f 95%);
   background-clip:text;-webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   text-shadow:0 1px 1px rgba(0,0,0,.08);
 }
-.topbar .monogram span{font-size:.63em;font-weight:400}
-.topbar .monogram:after {
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(105deg,transparent 28%,rgba(255,240,205,.13) 49%,transparent 67%);
-  transform:translateX(-120%);transition:transform 1.1s cubic-bezier(.22,.65,.2,1);
-}
-@media(hover:hover){.topbar .monogram:hover:after{transform:translateX(120%)}}
 .topbar .monogram:focus-visible{outline:2px solid #ead5a5;outline-offset:4px}
-@media(max-width:650px){.topbar .monogram{padding:4px 10px 5px;min-height:40px}}
-@media(prefers-reduced-motion:reduce){.topbar .monogram:after{transition:none;display:none}}
+
 
 
 /* CINEMATIC EDITORIAL SCROLL — quiet chapter rhythm, no scroll hijacking. */
