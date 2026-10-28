@@ -97,6 +97,10 @@ test("album Drive imports are declared only in wedding-info.js", () => {
   assert.ok(importer.includes("gallery"), "Album importer must read gallery configuration");
   assert.ok(importer.includes("workflow_dispatch"), "Manual import trigger required");
   assert.ok(!/^  push:/m.test(importer), "Updating the workflow must not auto-import old photos");
+  assert.ok(["append", "replace"].includes(info.gallery.mode));
+  const imageGenerator = read("generate_gallery.py");
+  assert.ok(imageGenerator.includes('ALBUM_MODE == "replace"'));
+  assert.ok(imageGenerator.includes('ALBUM_MODE == "append"'));
   assert.ok(Array.isArray(info.gallery.imports));
   for (const item of info.gallery.imports) {
     assert.match(item.name, /^[\w. -]+\.(jpg|jpeg|png|webp|avif)$/i);
