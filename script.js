@@ -260,7 +260,7 @@
       moonlightGate.hidden = true;
       moonlightGate.classList.remove("is-awakening", "is-opening", "is-blooming", "is-hero-revealing", "is-leaving");
       document.documentElement.classList.remove("gate-hero-revealing");
-    }, reducedGateMotion ? 0 : 360);
+    }, reducedGateMotion ? 0 : 720);
   };
 
   const openFromWax = () => {
@@ -292,15 +292,15 @@
       // only fades in after the doors are already clearly open.
       window.setTimeout(() => {
         if (!moonlightGate.hidden) moonlightGate.classList.add("is-blooming");
-      }, 360);
+      }, 500);
       window.setTimeout(() => {
         if (!moonlightGate.hidden) {
           moonlightGate.classList.add("is-hero-revealing");
           document.documentElement.classList.add("gate-hero-revealing");
         }
-      }, 610);
+      }, 900);
 
-      gateFallbackTimer = window.setTimeout(finishDoors, 1450);
+      gateFallbackTimer = window.setTimeout(finishDoors, 1780);
     }, 240);
   };
 

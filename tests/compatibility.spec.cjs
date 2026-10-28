@@ -250,6 +250,11 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(page.locator("#waxOpenButton")).toBeVisible();
   await expect(page.locator("#waxMonogram")).toHaveText("N · S");
   await expect(page.locator(".moonlight-gate__celestial")).toBeVisible();
+  await expect(page.locator(".moonlight-gate__hint")).toHaveCount(0);
+  const celestialWidth = await page.locator(".moonlight-gate__celestial").evaluate(node =>
+    node.getBoundingClientRect().width
+  );
+  expect(celestialWidth).toBeGreaterThanOrEqual(98);
   await expect(page.locator("#settingsHub")).toBeVisible();
   const gateLayout = await page.evaluate(() => {
     const scene = document.querySelector(".moonlight-gate__scene").getBoundingClientRect();
@@ -285,6 +290,10 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   expect(hingeState.rightTransform).toContain("matrix3d");
   expect(hingeState.leftOrigin.startsWith("0px")).toBe(true);
   expect(hingeState.rightOrigin.startsWith("0px")).toBe(false);
+  const hingeDuration = await page.locator(".moonlight-gate__door--left").evaluate(node =>
+    parseFloat(getComputedStyle(node).transitionDuration) * 1000
+  );
+  expect(hingeDuration).toBeGreaterThanOrEqual(1400);
   await expect(gate).toHaveClass(/is-blooming/);
   await expect(page.locator("html")).toHaveClass(/gate-hero-revealing/);
   await expect(page.locator(".hero")).toHaveCSS("opacity","1");
