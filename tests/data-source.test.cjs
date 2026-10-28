@@ -69,7 +69,7 @@ test("Vietnamese and English strings have matching keys and valid data placehold
   const vietnamese = info.text.vi;
   const english = info.text.en;
   assert.deepEqual(Object.keys(vietnamese).sort(), Object.keys(english).sort());
-  const derived = /^(?:couple\.(?:bride|groom)\.(?:fullUpper|slug)|parties\.(?:bride|groom)\.(?:dateDots|dateSlashes|dateEnglish|dateSpaced|dateYear|weekday))$/;
+  const derived = /^(?:couple\.(?:bride|groom)\.(?:fullUpper|slug)|parties\.(?:bride|groom|single)\.(?:dateDots|dateSlashes|dateEnglish|dateSpaced|dateYear|weekday))$/;
   for (const strings of [vietnamese, english]) {
     for (const [key, value] of Object.entries(strings)) {
       assert.equal(typeof value, "string", "Non-string text: " + key);
