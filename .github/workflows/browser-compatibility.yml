@@ -14,6 +14,11 @@ on:
       - "playwright.config.cjs"
       - ".github/workflows/browser-compatibility.yml"
   workflow_dispatch:
+    inputs:
+      extended:
+        description: "Run the full 8-device browser matrix instead of optimized smoke tests"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -56,6 +61,8 @@ jobs:
         run: |
           node --check wedding-info.js
           node --check i18n.js
+          node --check preferences.js
+          node --check settings.js
           node --check script.js
           node --check gallery.js
           node --check link-tool.js
@@ -78,10 +85,11 @@ jobs:
           cat /tmp/wedding-http.log
           exit 1
 
-      - name: Test desktop, Android tablets/phones, iPhone and iPad layouts
+      - name: Test desktop functionality and targeted cross-device smoke
         run: npx playwright test tests/compatibility.spec.cjs --reporter=line --workers=2
         env:
           CI: "true"
+          WEDDING_EXTENDED_TESTS: ${{ github.event.inputs.extended || 'false' }}
 
       - name: Upload browser test diagnostics
         if: failure()
