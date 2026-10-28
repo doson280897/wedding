@@ -14,6 +14,8 @@
   const coupleLabel = () => window.WEDDING_INFO.couple.bride.short + " & " + window.WEDDING_INFO.couple.groom.short;
   const guestInput = document.getElementById("linkToolGuest");
   const partySelect = document.getElementById("linkToolParty");
+  const singleMode = window.WEDDING_INFO.wedding?.mode === "single";
+  if (singleMode) partySelect.value = "single";
   const result = document.getElementById("linkToolResult");
   const generated = document.getElementById("linkToolGenerated");
   const preview = document.getElementById("linkToolPreview");
@@ -40,8 +42,9 @@
 
   function buildInvitation() {
     const name = guestInput.value.replace(/\s+/g, " ").trim().slice(0, 100);
-    const party = partySelect.value;
-    if (!name || !["bride", "groom"].includes(party)) {
+    const party = singleMode ? "single" : partySelect.value;
+    if (!name || !["bride", "groom", "single"].includes(party) ||
+        (!singleMode && party === "single")) {
       setFeedback("link.invalid");
       return false;
     }
@@ -49,7 +52,8 @@
     // Links sent to guests always open the actual invitation, never this tool.
     const url = new URL("index.html", new URL("./", location.href));
     url.searchParams.set("to", name);
-    url.searchParams.set("party", party);
+    if (singleMode) url.searchParams.delete("party");
+    else url.searchParams.set("party", party);
     url.searchParams.set("lang", i18n?.getLocale() || "vi");
 
     invitation = url.href;
@@ -78,7 +82,8 @@
       requestAnimationFrame(() => guestInput.focus({ preventScroll: true }));
     } else {
       const party = new URLSearchParams(location.search).get("party");
-      document.title = t(party === "bride" ? "page.titleBride" : party === "groom" ? "page.titleGroom" : "page.title");
+      document.title = t(singleMode ? "page.titleSingle" :
+        party === "bride" ? "page.titleBride" : party === "groom" ? "page.titleGroom" : "page.title");
       if (previouslyFocused?.isConnected) {
         previouslyFocused.focus({ preventScroll: true });
       } else {
@@ -105,7 +110,14 @@
     }
     const url = new URL(location.href);
     url.searchParams.delete("tool");
-    history.replaceState(null, "", url);
+    if (singleMode) {
+      // The single invitation is a direct root URL (no party chooser).
+      // Reload it so its envelope is properly initialized.
+      history.replaceState(history.state, "", url);
+      location.reload();
+      return;
+    }
+    history.replaceState(history.state, "", url);
     updateView();
   });
 
@@ -143,6 +155,22 @@
       if (error?.name !== "AbortError") setFeedback("link.shareFail");
     }
   });
+
+  if (singleMode) {
+    // There is only one celebration to invite guests to.
+    partySelect.value = "single";
+    const description = document.querySelector(".link-tool-description");
+    if (description) description.dataset.i18n = "link.singleDescription";
+    back.dataset.i18n = "link.singleBack";
+    back.dataset.i18nAria = "link.singleBackAria";
+    const updateSingleLabels = () => {
+      if (description) description.textContent = t("link.singleDescription");
+      back.textContent = t("link.singleBack");
+      back.setAttribute("aria-label", t("link.singleBackAria"));
+    };
+    updateSingleLabels();
+    document.addEventListener("wedding:languagechange", updateSingleLabels);
+  }
 
   document.addEventListener("wedding:languagechange", () => {
     if (!result.hidden) {
