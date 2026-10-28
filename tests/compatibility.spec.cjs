@@ -51,7 +51,7 @@ test("one shared language control, in-page generator, back navigation @smoke @co
 });
 
 
-test("party link, envelope and album lightbox interactions", async ({
+test("party link, wax gate and album lightbox interactions", async ({
   page,
 }) => {
   const errors = [];
@@ -60,16 +60,14 @@ test("party link, envelope and album lightbox interactions", async ({
     base + "/index.html?party=bride&to=CrossDeviceTest&lang=vi",
     { waitUntil: "domcontentloaded" },
   );
-  await expect(page.locator("#envelopeIntro")).toBeVisible();
+  await expect(page.locator("#waxOpenButton")).toBeVisible();
   // The seal is personalized from data, not hard-coded into the HTML.
   const initials = await page.evaluate(() =>
     window.WEDDING_INFO.couple.bride.initial + " · " + window.WEDDING_INFO.couple.groom.initial
   );
-  await expect(page.locator("#envelopeMonogram")).toHaveText(initials);
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await page.locator("#closeInvitation").click();
-  await expect(page.locator("#envelopeIntro")).toBeHidden();
+  await expect(page.locator("#waxMonogram")).toHaveText(initials);
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#waxOpenButton")).toBeHidden();
   await expect(page.locator("#heroMonogram")).toContainText(initials.split(" · ")[0]);
   await page.locator(".couple-section .section-title").scrollIntoViewIfNeeded();
   await expect(page.locator(".couple-section .section-title")).toHaveClass(/is-visible/);
@@ -127,9 +125,7 @@ test("menu, map and gift overlays open and close on each device @smoke", async (
   await page.goto(base + "/index.html?party=groom&to=Guest", {
     waitUntil: "domcontentloaded",
   });
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await page.locator("#closeInvitation").click();
+  await page.locator("#waxOpenButton").click();
   const menuToggle = page.locator("#wqToggle");
   // Even a collapsed idle Menu must open on the FIRST touch on phones.
   await menuToggle.evaluate(node => node.classList.add("is-idle"));
@@ -204,9 +200,7 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
   await page.goto(base + "/index.html?party=bride&lang=en", {
     waitUntil: "domcontentloaded",
   });
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await page.locator("#closeInvitation").click();
+  await page.locator("#waxOpenButton").click();
 
   await expect(page.locator("#heroMonogram")).toContainText("M");
   await expect(page.locator("#heroMonogram")).toContainText("T");
@@ -243,195 +237,25 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
 });
 
 
-test("F5 keeps the invitation open within the same tab @core", async ({ page }) => {
-  const url = base + "/index.html?party=bride&to=ReloadGuest&lang=vi";
-  await page.goto(url, { waitUntil: "domcontentloaded" });
-  await expect(page.locator("#envelopeIntro")).toBeVisible();
-  await expect(page.locator(".invitation-card")).toBeVisible();
-  await expect(page.locator(".invitation-card")).toHaveAttribute("aria-hidden", "true");
-  const visualContrast = await page.evaluate(() => ({
-    stage:getComputedStyle(document.getElementById("envelopeIntro")).backgroundColor,
-    card:getComputedStyle(document.querySelector(".invitation-card")).backgroundColor
-  }));
-  expect(visualContrast.stage).toBe("rgb(97, 118, 106)");
-  expect(visualContrast.card).toBe("rgb(255, 250, 240)");
+test("temporary wax gate is the only intro control and simply reveals content @core", async ({ page }) => {
+  await page.goto(base + "/index.html?party=bride&to=ReloadGuest", { waitUntil:"domcontentloaded" });
+  await expect(page.locator("#waxOpenButton")).toBeVisible();
+  await expect(page.locator("#waxMonogram")).toHaveText("N · S");
+  await expect(page.locator("#waxOpenButton")).toHaveCount(0);
+  await expect(page.locator("#closeInvitation")).toHaveCount(0);
+  await expect(page.locator("#envelopeCooldown")).toHaveCount(0);
+  await expect(page.locator(".invitation-card")).toHaveCount(0);
+  await expect(page.locator(".floating-petals")).toHaveCount(0);
+  await expect(page.locator("#invitationReveal")).toHaveCount(0);
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#waxOpenButton")).toBeHidden();
+  await expect(page.locator(".hero")).toBeVisible();
+  await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
 
-  // Global Dark/Light must still work while the sealed envelope is on screen.
-  await page.locator("#settingsTrigger").click();
-  await expect(page.locator("#settingsPanel")).toBeVisible();
-  await page.locator('[data-theme-option="light"]').click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await expect(page.locator(".envelope-intro")).toHaveCSS("background-color", "rgb(238, 230, 220)");
-  await page.locator('[data-theme-option="dark"]').click();
-  await expect(page.locator(".envelope-intro")).toHaveCSS("background-color", "rgb(97, 118, 106)");
-  await page.locator("#settingsClose").click();
-
-  await expect(page.locator("#envelopeSealButton")).toBeVisible();
-  await expect(page.locator("#openInvitation")).toHaveCount(0);
-  await expect(page.locator("#skipInvitation")).toHaveCount(0);
-  await expect(page.locator(".invitation-paper-proxy")).toHaveCount(0);
-
-  // The real invitation stays absolutely still. The sealed envelope itself
-  // slides down and disappears after the wax crack.
-  const cardBefore = await page.locator(".invitation-card").boundingBox();
-  const frontBefore = await page.locator(".envelope-front").boundingBox();
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
-  await expect(page.locator(".envelope-seal-light")).toHaveCSS("animation-name", "sealLocalizedBurst");
-  await expect(page.locator("#envelopeIntro")).toHaveClass(/is-envelope-dropping/);
-  await expect(page.locator("#floatingPetals")).toBeVisible();
-
-  const cardDuring = await page.locator(".invitation-card").boundingBox();
-  expect(Math.abs(cardDuring.y - cardBefore.y)).toBeLessThan(1);
-  expect(Math.abs(cardDuring.x - cardBefore.x)).toBeLessThan(1);
-
-  await expect(page.locator("#envelopeIntro")).toHaveClass(/is-envelope-cleared/, { timeout: 3000 });
-  await expect(page.locator(".envelope-front")).toBeHidden();
-  await expect(page.locator(".envelope-flap")).toBeHidden();
-  await expect(page.locator("#envelopeSealButton")).toBeHidden();
-  await expect(page.locator(".invitation-card")).not.toHaveAttribute("aria-hidden", "true");
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-
-  const cardAfter = await page.locator(".invitation-card").boundingBox();
-  expect(Math.abs(cardAfter.y - cardBefore.y)).toBeLessThan(1);
-  expect(Math.abs(cardAfter.x - cardBefore.x)).toBeLessThan(1);
-  expect(frontBefore.height).toBeGreaterThan(0);
-
-  await expect(page.locator("#envelopeCooldown")).toBeVisible();
-  // Verify actual rendered contrast of the timer's digits against its surface.
-  const timerContrast = await page.locator("#envelopeCooldown").evaluate(node => {
-    const luminance = color => {
-      const rgb = color.match(/[0-9.]+/g).slice(0,3).map(Number);
-      const channels = rgb.map(channel => {
-        const n = channel / 255;
-        return n <= .04045 ? n / 12.92 : ((n + .055) / 1.055) ** 2.4;
-      });
-      return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
-    };
-    const bg = luminance(getComputedStyle(node).backgroundColor);
-    const text = luminance(getComputedStyle(node.querySelector("span")).color);
-    return (Math.max(bg,text) + .05) / (Math.min(bg,text) + .05);
-  });
-  expect(timerContrast).toBeGreaterThanOrEqual(7);
-  // SVG ring and countdown digit must be concentric, even in iOS viewport
-  // sizes. Test actual element bounds rather than the CSS declarations.
-  const timerCenters = await page.locator("#envelopeCooldown").evaluate(node => {
-    const bounds = element => {
-      const rect = element.getBoundingClientRect();
-      return {x:rect.left + rect.width / 2,y:rect.top + rect.height / 2};
-    };
-    return {
-      badge:bounds(node),
-      ring:bounds(node.querySelector("svg")),
-      digit:bounds(node.querySelector("span"))
-    };
-  });
-  for (const part of ["ring", "digit"]) {
-    expect(Math.abs(timerCenters[part].x - timerCenters.badge.x)).toBeLessThan(.5);
-    expect(Math.abs(timerCenters[part].y - timerCenters.badge.y)).toBeLessThan(.5);
-  }
-  // The pocket remains fixed while the card rises out of it.
-  const pocket = await page.locator(".envelope-front").evaluate(node => {
-    const style = getComputedStyle(node);
-    return {transform:style.transform,opacity:style.opacity};
-  });
-  expect(pocket.opacity).toBe("1");
-  expect(["none","matrix(1, 0, 0, 1, 0, 0)","matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)"]).toContain(pocket.transform);
-  await expect(page.locator("#envelopeSealButton")).toBeDisabled();
-  // Only the lightweight paper proxy transitions. The full invitation never
-  // runs a moving layer animation, avoiding Safari text/SVG raster jitter.
-  expect(await page.locator(".invitation-card").evaluate(node =>
-    getComputedStyle(node).animationName
-  )).toBe("none");
-  await page.locator("#closeInvitation").click();
-  await expect(page.locator("#invitationReveal")).toBeVisible();
-  await expect(page.locator("#invitationReveal")).toHaveCSS("background-image","none");
-  expect(await page.locator("#invitationReveal").evaluate(node =>
-    getComputedStyle(node,"::before").animationName
-  )).toBe("heroLocalizedBurst");
-  await expect(page.locator("#invitationPortal")).toHaveCount(0);
-  await expect(page.locator("#envelopeIntro")).toBeHidden();
-  await expect(page.locator("#invitationReveal")).toBeHidden({ timeout: 3000 });
-  await expect(page.locator("#invitationPortal")).toHaveCount(0);
-  await expect(page.locator("#floatingPetals")).toBeHidden({timeout:3000});
-  await expect(page.locator(".floating-petal")).toHaveCount(0);
-  await expect(page.locator("html")).toHaveClass(/golden-signature-entered/);
-  const brideShort = await page.evaluate(() => window.WEDDING_INFO.couple.bride.short.toLocaleUpperCase("vi-VN"));
-  await expect(page.locator("#heroNames")).toContainText(brideShort);
-
-  await page.reload({ waitUntil: "domcontentloaded" });
-  await expect(page.locator("#envelopeIntro")).toBeHidden();
-  await expect(page.locator("#envelopeBurst")).toHaveCount(0);
-  await expect(page.locator("#invitationReveal")).toBeHidden();
-  await expect(page.locator("#invitationPortal")).toHaveCount(0);
-  await expect(page.locator("#floatingPetals")).toBeHidden();
-  await expect(page.locator("html")).toHaveClass(/envelope-resumed/);
-  await expect(page.locator("html")).not.toHaveClass(/golden-signature-entered/);
-  await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
-  expect(await page.evaluate(() => history.state?.weddingEnvelopeOpened)).toBe(
-    JSON.stringify(["bride", "ReloadGuest"]),
-  );
+  // Temporary baseline intentionally reappears after reload; no open-state persistence.
+  await page.reload({ waitUntil:"domcontentloaded" });
+  await expect(page.locator("#waxOpenButton")).toBeVisible();
 });
-
-
-test("reduced motion opens the envelope without particles or flash", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto(base + "/index.html?party=groom&to=QuietGuest", { waitUntil: "domcontentloaded" });
-  await expect(page.locator("#envelopeIntro")).toBeVisible();
-  await expect(page.locator(".invitation-card")).toBeHidden();
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await expect(page.locator(".invitation-card")).toBeVisible();
-  await expect(page.locator("#envelopeBurst")).toHaveCount(0);
-  await expect(page.locator(".envelope-flap")).toHaveCSS("opacity", "1");
-  await expect(page.locator(".envelope-flap")).toHaveCSS("transform", "matrix(1, 0, 0, -1, 0, 0)");
-  await expect(page.locator(".envelope-burst-particle")).toHaveCount(0);
-  await page.locator("#closeInvitation").click();
-  await expect(page.locator("#envelopeIntro")).toBeHidden();
-  await expect(page.locator("#invitationReveal")).toBeHidden();
-  await expect(page.locator("#invitationPortal")).toHaveCount(0);
-  await expect(page.locator("#floatingPetals")).toBeHidden();
-  await expect(page.locator(".floating-petal")).toHaveCount(0);
-  await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
-});
-
-
-test("settings palette provides light/dark, persistent language and music in one place @smoke @core", async ({
-  page,
-}) => {
-  await page.goto(base + "/index.html", { waitUntil: "domcontentloaded" });
-  const hub = page.locator("#settingsHub");
-  await expect(hub).toHaveCount(1);
-  await expect(page.locator("#settingsPanel")).toBeHidden();
-  // Music control is inside this single hub and no longer floats separately.
-  expect(await page.locator("#musicToggle").evaluate(node => node.closest("#settingsHub") !== null)).toBe(true);
-  await page.locator("#settingsTrigger").click();
-  await expect(page.locator("#settingsPanel")).toBeVisible();
-  await page.locator('[data-theme-option="light"]').click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await expect(page.locator('[data-theme-option="light"]')).toHaveAttribute("aria-pressed", "true");
-  expect(await page.locator("html").evaluate(node =>
-    getComputedStyle(node).getPropertyValue("--paper-ivory").trim()
-  )).toBe("#f6f1e8");
-  const lightBackground = await page.locator(".party-selector-card").evaluate(
-    node => getComputedStyle(node).backgroundImage,
-  );
-  await page.locator('[data-lang="en"]').click();
-  await expect(page.locator("#settingsPanel .settings-row-label").first()).toHaveText("Language");
-  await page.locator("#settingsClose").click();
-  await expect(page.locator("#settingsPanel")).toBeHidden();
-  await page.reload({ waitUntil: "domcontentloaded" });
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.locator("#settingsTrigger").click();
-  await expect(page.locator('[data-lang="en"]')).toHaveAttribute("aria-pressed", "true");
-  await page.locator('[data-theme-option="dark"]').click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  const darkBackground = await page.locator(".party-selector-card").evaluate(
-    node => getComputedStyle(node).backgroundImage,
-  );
-  expect(lightBackground).not.toBe(darkBackground);
-});
-
 
 test("settings popover stays inside phone and tablet viewport when hub is dragged @smoke", async ({
   page,
@@ -459,39 +283,25 @@ test("settings popover stays inside phone and tablet viewport when hub is dragge
 });
 
 
-test("personal invitation puts bold recipient below the greeting in both places", async ({
+test("personal invitation keeps the bold recipient in hero across languages", async ({
   page,
 }) => {
   const guest = "Anh Minh và chị Lan";
   await page.goto(base + "/index.html?party=bride&to=" + encodeURIComponent(guest), {
     waitUntil:"domcontentloaded",
   });
-  await expect(page.locator("#envelopeGuestLabel")).toHaveText("Kính mời");
-  await expect(page.locator("#envelopeGuest")).toHaveText(guest);
-  const envelopeStyle = await page.locator("#envelopeGuest").evaluate(node => ({
-    weight:getComputedStyle(node).fontWeight,
-    below:node.getBoundingClientRect().top >= document.getElementById("envelopeGuestLabel").getBoundingClientRect().top,
-  }));
-  expect(Number(envelopeStyle.weight)).toBeGreaterThanOrEqual(600);
-  expect(envelopeStyle.below).toBe(true);
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await page.locator("#closeInvitation").click();
+  await page.locator("#waxOpenButton").click();
   await expect(page.locator("#heroGuestLabel")).toHaveText("Kính mời");
   await expect(page.locator("#guestName")).toHaveText(guest);
   await expect(page.locator("#guestName")).toBeVisible();
   await page.locator("#settingsTrigger").click();
   await page.locator('[data-lang="en"]').click();
-  await expect(page.locator("#envelopeGuestLabel")).toHaveText("Cordially inviting");
   await expect(page.locator("#heroGuestLabel")).toHaveText("Cordially inviting");
   await expect(page.locator("#guestName")).toHaveText(guest);
 
   // A generic link must not render an empty personalized-name line.
   await page.goto(base + "/index.html?party=groom", { waitUntil: "domcontentloaded" });
-  await expect(page.locator("#envelopeGuest")).toBeHidden();
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await page.locator("#closeInvitation").click();
+  await page.locator("#waxOpenButton").click();
   await expect(page.locator("#guestName")).toBeHidden();
 });
 
@@ -580,7 +390,7 @@ test("a new tab starts in VN and Dark even after the first tab was changed @smok
   await other.waitForLoadState("domcontentloaded");
   await expect(other.locator("html")).toHaveAttribute("data-theme","dark");
   await expect(other.locator("html")).toHaveAttribute("lang","vi");
-  await expect(other.locator("#envelopeIntro")).toBeVisible();
+  await expect(other.locator("#waxOpenButton")).toBeVisible();
   await other.close();
 
   await page.reload({ waitUntil:"domcontentloaded" });
@@ -621,9 +431,7 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
   });
 
   await page.goto(base + "/index.html?party=bride", { waitUntil: "domcontentloaded" });
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await page.locator("#closeInvitation").click();
+  await page.locator("#waxOpenButton").click();
   await page.waitForFunction(() => window.__musicMockReady === true);
 
   const bubble = page.locator("#musicBubble");
@@ -676,135 +484,6 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
 });
 
 
-test("music bubble stays clickable above the unopened envelope and can cancel loading @smoke", async ({ page }) => {
-  await page.addInitScript(() => {
-    window.YT = {
-      PlayerState: { PLAYING:1, PAUSED:2, ENDED:0 },
-      Player: function (_host, options) {
-        const player = {
-          setVolume() {},
-          playVideo() { window.__pendingPlays = (window.__pendingPlays || 0) + 1; },
-          pauseVideo() { window.__pauseCalls = (window.__pauseCalls || 0) + 1; },
-          stopVideo() { window.__stopCalls = (window.__stopCalls || 0) + 1; },
-          getPlayerState() { return -1; },
-        };
-        window.__emitLatePlaying = () => options.events.onStateChange({data:1,target:player});
-        queueMicrotask(() => options.events.onReady({target:player}));
-        return player;
-      },
-    };
-  });
-
-  await page.goto(base + "/index.html?party=bride", {waitUntil:"domcontentloaded"});
-  await expect(page.locator("#envelopeIntro")).toBeVisible();
-  await page.locator("#settingsTrigger").click();
-  await page.locator("#musicToggle").click();
-
-  const bubble = page.locator("#musicBubble");
-  await expect(bubble).toBeVisible();
-  await expect(bubble).toHaveAttribute("data-music-state","starting");
-  const note = bubble.locator(".music-float-note svg");
-  expect(await note.evaluate(node => getComputedStyle(node).animationName)).toBe("none");
-
-  // On the unopened envelope the orb must be interactable, not merely
-  // visible behind the overlay (Playwright performs a real hit-test).
-  await page.locator("#musicBubbleTrigger").click();
-  await expect(page.locator("#musicBubbleActions")).toBeVisible();
-  await expect(page.locator("#musicBubblePause")).toBeEnabled();
-  await expect(page.locator("#musicBubblePause .music-float-pause-icon")).toBeVisible();
-  await page.locator("#musicBubblePause").click();
-  await expect(bubble).toHaveAttribute("data-music-state","paused");
-  await expect(bubble).toBeVisible();
-
-  await page.locator("#musicBubbleTrigger").click();
-  await page.locator("#musicBubbleStop").click();
-  await expect(bubble).toBeHidden();
-  expect(await page.evaluate(() => window.__stopCalls)).toBe(1);
-  await page.evaluate(() => window.__emitLatePlaying());
-  await expect(bubble).toBeHidden();
-});
-
-
-test("music confirms playing from player state even if YouTube sends no PLAYING event", async ({ page }) => {
-  await page.addInitScript(() => {
-    window.YT = {
-      PlayerState: { PLAYING:1, PAUSED:2, ENDED:0 },
-      Player: function (_host, options) {
-        let state = -1;
-        const player = {
-          setVolume() {},
-          playVideo() { state = 1; },
-          pauseVideo() { state = 2; },
-          stopVideo() { state = 0; },
-          getPlayerState() { return state; },
-        };
-        queueMicrotask(() => options.events.onReady({target:player}));
-        return player;
-      },
-    };
-  });
-
-  await page.goto(base + "/index.html?party=groom", {waitUntil:"domcontentloaded"});
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await page.locator("#closeInvitation").click();
-  await page.locator("#settingsTrigger").click();
-  // This test validates state polling, not pointer hit-testing (covered above).
-  // DOM click avoids a headless Chromium/Firefox actionability stall while
-  // another worker may be initializing YouTube/WebGL.
-  await page.locator("#musicToggle").evaluate(node => node.click());
-  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing", {timeout:4000});
-  await expect(page.locator("#musicToggle .music-label")).not.toContainText("ĐANG TẢI");
-  await page.locator("#musicBubbleTrigger").click();
-  await page.locator("#musicBubblePause").click();
-  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","paused");
-});
-
-
-test("music loading times out into a retryable paused state instead of freezing", async ({ page }) => {
-  await page.addInitScript(() => {
-    // Only shorten the product's 10s playback watchdog; leave other timers alone.
-    const originalTimeout = window.setTimeout;
-    window.setTimeout = (callback, delay, ...args) =>
-      originalTimeout(callback, delay === 10000 ? 180 : delay, ...args);
-    window.__allowMusicPlay = false;
-    window.YT = {
-      PlayerState: { PLAYING:1, PAUSED:2, ENDED:0 },
-      Player: function (_host, options) {
-        const player = {
-          setVolume() {},
-          playVideo() {
-            if (window.__allowMusicPlay) {
-              options.events.onStateChange({data:1, target:player});
-            }
-          },
-          pauseVideo() {},
-          stopVideo() {},
-          getPlayerState() { return window.__allowMusicPlay ? 1 : -1; },
-        };
-        queueMicrotask(() => options.events.onReady({target:player}));
-        return player;
-      },
-    };
-  });
-
-  await page.goto(base + "/index.html?party=bride", {waitUntil:"domcontentloaded"});
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await page.locator("#closeInvitation").click();
-  await page.locator("#settingsTrigger").click();
-  await page.locator("#musicToggle").click();
-
-  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","paused", {timeout:3000});
-  await expect(page.locator("#musicToggle .music-label")).toContainText("THỬ LẠI");
-  await page.locator("#musicBubbleTrigger").click();
-  await expect(page.locator("#musicBubblePause")).toBeEnabled();
-  await page.evaluate(() => window.__allowMusicPlay = true);
-  await page.locator("#musicBubblePause").click();
-  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing", {timeout:3000});
-});
-
-
 test("single reception shows one event, date, venue, map and gift @smoke", async ({ page }) => {
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
@@ -823,11 +502,8 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await page.goto(base+"/index.html?to=Minh%20va%20Lan",{waitUntil:"domcontentloaded"});
   await expect(page.locator("html")).toHaveAttribute("data-wedding-mode","single");
   await expect(page.locator("#partySelector")).toBeHidden();
-  await expect(page.locator("#envelopeIntro")).toBeVisible();
-  await expect(page.locator(".envelope-date [data-party-date='single']")).toHaveText("21 · 05 · 2027");
-  await page.locator("#envelopeSealButton").click();
-  await expect(page.locator("#closeInvitation")).toBeVisible();
-  await page.locator("#closeInvitation").click();
+  await expect(page.locator("#waxOpenButton")).toBeVisible();
+  await page.locator("#waxOpenButton").click();
   await expect(page.locator("#heroCeremonyLabel")).toContainText("TIỆC CƯỚI");
   await expect(page.locator(".hero-date [data-party-date='single']")).toHaveText("21.05.2027");
   await expect(page.locator(".event-card:visible")).toHaveCount(1);
@@ -865,5 +541,5 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   expect(invitation).toContain("lang=en");
   expect(invitation).not.toContain("party=");
   await page.locator("#linkToolBack").click();
-  await expect(page.locator("#envelopeIntro")).toBeVisible();
+  await expect(page.locator("#waxOpenButton")).toBeVisible();
 });

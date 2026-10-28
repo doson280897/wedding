@@ -14,13 +14,10 @@
     ? "single"
     : (partyParam === "bride" || partyParam === "groom" ? partyParam : null);
   document.documentElement.dataset.weddingMode = singleMode ? "single" : "double";
-  const invitationKey = JSON.stringify([selectedParty, params.get("to") || ""]);
-  const alreadyEntered = !!selectedParty && history.state?.weddingEnvelopeOpened === invitationKey;
   const partySelector = document.getElementById("partySelector");
   const languageButtons = Array.from(document.querySelectorAll(".language-switch [data-lang]"));
 
-  // A refreshed invitation always starts at the envelope, not the browser's
-  // previously restored scroll position inside the invitation.
+  // Keep the invitation anchored to the top while the temporary wax gate is active.
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   const resetInvitationScroll = () => window.scrollTo({ top:0, left:0, behavior:"instant" });
   resetInvitationScroll();
@@ -81,8 +78,6 @@
   const displayGuest = rawGuest ? rawGuest.replace(/[_+]/g, " ").trim().slice(0, 100) : "";
   const guestNode = document.getElementById("guestName");
   const heroGuestLabel = document.getElementById("heroGuestLabel");
-  const envelopeGuest = document.getElementById("envelopeGuest");
-  const envelopeGuestLabel = document.getElementById("envelopeGuestLabel");
 
   function updateGuest() {
     const named = Boolean(displayGuest);
@@ -97,11 +92,6 @@
     if (guestNode) {
       guestNode.textContent = named ? displayGuest : "";
       guestNode.hidden = !named;
-    }
-    if (envelopeGuestLabel) envelopeGuestLabel.textContent = named ? label : tr("envelope.invite");
-    if (envelopeGuest) {
-      envelopeGuest.textContent = named ? displayGuest : "";
-      envelopeGuest.hidden = !named;
     }
   }
 
@@ -245,259 +235,31 @@
     });
   });
 
-  const intro = document.getElementById("envelopeIntro");
   const themeColor = document.getElementById("themeColor");
   const setBrowserTheme = color => themeColor?.setAttribute("content", color);
   const setContentBrowserTheme = () => setBrowserTheme(
     document.documentElement.dataset.theme === "light" ? "#f5f0e6" : "#0b0e0e"
   );
-  const setEnvelopeBrowserTheme = () => setBrowserTheme(
-    document.documentElement.dataset.theme === "light" ? "#eee6dc" : "#61766a"
-  );
-  document.addEventListener("wedding:themechange", () => {
-    if (document.body.classList.contains("envelope-locked")) setEnvelopeBrowserTheme();
-    else setContentBrowserTheme();
-  });
-  const envelopeSealButton = document.getElementById("envelopeSealButton");
-  const closeInvitation = document.getElementById("closeInvitation");
-  const invitationReveal = document.getElementById("invitationReveal");
-  const floatingPetals = document.getElementById("floatingPetals");
-  const envelopeCooldown = document.getElementById("envelopeCooldown");
-  const envelopeCooldownValue = document.getElementById("envelopeCooldownValue");
-  // A reload in the same tab resumes the invitation without replaying its
-  // envelope. New tabs and a different party/guest still begin at the envelope.
-  if (intro && (alreadyEntered || linkToolInitial)) {
-    intro.hidden = true;
-    document.body.classList.remove("envelope-locked");
-    document.documentElement.classList.remove("envelope-theme", "envelope-pending");
+  document.addEventListener("wedding:themechange", setContentBrowserTheme);
+
+  const waxOpenButton = document.getElementById("waxOpenButton");
+  const openFromWax = () => {
+    if (!waxOpenButton || waxOpenButton.hidden) return;
+    waxOpenButton.hidden = true;
+    document.documentElement.classList.remove("wax-pending");
     setContentBrowserTheme();
-  }
-
-  if (intro && selectedParty && !alreadyEntered && !linkToolInitial) {
-    setEnvelopeBrowserTheme();
-    intro.hidden = false;
-    document.body.classList.add("envelope-locked");
     resetInvitationScroll();
-    window.setTimeout(() => envelopeSealButton?.focus({preventScroll:true}), 0);
+    document.dispatchEvent(new Event("wedding:waxopen"));
+  };
 
-    let opened = false;
-    let leaving = false;
-    let autoCloseTimer = 0;
-    let cooldownTickTimer = 0;
-    let revealCleanupTimer = 0;
-    let petalsCleanupTimer = 0;
-    const prefersReducedMotion = () =>
-      matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    // One composited opacity wash replaces the GPU-heavy foil particles,
-    // drifting petals, blurred radial flares and zoom portal.
-    const showInvitationReveal = () => {
-      if (!invitationReveal || prefersReducedMotion()) return;
-      invitationReveal.hidden = false;
-      invitationReveal.classList.add("is-active");
-      window.clearTimeout(revealCleanupTimer);
-      revealCleanupTimer = window.setTimeout(() => {
-        invitationReveal.hidden = true;
-        invitationReveal.classList.remove("is-active");
-      }, 1100);
-    };
-
-    // Ivory petal bloom, deliberately separate from the card raster/flight.
-    // 4 petals on phones, 8 on desktop; all compositor-only and self-cleaning.
-    const releasePetals = origin => {
-      if (!floatingPetals || !origin || prefersReducedMotion()) return;
-      const compact = matchMedia("(max-width: 650px)").matches;
-      const count = navigator.connection?.saveData ? 3 : compact ? 6 : 10;
-      floatingPetals.style.setProperty("--petal-x", origin.x + "px");
-      floatingPetals.style.setProperty("--petal-y", origin.y + "px");
-      const fragment = document.createDocumentFragment();
-      for (let i = 0; i < count; i++) {
-        const petal = document.createElement("i");
-        petal.className = "floating-petal";
-        const angle = (360 / count) * i + 14;
-        petal.style.setProperty("--petal-angle", angle + "deg");
-        petal.style.setProperty("--petal-distance", "-" + (compact ? 145 + (i % 3) * 34 : 175 + (i % 4) * 42) + "px");
-        petal.style.setProperty("--petal-delay", ((i % 4) * 38) + "ms");
-        fragment.append(petal);
-      }
-      floatingPetals.replaceChildren(fragment);
-      floatingPetals.hidden = false;
-      floatingPetals.classList.add("is-active");
-      window.clearTimeout(petalsCleanupTimer);
-      petalsCleanupTimer = window.setTimeout(() => {
-        floatingPetals.hidden = true;
-        floatingPetals.classList.remove("is-active");
-        floatingPetals.replaceChildren();
-      }, 2050);
-    };
-
-    const stopAutoClose = () => {
-      window.clearTimeout(autoCloseTimer);
-      window.clearInterval(cooldownTickTimer);
-      autoCloseTimer = 0;
-      cooldownTickTimer = 0;
-      envelopeCooldown?.classList.remove("is-active");
-      if (envelopeCooldown) envelopeCooldown.hidden = true;
-    };
-
-    const startAutoClose = () => {
-      if (!envelopeCooldown || !envelopeCooldownValue) return;
-      stopAutoClose();
-
-      const duration = 5000;
-      const startedAt = performance.now();
-      envelopeCooldown.hidden = false;
-      envelopeCooldownValue.textContent = "5";
-      // Never force layout during the heavy paper-compositing frame.
-      requestAnimationFrame(() => {
-        if (!envelopeCooldown.hidden) envelopeCooldown.classList.add("is-active");
-      });
-
-      cooldownTickTimer = window.setInterval(() => {
-        const elapsed = performance.now() - startedAt;
-        const remaining = String(Math.max(0, Math.ceil((duration - elapsed) / 1000)));
-        if (envelopeCooldownValue.textContent !== remaining) {
-          envelopeCooldownValue.textContent = remaining;
-        }
-      }, 250);
-
-      autoCloseTimer = window.setTimeout(() => {
-        envelopeCooldownValue.textContent = "0";
-        enterInvitation(false);
-      }, duration);
-    };
-
-    const enterInvitation = (instant = false) => {
-      if (leaving) return;
-      leaving = true;
-      stopAutoClose();
-
-      // Persist on the current browser history entry only. This survives F5
-      // (and back/forward) without copying an opened invitation to new tabs.
-      try {
-        const currentState = history.state && typeof history.state === "object"
-          ? history.state : {};
-        history.replaceState({ ...currentState, weddingEnvelopeOpened: invitationKey }, "");
-      } catch (_) { /* Storage/history restrictions must not block opening. */ }
-
-      if (instant || prefersReducedMotion()) {
-        intro.hidden = true;
-        resetInvitationScroll();
-        document.body.classList.remove("envelope-locked");
-        document.documentElement.classList.remove("envelope-theme", "envelope-pending");
-        setContentBrowserTheme();
-        document.dispatchEvent(new Event("wedding:envelopeexit"));
-        return;
-      }
-
-      showInvitationReveal();
-      intro.classList.add("is-leaving");
-      window.setTimeout(() => {
-        intro.hidden = true;
-        resetInvitationScroll();
-        document.body.classList.remove("envelope-locked");
-        document.documentElement.classList.remove("envelope-theme", "envelope-pending");
-        setContentBrowserTheme();
-        document.dispatchEvent(new Event("wedding:envelopeexit"));
-        document.dispatchEvent(new Event("wedding:ceremonialentry"));
-      }, 260);
-    };
-
-    const openEnvelope = () => {
-      if (opened || leaving) return;
-      opened = true;
-      envelopeSealButton?.setAttribute("disabled", "");
-
-      const reduced = prefersReducedMotion();
-      const card = intro.querySelector(".invitation-card");
-      const movingEnvelope = intro.querySelector(".envelope-front");
-      const sealRect = envelopeSealButton?.getBoundingClientRect();
-      const petalOrigin = sealRect && {
-        x: sealRect.left + sealRect.width / 2,
-        y: sealRect.top + sealRect.height / 2
-      };
-
-      const revealCard = () => {
-        if (leaving) return;
-        card?.removeAttribute("aria-hidden");
-        intro.classList.add("is-envelope-cleared", "is-opened");
-        if (reduced) startAutoClose();
-        else requestAnimationFrame(startAutoClose);
-        closeInvitation?.focus({ preventScroll:true });
-      };
-
-      const dropEnvelope = () => {
-        if (leaving) return;
-        if (reduced) {
-          intro.classList.add("is-envelope-dropping");
-          revealCard();
-          return;
-        }
-
-        let finished = false;
-        let fallbackTimer = 0;
-        const finishDrop = event => {
-          if (event && (event.target !== movingEnvelope || event.propertyName !== "transform")) return;
-          if (finished || leaving) return;
-          finished = true;
-          movingEnvelope?.removeEventListener("transitionend", finishDrop);
-          window.clearTimeout(fallbackTimer);
-          revealCard();
-        };
-
-        movingEnvelope?.addEventListener("transitionend", finishDrop);
-        intro.classList.add("is-envelope-dropping");
-        requestAnimationFrame(() => {
-          if (!leaving) releasePetals(petalOrigin);
-        });
-        fallbackTimer = window.setTimeout(finishDrop, 1350);
-      };
-
-      if (reduced) {
-        dropEnvelope();
-        return;
-      }
-
-      intro.classList.add("is-seal-cracking");
-      window.setTimeout(() => {
-        if (!leaving) dropEnvelope();
-      }, 260);
-    };
-
-    envelopeSealButton?.addEventListener("click", openEnvelope);
-    closeInvitation?.addEventListener("click", () => enterInvitation(false));
-
-    document.addEventListener("keydown", event => {
-      if (intro.hidden || !document.body.classList.contains("envelope-locked")) return;
-      if (event.key === "Escape") {
-        event.preventDefault();
-        // Before opening, only the physical wax seal can start the ceremony.
-        if (opened) enterInvitation(false);
-        return;
-      }
-      if (event.key !== "Tab") return;
-
-      const envelopeActions = opened
-        ? [closeInvitation]
-        : [envelopeSealButton];
-      const settingsTrigger = document.getElementById("settingsTrigger");
-      const settingsPanel = document.getElementById("settingsPanel");
-      const paletteButtons = settingsPanel?.hidden
-        ? [] : [...settingsPanel.querySelectorAll("button")];
-      const focusable = [settingsTrigger, ...paletteButtons, ...envelopeActions]
-        .filter(button => button && !button.disabled && !button.hidden);
-      if (!focusable.length) return;
-      const first = focusable[0];
-      const last = focusable.at(-1);
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    });
+  if (waxOpenButton) {
+    if (selectedParty && !linkToolInitial) {
+      waxOpenButton.hidden = false;
+      waxOpenButton.addEventListener("click", openFromWax, { once:true });
+      requestAnimationFrame(() => waxOpenButton.focus({ preventScroll:true }));
+    } else {
+      waxOpenButton.hidden = true;
+    }
   }
 
   const musicButton = document.getElementById("musicToggle");
@@ -885,7 +647,6 @@
       escapeHtml(left) + " <span>" + separator + "</span> " + escapeHtml(right);
 
     const pairs = {
-      envelope: "<span>" + escapeHtml(first.short) + "</span><em>&amp;</em><span>" + escapeHtml(second.short) + "</span>",
       hero: pair(upper(first.short), upper(second.short), "&amp;"),
       closing: pair(first.short, second.short, "&amp;"),
       footer: "© " + new Date(partyInfo(selectedParty).date + "T00:00:00Z").getUTCFullYear() +
@@ -900,8 +661,8 @@
 
     const monogram = document.getElementById("heroMonogram");
     if (monogram) monogram.innerHTML = escapeHtml(first.initial) + " <span>&amp;</span> " + escapeHtml(second.initial);
-    const seal = document.getElementById("envelopeMonogram");
-    if (seal) seal.textContent = first.initial + " · " + second.initial;
+    const wax = document.getElementById("waxMonogram");
+    if (wax) wax.textContent = first.initial + " · " + second.initial;
   }
 
   function refreshPartyLabels() {
@@ -959,8 +720,7 @@
   if (hero && heroPhoto && "IntersectionObserver" in window) {
     let heroInViewport = false;
     const updateHeroMotion = () => {
-      // No costly hero zoom behind an opaque, unopened envelope.
-      const visible = heroInViewport && !document.body.classList.contains("envelope-locked");
+      const visible = heroInViewport && !document.documentElement.classList.contains("wax-pending");
       heroPhoto.style.animationPlayState = visible ? "running" : "paused";
       heroPhoto.style.willChange = visible ? "transform" : "auto";
     };
@@ -969,7 +729,7 @@
       updateHeroMotion();
     }, {threshold:0});
     heroAnimationObserver.observe(hero);
-    document.addEventListener("wedding:envelopeexit", updateHeroMotion);
+    document.addEventListener("wedding:waxopen", updateHeroMotion);
     updateHeroMotion();
   }
 
@@ -1009,18 +769,8 @@
     document.documentElement.classList.add("cinematic-ready");
   }
 
-  // Hero animation starts when the invitation is actually entered, not while
-  // the envelope is covering it. Same-tab reloads start immediately.
   const enterCinematicHero = () => document.documentElement.classList.add("cinematic-entered");
-  document.addEventListener("wedding:envelopeexit", enterCinematicHero, {once:true});
-  if (!document.body.classList.contains("envelope-locked")) enterCinematicHero();
-
-  // Only a deliberate ceremonial entrance earns the one-time golden signature.
-  // The fast Skip button, reduced-motion visitors and same-tab reloads do not.
-  document.addEventListener("wedding:ceremonialentry", () => {
-    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.documentElement.classList.add("golden-signature-entered");
-    }
-  }, {once:true});
+  document.addEventListener("wedding:waxopen", enterCinematicHero, { once:true });
+  if (!document.documentElement.classList.contains("wax-pending")) enterCinematicHero();
 
 })();

@@ -20,13 +20,7 @@
       button.setAttribute("aria-pressed", String(active));
     }
 
-    const envelopeVisible = document.body.classList.contains("envelope-locked") ||
-      document.documentElement.classList.contains("envelope-pending");
-    if (themeMeta) {
-      themeMeta.content = envelopeVisible
-        ? (theme === "light" ? "#eee6dc" : "#61766a")
-        : (theme === "light" ? "#f5f0e6" : "#0b0e0e");
-    }
+    if (themeMeta) themeMeta.content = theme === "light" ? "#f5f0e6" : "#0b0e0e";
   };
 
   const setTheme = (next, persist = true) => {
@@ -102,10 +96,6 @@
   navToggle?.addEventListener("click", () => setOpen(false));
   document.querySelector(".party-admin-link")?.addEventListener("click", () => setOpen(false));
   window.addEventListener("popstate", () => setOpen(false));
-  document.addEventListener("wedding:envelopeexit", () => {
-    setOpen(false);
-    syncThemeControls();
-  });
   window.addEventListener("resize", positionPanel, { passive: true });
   window.addEventListener("scroll", positionPanel, { passive: true });
   hub.addEventListener("pointerup", () => requestAnimationFrame(positionPanel));
