@@ -1228,12 +1228,59 @@ html[data-theme="light"] .moonlight-gate__portal{filter:blur(10px) saturate(.75)
   color:#fbe2af;filter:drop-shadow(0 1px 4px #4c2324a6);
 }
 .wax-lock{display:block;width:100%;height:100%;overflow:visible}
-.wax-lock__shackle{
-  transform-origin:12px 24px;
-  transition:transform .48s cubic-bezier(.2,.7,.22,1);
+/* Key entry, twist and shackle release share one 1.6s sequence. The
+   stationary tip (23.5,36) is the rotation pivot; the key stays aligned
+   with the lock as it turns instead of swinging around its centre. */
+.wax-lock__key-insert{
+  opacity:0;
+  transform:translate(38px,5px) rotate(-9deg);
+  transform-box:view-box;
+  transform-origin:23.5px 36px;
+  filter:drop-shadow(0 0 2px #ffe0a87d);
 }
+.wax-lock__key-turn{
+  transform-box:view-box;
+  transform-origin:23.5px 36px;
+}
+.wax-lock__shackle{
+  transform-box:view-box;
+  transform-origin:12px 24px;
+}
+.moonlight-gate.is-unlocking .wax-lock__key-insert{
+  animation:gateKeyInsert 1.6s cubic-bezier(.25,.72,.25,1) both;
+}
+.moonlight-gate.is-unlocking .wax-lock__key-turn{
+  animation:gateKeyTwist 1.6s ease-in-out both;
+}
+.moonlight-gate.is-unlocking .wax-lock__shackle{
+  animation:gateLockShackle 1.6s cubic-bezier(.16,.72,.3,1) both;
+}
+.moonlight-gate.is-unlocking .wax-lock__body{
+  animation:gateLockBodyGlow 1.6s ease-in-out both;
+}
+@keyframes gateKeyInsert{
+  0%{opacity:0;transform:translate(38px,5px) rotate(-9deg)}
+  12%{opacity:1}
+  45%,100%{opacity:1;transform:translate(0,0) rotate(0)}
+}
+@keyframes gateKeyTwist{
+  0%,48%{transform:rotate(0deg)}
+  79%,100%{transform:rotate(55deg)}
+}
+@keyframes gateLockShackle{
+  0%,78%{transform:translateY(0) rotate(0deg)}
+  86%{transform:translateY(-3px) rotate(-8deg)}
+  100%{transform:translateY(-7px) rotate(-20deg)}
+}
+@keyframes gateLockBodyGlow{
+  0%,65%{filter:none}
+  82%{filter:drop-shadow(0 0 4px #ffe1a873)}
+  100%{filter:drop-shadow(0 0 7px #ffe1a850)}
+}
+/* Keep the unlocked shackle in its released position during the short
+   door-glow prelude, before the entire seal fades away. */
 .moonlight-gate.is-awakening .wax-lock__shackle{
-  transform:translateY(-5px) rotate(-18deg);
+  transform:translateY(-7px) rotate(-20deg);
 }
 .moonlight-gate.is-opening #waxOpenButton{opacity:0;transform:translate(-50%,-50%) scale(.7)}
 .moonlight-gate.is-opening .moonlight-gate__top-caption,

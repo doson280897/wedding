@@ -284,8 +284,18 @@
           <path class="wax-lock__shackle" d="M12 24V17a12 12 0 0 1 24 0v7h-6v-7a6 6 0 0 0-12 0v7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
           <rect class="wax-lock__body" x="7" y="22" width="34" height="29" rx="6" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="2"/>
           <rect x="11" y="26" width="26" height="21" rx="3" stroke="currentColor" stroke-opacity=".44"/>
-          <path d="M24 30a5 5 0 0 0-2.5 9.3L20 44h8l-1.5-4.7A5 5 0 0 0 24 30Z" fill="currentColor"/>
+          <path d="M24 30a5 5 0 0 0-2.5 9.3L20 44h8l-1.5-4.7A5 5 0 0 0 24 30Z" fill="#50332e" stroke="currentColor" stroke-width=".9"/>
           <path d="M14 25h20M14 48h20" stroke="currentColor" stroke-opacity=".52" stroke-width="1"/>
+          <!-- The tip enters the keyhole first. The nested group turns around
+               that same tip, so the rotation looks like a real key turn. -->
+          <g class="wax-lock__key-insert">
+            <g class="wax-lock__key-turn">
+              <path d="M23.5 36H41" stroke="#ffecc1" stroke-width="3.2" stroke-linecap="round"/>
+              <path d="M28 36v-4M33 36v-3.6" stroke="#ffecc1" stroke-width="2.1" stroke-linecap="round"/>
+              <circle cx="47" cy="36" r="6.5" fill="#5c3930" stroke="#ffe5a8" stroke-width="3"/>
+              <circle cx="47" cy="36" r="2" fill="#ffe7b0"/>
+            </g>
+          </g>
         </svg>
       </span>
     </button>

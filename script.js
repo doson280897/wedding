@@ -256,6 +256,7 @@
   const reducedGateMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   // Enjoy the names and full-screen shooting stars after the doors settle,
   // then crossfade the night sky and the real hero together.
+  const GATE_UNLOCK_MS = 1600;
   const GATE_AWAKEN_MS = 240;
   const GATE_DOOR_MS = 3200;
   const GATE_REVEAL_BEAT_MS = 2200;
@@ -412,7 +413,7 @@
     leftGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.hidden = true;
     moonlightGate.classList.remove(
-      "is-awakening", "is-opening", "is-opened", "is-handoff", "is-leaving"
+      "is-unlocking", "is-awakening", "is-opening", "is-opened", "is-handoff", "is-leaving"
     );
     document.documentElement.classList.remove("wax-pending", "gate-hero-revealing");
     setContentBrowserTheme();
@@ -455,16 +456,23 @@
       return;
     }
 
-    moonlightGate.classList.add("is-awakening");
+    // Only open the wings after the key has entered, turned, and freed the
+    // shackle. The portal glow begins in the short beat after unlocking.
+    moonlightGate.classList.add("is-unlocking");
     scheduleGate(() => {
       if (moonlightGate.hidden) return;
-      // Wait for the real two-stage hinge animation to finish. Keep the
-      // guarded fallback for browsers that suppress animationend.
-      leftGateDoor?.addEventListener("animationend", onDoorAnimationEnd);
-      moonlightGate.classList.add("is-opening");
-      startGateMeteors();
-      scheduleGate(settleOpenDoor, GATE_DOOR_MS + 180);
-    }, GATE_AWAKEN_MS);
+      moonlightGate.classList.remove("is-unlocking");
+      moonlightGate.classList.add("is-awakening");
+      scheduleGate(() => {
+        if (moonlightGate.hidden) return;
+        // Match the two-stage hinge's actual CSS animation end; retain the
+        // time fallback for browsers which suppress animationend.
+        leftGateDoor?.addEventListener("animationend", onDoorAnimationEnd);
+        moonlightGate.classList.add("is-opening");
+        startGateMeteors();
+        scheduleGate(settleOpenDoor, GATE_DOOR_MS + 180);
+      }, GATE_AWAKEN_MS);
+    }, GATE_UNLOCK_MS);
   };
   if (moonlightGate && waxOpenButton) {
     if (selectedParty && !linkToolInitial) {
