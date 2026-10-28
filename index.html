@@ -45,15 +45,27 @@
 </script>
 <script>
 (() => {
-  const party = new URLSearchParams(location.search).get("party");
+  const params = new URLSearchParams(location.search);
+  const party = params.get("party");
+  // history.state survives F5 in this tab but isn't shared with newly opened tabs.
+  // Include the party and personalized guest so opening a different invitation
+  // does not incorrectly skip its envelope.
+  const invitationKey = JSON.stringify([party, params.get("to") || ""]);
+  const alreadyEntered = history.state?.weddingEnvelopeOpened === invitationKey;
   const settings = window.WEDDING_INFO;
   const theme = document.getElementById("themeColor");
   const favicon = document.getElementById("siteFavicon");
   if (party === "bride" || party === "groom") {
     if (favicon && settings?.parties?.[party]?.images?.favicon) favicon.href = settings.parties[party].images.favicon + "?v=__BUILD_ID__";
     document.documentElement.dataset.party = party;
-    document.documentElement.classList.add("envelope-theme", "envelope-pending");
-    if (theme) theme.setAttribute("content", "#496957");
+    if (alreadyEntered) {
+      // Hide the envelope before the first paint, not only after deferred JS.
+      document.documentElement.classList.add("envelope-resumed");
+      if (theme) theme.setAttribute("content", "#0b0e0e");
+    } else {
+      document.documentElement.classList.add("envelope-theme", "envelope-pending");
+      if (theme) theme.setAttribute("content", "#496957");
+    }
 
     const heroPreload = document.createElement("link");
     heroPreload.rel = "preload";
