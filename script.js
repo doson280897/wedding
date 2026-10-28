@@ -409,6 +409,32 @@
       envelopeSealButton?.setAttribute("disabled", "");
 
       const reduced = prefersReducedMotion();
+
+      // Copy the already-resolved personalized invitation into the lightweight
+      // moving face. It looks like the real card while avoiding moving its
+      // decorative SVG tree and complex layout during extraction.
+      const motionCard = intro.querySelector(".invitation-paper-proxy");
+      const realCard = intro.querySelector(".invitation-card");
+      if (motionCard && realCard) {
+        const copyText = (targetSelector, sourceSelector) => {
+          const target = motionCard.querySelector(targetSelector);
+          const source = realCard.querySelector(sourceSelector);
+          if (target && source) target.textContent = source.textContent.trim();
+        };
+        copyText(".invitation-paper-proxy-eyebrow", ".envelope-eyebrow");
+        copyText(".invitation-paper-proxy-date", ".envelope-date");
+        copyText(".invitation-paper-proxy-label", "#envelopeGuestLabel");
+        const motionNames = motionCard.querySelector(".invitation-paper-proxy-names");
+        const realNames = realCard.querySelector("#envelopeTitle");
+        if (motionNames && realNames) motionNames.innerHTML = realNames.innerHTML;
+        const motionGuest = motionCard.querySelector(".invitation-paper-proxy-guest");
+        const realGuest = realCard.querySelector("#envelopeGuest");
+        if (motionGuest && realGuest) {
+          motionGuest.textContent = realGuest.textContent;
+          motionGuest.hidden = realGuest.hidden;
+        }
+      }
+
       // One geometry read before the paper or seal moves; no forced layout
       // during the transform animation.
       const seal = intro.querySelector(".envelope-seal")?.getBoundingClientRect();

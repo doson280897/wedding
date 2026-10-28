@@ -1668,3 +1668,64 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
   .envelope-seal-light{display:none!important}
   .invitation-reveal{display:none!important}
 }
+
+
+/* PROFESSIONAL MOTION FACE — same hierarchy as the real invitation, but only
+   lightweight text/rules move. The decorative SVGs remain stationary. */
+.invitation-paper-proxy{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:46px 48px 40px;
+}
+.invitation-paper-proxy-rule{
+  width:54%;height:1px;margin-bottom:14px;
+  background:linear-gradient(90deg,transparent,#9d8c68,transparent);
+}
+.invitation-paper-proxy-eyebrow{
+  position:relative;margin:0;color:#374f3e;
+  font:500 clamp(17px,2.8vw,23px) 'Cormorant Garamond',serif;
+  letter-spacing:.12em;text-transform:uppercase;
+}
+.invitation-paper-proxy-leaf{
+  display:block;margin:4px 0 1px;color:#758c72;
+  font:23px 'Cormorant Garamond',serif;transform:rotate(-18deg);
+}
+.invitation-paper-proxy-leaf-small{font-size:17px;margin:8px 0 5px}
+.invitation-paper-proxy-names{
+  margin:0;display:flex;flex-direction:column;align-items:center;
+  font:400 clamp(42px,8vw,68px)/.92 'Great Vibes',cursive;
+  color:#315946;white-space:normal;text-shadow:0 1px 0 #fff;
+}
+.invitation-paper-proxy-names>span{display:block}
+.invitation-paper-proxy-names em{
+  font:400 .52em/1 'Cormorant Garamond',serif;color:#7c8e72;
+  margin:6px 0 5px;
+}
+.invitation-paper-proxy-date{
+  margin:18px 0 2px;color:#aa956c;
+  font:600 11px Montserrat,sans-serif;letter-spacing:.15em;
+}
+.invitation-paper-proxy-invite{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;margin:7px 0 0;max-width:88%;padding:0 8px 7px;
+  border-bottom:1px dotted rgba(81,94,81,.55);
+}
+.invitation-paper-proxy-label{
+  color:#5b685c;font:500 12px/1.4 Montserrat,sans-serif;
+  letter-spacing:.13em;text-transform:uppercase;text-align:center;
+}
+.invitation-paper-proxy-guest{
+  color:#315b47;font:700 clamp(20px,3.3vw,32px)/1.16 Georgia,'Times New Roman',serif;
+  letter-spacing:.015em;text-align:center;max-width:100%;overflow-wrap:anywhere;
+}
+.invitation-paper-proxy-guest[hidden]{display:none}
+@media(max-width:650px){
+  .invitation-paper-proxy{padding:37px 28px 34px}
+  .invitation-paper-proxy-names{font-size:clamp(39px,12.7vw,57px)}
+  .invitation-paper-proxy-eyebrow{font-size:16px}
+  .invitation-paper-proxy-date{font-size:9px;letter-spacing:.11em;margin-top:15px}
+  .invitation-paper-proxy-label{font-size:11px}
+  .invitation-paper-proxy-guest{font-size:clamp(20px,6vw,29px)}
+}
+@media(max-width:380px){
+  .invitation-paper-proxy{padding-left:20px;padding-right:20px}
+}
