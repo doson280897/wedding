@@ -549,3 +549,82 @@ test("a new tab starts in VN and Dark even after the first tab was changed @smok
   await expect(page.locator("html")).toHaveAttribute("data-theme","light");
   await expect(page.locator("html")).toHaveAttribute("lang","en");
 });
+
+
+test("music orb animates when playing, pauses without hiding, stops until re-enabled @smoke @core", async ({
+  page,
+}) => {
+  // Deterministic YouTube mock: no external network or media autoplay required.
+  await page.addInitScript(() => {
+    window.YT = {
+      PlayerState: { PLAYING: 1, PAUSED: 2, ENDED: 0 },
+      Player: function (_host, options) {
+        const player = {
+          setVolume() {},
+          playVideo() {
+            window.__musicTestPlayCalls = (window.__musicTestPlayCalls || 0) + 1;
+            options.events.onStateChange({ data: 1 });
+          },
+          pauseVideo() {
+            options.events.onStateChange({ data: 2 });
+          },
+          stopVideo() {
+            window.__musicTestStopCalls = (window.__musicTestStopCalls || 0) + 1;
+            options.events.onStateChange({ data: 0 });
+          },
+        };
+        queueMicrotask(() => {
+          window.__musicMockReady = true;
+          options.events.onReady({ target: player });
+        });
+        return player;
+      },
+    };
+  });
+
+  await page.goto(base + "/index.html?party=bride", { waitUntil: "domcontentloaded" });
+  await page.locator("#skipInvitation").click();
+  await page.waitForFunction(() => window.__musicMockReady === true);
+
+  const bubble = page.locator("#musicBubble");
+  await expect(bubble).toBeHidden();
+  await page.locator("#settingsTrigger").click();
+  await page.locator("#musicToggle").click();
+  await expect(bubble).toBeVisible();
+  await expect(bubble).toHaveAttribute("data-music-state", "playing");
+  await expect(page.locator("#musicToggle")).toHaveAttribute("aria-pressed", "true");
+
+  const note = page.locator(".music-float-note svg");
+  const playingAnimation = await note.evaluate(node => getComputedStyle(node).animationName);
+  expect(playingAnimation).toContain("musicFloatSway");
+
+  await page.locator("#musicBubbleTrigger").click();
+  await expect(page.locator("#musicBubbleActions")).toBeVisible();
+  await expect(page.locator("#musicBubbleStop svg")).toBeVisible();
+  const playingBackground = await page.locator("#musicBubbleTrigger").evaluate(
+    node => getComputedStyle(node).backgroundImage,
+  );
+
+  await page.locator("#musicBubblePause").click();
+  await expect(bubble).toBeVisible();
+  await expect(bubble).toHaveAttribute("data-music-state", "paused");
+  expect(await note.evaluate(node => getComputedStyle(node).animationName)).toBe("none");
+  const pausedBackground = await page.locator("#musicBubbleTrigger").evaluate(
+    node => getComputedStyle(node).backgroundImage,
+  );
+  expect(pausedBackground).not.toBe(playingBackground);
+
+  await page.locator("#musicBubblePause").click();
+  await expect(bubble).toHaveAttribute("data-music-state", "playing");
+  await page.locator("#musicBubbleStop").click();
+  await expect(bubble).toBeHidden();
+  await expect(page.locator("#musicToggle")).toHaveAttribute("aria-pressed", "false");
+  expect(await page.evaluate(() => window.__musicTestStopCalls)).toBe(1);
+
+  // The stopped bubble cannot start music itself; guests must use Settings.
+  await page.locator("#settingsTrigger").click();
+  await page.locator("#musicToggle").click();
+  await expect(bubble).toBeVisible();
+  await expect(bubble).toHaveAttribute("data-music-state", "playing");
+  expect(await page.evaluate(() => window.__musicTestPlayCalls)).toBe(3);
+});
