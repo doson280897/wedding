@@ -798,6 +798,8 @@
 
     const monogram = document.getElementById("heroMonogram");
     if (monogram) monogram.innerHTML = escapeHtml(first.initial) + " <span>&amp;</span> " + escapeHtml(second.initial);
+    const seal = document.getElementById("envelopeMonogram");
+    if (seal) seal.textContent = first.initial + " · " + second.initial;
   }
 
   function refreshPartyLabels() {
