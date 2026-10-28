@@ -184,7 +184,7 @@ html.link-tool-active .settings-music-row {display:none!important}
   display:block;
   max-width:100%;
   color:#315b47;
-  font:700 clamp(20px,3.3vw,32px)/1.12 'Cormorant Garamond',serif;
+  font:700 clamp(20px,3.3vw,32px)/1.16 Georgia,'Times New Roman',serif;
   letter-spacing:.015em;
   overflow-wrap:anywhere;
   text-wrap:balance;
@@ -210,7 +210,7 @@ html.link-tool-active .settings-music-row {display:none!important}
 .hero-recipient-name {
   display:block;
   color:#fbe3ba;
-  font:700 clamp(24px,3.3vw,38px)/1.12 'Cormorant Garamond',serif;
+  font:700 clamp(24px,3.3vw,38px)/1.16 Georgia,'Times New Roman',serif;
   letter-spacing:.015em;
   text-shadow:0 3px 16px rgba(0,0,0,.75);
   overflow-wrap:anywhere;
