@@ -476,7 +476,8 @@ window.WEDDING_INFO = {
       "invitation.promiseGroom": "Về chung một nhà, thương nhau một đời.",
       "invitation.promiseSingle": "Hai lời hẹn, một ngày chung đôi.",
       "closing.note": "Cảm ơn bạn đã dành một chỗ cho chúng mình trong những yêu thương của bạn. Hẹn cùng nhau lưu lại một ngày thật đẹp.",
-      "album.captionLabel": "Lời tựa của bức ảnh"
+      "album.captionLabel": "Lời tựa của bức ảnh",
+      "album.photoRetry": "Ảnh tiếp theo chưa tải được. Bạn thử chuyển ảnh lại nhé."
     },
     "en": {
       "page.title": "{{site.titlePrefix}} | {{couple.bride.short}} · {{couple.groom.short}}",
@@ -715,7 +716,8 @@ window.WEDDING_INFO = {
       "invitation.promiseGroom": "One home, a lifetime of love.",
       "invitation.promiseSingle": "Two promises, one celebration.",
       "closing.note": "Thank you for keeping a place for us in your heart. We look forward to sharing a beautiful day with you.",
-      "album.captionLabel": "Photo caption"
+      "album.captionLabel": "Photo caption",
+      "album.photoRetry": "The next photo could not load. Please try switching photos again."
     }
   },
   "wedding": {

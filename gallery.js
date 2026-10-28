@@ -168,7 +168,7 @@
       if (!img.naturalWidth || !img.naturalHeight) return;
       const ratio = img.naturalWidth / img.naturalHeight;
       photo.ratio = ratio;
-      applyCardSize(item, ratio);
+      if (Math.abs(item.ratio - ratio) > .0001) applyCardSize(item, ratio);
       warmDecode(img);
       requestSceneFrame();
     });
@@ -584,9 +584,39 @@
     image.alt = lightboxAlt(nextIndex);
     image.draggable = false;
     image.decoding = "async";
-    image.src = versionedAsset(photos[nextIndex]);
+    // A failed or stalled request must never replace the visible artwork.
+    // Both event handlers and the timeout are released on every completion.
+    const loaded = await new Promise(resolve => {
+      let finished = false;
+      const settle = value => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeout);
+        image.onload = image.onerror = null;
+        if (!value) image.removeAttribute("src");
+        resolve(value);
+      };
+      const timeout = setTimeout(() => settle(false), 12000);
+      image.onload = () => settle(image.naturalWidth > 0);
+      image.onerror = () => settle(false);
+      image.src = versionedAsset(photos[nextIndex]);
+      if (image.complete) settle(image.naturalWidth > 0);
+    });
+    if (!loaded) return null;
     try { await image.decode?.(); } catch (_) {}
-    return { image, index:nextIndex };
+    return image.naturalWidth > 0 ? { image, index:nextIndex } : null;
+  }
+
+  function failLightboxStep() {
+    lightboxTransitioning = false;
+    const queued = lightboxQueuedDelta;
+    lightboxQueuedDelta = 0;
+    const caption = document.getElementById("albumLightboxCaption");
+    if (caption) {
+      caption.setAttribute("role", "status");
+      caption.textContent = tr("album.photoRetry");
+    }
+    if (queued) animateLightboxStep(queued);
   }
 
   async function animateLightboxStep(delta) {
@@ -606,6 +636,7 @@
     if (reducedMotion || !lightboxImage.animate) {
       const decoded = await decodeLightboxLayer(nextIndex);
       if (generation !== lightboxGeneration || lightbox.hidden) return;
+      if (!decoded) { failLightboxStep(); return; }
       decoded.image.id = "albumLightboxImage";
       lightboxImage.replaceWith(decoded.image);
       lightboxImage = decoded.image;
@@ -624,6 +655,7 @@
     // Decode first while the current photo remains fully visible.
     const decoded = await decodeLightboxLayer(nextIndex);
     if (generation !== lightboxGeneration || lightbox.hidden) return;
+    if (!decoded) { failLightboxStep(); return; }
 
     const incoming = decoded.image;
     lightboxStage.append(incoming);
@@ -839,14 +871,22 @@
   });
 
   let resizeTimer = 0;
-  addEventListener("resize", () => {
+  const scheduleSceneResize = () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
+      const width = viewport.clientWidth;
+      const height = viewport.clientHeight;
+      if (cachedMetrics?.width === width && cachedMetrics?.height === height) return;
       cachedMetrics = null;
       for (const item of items) applyCardSize(item, item.ratio);
       requestSceneFrame();
     }, 80);
-  }, { passive:true });
+  };
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(scheduleSceneResize).observe(viewport);
+  } else {
+    addEventListener("resize", scheduleSceneResize, { passive:true });
+  }
 
   async function start() {
     setStatus("album.loading");

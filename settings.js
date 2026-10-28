@@ -46,17 +46,22 @@
     const hubRect = hub.getBoundingClientRect();
     const panelRect = panel.getBoundingClientRect();
     const edge = 10;
+    const viewport = window.visualViewport;
+    const viewportLeft = viewport?.offsetLeft || 0;
+    const viewportTop = viewport?.offsetTop || 0;
+    const viewportRight = viewportLeft + (viewport?.width || innerWidth);
+    const viewportBottom = viewportTop + (viewport?.height || innerHeight);
     const width = panelRect.width;
     const height = panelRect.height;
     // Clamp in viewport coordinates, then convert to the hub's local
     // position. This also works when the hub is dragged to the screen center.
-    const left = Math.max(edge, Math.min(innerWidth - width - edge, triggerRect.right - width));
-    const roomBelow = innerHeight - triggerRect.bottom;
-    const roomAbove = triggerRect.top;
+    const left = Math.max(viewportLeft + edge, Math.min(viewportRight - width - edge, triggerRect.right - width));
+    const roomBelow = viewportBottom - triggerRect.bottom;
+    const roomAbove = triggerRect.top - viewportTop;
     const preferredTop = roomBelow >= height + edge || roomBelow >= roomAbove
       ? triggerRect.bottom + edge
       : triggerRect.top - height - edge;
-    const top = Math.max(edge, Math.min(innerHeight - height - edge, preferredTop));
+    const top = Math.max(viewportTop + edge, Math.min(viewportBottom - height - edge, preferredTop));
     panel.style.left = Math.round(left - hubRect.left) + "px";
     panel.style.top = Math.round(top - hubRect.top) + "px";
     panel.style.right = "auto";
@@ -149,6 +154,8 @@
   };
   window.addEventListener("resize", schedulePanelPosition, { passive: true });
   window.addEventListener("scroll", schedulePanelPosition, { passive: true });
+  window.visualViewport?.addEventListener("resize", schedulePanelPosition, { passive: true });
+  window.visualViewport?.addEventListener("scroll", schedulePanelPosition, { passive: true });
   hub.addEventListener("pointerup", schedulePanelPosition);
 
   syncThemeControls();

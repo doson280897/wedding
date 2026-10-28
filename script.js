@@ -125,7 +125,7 @@
     }
     units.forEach(item => {
       const node = document.querySelector("#" + item[0] + " + small");
-      if (node) node.textContent = tr(item[1]);
+      if (node && node.textContent !== tr(item[1])) node.textContent = tr(item[1]);
     });
   }
 
@@ -133,8 +133,10 @@
     if (!timer) return;
     const wedding = weddingDates[selectedWedding];
     const remain = Math.max(0, wedding.time - Date.now());
-    if (countdownTitle) countdownTitle.textContent = tr(wedding.titleKey);
-    timer.setAttribute("aria-label", tr(wedding.ariaKey));
+    const title = tr(wedding.titleKey);
+    if (countdownTitle && countdownTitle.textContent !== title) countdownTitle.textContent = title;
+    const label = tr(wedding.ariaKey);
+    if (timer.getAttribute("aria-label") !== label) timer.setAttribute("aria-label", label);
     if (!remain) {
       const finished = document.createElement("p");
       finished.className = "finished";
@@ -151,7 +153,8 @@
     ];
     ["days","hours","minutes","seconds"].forEach((id,index) => {
       const node = document.getElementById(id);
-      if (node) node.textContent = String(values[index]).padStart(2,"0");
+      const value = String(values[index]).padStart(2,"0");
+      if (node && node.textContent !== value) node.textContent = value;
     });
   }
 
