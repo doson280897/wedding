@@ -31,17 +31,42 @@ def read_wedding_info() -> dict:
 
 
 WEDDING_INFO = read_wedding_info()
-MANIFEST_FILE = ROOT / WEDDING_INFO.get("gallery", {}).get("manifest", "images/manifest.json")
-ALBUM_MODE = WEDDING_INFO.get("gallery", {}).get("mode", "append")
+MANIFEST_FILE = IMAGE_ROOT / "manifest.json"
+
+
+def read_album_manifest() -> dict:
+    """Read the only album config/photo list, never a second gallery config."""
+    if not MANIFEST_FILE.is_file():
+        raise FileNotFoundError(
+            "Thiếu images/manifest.json: hãy tạo file cấu hình album trước."
+        )
+    data = json.loads(MANIFEST_FILE.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or not isinstance(data.get("photos"), list):
+        raise ValueError("images/manifest.json phải là object với photos là một mảng")
+    return data
+
+
+ALBUM_MANIFEST = read_album_manifest()
+ALBUM_MODE = ALBUM_MANIFEST.get("mode")
 if ALBUM_MODE not in ("append", "replace"):
-    raise ValueError("gallery.mode phải là append hoặc replace")
+    raise ValueError("images/manifest.json: mode phải là append hoặc replace")
+if not isinstance(ALBUM_MANIFEST.get("shuffle"), bool):
+    raise ValueError("images/manifest.json: shuffle phải là true hoặc false")
+
+optimization = ALBUM_MANIFEST.get("optimization")
+if not isinstance(optimization, dict):
+    raise ValueError("images/manifest.json: cần khai báo optimization")
+ALBUM_MAX_SIDE = optimization.get("maxSide")
+ALBUM_QUALITY = optimization.get("quality")
+if type(ALBUM_MAX_SIDE) is not int or not 160 <= ALBUM_MAX_SIDE <= 4096:
+    raise ValueError("images/manifest.json: optimization.maxSide phải từ 160 đến 4096")
+if type(ALBUM_QUALITY) is not int or not 1 <= ALBUM_QUALITY <= 100:
+    raise ValueError("images/manifest.json: optimization.quality phải từ 1 đến 100")
+
 
 SUPPORTED_EXTENSIONS = {
     ".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif", ".bmp", ".tif", ".tiff"
 }
-
-ALBUM_MAX_SIDE = 960
-ALBUM_QUALITY = 80
 
 # Read portrait / hero / ending filenames from wedding-info.js.
 # Changing the couple's photo filenames does not require editing this script.
@@ -159,97 +184,69 @@ def optimize_assets():
 
 
 def generate_manifest():
-    """Build album WebP files and images/manifest.json."""
+    """Add new optimized photos without erasing manifest settings or captions."""
     ensure_dirs()
     found = discover_album_images()
-    manifest = {"total": 0, "photos": []}
-    expected_targets: set[Path] = set()
-    # Preserve already-published album photos when adding new selections.
-    previous = []
-    if ALBUM_MODE == "append" and MANIFEST_FILE.exists():
-        try:
-            old = json.loads(MANIFEST_FILE.read_text(encoding="utf-8"))
-            previous = old if isinstance(old, list) else old.get("photos", [])
-        except (OSError, ValueError, TypeError):
-            previous = []
 
-    if not found:
-        if ALBUM_MODE == "replace":
-            # A new couple must never inherit the previous couple's album.
-            MANIFEST_FILE.parent.mkdir(parents=True, exist_ok=True)
-            MANIFEST_FILE.write_text(
-                json.dumps(manifest, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-            print("Replace mode: no current photos; published album is empty.")
-            return
-        existing_photos = []
-        if MANIFEST_FILE.exists():
-            try:
-                existing = json.loads(MANIFEST_FILE.read_text(encoding="utf-8"))
-                existing_photos = existing if isinstance(existing, list) else existing.get("photos", [])
-            except (OSError, ValueError, TypeError):
-                existing_photos = []
-
-        if existing_photos or any(OPTIMIZED_ALBUM.rglob("*.webp")):
-            print(
-                "Không có ảnh gốc trong images/original/album/. "
-                "Giữ nguyên manifest và album tối ưu hiện có."
-            )
-            return
-
-        MANIFEST_FILE.parent.mkdir(parents=True, exist_ok=True)
-        MANIFEST_FILE.write_text(
-            json.dumps(manifest, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
-        print("Chưa có album. Đã tạo images/manifest.json rỗng.")
-        return
+    # Preserve all manual options and per-photo custom metadata. In append
+    # mode the original heavy images may be absent (they are gitignored);
+    # their existing optimized photos must remain in the published manifest.
+    manifest = dict(ALBUM_MANIFEST)
+    previous = [
+        dict(item) for item in manifest["photos"]
+        if isinstance(item, dict) and isinstance(item.get("src"), str)
+        and item["src"]
+    ]
+    photos = list(previous) if ALBUM_MODE == "append" else []
+    indexes = {photo["src"]: index for index, photo in enumerate(photos)}
 
     for source in found:
         target = optimized_album_target(source)
-        expected_targets.add(target.resolve())
-
         try:
             if not target.exists() or source.stat().st_mtime_ns > target.stat().st_mtime_ns:
                 build_album_image(source, target)
                 print(f"Optimized: {source.relative_to(ROOT).as_posix()}")
+            digest = hashlib.sha1(target.read_bytes()).hexdigest()[:10]
+            with Image.open(target) as optimized:
+                width, height = optimized.size
         except (OSError, ValueError, UnidentifiedImageError) as exc:
             print(f"Skipped {source.relative_to(ROOT).as_posix()}: {exc}")
             continue
 
-        digest = hashlib.sha1(target.read_bytes()).hexdigest()[:10]
-        try:
-            with Image.open(target) as optimized:
-                width, height = optimized.size
-        except (OSError, ValueError, UnidentifiedImageError):
-            width, height = 0, 0
+        generated = {
+            "src": quote(target.relative_to(ROOT).as_posix(), safe="/"),
+            "name": safe_display_name(source),
+            "v": digest,
+            "width": width,
+            "height": height,
+        }
+        path = generated["src"]
+        if path in indexes:
+            # Retain hand-edited 'caption' and unknown future metadata.
+            photos[indexes[path]].update(generated)
+        else:
+            indexes[path] = len(photos)
+            photos.append(generated)
 
-        manifest["photos"].append(
-            {
-                "src": quote(target.relative_to(ROOT).as_posix(), safe="/"),
-                "name": safe_display_name(source),
-                "v": digest,
-                "width": width,
-                "height": height,
-            }
-        )
+    unique = []
+    seen = set()
+    for item in photos:
+        if item["src"] in seen:
+            continue
+        seen.add(item["src"])
+        unique.append(item)
 
-    # Never delete optimized photos just because their original is absent.
-    existing_src = {item["src"] for item in manifest["photos"]}
-    for item in previous:
-        if item.get("src") not in existing_src and (ROOT / item.get("src", "")).is_file():
-            manifest["photos"].append(item)
-            existing_src.add(item["src"])
-
-    manifest["total"] = len(manifest["photos"])
-    MANIFEST_FILE.parent.mkdir(parents=True, exist_ok=True)
+    manifest["photos"] = unique
+    manifest["total"] = len(unique)
     MANIFEST_FILE.write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2),
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    print(f"\nHoàn tất: {manifest['total']} ảnh.")
-    print("Đã cập nhật images/manifest.json và images/optimized/album/.")
+    if not found and ALBUM_MODE == "append":
+        print("Không có ảnh gốc mới; giữ nguyên danh sách ảnh và tùy chỉnh.")
+    elif not found:
+        print("Replace mode: không có ảnh gốc nên album mới rỗng.")
+    print(f"Hoàn tất: {manifest['total']} ảnh trong images/manifest.json.")
 
 
 if __name__ == "__main__":
