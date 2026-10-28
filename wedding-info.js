@@ -473,7 +473,8 @@ window.WEDDING_INFO = {
       "link.singleDescription": "Nhập tên khách để tạo thiệp cho một tiệc cưới chung. Không cần chọn nhà gái hoặc nhà trai.",
       "link.singleBack": "← Quay lại thiệp cưới",
       "link.singleBackAria": "Trở về thiệp cưới",
-      "menu.singleCouple": "Cô dâu & chú rể"
+      "menu.singleCouple": "Cô dâu & chú rể",
+      "link.brandSingle": "{{couple.groom.short}} & {{couple.bride.short}} · WEDDING {{parties.single.dateYear}}"
     },
     "en": {
       "page.title": "{{site.titlePrefix}} | {{couple.bride.short}} · {{couple.groom.short}}",
@@ -707,7 +708,8 @@ window.WEDDING_INFO = {
       "link.singleDescription": "Enter your guest's name to create an invitation for one shared wedding reception.",
       "link.singleBack": "← Back to the wedding invitation",
       "link.singleBackAria": "Return to the wedding invitation",
-      "menu.singleCouple": "Bride & groom"
+      "menu.singleCouple": "Bride & groom",
+      "link.brandSingle": "{{couple.groom.short}} & {{couple.bride.short}} · WEDDING {{parties.single.dateYear}}"
     }
   },
   "wedding": {
