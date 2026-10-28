@@ -494,6 +494,69 @@ test("Settings and Menu share identical drag, snap and tap behavior @smoke @core
   }
 });
 
+
+test("music orb drags while playing, snaps to edges and keeps player running @smoke @core", async ({page}) => {
+  await page.addInitScript(() => {
+    window.YT = {
+      PlayerState:{PLAYING:1,PAUSED:2,ENDED:0,BUFFERING:3},
+      Player:function(_host,options) {
+        const player = {
+          setVolume(){},
+          playVideo() {
+            window.__musicDragPlayCalls = (window.__musicDragPlayCalls || 0) + 1;
+            options.events.onStateChange({data:1});
+          },
+          pauseVideo() {window.__musicDragPauses=(window.__musicDragPauses||0)+1;options.events.onStateChange({data:2});},
+          stopVideo() {options.events.onStateChange({data:0});}
+        };
+        queueMicrotask(()=>options.events.onReady({target:player}));
+        return player;
+      }
+    };
+  });
+  await page.goto(base+"/index.html?party=groom",{waitUntil:"domcontentloaded"});
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden({timeout:9000});
+  await page.locator("#settingsTrigger").click();
+  await page.locator("#controlTabSettings").click();
+  await page.locator("#musicToggle").click();
+  const orb = page.locator("#musicBubble");
+  await expect(orb).toBeVisible();
+  await expect(orb).toHaveAttribute("data-music-state","playing");
+  await page.locator("#settingsClose").click();
+
+  const dragTo = async (toLeft,id) => page.evaluate(({toLeft,id}) => {
+    const node=document.getElementById("musicBubble");
+    const handle=document.getElementById("musicBubbleTrigger");
+    const rect=node.getBoundingClientRect();
+    const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
+    const x2=toLeft?10:innerWidth-10,y2=Math.max(70,y-115);
+    const event=(name,xx,yy)=>new PointerEvent(name,{
+      bubbles:true,cancelable:true,pointerId:id,pointerType:"touch",
+      isPrimary:true,button:0,clientX:xx,clientY:yy
+    });
+    handle.dispatchEvent(event("pointerdown",x,y));
+    window.dispatchEvent(event("pointermove",x2,y2));
+    window.dispatchEvent(event("pointerup",x2,y2));
+    return node.dataset.userMoved;
+  },{toLeft,id});
+  expect(await dragTo(false,17)).toBe("true");
+  await expect(orb).toHaveAttribute("data-float-edge","right");
+  await page.waitForTimeout(420);
+  let position=await orb.evaluate(node=>{const r=node.getBoundingClientRect();return innerWidth-r.right;});
+  expect(position).toBeLessThanOrEqual(25);
+  expect(await dragTo(true,18)).toBe("true");
+  await expect(orb).toHaveAttribute("data-float-edge","left");
+  await page.waitForTimeout(420);
+  position=await orb.evaluate(node=>node.getBoundingClientRect().left);
+  expect(position).toBeLessThanOrEqual(25);
+  await expect(orb).toHaveAttribute("data-music-state","playing");
+  expect(await page.evaluate(()=>window.__musicDragPlayCalls)).toBe(1);
+  expect(await page.evaluate(()=>window.__musicDragPauses||0)).toBe(0);
+  await page.locator("#musicBubbleTrigger").click();
+  await expect(page.locator("#musicBubbleActions")).toBeVisible();
+});
+
 test("personal invitation keeps the bold recipient in hero across languages", async ({
   page,
 }) => {
@@ -520,7 +583,7 @@ test("personal invitation keeps the bold recipient in hero across languages", as
 });
 
 
-test("F5 resets the single floating hub and keeps its icon centered @smoke", async ({ page }) => {
+test("F5 resets the single floating hub to bottom-right and keeps its icon centered @smoke", async ({ page }) => {
   await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
   const hub = page.locator("#settingsHub");
   await expect(hub).toHaveClass(/floating-control/);
@@ -535,10 +598,10 @@ test("F5 resets the single floating hub and keeps its icon centered @smoke", asy
   await page.reload({ waitUntil:"domcontentloaded" });
   const corner = await hub.evaluate(node => {
     const r=node.getBoundingClientRect();
-    return { right:innerWidth-r.right,top:r.top };
+    return { right:innerWidth-r.right,bottom:innerHeight-r.bottom };
   });
   expect(corner.right).toBeLessThanOrEqual(30);
-  expect(corner.top).toBeLessThanOrEqual(40);
+  expect(corner.bottom).toBeLessThanOrEqual(40);
   await hub.evaluate(node => node.classList.add("is-idle"));
   await page.waitForTimeout(350);
   const centered = await hub.evaluate(node => {

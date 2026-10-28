@@ -138,245 +138,280 @@
     links.forEach(item => item.setAttribute("aria-current", String(item===link)));
   }));
 
-  // One draggable control on all screens, with the existing edge-snap physics.
-  const floatingControls = [document.getElementById("settingsHub")].filter(Boolean);
+  // Both visible orbs share one compositor-friendly drag/snap controller.
+  // The main hub starts bottom-right; music stays bottom-left until moved.
+  const hub = document.getElementById("settingsHub");
+  const musicDock = document.getElementById("musicBubble");
   const FLOAT_EDGE = 8;
+  const FLOAT_GAP = 12;
   const FLOAT_IDLE_DELAY = 2600;
+  const SNAP_MS = 340;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const coarsePointer = window.matchMedia("(hover: none), (pointer: coarse)");
-
-  // Measure notch and home-indicator insets once independently of CSS
-  // positions, which become "auto" after a dragged control is anchored.
   const safeArea = (() => {
     const probe = document.createElement("div");
     probe.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;inset:0;" +
       "padding-top:env(safe-area-inset-top,0px);" +
       "padding-right:env(safe-area-inset-right,0px);" +
-      "padding-bottom:env(safe-area-inset-bottom,0px)";
+      "padding-bottom:env(safe-area-inset-bottom,0px);" +
+      "padding-left:env(safe-area-inset-left,0px)";
     document.body.append(probe);
-    const computed = getComputedStyle(probe);
-    const insets = {
-      top:parseFloat(computed.paddingTop) || 0,
-      right:parseFloat(computed.paddingRight) || 0,
-      bottom:parseFloat(computed.paddingBottom) || 0
-    };
+    const css = getComputedStyle(probe);
+    const inset = side => parseFloat(css.getPropertyValue("padding-" + side)) || 0;
+    const result = {top:inset("top"),right:inset("right"),
+      bottom:inset("bottom"),left:inset("left")};
     probe.remove();
-    return insets;
+    return result;
   })();
 
-  // Drag positions deliberately live only in the current document.
-  // Every F5/navigation resets to top-right (settings) and bottom-right
-  // (menu), so no previous tab's position can be restored.
-  const defaultPosition = control => {
-    setEdgeAnchor(control, "right", FLOAT_EDGE + safeArea.top);
-  };
-  const clampTop = (control, top) => {
-    const rect = control.getBoundingClientRect();
-    return Math.max(FLOAT_EDGE, Math.min(Math.max(FLOAT_EDGE, innerHeight - rect.height - FLOAT_EDGE), top));
-  };
+  const minLeft = () => FLOAT_EDGE + safeArea.left;
+  const minTop = () => FLOAT_EDGE + safeArea.top;
+  const clamp = (value, min, max) => Math.max(min, Math.min(Math.max(min, max), value));
+  const bounds = rect => ({
+    left:minLeft(),
+    right:Math.max(minLeft(), innerWidth - rect.width - FLOAT_EDGE - safeArea.right),
+    top:minTop(),
+    bottom:Math.max(minTop(), innerHeight - rect.height - FLOAT_EDGE - safeArea.bottom)
+  });
+  const visible = node => node?.isConnected && !node.hidden &&
+    getComputedStyle(node).display !== "none";
 
-  const setEdgeAnchor = (control, edge, top) => {
-    control.dataset.floatEdge = edge;
-    control.style.top = clampTop(control, top) + "px";
-    control.style.bottom = "auto";
-
+  // Keep snapped controls anchored to the actual screen edge so a compact
+  // Settings icon grows INWARD when its label expands.
+  const anchor = (node, edge, top) => {
+    if (!node?.isConnected || !visible(node)) return;
+    const rect = node.getBoundingClientRect();
+    const limits = bounds(rect);
+    node.dataset.floatEdge = edge;
+    node.style.transform = "none";
+    node.style.top = clamp(top,limits.top,limits.bottom) + "px";
+    node.style.bottom = "auto";
     if (edge === "left") {
-      control.style.left = FLOAT_EDGE + "px";
-      control.style.right = "auto";
+      node.style.left = limits.left + "px";
+      node.style.right = "auto";
     } else {
-      control.style.right = (FLOAT_EDGE + safeArea.right) + "px";
-      control.style.left = "auto";
+      node.style.right = (FLOAT_EDGE + safeArea.right) + "px";
+      node.style.left = "auto";
     }
   };
 
-  const snapFloatingToEdge = (control, preserveEdge = false) => {
-    if (!control.isConnected) return;
-    const rect = control.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-
-    const edge = preserveEdge && (control.dataset.floatEdge === "left" || control.dataset.floatEdge === "right")
-      ? control.dataset.floatEdge
-      : (rect.left + rect.width / 2 < innerWidth / 2 ? "left" : "right");
-
-    const top = clampTop(control, rect.top);
-    setEdgeAnchor(control, edge, top);
-
+  const initialPosition = node => {
+    if (!visible(node)) return;
+    const rect = node.getBoundingClientRect();
+    const initialEdge = node === hub ? "right" : "left";
+    const offset = node === hub ? 0 : 0;
+    anchor(node,initialEdge,bounds(rect).bottom - offset);
   };
+  const controls = [hub,musicDock].filter(Boolean);
+  const setupFloating = (node,handle) => {
+    if (!handle) return;
+    node.classList.add("floating-control");
+    if (node === hub) initialPosition(node);
 
-  const glideFloatingToEdge = control => {
-    if (!control.isConnected) return;
-
-    const rect = control.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-
-    const edge = rect.left + rect.width / 2 < innerWidth / 2 ? "left" : "right";
-    const top = clampTop(control, rect.top);
-    const targetLeft = edge === "left"
-      ? FLOAT_EDGE
-      : Math.max(FLOAT_EDGE, innerWidth - rect.width - FLOAT_EDGE);
-
-    control.dataset.floatEdge = edge;
-    control.style.right = "auto";
-    control.style.bottom = "auto";
-    control.style.top = top + "px";
-    control.style.left = targetLeft + "px";
-
-    // Once the glide finishes, convert the pixel position to a true edge
-    // anchor. Later expansion therefore grows inward instead of off-screen.
-    setTimeout(() => {
-      if (!control.isConnected || control.classList.contains("is-dragging")) return;
-      if (control.dataset.floatEdge !== edge) return;
-      setEdgeAnchor(control, edge, top);
-    }, 330);
-  };
-
-  const installFloatingControl = control => {
-    control.classList.add("floating-control");
-    defaultPosition(control);
-
-    let idleTimer = 0;
     let drag = null;
-    let suppressClick = false;
+    let frame = 0;
+    let glideTimer = 0;
+    let glideFrame = 0;
+    let idleTimer = 0;
+    let suppressClickUntil = 0;
     let tapStartedIdle = false;
 
+    const cancelGlide = () => {
+      clearTimeout(glideTimer);
+      cancelAnimationFrame(glideFrame);
+      if (!node.classList.contains("is-snapping")) return;
+      const rect = node.getBoundingClientRect();
+      node.classList.add("is-dragging");
+      node.classList.remove("is-snapping");
+      node.style.transform = "none";
+      node.style.left = rect.left + "px";
+      node.style.top = rect.top + "px";
+      node.style.right = "auto";
+      node.style.bottom = "auto";
+      node.classList.remove("is-dragging");
+    };
     const wake = () => {
       clearTimeout(idleTimer);
-      control.classList.remove("is-idle");
-      if (control.dataset.userMoved !== "true") defaultPosition(control);
+      if (drag || node.classList.contains("is-snapping")) return;
+      node.classList.remove("is-idle");
+      if (node.dataset.userMoved !== "true") initialPosition(node);
     };
-
-    const collapseNow = () => {
-      if (control.classList.contains("settings-hub") && control.classList.contains("is-open")) return;
-      control.classList.add("is-idle");
-      if (control.dataset.userMoved === "true") snapFloatingToEdge(control, true);
-      else defaultPosition(control);
+    const settleIdle = () => {
+      if (drag || node.classList.contains("is-snapping") ||
+          (node === hub && node.classList.contains("is-open"))) return;
+      if (node === hub) node.classList.add("is-idle");
+      if (node.dataset.userMoved === "true") {
+        anchor(node,node.dataset.floatEdge || "right",node.getBoundingClientRect().top);
+      } else initialPosition(node);
     };
-
     const scheduleIdle = (delay = FLOAT_IDLE_DELAY) => {
       clearTimeout(idleTimer);
-      idleTimer = setTimeout(collapseNow, delay);
+      if (node === hub) idleTimer = setTimeout(settleIdle,delay);
     };
-
-    const onPointerMove = event => {
+    const avoidOverlap = (edge, proposedTop, rect) => {
+      const other = node === hub ? musicDock : hub;
+      if (!visible(other)) return proposedTop;
+      const their = other.getBoundingClientRect();
+      const theirEdge = other.dataset.floatEdge ||
+        (their.left + their.width / 2 < innerWidth / 2 ? "left" : "right");
+      if (theirEdge !== edge || proposedTop + rect.height + FLOAT_GAP <= their.top ||
+          their.bottom + FLOAT_GAP <= proposedTop) return proposedTop;
+      const limits = bounds(rect);
+      const above = their.top - rect.height - FLOAT_GAP;
+      const below = their.bottom + FLOAT_GAP;
+      if (above >= limits.top) return above;
+      if (below <= limits.bottom) return below;
+      return proposedTop;
+    };
+    const glide = () => {
+      if (!visible(node)) return;
+      const rect = node.getBoundingClientRect();
+      const edge = rect.left + rect.width / 2 < innerWidth / 2 ? "left" : "right";
+      const limits = bounds(rect);
+      const top = clamp(avoidOverlap(edge,rect.top,rect),limits.top,limits.bottom);
+      const targetLeft = edge === "left" ? limits.left : limits.right;
+      node.dataset.floatEdge = edge;
+      node.style.transform = "none";
+      node.style.left = rect.left + "px";
+      node.style.top = rect.top + "px";
+      node.style.right = "auto";
+      node.style.bottom = "auto";
+      // Read one layout frame so the browser can animate from this exact spot.
+      void node.offsetWidth;
+      node.classList.remove("is-dragging");
+      node.classList.add("is-snapping");
+      const finish = () => {
+        if (!node.classList.contains("is-snapping")) return;
+        node.classList.remove("is-snapping");
+        anchor(node,edge,top);
+        scheduleIdle(900);
+      };
+      if (reducedMotion.matches) {
+        node.style.left = targetLeft + "px";
+        node.style.top = top + "px";
+        finish();
+      } else {
+        glideFrame = requestAnimationFrame(() => {
+          node.style.left = targetLeft + "px";
+          node.style.top = top + "px";
+        });
+        glideTimer = setTimeout(finish,SNAP_MS + 55);
+      }
+    };
+    const paintDrag = () => {
+      frame = 0;
+      if (!drag?.moved) return;
+      const limits = drag.bounds;
+      const left = clamp(drag.left + drag.dx,limits.left,limits.right);
+      const top = clamp(drag.top + drag.dy,limits.top,limits.bottom);
+      node.style.transform =
+        "translate3d(" + (left - drag.left) + "px," + (top - drag.top) + "px,0)";
+    };
+    const move = event => {
       if (!drag || event.pointerId !== drag.id) return;
-
-      const dx = event.clientX - drag.startX;
-      const dy = event.clientY - drag.startY;
-
-      if (!drag.moved && Math.hypot(dx, dy) > 6) {
+      drag.dx = event.clientX - drag.startX;
+      drag.dy = event.clientY - drag.startY;
+      if (!drag.moved && Math.hypot(drag.dx,drag.dy) > 6) {
         drag.moved = true;
         tapStartedIdle = false;
-        control.classList.add("is-dragging");
-
-        const rect = control.getBoundingClientRect();
-        control.style.right = "auto";
-        control.style.bottom = "auto";
-        control.style.left = rect.left + "px";
-        control.style.top = rect.top + "px";
+        const rect = node.getBoundingClientRect();
+        node.classList.add("is-dragging");
+        node.style.left = rect.left + "px";
+        node.style.top = rect.top + "px";
+        node.style.right = "auto";
+        node.style.bottom = "auto";
+        drag.left = rect.left;
+        drag.top = rect.top;
+        drag.bounds = bounds(rect);
+        if (node === hub) window.WeddingControlHub?.close(false);
+        else document.dispatchEvent(new Event("wedding:musicdockdrag"));
       }
-
       if (!drag.moved) return;
-      event.preventDefault();
-
-      const rect = control.getBoundingClientRect();
-      const maxLeft = Math.max(FLOAT_EDGE, innerWidth - rect.width - FLOAT_EDGE);
-      const maxTop = Math.max(FLOAT_EDGE, innerHeight - rect.height - FLOAT_EDGE);
-
-      control.style.left = Math.max(FLOAT_EDGE, Math.min(maxLeft, drag.left + dx)) + "px";
-      control.style.top = Math.max(FLOAT_EDGE, Math.min(maxTop, drag.top + dy)) + "px";
+      if (event.cancelable) event.preventDefault();
+      if (!frame) frame = requestAnimationFrame(paintDrag);
     };
-
-    const finishDrag = event => {
+    const end = event => {
       if (!drag || (event.pointerId != null && event.pointerId !== drag.id)) return;
-
       const moved = drag.moved;
+      // Resolve the final pointer coordinates before the glide. No trailing
+      // animation frame is allowed to overwrite the release position.
+      if (frame) {cancelAnimationFrame(frame);frame=0;}
+      if (moved) paintDrag();
       drag = null;
-      control.classList.remove("is-dragging");
-
-      window.removeEventListener("pointermove", onPointerMove, true);
-      window.removeEventListener("pointerup", finishDrag, true);
-      window.removeEventListener("pointercancel", finishDrag, true);
-
+      window.removeEventListener("pointermove",move,true);
+      window.removeEventListener("pointerup",end,true);
+      window.removeEventListener("pointercancel",end,true);
       if (moved) {
-        control.dataset.userMoved = "true";
-        suppressClick = true;
-        setTimeout(() => { suppressClick = false; }, 120);
-        glideFloatingToEdge(control);
-        scheduleIdle(1050);
+        node.dataset.userMoved = "true";
+        suppressClickUntil = performance.now() + 450;
+        glide();
       } else {
         scheduleIdle();
       }
     };
-
-    control.addEventListener("pointerdown", event => {
+    handle.addEventListener("pointerdown", event => {
       if (event.button != null && event.button !== 0) return;
-      if (control.classList.contains("settings-hub") && event.target.closest(".settings-panel")) return;
-      tapStartedIdle = control.classList.contains("is-idle");
-      // Settings and Menu must behave identically: when a dock is collapsed,
-      // do not expand it under the pressed finger or mouse button. Expanding
-      // on pointerdown shifts the Settings trigger and can cancel the click
-      // or make the drag jump. Wake only on an actual click, not a drag.
-      if (!tapStartedIdle) wake();
-
-      const rect = control.getBoundingClientRect();
+      if (!visible(node) || drag) return;
+      cancelGlide();
+      tapStartedIdle = node.classList.contains("is-idle");
+      // Do not expand a collapsed hit target underneath the pointer.
+      if (!tapStartedIdle && node === hub) wake();
+      const rect = node.getBoundingClientRect();
       drag = {
-        id:event.pointerId,
-        startX:event.clientX,
-        startY:event.clientY,
-        left:rect.left,
-        top:rect.top,
-        moved:false
+        id:event.pointerId,startX:event.clientX,startY:event.clientY,
+        left:rect.left,top:rect.top,dx:0,dy:0,moved:false,
+        bounds:bounds(rect)
       };
-
-      window.addEventListener("pointermove", onPointerMove, { capture:true, passive:false });
-      window.addEventListener("pointerup", finishDrag, { capture:true });
-      window.addEventListener("pointercancel", finishDrag, { capture:true });
-    }, { passive:true });
-
-    control.addEventListener("click", event => {
-      // Children in the settings palette are independent interactive controls,
-      // not drag handles; don't suppress taps or reset idle while selecting.
-      if (control.classList.contains("settings-hub") && event.target.closest(".settings-panel")) return;
-      if (suppressClick) {
+      window.addEventListener("pointermove",move,{capture:true,passive:false});
+      window.addEventListener("pointerup",end,true);
+      window.addEventListener("pointercancel",end,true);
+    },{passive:true});
+    // Capture prevents the post-drag synthetic click from opening Settings
+    // or the music action menu, without interfering with normal taps.
+    node.addEventListener("click",event => {
+      if (event.target.closest(".settings-panel,.music-float-actions")) return;
+      if (performance.now() < suppressClickUntil) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        suppressClick = false;
         return;
       }
-
-      // A single tap must activate the Menu even when its icon is collapsed.
-      // The old "wake on first tap" behavior made touch users tap twice.
       tapStartedIdle = false;
-      wake();
-      scheduleIdle();
-    }, true);
-
-    control.addEventListener("pointerenter", () => {
-      if (!coarsePointer.matches) wake();
+      if (node === hub) {wake();scheduleIdle();}
+    },true);
+    handle.addEventListener("pointerenter", () => {
+      if (!coarsePointer.matches && node === hub) wake();
     });
-    control.addEventListener("pointerleave", () => {
+    handle.addEventListener("pointerleave", () => {
       if (!coarsePointer.matches) scheduleIdle();
     });
-    control.addEventListener("focusin", () => {
-      // Focus can arrive between pointerdown and click. Preserve the compact
-      // hit target for BOTH controls until the gesture has been classified.
-      if (tapStartedIdle) return;
-      wake();
+    handle.addEventListener("focus", () => {
+      if (!tapStartedIdle && node === hub) wake();
     });
-    control.addEventListener("focusout", () => scheduleIdle());
-    if (control.classList.contains("settings-hub")) {
-      document.addEventListener("wedding:settingsclosed", () => scheduleIdle(1250));
+    if (node === hub) {
+      node.addEventListener("focusout",() => scheduleIdle());
+      document.addEventListener("wedding:settingsclosed",() => scheduleIdle(1100));
     }
-
+    const reset = () => {
+      cancelGlide();
+      if (drag) return;
+      if (node.dataset.userMoved === "true") {
+        anchor(node,node.dataset.floatEdge || "right",node.getBoundingClientRect().top);
+      } else initialPosition(node);
+    };
+    window.addEventListener("resize",reset,{passive:true});
+    if (node === musicDock) {
+      // The orb is initially hidden; its first real PLAYING event gives it
+      // dimensions and therefore a valid dock position.
+      new MutationObserver(() => {
+        if (!visible(node)) return;
+        if (node.dataset.userMoved !== "true") initialPosition(node);
+        else anchor(node,node.dataset.floatEdge || "left",node.getBoundingClientRect().top);
+      }).observe(node,{attributes:true,attributeFilter:["hidden"]});
+    }
     scheduleIdle(1500);
   };
 
-  floatingControls.forEach(installFloatingControl);
-
-  window.addEventListener("resize", () => {
-    floatingControls.forEach(control => {
-      if (control.dataset.userMoved === "true") snapFloatingToEdge(control, true);
-      else defaultPosition(control);
-    });
-  }, { passive:true });
+  setupFloating(hub,document.getElementById("settingsTrigger"));
+  setupFloating(musicDock,document.getElementById("musicBubbleTrigger"));
 
 })();

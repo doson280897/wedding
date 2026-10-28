@@ -557,6 +557,7 @@
     setBubbleActionsOpen(false);
   });
   musicBubbleStop?.addEventListener("click", stopMusic);
+  document.addEventListener("wedding:musicdockdrag", () => setBubbleActionsOpen(false));
 
   document.addEventListener("pointerdown", event => {
     if (bubbleActionsOpen && musicBubble && !musicBubble.contains(event.target)) setBubbleActionsOpen(false);

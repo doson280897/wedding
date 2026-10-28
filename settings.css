@@ -341,15 +341,12 @@ html[data-theme="light"] .settings-hub .settings-options :is(.language-option,.t
 html[data-theme="light"] .settings-hub .settings-music-row .music-toggle {background:#f2eadb;color:#395240;border-color:#b7a077}
 html[data-theme="light"] .settings-hub .settings-music-row .music-toggle[aria-pressed=true] {background:#405e46;color:#fff8e8}
 
-/* Floating controls start at stable corners on every page load.
-   Respect iOS/Android safe areas; JS keeps these anchors while idle. */
+/* The only permanent control docks at the bottom RIGHT by default. */
 .language-switch.settings-hub {
-  top:max(8px,env(safe-area-inset-top,0px));
-  right:max(8px,env(safe-area-inset-right,0px));
-}
-.wq-toggle.floating-control {
+  top:auto;
   right:max(8px,env(safe-area-inset-right,0px));
   bottom:max(8px,env(safe-area-inset-bottom,0px));
+  left:auto;
 }
 
 /* In a collapsed dock, remove the *layout gap* as well as the text.
@@ -384,8 +381,8 @@ html[data-theme="light"] .language-switch.settings-hub.floating-control.is-open 
 }
 
 
-/* Contextual music orb: only visible after playback was explicitly enabled.
-   The stop button dismisses the orb until music is enabled in Settings again. */
+/* Contextual music orb: only visible after confirmed PLAYING.
+   Pause keeps its position; Stop hides it until re-enabled in Settings. */
 .music-float {
   position:fixed;
   left:max(12px, env(safe-area-inset-left, 0px));
@@ -414,8 +411,10 @@ html[data-theme="light"] .language-switch.settings-hub.floating-control.is-open 
   background:radial-gradient(circle at 30% 25%, #42432d, #17251c 70%);
   color:#f2d393;
   box-shadow:0 6px 25px rgba(0,0,0,.35), inset 0 0 0 3px rgba(250,210,130,.06);
-  cursor:pointer;
-  touch-action:manipulation;
+  cursor:grab;
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
   transition:background .24s, color .24s, border-color .24s, box-shadow .24s;
 }
 .music-float-trigger::before {
@@ -682,3 +681,40 @@ html[data-theme="light"] .settings-hub .wq-panel{background:transparent;color:#3
 html[data-theme="light"] .settings-hub .wq-link{color:#395341}
 html[data-theme="light"] .settings-hub .wq-description{color:#67776b}
 @media(max-width:650px){.settings-hub .settings-panel{padding:16px}}
+
+/* The shared dock controller animates ONLY the release, never pointer moves.
+   Translate3d keeps dragging on the compositor, avoiding layout thrash. */
+.settings-hub.floating-control,
+.music-float.floating-control {
+  will-change:auto;
+  touch-action:none;
+}
+.settings-hub.floating-control.is-dragging,
+.music-float.floating-control.is-dragging {
+  transition:none!important;
+  will-change:transform;
+  cursor:grabbing;
+}
+.settings-hub.floating-control.is-snapping,
+.music-float.floating-control.is-snapping {
+  transition:left .34s cubic-bezier(.22,.82,.21,1),
+             top .34s cubic-bezier(.22,.82,.21,1)!important;
+  will-change:left,top;
+}
+.music-float.floating-control {
+  right:auto;
+  top:auto;
+  left:max(8px,env(safe-area-inset-left,0px));
+  bottom:max(8px,env(safe-area-inset-bottom,0px));
+}
+.music-float.floating-control .music-float-trigger:active{cursor:grabbing}
+.music-float[data-float-edge="right"] .music-float-actions{
+  left:auto;right:calc(100% + 9px);
+}
+@media(max-width:650px){
+  .music-float[data-float-edge="right"] .music-float-actions{right:calc(100% + 7px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .settings-hub.floating-control.is-snapping,
+  .music-float.floating-control.is-snapping{transition:none!important}
+}
