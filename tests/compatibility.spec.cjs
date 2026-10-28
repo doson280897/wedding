@@ -62,6 +62,8 @@ test("party link, wax gate and album lightbox interactions", async ({
   );
   await expect(page.locator("#moonlightGate")).toBeVisible();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
+  // The third-party player must not compete with the opening on first paint.
+  expect(await page.evaluate(() => Boolean(window.__weddingYouTubeApiPromise))).toBe(false);
   // The seal is personalized from data, not hard-coded into the HTML.
   const initials = await page.evaluate(() =>
     window.WEDDING_INFO.couple.bride.initial + " · " + window.WEDDING_INFO.couple.groom.initial

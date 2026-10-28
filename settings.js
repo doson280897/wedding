@@ -94,9 +94,19 @@
   navToggle?.addEventListener("click", () => setOpen(false));
   document.querySelector(".party-admin-link")?.addEventListener("click", () => setOpen(false));
   window.addEventListener("popstate", () => setOpen(false));
-  window.addEventListener("resize", positionPanel, { passive: true });
-  window.addEventListener("scroll", positionPanel, { passive: true });
-  hub.addEventListener("pointerup", () => requestAnimationFrame(positionPanel));
+  // A dragging/scrolling settings palette can emit many events per frame.
+  // Coalesce layout reads and writes to one positioning pass.
+  let positionFrame = 0;
+  const schedulePanelPosition = () => {
+    if (panel.hidden || positionFrame) return;
+    positionFrame = requestAnimationFrame(() => {
+      positionFrame = 0;
+      positionPanel();
+    });
+  };
+  window.addEventListener("resize", schedulePanelPosition, { passive: true });
+  window.addEventListener("scroll", schedulePanelPosition, { passive: true });
+  hub.addEventListener("pointerup", schedulePanelPosition);
 
   syncThemeControls();
   window.WeddingTheme = { getTheme: currentTheme, setTheme };
