@@ -51,7 +51,8 @@ jobs:
           from pathlib import Path
           source = Path("wedding-info.js").read_text(encoding="utf-8")
           info, _ = json.JSONDecoder().raw_decode(source.split("window.WEDDING_INFO = ", 1)[1].lstrip())
-          assert "bride" in info["parties"] and "groom" in info["parties"]
+          assert all(key in info["parties"] for key in ("bride", "groom", "single"))
+          assert info["wedding"]["mode"] in ("single", "double")
           print("Python image optimizer can read the single wedding info file.")
           PY
 
