@@ -178,24 +178,22 @@
 
   const FLOAT_EDGE = 8;
   const FLOAT_IDLE_DELAY = 2600;
-  const FLOAT_STORE_KEY = "wedding:floating-controls:v2";
   const coarsePointer = window.matchMedia("(hover: none), (pointer: coarse)");
 
-  let savedFloating = {};
-  try {
-    savedFloating = JSON.parse(sessionStorage.getItem(FLOAT_STORE_KEY) || "{}") || {};
-  } catch (_) {
-    savedFloating = {};
-  }
-
-  const saveFloatingPositions = () => {
-    try { sessionStorage.setItem(FLOAT_STORE_KEY, JSON.stringify(savedFloating)); } catch (_) {}
-  };
-
-  const controlKey = control => {
-    if (control === toggle) return "menu";
-    if (control.id === "musicToggle") return "music";
-    return "language";
+  // Drag positions deliberately live only in the current document.
+  // Every F5/navigation starts at top-right (settings) and
+  // bottom-right (menu), rather than restoring old sessionStorage.
+  const defaultPosition = control => {
+    const css = getComputedStyle(control);
+    const rect = control.getBoundingClientRect();
+    const safeOffset = control === toggle
+      ? Number.parseFloat(css.bottom)
+      : Number.parseFloat(css.top);
+    const margin = Math.max(FLOAT_EDGE, Number.isFinite(safeOffset) ? safeOffset : FLOAT_EDGE);
+    const top = control === toggle
+      ? Math.max(FLOAT_EDGE, innerHeight - rect.height - margin)
+      : margin;
+    setEdgeAnchor(control, "right", top);
   };
 
   const clampTop = (control, top) => {
@@ -231,8 +229,6 @@
     const top = clampTop(control, rect.top);
     setEdgeAnchor(control, edge, top);
 
-    savedFloating[controlKey(control)] = { edge, top };
-    saveFloatingPositions();
   };
 
   const glideFloatingToEdge = control => {
@@ -253,9 +249,6 @@
     control.style.top = top + "px";
     control.style.left = targetLeft + "px";
 
-    savedFloating[controlKey(control)] = { edge, top };
-    saveFloatingPositions();
-
     // Once the glide finishes, convert the pixel position to a true edge
     // anchor. Later expansion therefore grows inward instead of off-screen.
     setTimeout(() => {
@@ -265,18 +258,9 @@
     }, 330);
   };
 
-  const restoreFloatingPosition = control => {
-    if (control.matches(".language-switch") && document.body.classList.contains("envelope-locked")) return;
-
-    const saved = savedFloating[controlKey(control)];
-    if (!saved || (saved.edge !== "left" && saved.edge !== "right")) return;
-
-    setEdgeAnchor(control, saved.edge, Number(saved.top) || FLOAT_EDGE);
-  };
-
   const installFloatingControl = control => {
     control.classList.add("floating-control");
-    restoreFloatingPosition(control);
+    defaultPosition(control);
 
     let idleTimer = 0;
     let armedTimer = 0;
@@ -300,13 +284,15 @@
     const wake = () => {
       clearTimeout(idleTimer);
       control.classList.remove("is-idle");
+      if (control.dataset.userMoved !== "true") defaultPosition(control);
     };
 
     const collapseNow = () => {
       if (control.classList.contains("settings-hub") && control.classList.contains("is-open")) return;
       setArmed(false);
-      snapFloatingToEdge(control, true);
       control.classList.add("is-idle");
+      if (control.dataset.userMoved === "true") snapFloatingToEdge(control, true);
+      else defaultPosition(control);
     };
 
     const scheduleIdle = (delay = FLOAT_IDLE_DELAY) => {
@@ -356,6 +342,7 @@
       window.removeEventListener("pointercancel", finishDrag, true);
 
       if (moved) {
+        control.dataset.userMoved = "true";
         suppressClick = true;
         setTimeout(() => { suppressClick = false; }, 120);
         glideFloatingToEdge(control);
@@ -430,17 +417,18 @@
 
   floatingControls.forEach(installFloatingControl);
 
-  // The envelope temporarily pins the switch next to the safe area.
-  // Restore the user's saved draggable position once the envelope disappears.
+  // The initial anchors are fixed for each load. Do not restore a previous
+  // tab's saved drag position when the envelope disappears.
   document.addEventListener("wedding:envelopeexit", () => {
-    const languageControl = document.querySelector(".language-switch");
-    if (languageControl) restoreFloatingPosition(languageControl);
+    for (const control of floatingControls) {
+      if (control.dataset.userMoved !== "true") defaultPosition(control);
+    }
   });
 
   window.addEventListener("resize", () => {
     floatingControls.forEach(control => {
-      if (control.matches(".language-switch") && document.body.classList.contains("envelope-locked")) return;
-      snapFloatingToEdge(control, true);
+      if (control.dataset.userMoved === "true") snapFloatingToEdge(control, true);
+      else defaultPosition(control);
     });
   }, { passive:true });
 
