@@ -1,0 +1,14 @@
+{
+  "name": "wedding-invitation",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Static wedding invitation site, GitHub Pages",
+  "scripts": {
+    "test:unit": "node --test tests/*.test.cjs",
+    "test:browser": "playwright test tests/compatibility.spec.cjs --reporter=line --workers=2",
+    "test:browser:extended": "WEDDING_EXTENDED_TESTS=true playwright test tests/compatibility.spec.cjs --reporter=line --workers=2"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

@@ -180,3 +180,10 @@ Album chỉ tải ảnh ở gần vùng hiển thị; animation mở cổng dùn
 - Tiếng Anh: `?lang=en`
 
 **Nguyên tắc bảo trì:** Cập nhật thông tin khách hàng **chỉ trong `wedding-info.js`**. Sửa các file còn lại **chỉ khi muốn nâng cấp giao diện hoặc tính năng**.
+
+
+### Kiểm thử và dependency
+
+Dự án dùng Playwright **1.64.1** cố định trong `package.json` và workflow CI (không dùng `latest`).
+Dành cho máy local: chạy `npm install`, `npx playwright install chromium webkit firefox`, sau đó `npm run test:unit` và `npm run test:browser` (cần mở HTTP server cổng 8000 tại thư mục repo trước khi chạy browser test).
+CI tự chạy smoke trên desktop Chromium, Android Chromium, iPhone WebKit và Firefox; full 8-device matrix có thể chạy từ **Actions → Cross-device browser compatibility → Run workflow → extended**.

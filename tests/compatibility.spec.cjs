@@ -150,7 +150,7 @@ test("menu, map and gift overlays open and close on each device @smoke", async (
   await menuToggle.click();
   await expect(menuToggle).toHaveAttribute("aria-expanded", "true");
   // A hidden gift popup should not fetch bank QR images on first paint.
-  const activeQR = page.locator(".gift-card[data-party-scope='bride'] .gift-qr");
+  const activeQR = page.locator(".gift-card[data-party-scope='groom'] .gift-qr");
   await expect(activeQR).not.toHaveAttribute("src", /.+/);
   await page.locator('#wqPanel a[href="#wedding-gift"]').click();
   await expect(page.locator("#wgModal")).toBeVisible();
