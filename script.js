@@ -246,20 +246,54 @@
   const waxOpenButton = document.getElementById("waxOpenButton");
   const reducedGateMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let gateOpening = false;
-  let gateFallbackTimer = 0;
+  const gateTimers = new Set();
+  const scheduleGate = (callback, delay) => {
+    const timer = window.setTimeout(() => {
+      gateTimers.delete(timer);
+      callback();
+    }, delay);
+    gateTimers.add(timer);
+    return timer;
+  };
+  const clearGateTimers = () => {
+    gateTimers.forEach(timer => window.clearTimeout(timer));
+    gateTimers.clear();
+  };
+
+  const completeMoonlightGate = () => {
+    if (!moonlightGate || moonlightGate.hidden) return;
+    clearGateTimers();
+    moonlightGate.hidden = true;
+    moonlightGate.classList.remove(
+      "is-awakening", "is-opening", "is-blooming",
+      "is-hero-revealing", "is-leaving"
+    );
+    document.documentElement.classList.remove("wax-pending", "gate-hero-revealing");
+    setContentBrowserTheme();
+    resetInvitationScroll();
+
+    // Start persistent hero motion only after the gate is fully gone, so it
+    // cannot compete with the final crossfade on iOS/WebKit.
+    requestAnimationFrame(() => {
+      document.dispatchEvent(new Event("wedding:waxopen"));
+    });
+  };
 
   const finishMoonlightGate = () => {
     if (!moonlightGate || moonlightGate.hidden) return;
-    window.clearTimeout(gateFallbackTimer);
-    moonlightGate.classList.add("is-leaving");
-    setContentBrowserTheme();
-    resetInvitationScroll();
-    document.dispatchEvent(new Event("wedding:waxopen"));
-    window.setTimeout(() => {
-      moonlightGate.hidden = true;
-      moonlightGate.classList.remove("is-awakening", "is-opening", "is-blooming", "is-hero-revealing", "is-leaving");
-      document.documentElement.classList.remove("wax-pending", "gate-hero-revealing");
-    }, reducedGateMotion ? 0 : 940);
+    if (reducedGateMotion) {
+      document.documentElement.classList.add("gate-hero-revealing", "cinematic-entered");
+      completeMoonlightGate();
+      return;
+    }
+
+    // Do not wait for the doors to stop. Fade the gate while they are still
+    // moving so the viewer never sees a hard "door finished -> scene changed"
+    // boundary.
+    if (!moonlightGate.classList.contains("is-leaving")) {
+      moonlightGate.classList.add("is-leaving");
+    }
+    scheduleGate(completeMoonlightGate, 1080);
   };
 
   const openFromWax = () => {
@@ -273,33 +307,28 @@
     }
 
     moonlightGate.classList.add("is-awakening");
-    window.setTimeout(() => {
+    scheduleGate(() => {
       if (!moonlightGate || moonlightGate.hidden) return;
       moonlightGate.classList.add("is-opening");
-      const leftDoor = moonlightGate.querySelector(".moonlight-gate__door--left");
-      let completed = false;
-      const finishDoors = event => {
-        if (event && (event.target !== leftDoor || event.propertyName !== "transform")) return;
-        if (completed) return;
-        completed = true;
-        leftDoor?.removeEventListener("transitionend", finishDoors);
-        finishMoonlightGate();
-      };
-      leftDoor?.addEventListener("transitionend", finishDoors);
 
-      // Let celestial light leak through the growing seam first. The hero
-      // only fades in after the doors are already clearly open.
-      window.setTimeout(() => {
+      // Light starts leaking through while the doors are still near closed.
+      scheduleGate(() => {
         if (!moonlightGate.hidden) moonlightGate.classList.add("is-blooming");
-      }, 460);
-      window.setTimeout(() => {
+      }, 420);
+
+      // Hero and its text enter together as one visual reveal.
+      scheduleGate(() => {
         if (!moonlightGate.hidden) {
           moonlightGate.classList.add("is-hero-revealing");
-          document.documentElement.classList.add("gate-hero-revealing");
+          document.documentElement.classList.add("gate-hero-revealing", "cinematic-entered");
         }
-      }, 760);
+      }, 700);
 
-      gateFallbackTimer = window.setTimeout(finishDoors, 2020);
+      // Begin dissolving the gate before the 1.62s hinge motion completes.
+      scheduleGate(finishMoonlightGate, 1180);
+
+      // Safety completion in case a browser throttles an intermediate timer.
+      scheduleGate(completeMoonlightGate, 2380);
     }, 240);
   };
 
