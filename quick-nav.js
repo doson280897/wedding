@@ -8,7 +8,11 @@
   const links = [...panel.querySelectorAll(".wq-link")];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const tr = key => window.WeddingI18n ? window.WeddingI18n.t(key) : key;
-  const languageButtons = [...document.querySelectorAll(".language-switch [data-lang]")];
+  const settingsFocusable = () => {
+    const trigger = document.getElementById("settingsTrigger");
+    const options = document.getElementById("settingsPanel");
+    return [trigger, ...(!options?.hidden ? options.querySelectorAll("button") : [])];
+  };
 
   const mapModal = document.getElementById("wmModal");
   const mapBackdrop = document.getElementById("wmBackdrop");
@@ -125,21 +129,21 @@
     if (giftOpen) {
       if (event.key === "Escape") {event.preventDefault();setGiftOpen(false);return;}
       if (event.key === "Tab") {
-        trapFocus(event, [giftClose, ...giftModal.querySelectorAll('a[href]'), ...languageButtons]);
+        trapFocus(event, [giftClose, ...giftModal.querySelectorAll('a[href]'), ...settingsFocusable()]);
       }
       return;
     }
     if (mapOpen) {
       if (event.key === "Escape") {event.preventDefault();setMapOpen(false);return;}
       if (event.key === "Tab") {
-        trapFocus(event, [mapClose, ...mapModal.querySelectorAll('a[href]'), ...languageButtons]);
+        trapFocus(event, [mapClose, ...mapModal.querySelectorAll('a[href]'), ...settingsFocusable()]);
       }
       return;
     }
     if (!open) return;
     if (event.key === "Escape") {event.preventDefault();setOpen(false);return;}
     if (event.key !== "Tab") return;
-    trapFocus(event, [closeBtn, ...links, ...languageButtons]);
+    trapFocus(event, [closeBtn, ...links, ...settingsFocusable()]);
   });
   const refreshLanguage = () => {
     toggle.setAttribute("aria-label", tr(open ? "menu.closeAria" : "menu.openAria"));
