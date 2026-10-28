@@ -112,7 +112,12 @@
     for (const side of ["bride", "groom"]) {
       const img = getInfo("parties." + side + ".images.hero");
       const ending = getInfo("parties." + side + ".images.ending");
-      const safeCssUrl = value => 'url("' + String(value).replace(/["\\\n\r]/g, "") + '")';
+      const safeCssUrl = value => {
+        const url = new URL(value, document.baseURI);
+        const build = document.querySelector('meta[name="wedding-build"]')?.content;
+        if (build && build !== "__BUILD_ID__") url.searchParams.set("v", build);
+        return 'url("' + url.href.replace(/["\\\n\r]/g, "") + '")';
+      };
       if (img) document.documentElement.style.setProperty("--hero-" + side + "-image", safeCssUrl(img));
       if (ending) document.documentElement.style.setProperty("--ending-" + side + "-image", safeCssUrl(ending));
     }
