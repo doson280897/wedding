@@ -28,16 +28,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Build HTML metadata, initials, images and version from wedding-info.js
+        env:
+          BUILD_SHA: ${{ github.sha }}
+        run: node build-wedding.cjs
+
       - name: Build social share preview from optimized hero
         run: |
           python3 -m pip install --quiet Pillow
           python3 - <<'PY'
           from pathlib import Path
           from PIL import Image, ImageDraw, ImageFont, ImageOps
+          import json
 
-          source = Path("images/optimized/assets/hero_bride.webp")
+          wedding = json.loads(Path("/tmp/wedding-deploy-info.json").read_text(encoding="utf-8"))
+          couple = wedding["couple"]
+          parties = wedding["parties"]
+
+          source = Path(parties["bride"]["images"]["hero"])
           if not source.exists():
-              raise SystemExit("Missing images/optimized/assets/hero_bride.webp")
+              raise SystemExit(f"Missing configured hero image: {source}")
 
           image = Image.open(source).convert("RGB")
           image = ImageOps.fit(image, (1200, 630), Image.Resampling.LANCZOS, centering=(0.5, 0.42)).convert("RGBA")
@@ -73,38 +83,32 @@ jobs:
           cream = (245, 236, 221, 255)
           muted = (211, 191, 158, 255)
 
+          def fitted_font(pattern, text, size, available=460):
+              while size > 20:
+                  font = load_font(pattern, size)
+                  if draw.textbbox((0, 0), text, font=font)[2] <= available:
+                      return font
+                  size -= 2
+              return load_font(pattern, size)
+
           left = 690
-          draw.text((left, 170), "WEDDING INVITATION", font=small, fill=muted)
+          title = "WEDDING INVITATION"
+          groom_name = couple["groom"]["short"].upper()
+          bride_name = "&  " + couple["bride"]["short"].upper()
+          def date_dots(side):
+              year, month, day = parties[side]["date"].split("-")
+              return f"{day}.{month}.{year}"
+
+          draw.text((left, 170), title, font=small, fill=muted)
           draw.line((left, 210, 1115, 210), fill=(209, 174, 117, 150), width=1)
-          draw.text((left, 236), "THÀNH SƠN", font=names, fill=cream)
-          draw.text((left, 311), "&  TỐ NGA", font=amp, fill=gold)
-          draw.text((left, 390), "14.11.2026  —  29.11.2026", font=date, fill=muted)
-          draw.text((left, 442), "Trân trọng kính mời", font=small, fill=cream)
+          draw.text((left, 236), groom_name, font=fitted_font("serif:style=Bold", groom_name, 58), fill=cream)
+          draw.text((left, 311), bride_name, font=fitted_font("serif", bride_name, 42), fill=gold)
+          date_label = date_dots("bride") + "  —  " + date_dots("groom")
+          draw.text((left, 390), date_label, font=fitted_font("sans", date_label, 25), fill=muted)
+          draw.text((left, 442), wedding["text"]["vi"]["envelope.invite"], font=small, fill=cream)
 
           image.convert("RGB").save("og-preview.jpg", "JPEG", quality=88, optimize=True, progressive=True)
           print("Created og-preview.jpg", Path("og-preview.jpg").stat().st_size, "bytes")
-          PY
-
-      - name: Stamp deployment version and bust browser cache
-        env:
-          BUILD_SHA: ${{ github.sha }}
-        run: |
-          python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          build = os.environ["BUILD_SHA"][:12]
-          for filename in ("index.html", "link-tool.html", "style.css"):
-              path = Path(filename)
-              text = path.read_text(encoding="utf-8")
-              path.write_text(text.replace("__BUILD_ID__", build), encoding="utf-8")
-
-          Path("version.json").write_text(
-              json.dumps({"build": build}, separators=(",", ":")),
-              encoding="utf-8"
-          )
-          print("Stamped deployment build:", build)
           PY
 
       - name: Configure Pages
