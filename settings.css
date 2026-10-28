@@ -1,0 +1,375 @@
+/* Unified wedding controls: a single draggable palette for language, theme & music.
+   Navigation remains a separate deliberate shortcut at the bottom. */
+.language-switch.settings-hub,
+.language-switch.settings-hub.floating-control,
+.language-switch.settings-hub.floating-control.is-idle {
+  z-index: 6001;
+  width: auto;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  gap: 0;
+  overflow: visible;
+  border-radius: 999px;
+  background: rgba(19, 27, 22, .94);
+  border: 1px solid rgba(216, 182, 123, .60);
+  box-shadow: 0 8px 30px rgba(0,0,0,.32);
+  backdrop-filter: none;
+  opacity: 1;
+  touch-action: none;
+}
+
+.settings-hub .settings-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  height: 42px;
+  padding: 0 13px;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: #edcf9e;
+  cursor: grab;
+  white-space: nowrap;
+  font: 600 10px Montserrat, sans-serif;
+  letter-spacing: .12em;
+}
+.settings-hub .settings-trigger:active { cursor: grabbing; }
+.settings-hub .settings-trigger svg { display:block;flex:0 0 20px;width:20px;height:20px }
+.settings-hub .settings-trigger-label { max-width:110px;overflow:hidden;opacity:1;transition:max-width .25s,opacity .15s }
+.settings-hub.floating-control.is-idle .settings-trigger { width:42px;padding:0 }
+.settings-hub.floating-control.is-idle .settings-trigger-label { max-width:0;opacity:0 }
+.settings-hub.is-open .settings-trigger,
+.settings-hub.floating-control.is-idle.is-open .settings-trigger { width:auto;padding:0 13px }
+.settings-hub.is-open .settings-trigger-label,
+.settings-hub.floating-control.is-idle.is-open .settings-trigger-label { max-width:110px;opacity:1 }
+
+.settings-hub .settings-panel {
+  position:absolute;
+  z-index:2;
+  left:0;
+  top:calc(100% + 10px);
+  width:min(315px, calc(100vw - 20px));
+  max-height:calc(100vh - 20px);
+  max-height:calc(100dvh - 20px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:18px;
+  border:1px solid rgba(219,190,136,.56);
+  border-radius:18px;
+  background:linear-gradient(145deg,#252a24,#101611);
+  color:#f0e5d5;
+  box-shadow:0 24px 66px rgba(0,0,0,.58);
+  font-family:Montserrat,system-ui,sans-serif;
+  letter-spacing:normal;
+  touch-action:pan-y;
+  user-select:text;
+  -webkit-user-select:text;
+}
+.settings-hub .settings-panel[hidden] { display:none!important }
+.settings-panel-heading { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px;color:#d4b88a;font:600 11px Montserrat,sans-serif;letter-spacing:.12em }
+.settings-close { display:grid;place-items:center;width:34px;height:34px;border:0;background:transparent;color:#f1dfc3;font-size:25px;line-height:1;cursor:pointer;border-radius:50% }
+.settings-row { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid rgba(210,181,132,.19) }
+.settings-row-label { flex:1 1 auto;min-width:76px;color:#e1d9c9;font-size:12px;font-weight:500;letter-spacing:0 }
+.settings-options { flex:0 0 auto;display:flex;align-items:center;gap:3px;padding:3px;border:1px solid rgba(199,167,114,.30);border-radius:999px;background:rgba(0,0,0,.16) }
+.settings-hub .settings-options .language-option,
+.settings-hub .settings-options .theme-option {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  max-width:none;
+  min-height:36px;
+  min-width:45px;
+  padding:7px 10px;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:#baa98b;
+  opacity:1;
+  font:600 11px Montserrat,system-ui,sans-serif;
+  letter-spacing:.02em;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.settings-hub .settings-options .theme-option { min-width:70px }
+.settings-hub .settings-options :is(.language-option,.theme-option).is-active {
+  background:#c9a86e;
+  color:#151c16;
+  box-shadow:0 2px 10px rgba(0,0,0,.22);
+}
+.settings-hub .settings-panel :is(button):focus-visible,
+.settings-hub .settings-trigger:focus-visible {
+  outline:2px solid #eed19d;
+  outline-offset:2px;
+}
+.settings-hub .settings-music-row .music-toggle {
+  position:static;
+  left:auto;
+  right:auto;
+  top:auto;
+  bottom:auto;
+  z-index:auto;
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:auto;
+  min-width:105px;
+  min-height:40px;
+  gap:7px;
+  padding:7px 10px;
+  border-radius:999px;
+  border:1px solid rgba(203,169,114,.46);
+  background:#171e19;
+  color:#f0d7ac;
+  box-shadow:none;
+  font-size:10px;
+  letter-spacing:.01em;
+  backdrop-filter:none;
+  cursor:pointer;
+  touch-action:manipulation;
+  user-select:none;
+}
+.settings-music-row .music-icon { width:18px;height:18px;flex-basis:18px }
+.settings-music-row .music-icon svg { width:18px;height:18px }
+.settings-music-row .music-label {display:inline;max-width:none;white-space:nowrap}
+html.party-pending .settings-music-row,
+html.link-tool-active .settings-music-row {display:none!important}
+
+@media(max-width:650px) {
+  .language-switch.settings-hub,
+  .language-switch.settings-hub.floating-control,
+  .language-switch.settings-hub.floating-control.is-idle {
+    min-width:44px;
+    min-height:44px;
+    height:44px;
+    padding:0;
+    gap:0;
+  }
+  .settings-hub .settings-panel { padding:16px; }
+  .settings-hub .settings-options .language-option,
+  .settings-hub .settings-options .theme-option {
+    min-height:40px;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .settings-hub .settings-trigger-label { transition:none; }
+}
+
+/* Personalized invitation: the recipient has a genuine typographic hierarchy. */
+.envelope-invite {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  margin-top:8px;
+  max-width:94%;
+  width:100%;
+  padding:0 7px 7px;
+}
+.envelope-recipient-label {
+  display:block;
+  color:#5b685c;
+  font:500 12px/1.4 Montserrat,sans-serif;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+.envelope-recipient-name {
+  display:block;
+  max-width:100%;
+  color:#315b47;
+  font:700 clamp(20px,3.3vw,32px)/1.12 'Cormorant Garamond',serif;
+  letter-spacing:.015em;
+  overflow-wrap:anywhere;
+  text-wrap:balance;
+}
+.envelope-recipient-name[hidden] {display:none}
+.guest-greeting {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  max-width:min(100%,540px);
+  margin:10px auto 14px;
+  letter-spacing:normal;
+}
+.hero-recipient-label {
+  display:block;
+  color:#f0d9b7;
+  font:500 11px/1.5 Montserrat,sans-serif;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+}
+.hero-recipient-name {
+  display:block;
+  color:#fbe3ba;
+  font:700 clamp(24px,3.3vw,38px)/1.12 'Cormorant Garamond',serif;
+  letter-spacing:.015em;
+  text-shadow:0 3px 16px rgba(0,0,0,.75);
+  overflow-wrap:anywhere;
+  text-wrap:balance;
+  max-width:100%;
+}
+.hero-recipient-name[hidden] {display:none}
+@media (max-width:650px) {
+  .envelope-recipient-name {font-size:clamp(20px,6vw,29px)}
+  .hero-recipient-name {font-size:clamp(22px,6.1vw,32px)}
+  .hero-recipient-label {font-size:10px}
+}
+@media (max-height:650px) {
+  .envelope-invite {margin-top:4px}
+  .envelope-recipient-name {font-size:clamp(18px,4vh,26px)}
+}
+
+/* Warm ivory / sage palette. Photos and cinema lightbox remain naturally dark.
+   This avoids washing out the pictures while making reading areas truly light. */
+html[data-theme="light"] body {background:#f5f0e6;color:#25382c}
+html[data-theme="light"] .couple-section {background:radial-gradient(ellipse at 50% 25%,#f6f0e4,#e9e2d4 75%)}
+html[data-theme="light"] .family-section,
+html[data-theme="light"] .events-section,
+html[data-theme="light"] .locations-section {background:#f5f0e6}
+html[data-theme="light"] .events-section {background:radial-gradient(ellipse at 50% 0%,#eee5d6,#f7f2e9 75%)}
+html[data-theme="light"] .locations-section {background:#f2ebdf}
+html[data-theme="light"] .section-title,
+html[data-theme="light"] .person-copy h3,
+html[data-theme="light"] .family-card h3,
+html[data-theme="light"] .family-card h4,
+html[data-theme="light"] .location-info h3 {color:#355442}
+html[data-theme="light"] .section-title em {color:#8b7651}
+html[data-theme="light"] .section-lead,
+html[data-theme="light"] .person-copy p,
+html[data-theme="light"] .event-address,
+html[data-theme="light"] .family-address,
+html[data-theme="light"] .lunar,
+html[data-theme="light"] .location-info p {color:#526356}
+html[data-theme="light"] .gold,
+html[data-theme="light"] .person-copy .script {color:#81693f}
+html[data-theme="light"] .couple-divider,
+html[data-theme="light"] .ornament {color:#947446}
+html[data-theme="light"] .family-card,
+html[data-theme="light"] .event-card,
+html[data-theme="light"] .location-card {
+  background:linear-gradient(145deg,#fffdf6,#f2ecdf);
+  border-color:rgba(156,128,78,.42);
+  box-shadow:0 14px 38px rgba(63,51,33,.11);
+}
+html[data-theme="light"] .family-card p,
+html[data-theme="light"] .family-card strong,
+html[data-theme="light"] .event-detail {color:#314639}
+html[data-theme="light"] .family-card>span,
+html[data-theme="light"] .family-card small,
+html[data-theme="light"] .event-label,
+html[data-theme="light"] .location-info small {color:#8b6c3a}
+html[data-theme="light"] .date-block strong {color:#4a6b52}
+html[data-theme="light"] .date-block small {color:#65766b}
+html[data-theme="light"] .event-detail span {color:#846337}
+html[data-theme="light"] .calendar-button,
+html[data-theme="light"] .map-button {background:#f9f3e6;color:#395240;border-color:#b89a66}
+html[data-theme="light"] .calendar-button:hover,
+html[data-theme="light"] .map-button:hover {background:#ebdfc9}
+html[data-theme="light"] footer {background:#eae0d0;color:#485b4c}
+
+/* Retain a deep 3D stage, but use an ivory frame when in light mode. */
+html[data-theme="light"] .album-section {
+  background:
+    radial-gradient(ellipse at 50% 44%,#324249 0%,#17242a 48%,#0a1216 92%);
+  border-color:#ac905f;
+}
+html[data-theme="light"] .album-ambient {opacity:.70}
+html[data-theme="light"] .album-card {border-color:rgba(232,209,158,.6)}
+
+/* Landing page and invitation generator: both participate in the theme. */
+html[data-theme="light"].party-pending body {background:#f1eadf}
+html[data-theme="light"] .party-selector {color:#2c4234}
+html[data-theme="light"] .party-selector-backdrop {
+  background:radial-gradient(circle at 50% 10%,#e2d6bb,#f5efe4 64%,#ebe2d3 100%);
+}
+html[data-theme="light"] .party-selector-card {
+  background:linear-gradient(145deg,#fffdf6,#eee7d9);
+  border-color:#cbb38b;
+  box-shadow:0 30px 72px rgba(76,59,35,.17);
+}
+html[data-theme="light"] .party-selector-card h2 {color:#2e4a39}
+html[data-theme="light"] .party-selector-card>p:not(.party-selector-kicker) {color:#667466}
+html[data-theme="light"] .party-selector-kicker,
+html[data-theme="light"] .party-selector-role,
+html[data-theme="light"] .party-selector-action {color:#806339}
+html[data-theme="light"] .party-selector-option {
+  background:linear-gradient(150deg,#f9f4e9,#e8e0d0);
+  border-color:rgba(166,136,83,.42);
+  color:#2c4735;
+}
+html[data-theme="light"] .party-selector-option:hover {background:#fffaf0;border-color:#987b4b}
+html[data-theme="light"] .party-selector-option small {color:#68786c}
+html[data-theme="light"] .party-admin-link {color:#6b552f;border-color:#ab9064}
+html[data-theme="light"] .party-admin-link:hover {background:#e9ddc9}
+
+/* Main navigation and modal surfaces. */
+html[data-theme="light"] .wq-toggle.floating-control {background:#f5ebdc;color:#344d3d;border-color:#b89a67;box-shadow:0 8px 24px #43351b30}
+html[data-theme="light"] .wq-panel {background:linear-gradient(145deg,#fffaf0,#eae2d4);color:#2a4234;border-color:#c9b087;box-shadow:0 24px 65px #44391d38}
+html[data-theme="light"] .wq-heading {color:#2a4234}
+html[data-theme="light"] .wq-heading em,
+html[data-theme="light"] .wq-kicker,
+html[data-theme="light"] .wq-no,
+html[data-theme="light"] .wq-arrow,
+html[data-theme="light"] .wq-footnote {color:#856c42}
+html[data-theme="light"] .wq-description,
+html[data-theme="light"] .wq-group-label {color:#657468}
+html[data-theme="light"] .wq-link {color:#324a3b;border-color:#bda78554}
+html[data-theme="light"] .wq-link:hover {color:#84683a}
+html[data-theme="light"] .wq-close,
+html[data-theme="light"] .wm-close,
+html[data-theme="light"] .wg-close {color:#385442}
+html[data-theme="light"] .wm-dialog,
+html[data-theme="light"] .wg-dialog {background:#f5efe3;border-color:#baa173;box-shadow:0 24px 60px #1a281b4a;color:#2e4234}
+html[data-theme="light"] .wm-header,
+html[data-theme="light"] .wg-header {background:#eee6d9f2;border-color:#c5ad8559}
+html[data-theme="light"] .gift-card {background:linear-gradient(145deg,#fffdf8,#e9e1d3);border-color:#cbb18b;box-shadow:0 10px 28px #513f2422}
+html[data-theme="light"] .gift-card h3 {color:#34513f}
+html[data-theme="light"] .gift-bank {color:#886734}
+html[data-theme="light"] .gift-account-number,
+html[data-theme="light"] .gift-hint {color:#56695a}
+
+/* Admin form: light surfaces, correct contrast and accessible inputs. */
+html[data-theme="light"] .link-tool-screen {
+  background:radial-gradient(ellipse at 50% 0%,#e5dac4,#f6f0e6 78%);
+  color:#2b4434;
+}
+html[data-theme="light"] .link-tool-card {
+  background:#fffaf1;
+  border-color:#cdb48a;
+  box-shadow:0 24px 70px rgba(76,54,27,.18);
+}
+html[data-theme="light"] .link-tool-back,
+html[data-theme="light"] .link-tool-eyebrow,
+html[data-theme="light"] .link-tool-result small {color:#856337}
+html[data-theme="light"] .link-tool-description,
+html[data-theme="light"] .link-tool-note {color:#526354}
+html[data-theme="light"] .link-tool-card input,
+html[data-theme="light"] .link-tool-card select {background:#fffcf6;color:#2c4133;border-color:#a6a28a}
+html[data-theme="light"] .link-tool-card input::placeholder {color:#7e8b80}
+html[data-theme="light"] .link-tool-action {background:#465f4c;color:#fffaf0;border-color:#465f4c}
+html[data-theme="light"] .link-tool-action.secondary {background:#fffaf0;color:#34503d;border-color:#ad9264}
+html[data-theme="light"] #linkToolGenerated,
+html[data-theme="light"] .link-tool-feedback {color:#826236}
+
+/* Settings popover in ivory mode. */
+html[data-theme="light"] .settings-hub.language-switch {background:#f5ebdc;border-color:#aa8c5c;color:#36513f;box-shadow:0 8px 24px #43351b30}
+html[data-theme="light"] .settings-hub .settings-trigger {color:#385442}
+html[data-theme="light"] .settings-hub .settings-panel {background:linear-gradient(145deg,#fffdf7,#eee6d7);color:#2d4636;border-color:#c9ad7b;box-shadow:0 22px 66px #43351b40}
+html[data-theme="light"] .settings-panel-heading,
+html[data-theme="light"] .settings-row-label {color:#395341}
+html[data-theme="light"] .settings-close {color:#49614c}
+html[data-theme="light"] .settings-row {border-color:#b4a27d69}
+html[data-theme="light"] .settings-options {background:#eee5d6;border-color:#baa37c}
+html[data-theme="light"] .settings-hub .settings-options :is(.language-option,.theme-option) {color:#465c49}
+html[data-theme="light"] .settings-hub .settings-options :is(.language-option,.theme-option).is-active {background:#435e4a;color:#fff8ec}
+html[data-theme="light"] .settings-hub .settings-music-row .music-toggle {background:#f2eadb;color:#395240;border-color:#b7a077}
+html[data-theme="light"] .settings-hub .settings-music-row .music-toggle[aria-pressed=true] {background:#405e46;color:#fff8e8}
