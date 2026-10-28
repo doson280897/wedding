@@ -119,7 +119,7 @@
     url.searchParams.delete("tool");
     if (singleMode) {
       // The single invitation is a direct root URL (no party chooser).
-      // Reload it so its envelope is properly initialized.
+      // Reload it so the temporary wax gate is initialized.
       history.replaceState(history.state, "", url);
       location.reload();
       return;

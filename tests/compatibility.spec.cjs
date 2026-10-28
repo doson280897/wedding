@@ -241,12 +241,8 @@ test("temporary wax gate is the only intro control and simply reveals content @c
   await page.goto(base + "/index.html?party=bride&to=ReloadGuest", { waitUntil:"domcontentloaded" });
   await expect(page.locator("#waxOpenButton")).toBeVisible();
   await expect(page.locator("#waxMonogram")).toHaveText("N · S");
-  await expect(page.locator("#waxOpenButton")).toHaveCount(0);
-  await expect(page.locator("#closeInvitation")).toHaveCount(0);
-  await expect(page.locator("#envelopeCooldown")).toHaveCount(0);
-  await expect(page.locator(".invitation-card")).toHaveCount(0);
-  await expect(page.locator(".floating-petals")).toHaveCount(0);
-  await expect(page.locator("#invitationReveal")).toHaveCount(0);
+  await expect(page.locator(".hero")).toBeHidden();
+  await expect(page.locator("#settingsHub")).toBeHidden();
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#waxOpenButton")).toBeHidden();
   await expect(page.locator(".hero")).toBeVisible();
@@ -437,8 +433,7 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
   const bubble = page.locator("#musicBubble");
   await expect(bubble).toBeHidden();
   await page.locator("#settingsTrigger").click();
-  // State-machine test: real pointer hit-testing is covered by the dedicated
-  // unopened-envelope smoke case, so avoid Firefox/YouTube actionability stalls.
+  // State-machine test uses a programmatic click to avoid Firefox/YouTube actionability stalls.
   await page.locator("#musicToggle").evaluate(node => node.click());
   await expect(bubble).toBeVisible();
   await expect(bubble).toHaveAttribute("data-music-state", "playing");

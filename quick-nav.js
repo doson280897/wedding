@@ -232,8 +232,6 @@
 
   const snapFloatingToEdge = (control, preserveEdge = false) => {
     if (!control.isConnected) return;
-    if (control.matches(".language-switch") && document.body.classList.contains("envelope-locked")) return;
-
     const rect = control.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
 
@@ -430,14 +428,6 @@
   };
 
   floatingControls.forEach(installFloatingControl);
-
-  // The initial anchors are fixed for each load. Do not restore a previous
-  // tab's saved drag position when the envelope disappears.
-  document.addEventListener("wedding:envelopeexit", () => {
-    for (const control of floatingControls) {
-      if (control.dataset.userMoved !== "true") defaultPosition(control);
-    }
-  });
 
   window.addEventListener("resize", () => {
     floatingControls.forEach(control => {
