@@ -785,3 +785,45 @@ test("collapsed menu SVG is geometrically centered on phones and desktop @smoke"
   expect(geometry.width).toBe(geometry.height);
   expect(geometry.labelDisplay).toBe("none");
 });
+
+
+test("single reception shows one event, date, venue, map and gift @smoke", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.route("**/wedding-info.js*", async route => {
+    const response = await route.fetch();
+    const context = {window:{}};
+    require("node:vm").runInNewContext(await response.text(),context);
+    const config = context.window.WEDDING_INFO;
+    config.wedding.mode = "single";
+    config.parties.single.date = "2027-05-21";
+    config.parties.single.receptionTime = "17:30";
+    config.parties.single.receptionEnd = "20:00";
+    config.parties.single.venue.name = {vi:"Trung Tâm Tiệc Cưới Sen Vàng",en:"Golden Lotus Wedding Hall"};
+    await route.fulfill({response,body:"window.WEDDING_INFO = "+JSON.stringify(config)+";"});
+  });
+  await page.goto(base+"/index.html?to=Minh%20va%20Lan",{waitUntil:"domcontentloaded"});
+  await expect(page.locator("html")).toHaveAttribute("data-wedding-mode","single");
+  await expect(page.locator("#partySelector")).toBeHidden();
+  await expect(page.locator("#envelopeIntro")).toBeVisible();
+  await expect(page.locator(".envelope-date [data-party-date='single']")).toHaveText("21 · 05 · 2027");
+  await page.locator("#skipInvitation").click();
+  await expect(page.locator("#heroCeremonyLabel")).toContainText("TIỆC CƯỚI");
+  await expect(page.locator(".hero-date [data-party-date='single']")).toHaveText("21.05.2027");
+  await expect(page.locator(".event-card:visible")).toHaveCount(1);
+  await expect(page.locator('[data-party-scope="single"] .event-detail')).toContainText("17:30");
+  await expect(page.locator(".family-card:visible")).toHaveCount(2);
+  const downloadPromise = page.waitForEvent("download");
+  await page.locator('[data-calendar="single"]').click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/tiec-cuoi-.*[.]ics$/);
+  await page.locator('a[href="#map-single"].map-button').click();
+  await expect(page.locator("#map-single")).toBeVisible();
+  await expect(page.locator("#map-single h3")).toHaveText("Trung Tâm Tiệc Cưới Sen Vàng");
+  await expect(page.locator("#map-groom")).toBeHidden();
+  await page.locator("#wmClose").click();
+  await page.locator("#wqToggle").click();
+  await page.locator('a[href="#wedding-gift"].wq-link').click();
+  await expect(page.locator(".gift-card:visible")).toHaveCount(1);
+  expect(errors).toEqual([]);
+});
