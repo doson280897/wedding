@@ -827,3 +827,29 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await expect(page.locator(".gift-card:visible")).toHaveCount(1);
   expect(errors).toEqual([]);
 });
+
+
+test("single wedding link generator omits party choice and sends clean guest link", async ({page}) => {
+  await page.route("**/wedding-info.js*", async route => {
+    const response = await route.fetch();
+    const context = {window:{}};
+    require("node:vm").runInNewContext(await response.text(),context);
+    context.window.WEDDING_INFO.wedding.mode = "single";
+    await route.fulfill({response,body:"window.WEDDING_INFO = "+JSON.stringify(context.window.WEDDING_INFO)+";"});
+  });
+  await page.goto(base+"/index.html?tool=links&lang=en",{waitUntil:"domcontentloaded"});
+  await expect(page.locator("#linkToolScreen")).toBeVisible();
+  await expect(page.locator("#envelopeIntro")).toBeHidden();
+  await expect(page.locator("#linkToolPartyField")).toBeHidden();
+  await expect(page.locator("#linkToolParty")).toHaveValue("single");
+  await page.locator("#linkToolGuest").fill("Alex & Jamie");
+  await page.locator('#linkToolForm button[type="submit"]').click();
+  const invitation = await page.locator("#linkToolGenerated").textContent();
+  expect(invitation).toContain("to=Alex+%26+Jamie");
+  expect(invitation).toContain("lang=en");
+  expect(invitation).not.toContain("party=");
+  await expect(page.locator(".link-tool-description")).toContainText("one shared wedding reception");
+  await page.locator("#linkToolBack").click();
+  await expect(page.locator("#linkToolScreen")).toBeHidden();
+  await expect(page.locator("#envelopeIntro")).toBeVisible();
+});
