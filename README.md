@@ -53,6 +53,9 @@ Chỉ thay chữ trong config không thể biến ảnh cưới cũ thành ảnh
 **Quan trọng với QR mừng cưới:** Khi thay `gift.bank`, `gift.accountNumber` hoặc `gift.accountHolder`, phải tạo lại mã QR cho **đúng tài khoản mới**, upload QR mới và cập nhật `gift.qrImage`. Thay số tài khoản hiển thị trong file thông tin **không tự sửa nội dung QR cũ**. Luôn thử quét mã và đối chiếu ngân hàng, số tài khoản, người nhận trước khi gửi thiệp cho khách.
 
 Nếu giữ `gallery.photos: null`, album sẽ tự đọc `gallery.manifest` (mặc định `images/manifest.json`) do pipeline tạo.
+
+Có thể nhập ảnh từ Google Drive bằng `gallery.imports` trong **cùng file thông tin**. Mỗi mục dùng `{ "name": "anh-1.jpg", "fileId": "GOOGLE_DRIVE_FILE_ID" }`. Sau khi sửa danh sách, vào **GitHub Actions → Import wedding album from config → Run workflow** để tải và tối ưu ảnh. Workflow nhập ảnh chỉ chạy khi được yêu cầu, không tự chạy khi cập nhật template.
+
 Nếu muốn hoàn toàn chọn danh sách ảnh ngay trong file thông tin, điền:
 
 ```js
