@@ -7,6 +7,8 @@ on:
       - "index.html"
       - "link-tool.html"
       - "*.js"
+      - "*.cjs"
+      - "*.svg"
       - "*.css"
       - "tests/**"
       - "playwright.config.cjs"
@@ -34,6 +36,20 @@ jobs:
 
       - name: Install Chromium, WebKit and Firefox browser engines
         run: npx playwright install --with-deps chromium webkit firefox
+
+      - name: Validate single-file configuration and build templates
+        env:
+          BUILD_SHA: ${{ github.sha }}
+        run: |
+          node --check wedding-info.js
+          node --check i18n.js
+          node --check script.js
+          node --check gallery.js
+          node --check link-tool.js
+          node --check quick-nav.js
+          node build-wedding.cjs
+          grep -q 'name="description"' index.html
+          ! grep -q '__WEDDING_TITLE__' index.html
 
       - name: Start local website
         run: |
