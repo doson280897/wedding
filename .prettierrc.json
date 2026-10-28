@@ -17,6 +17,13 @@
       "options": {
         "singleQuote": false
       }
+    },
+    {
+      "files": "wedding-info.js",
+      "options": {
+        "quoteProps": "preserve",
+        "trailingComma": "none"
+      }
     }
   ]
 }
