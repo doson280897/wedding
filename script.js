@@ -350,15 +350,18 @@
       const startedAt = performance.now();
       envelopeCooldown.hidden = false;
       envelopeCooldownValue.textContent = "5";
-      // Force a fresh CSS animation in case the intro is reopened during development.
-      void envelopeCooldown.offsetWidth;
-      envelopeCooldown.classList.add("is-active");
+      // Never force layout during the heavy paper-compositing frame.
+      requestAnimationFrame(() => {
+        if (!envelopeCooldown.hidden) envelopeCooldown.classList.add("is-active");
+      });
 
       cooldownTickTimer = window.setInterval(() => {
         const elapsed = performance.now() - startedAt;
-        const remaining = Math.max(0, Math.ceil((duration - elapsed) / 1000));
-        envelopeCooldownValue.textContent = String(remaining);
-      }, 100);
+        const remaining = String(Math.max(0, Math.ceil((duration - elapsed) / 1000)));
+        if (envelopeCooldownValue.textContent !== remaining) {
+          envelopeCooldownValue.textContent = remaining;
+        }
+      }, 250);
 
       autoCloseTimer = window.setTimeout(() => {
         envelopeCooldownValue.textContent = "0";
@@ -424,7 +427,10 @@
         intro.querySelector(".invitation-card")?.removeAttribute("aria-hidden");
         intro.classList.add("is-card-lifted", "is-opened");
         if (!reduced) releasePetals(petalOrigin);
-        startAutoClose();
+        // Schedule badge layout after this animation frame rather than during
+        // the card's first raster/composite step.
+        if (reduced) startAutoClose();
+        else requestAnimationFrame(startAutoClose);
         closeInvitation?.focus({preventScroll:true});
       };
 
