@@ -167,10 +167,13 @@
     // There is only one celebration to invite guests to.
     partySelect.value = "single";
     const description = document.querySelector(".link-tool-description");
+    const brand = document.querySelector(".link-tool-eyebrow");
+    if (brand) brand.dataset.i18n = "link.brandSingle";
     if (description) description.dataset.i18n = "link.singleDescription";
     back.dataset.i18n = "link.singleBack";
     back.dataset.i18nAria = "link.singleBackAria";
     const updateSingleLabels = () => {
+      if (brand) brand.textContent = t("link.brandSingle");
       if (description) description.textContent = t("link.singleDescription");
       back.textContent = t("link.singleBack");
       back.setAttribute("aria-label", t("link.singleBackAria"));
