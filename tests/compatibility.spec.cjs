@@ -824,7 +824,13 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await expect(page.locator("#map-single h3")).toHaveText("Trung Tâm Tiệc Cưới Sen Vàng");
   await expect(page.locator("#map-groom")).toBeHidden();
   await page.locator("#wmClose").click();
-  await page.locator("#wqToggle").click();
+  const navigationToggle = page.locator("#wqToggle");
+  await navigationToggle.evaluate(node => node.classList.add("is-idle"));
+  await navigationToggle.click();
+  // A genuine one-tap action on mobile must open the panel even while the
+  // toggle is collapsed; previous tests only noticed after a 30s timeout.
+  await expect(page.locator("#wqPanel")).toHaveClass(/is-open/);
+  await expect(page.locator('a[href="#wedding-gift"].wq-link')).toBeVisible();
   await page.locator('a[href="#wedding-gift"].wq-link').click();
   await expect(page.locator(".gift-card:visible")).toHaveCount(1);
   expect(errors).toEqual([]);
