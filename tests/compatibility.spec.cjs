@@ -507,7 +507,7 @@ test("light palette remains light when opening an invitation @smoke @core", asyn
   const actual = await hub.evaluate(node => {
     const color = getComputedStyle(node).backgroundColor;
     const root = document.documentElement.dataset.theme;
-    const parsed = color.match(/[\\d.]+/g)?.slice(0,3).map(Number) || [];
+    const parsed = color.match(/[0-9.]+/g)?.slice(0,3).map(Number) || [];
     return {color,root,parsed};
   });
   expect(actual.root).toBe("light");
