@@ -416,7 +416,10 @@ test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @c
   await page.locator("#newTabWithPreferencesTest").click();
   const other = await popupPromise;
   await other.waitForLoadState("domcontentloaded");
-  await expect(other.locator("html")).toHaveAttribute("data-theme","dark");
+  const popupSystemTheme = await other.evaluate(() =>
+    matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
+  );
+  await expect(other.locator("html")).toHaveAttribute("data-theme", popupSystemTheme);
   await expect(other.locator("html")).toHaveAttribute("lang","vi");
   await expect(other.locator("#waxOpenButton")).toBeVisible();
   await other.close();
