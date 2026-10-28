@@ -66,7 +66,9 @@ test("party link, envelope and album lightbox interactions", async ({
     window.WEDDING_INFO.couple.bride.initial + " · " + window.WEDDING_INFO.couple.groom.initial
   );
   await expect(page.locator("#envelopeMonogram")).toHaveText(initials);
-  await page.locator("#skipInvitation").click();
+  await page.locator("#envelopeSealButton").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await page.locator("#closeInvitation").click();
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#heroMonogram")).toContainText(initials.split(" · ")[0]);
   await page.locator(".couple-section .section-title").scrollIntoViewIfNeeded();
@@ -125,7 +127,9 @@ test("menu, map and gift overlays open and close on each device @smoke", async (
   await page.goto(base + "/index.html?party=groom&to=Guest", {
     waitUntil: "domcontentloaded",
   });
-  await page.locator("#skipInvitation").click();
+  await page.locator("#envelopeSealButton").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await page.locator("#closeInvitation").click();
   const menuToggle = page.locator("#wqToggle");
   // Even a collapsed idle Menu must open on the FIRST touch on phones.
   await menuToggle.evaluate(node => node.classList.add("is-idle"));
@@ -200,7 +204,9 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
   await page.goto(base + "/index.html?party=bride&lang=en", {
     waitUntil: "domcontentloaded",
   });
-  await page.locator("#skipInvitation").click();
+  await page.locator("#envelopeSealButton").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await page.locator("#closeInvitation").click();
 
   await expect(page.locator("#heroMonogram")).toContainText("M");
   await expect(page.locator("#heroMonogram")).toContainText("T");
@@ -261,8 +267,11 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await expect(page.locator(".envelope-intro")).toHaveCSS("background-color", "rgb(97, 118, 106)");
   await expect(page.locator("#themeColor")).toHaveAttribute("content", "#61766a");
   await page.locator("#settingsClose").click();
-  await expect(page.locator("#envelopeStageHit")).toBeVisible();
-  await expect(page.locator(".envelope-seal")).toBeVisible();
+  await expect(page.locator("#envelopeSealButton")).toBeVisible();
+  await expect(page.locator("#envelopeSealButton")).toHaveAttribute("aria-label", "Chạm con dấu để mở thiệp cưới");
+  await expect(page.locator("#openInvitation")).toHaveCount(0);
+  await expect(page.locator("#skipInvitation")).toHaveCount(0);
+  await expect(page.locator("#envelopeStageHit")).toHaveCount(0);
   // The original diamond flap pointed upward as if already opened.
   // A sealed envelope must have its triangular flap pointing DOWN,
   // layered above the paper pocket and aligned with the wax seal.
@@ -285,7 +294,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
 
   // The seal emits one burst; the exit flash bridges into the hero.
   // They must never replay on F5 in the same tab.
-  await page.locator("#openInvitation").click();
+  await page.locator("#envelopeSealButton").click();
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-flap-open/);
   await expect(page.locator("#envelopeBurst")).toHaveCount(0);
@@ -355,7 +364,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   });
   expect(pocket.opacity).toBe("1");
   expect(["none","matrix(1, 0, 0, 1, 0, 0)","matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)"]).toContain(pocket.transform);
-  await expect(page.locator("#envelopeStageHit")).toBeHidden();
+  await expect(page.locator("#envelopeSealButton")).toBeDisabled();
   expect(await page.locator(".invitation-card").evaluate(node =>
     getComputedStyle(node).animationName
   )).toContain("luxInvitationFlight");
@@ -398,7 +407,7 @@ test("reduced motion opens the envelope without particles or flash", async ({ pa
   await page.goto(base + "/index.html?party=groom&to=QuietGuest", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeHidden();
-  await page.locator("#envelopeStageHit").click();
+  await page.locator("#envelopeSealButton").click();
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeVisible();
   await expect(page.locator("#envelopeBurst")).toHaveCount(0);
@@ -493,7 +502,9 @@ test("personal invitation puts bold recipient below the greeting in both places"
   }));
   expect(Number(envelopeStyle.weight)).toBeGreaterThanOrEqual(600);
   expect(envelopeStyle.below).toBe(true);
-  await page.locator("#skipInvitation").click();
+  await page.locator("#envelopeSealButton").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await page.locator("#closeInvitation").click();
   await expect(page.locator("#heroGuestLabel")).toHaveText("Kính mời");
   await expect(page.locator("#guestName")).toHaveText(guest);
   await expect(page.locator("#guestName")).toBeVisible();
@@ -506,7 +517,9 @@ test("personal invitation puts bold recipient below the greeting in both places"
   // A generic link must not render an empty personalized-name line.
   await page.goto(base + "/index.html?party=groom", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeGuest")).toBeHidden();
-  await page.locator("#skipInvitation").click();
+  await page.locator("#envelopeSealButton").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await page.locator("#closeInvitation").click();
   await expect(page.locator("#guestName")).toBeHidden();
 });
 
@@ -636,7 +649,9 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
   });
 
   await page.goto(base + "/index.html?party=bride", { waitUntil: "domcontentloaded" });
-  await page.locator("#skipInvitation").click();
+  await page.locator("#envelopeSealButton").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await page.locator("#closeInvitation").click();
   await page.waitForFunction(() => window.__musicMockReady === true);
 
   const bubble = page.locator("#musicBubble");
@@ -756,7 +771,9 @@ test("music confirms playing from player state even if YouTube sends no PLAYING 
   });
 
   await page.goto(base + "/index.html?party=groom", {waitUntil:"domcontentloaded"});
-  await page.locator("#skipInvitation").click();
+  await page.locator("#envelopeSealButton").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await page.locator("#closeInvitation").click();
   await page.locator("#settingsTrigger").click();
   await page.locator("#musicToggle").click();
   await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing", {timeout:4000});
@@ -795,7 +812,9 @@ test("music loading times out into a retryable paused state instead of freezing"
   });
 
   await page.goto(base + "/index.html?party=bride", {waitUntil:"domcontentloaded"});
-  await page.locator("#skipInvitation").click();
+  await page.locator("#envelopeSealButton").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await page.locator("#closeInvitation").click();
   await page.locator("#settingsTrigger").click();
   await page.locator("#musicToggle").click();
 
@@ -829,7 +848,9 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await expect(page.locator("#partySelector")).toBeHidden();
   await expect(page.locator("#envelopeIntro")).toBeVisible();
   await expect(page.locator(".envelope-date [data-party-date='single']")).toHaveText("21 · 05 · 2027");
-  await page.locator("#skipInvitation").click();
+  await page.locator("#envelopeSealButton").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await page.locator("#closeInvitation").click();
   await expect(page.locator("#heroCeremonyLabel")).toContainText("TIỆC CƯỚI");
   await expect(page.locator(".hero-date [data-party-date='single']")).toHaveText("21.05.2027");
   await expect(page.locator(".event-card:visible")).toHaveCount(1);

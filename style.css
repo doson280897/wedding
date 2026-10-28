@@ -1553,3 +1553,17 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
   .envelope-cooldown svg{inset:0;width:100%;height:100%}
   .envelope-cooldown span{font-size:14px}
 }
+
+/* One deliberate action: the personalized wax seal is the only way to open. */
+#envelopeSealButton{
+  appearance:none;-webkit-appearance:none;padding:0;margin:0;
+  cursor:pointer;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+#envelopeSealButton:focus-visible{
+  outline:3px solid #fff0ca;outline-offset:6px;
+}
+#envelopeSealButton:disabled{cursor:default}
+@media(hover:hover){
+  #envelopeSealButton:not(:disabled):hover{box-shadow:0 8px 18px rgba(86,72,45,.25),inset 0 0 0 4px rgba(245,237,210,.22)}
+}

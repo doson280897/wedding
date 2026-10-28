@@ -258,10 +258,8 @@
     if (document.body.classList.contains("envelope-locked")) setEnvelopeBrowserTheme();
     else setContentBrowserTheme();
   });
-  const openInvitation = document.getElementById("openInvitation");
-  const envelopeStageHit = document.getElementById("envelopeStageHit");
+  const envelopeSealButton = document.getElementById("envelopeSealButton");
   const closeInvitation = document.getElementById("closeInvitation");
-  const skipInvitation = document.getElementById("skipInvitation");
   const invitationReveal = document.getElementById("invitationReveal");
   const floatingPetals = document.getElementById("floatingPetals");
   const envelopeCooldown = document.getElementById("envelopeCooldown");
@@ -280,7 +278,7 @@
     intro.hidden = false;
     document.body.classList.add("envelope-locked");
     resetInvitationScroll();
-    window.setTimeout(() => openInvitation?.focus({preventScroll:true}), 0);
+    window.setTimeout(() => envelopeSealButton?.focus({preventScroll:true}), 0);
 
     let opened = false;
     let leaving = false;
@@ -408,9 +406,7 @@
     const openEnvelope = () => {
       if (opened || leaving) return;
       opened = true;
-      openInvitation?.setAttribute("disabled", "");
-      envelopeStageHit?.setAttribute("disabled", "");
-      skipInvitation?.setAttribute("disabled", "");
+      envelopeSealButton?.setAttribute("disabled", "");
 
       const reduced = prefersReducedMotion();
       // One geometry read before the paper or seal moves; no forced layout
@@ -474,24 +470,22 @@
       }
     };
 
-    openInvitation?.addEventListener("click", openEnvelope);
-    envelopeStageHit?.addEventListener("click", openEnvelope);
+    envelopeSealButton?.addEventListener("click", openEnvelope);
     closeInvitation?.addEventListener("click", () => enterInvitation(false));
-    skipInvitation?.addEventListener("click", () => enterInvitation(true));
 
     document.addEventListener("keydown", event => {
       if (intro.hidden || !document.body.classList.contains("envelope-locked")) return;
       if (event.key === "Escape") {
         event.preventDefault();
+        // Before opening, only the physical wax seal can start the ceremony.
         if (opened) enterInvitation(false);
-        else enterInvitation(true);
         return;
       }
       if (event.key !== "Tab") return;
 
       const envelopeActions = opened
         ? [closeInvitation]
-        : [envelopeStageHit, openInvitation, skipInvitation];
+        : [envelopeSealButton];
       const settingsTrigger = document.getElementById("settingsTrigger");
       const settingsPanel = document.getElementById("settingsPanel");
       const paletteButtons = settingsPanel?.hidden
