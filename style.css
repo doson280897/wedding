@@ -885,7 +885,6 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 @media(prefers-reduced-motion:reduce){
   .cinematic-ready .cinematic-reveal,
   .cinematic-ready .cinematic-reveal.is-visible{opacity:1;transform:none;filter:none;transition:none}
-  .reveal{opacity:1;transform:none}
 }
 
 

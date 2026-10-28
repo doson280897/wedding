@@ -136,7 +136,10 @@
     if (countdownTitle) countdownTitle.textContent = tr(wedding.titleKey);
     timer.setAttribute("aria-label", tr(wedding.ariaKey));
     if (!remain) {
-      timer.innerHTML = '<p class="finished">' + tr("countdown.finished") + '</p>';
+      const finished = document.createElement("p");
+      finished.className = "finished";
+      finished.textContent = tr("countdown.finished");
+      timer.replaceChildren(finished);
       return;
     }
     ensureTimerBoxes();
@@ -238,10 +241,15 @@
 
   const themeColor = document.getElementById("themeColor");
   const setBrowserTheme = color => themeColor?.setAttribute("content", color);
-  const setContentBrowserTheme = () => setBrowserTheme(
-    document.documentElement.dataset.theme === "light" ? "#f5f0e6" : "#0b0e0e"
-  );
+  const setContentBrowserTheme = () => {
+    const isLight = document.documentElement.dataset.theme === "light";
+    const gateVisible = document.documentElement.classList.contains("wax-pending");
+    setBrowserTheme(gateVisible
+      ? (isLight ? "#e4ddd0" : "#0b161e")
+      : (isLight ? "#f5f0e6" : "#0b0e0e"));
+  };
   document.addEventListener("wedding:themechange", setContentBrowserTheme);
+  setContentBrowserTheme();
   setContentBrowserTheme();
 
   const moonlightGate = document.getElementById("moonlightGate");

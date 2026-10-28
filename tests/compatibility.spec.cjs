@@ -470,6 +470,10 @@ test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @c
   await expect(lightPage.locator("#moonlightGate")).toBeVisible();
   await expect(lightPage.locator(".moonlight-gate__celestial")).toBeVisible();
   await expect(lightPage.locator("#settingsHub")).toBeVisible();
+  await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#e4ddd0");
+  await lightPage.locator("#waxOpenButton").click();
+  await expect(lightPage.locator("#moonlightGate")).toBeHidden({ timeout:4500 });
+  await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#f5f0e6");
   await lightPage.close();
 });
 
