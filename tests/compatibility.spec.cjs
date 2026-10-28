@@ -242,6 +242,12 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeHidden();
+  const visualContrast = await page.evaluate(() => ({
+    stage:getComputedStyle(document.getElementById("envelopeIntro")).backgroundColor,
+    card:getComputedStyle(document.querySelector(".invitation-card")).backgroundColor
+  }));
+  expect(visualContrast.stage).toBe("rgb(25, 39, 32)");
+  expect(visualContrast.card).toBe("rgb(255, 250, 240)");
   await expect(page.locator("#envelopeStageHit")).toBeVisible();
   await expect(page.locator(".envelope-seal")).toBeVisible();
   // The original diamond flap pointed upward as if already opened.
@@ -282,6 +288,13 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   expect(foil).toBeLessThanOrEqual(12);
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await expect(page.locator(".invitation-card")).toBeVisible();
+  // The pocket remains fixed while the card rises out of it.
+  const pocket = await page.locator(".envelope-front").evaluate(node => {
+    const style = getComputedStyle(node);
+    return {transform:style.transform,opacity:style.opacity};
+  });
+  expect(pocket.opacity).toBe("1");
+  expect(["none","matrix(1, 0, 0, 1, 0, 0)","matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)"]).toContain(pocket.transform);
   await expect(page.locator("#envelopeStageHit")).toBeHidden();
   expect(await page.locator(".invitation-card").evaluate(node =>
     getComputedStyle(node).animationName

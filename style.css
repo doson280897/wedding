@@ -1568,3 +1568,71 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
     visibility:visible!important;opacity:1!important;
   }
 }
+
+
+/* ENVELOPE CONTRAST & MOBILE SMOOTHNESS — matte dark-olive stage, warm
+   stationery pocket and a distinct pearl-ivory card. No background animation. */
+.envelope-intro{
+  background-color:#192720;
+  background-image:
+    radial-gradient(ellipse at 50% 45%,rgba(188,158,110,.17),transparent 57%),
+    linear-gradient(155deg,#2c3b32 0%,#1c2a22 57%,#111a16 100%);
+}
+.envelope-intro:before,.envelope-intro:after{opacity:.065}
+.envelope-shell .envelope-back{
+  background:linear-gradient(145deg,#e6d6bb,#d6c2a4);
+  border-color:rgba(123,98,64,.45);
+}
+.envelope-flap{
+  background:linear-gradient(162deg,#ebddc6,#d2bb9a 80%);
+  border-color:rgba(122,95,60,.42);
+}
+.envelope-front-left{
+  background:linear-gradient(150deg,#e4d3b9,#cdb899);
+}
+.envelope-front-right{
+  background:linear-gradient(210deg,#e8d8be,#d1bea2);
+}
+.envelope-front-bottom{
+  background:linear-gradient(180deg,#e1ceb0,#cdb597);
+}
+.invitation-card{
+  background-color:#fffaf0;
+  background-image:linear-gradient(157deg,#fffefa 0%,#fff9ef 54%,#f5e8d5 100%);
+  color:#283e31;
+  border:1px solid rgba(159,121,65,.66);
+  box-shadow:0 24px 42px rgba(12,20,14,.27),0 4px 12px rgba(40,33,22,.12),
+    inset 0 1px 0 rgba(255,255,255,.92);
+}
+.invitation-card:before{border-color:rgba(174,141,86,.38)}
+.invitation-card-rule{
+  background:linear-gradient(90deg,transparent,#ae8955,transparent);
+}
+.envelope-intro.is-card-lifted .envelope-front{
+  /* Keep the pocket stationary while only the card travels upward. */
+  transform:none;opacity:1;transition:none;will-change:auto;
+}
+.envelope-open,.envelope-close{
+  background:linear-gradient(180deg,#e8d0a0,#cfae74);
+  color:#243429;border-color:#b7935e;
+  box-shadow:0 11px 26px rgba(0,0,0,.19);
+}
+.envelope-open:hover{
+  background:linear-gradient(180deg,#f0ddba,#d9b982);
+  box-shadow:0 13px 29px rgba(0,0,0,.24);
+}
+.envelope-skip{color:#e3d6bd}
+.envelope-cooldown span{color:#faf1db}
+.envelope-cooldown-track{stroke:rgba(255,235,197,.3)}
+.envelope-cooldown-progress{stroke:#ead09b}
+.envelope-intro.is-card-lifted .invitation-card{will-change:transform,opacity}
+@media(max-width:650px){
+  .invitation-card{
+    box-shadow:0 18px 30px rgba(12,20,14,.28),
+      0 3px 11px rgba(40,33,22,.1);
+  }
+  .envelope-intro:before,.envelope-intro:after{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .envelope-intro.is-card-lifted .invitation-card{will-change:auto}
+}
