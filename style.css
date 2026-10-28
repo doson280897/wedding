@@ -315,6 +315,8 @@ html.envelope-theme body{
 .music-toggle{position:fixed;left:20px;bottom:24px;z-index:1003;border:1px solid #bfa47888;border-radius:50px;background:#171b19ed;color:#eed7ac;padding:11px 14px;display:flex;align-items:center;gap:8px;font:500 10px Montserrat,sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 10px 36px #0009;backdrop-filter:blur(7px)}
 .music-toggle[aria-pressed=true]{border-color:#e8c789;background:#343024ed;box-shadow:0 10px 36px #0009,0 0 24px #d0aa6b1e}
 .envelope-intro[hidden]{display:none!important}
+/* Previously entered in THIS tab: do not flash the envelope during an F5 reload. */
+html.envelope-resumed #envelopeIntro{display:none!important}
 html.party-pending #envelopeIntro{display:none!important}
 html.envelope-pending body{overflow:hidden;background:#f2eee4}
 html.envelope-pending body> :not(#envelopeIntro):not(.language-switch){visibility:hidden!important}
