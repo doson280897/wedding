@@ -185,7 +185,7 @@ window.WEDDING_INFO = {
   },
   "text": {
     "vi": {
-      "page.title": "Thiệp cưới | {{couple.bride.short}} · {{couple.groom.short}}",
+      "page.title": "{{site.titlePrefix}} | {{couple.bride.short}} · {{couple.groom.short}}",
       "page.titleBride": "{{couple.bride.short}} & {{couple.groom.short}} | Lễ Vu Quy",
       "page.titleGroom": "{{couple.groom.short}} & {{couple.bride.short}} | Lễ Tân Hôn",
       "language.label": "Chọn ngôn ngữ",
@@ -374,7 +374,7 @@ window.WEDDING_INFO = {
       "link.shareFail": "Không thể chia sẻ. Hãy dùng nút Sao chép link."
     },
     "en": {
-      "page.title": "Wedding Invitation | {{couple.bride.short}} · {{couple.groom.short}}",
+      "page.title": "{{site.titlePrefix}} | {{couple.bride.short}} · {{couple.groom.short}}",
       "page.titleBride": "{{couple.bride.short}} & {{couple.groom.short}} | Bride's Ceremony",
       "page.titleGroom": "{{couple.groom.short}} & {{couple.bride.short}} | Groom's Ceremony",
       "language.label": "Choose language",
