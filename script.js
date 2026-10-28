@@ -876,4 +876,33 @@
     reveal.forEach(node => node.classList.add("visible"));
   }
 
+  // Cinematic chapter transitions are progressive enhancement. Content stays
+  // readable without IntersectionObserver and for reduced-motion visitors.
+  const reducedCinematicMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const chapterTargets = document.querySelectorAll(
+    ".section-head, .album-header, .couple-section > .overline, " +
+    ".couple-section > .section-title, .couple-section > .section-lead, .closing-content"
+  );
+  if (!reducedCinematicMotion && "IntersectionObserver" in window) {
+    const chapterObserver = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add("is-visible");
+        chapterObserver.unobserve(entry.target);
+      }
+    }, {threshold:0.08, rootMargin:"0px 0px -5% 0px"});
+    chapterTargets.forEach((node, index) => {
+      node.classList.add("cinematic-reveal");
+      node.style.setProperty("--cinematic-order", String(index % 3));
+      chapterObserver.observe(node);
+    });
+    document.documentElement.classList.add("cinematic-ready");
+  }
+
+  // Hero animation starts when the invitation is actually entered, not while
+  // the envelope is covering it. Same-tab reloads start immediately.
+  const enterCinematicHero = () => document.documentElement.classList.add("cinematic-entered");
+  document.addEventListener("wedding:envelopeexit", enterCinematicHero, {once:true});
+  if (!document.body.classList.contains("envelope-locked")) enterCinematicHero();
+
 })();
