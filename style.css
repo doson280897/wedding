@@ -1532,3 +1532,24 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
   100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--petal-angle)) translateY(var(--petal-distance)) scale(.7)}
 }
 @media(prefers-reduced-motion:reduce){.floating-petals{display:none!important}}
+
+/* COUNTDOWN GEOMETRY — timer digit and SVG share exactly the same center.
+   Previous inset + fixed SVG dimensions drifted at mobile breakpoints. */
+.envelope-cooldown{
+  position:fixed;display:grid;place-items:center;
+  padding:0;box-sizing:border-box;
+}
+.envelope-cooldown svg{
+  position:absolute;inset:0;width:100%;height:100%;
+  margin:0;padding:0;transform:rotate(-90deg);transform-origin:50% 50%;
+}
+.envelope-cooldown span{
+  position:absolute;inset:0;width:100%;height:100%;
+  display:grid;place-items:center;margin:0;padding:0;
+  line-height:1;letter-spacing:0;transform:none;
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:650px){
+  .envelope-cooldown svg{inset:0;width:100%;height:100%}
+  .envelope-cooldown span{font-size:14px}
+}

@@ -331,6 +331,23 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
     return (Math.max(bg,text) + .05) / (Math.min(bg,text) + .05);
   });
   expect(timerContrast).toBeGreaterThanOrEqual(7);
+  // SVG ring and countdown digit must be concentric, even in iOS viewport
+  // sizes. Test actual element bounds rather than the CSS declarations.
+  const timerCenters = await page.locator("#envelopeCooldown").evaluate(node => {
+    const bounds = element => {
+      const rect = element.getBoundingClientRect();
+      return {x:rect.left + rect.width / 2,y:rect.top + rect.height / 2};
+    };
+    return {
+      badge:bounds(node),
+      ring:bounds(node.querySelector("svg")),
+      digit:bounds(node.querySelector("span"))
+    };
+  });
+  for (const part of ["ring", "digit"]) {
+    expect(Math.abs(timerCenters[part].x - timerCenters.badge.x)).toBeLessThan(.5);
+    expect(Math.abs(timerCenters[part].y - timerCenters.badge.y)).toBeLessThan(.5);
+  }
   // The pocket remains fixed while the card rises out of it.
   const pocket = await page.locator(".envelope-front").evaluate(node => {
     const style = getComputedStyle(node);
