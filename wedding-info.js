@@ -4,7 +4,8 @@
  * 1. site: domain và thông tin khi chia sẻ thiệp.
  * 2. couple / families: tên, chữ cái viết tắt (ví dụ S & N), cha mẹ và địa chỉ.
  * 3. parties.bride / parties.groom: ngày, giờ, Google Maps, nhạc YouTube, ảnh, tài khoản và QR.
- * 4. gallery: mode="append" giữ ảnh cũ, mode="replace" chỉ dùng ảnh mới;\n *    photos=null để dùng manifest tự tạo, hoặc nhập mảng {src, width, height}.
+ * 4. gallery: mode="append" giữ ảnh cũ, mode="replace" chỉ dùng ảnh mới;
+ *    photos=null để dùng manifest tự tạo, hoặc nhập mảng {src, width, height}.
  * 5. text.vi / text.en: mọi nội dung hiển thị, lời mời và bản dịch. Dùng {{duong.dan}}
  *    để lấy dữ liệu phía trên; ví dụ {{couple.groom.short}}, {{parties.bride.dateDots}}.
  *
