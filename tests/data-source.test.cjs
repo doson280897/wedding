@@ -46,14 +46,14 @@ test("one wedding-info.js holds all customer data", () => {
 test("one-reception data is independent and complete without a second-party account", () => {
   const party = info.parties.single;
   assert.ok(party,"Single-reception config must exist");
-  assert.match(party.date,/^\\d{4}-\\d{2}-\\d{2}$/);
+  assert.match(party.date,/^\d{4}-\d{2}-\d{2}$/);
   for (const key of ["receptionTime","receptionEnd"]) {
-    assert.match(party[key],/^\\d{2}:\\d{2}$/);
+    assert.match(party[key],/^\d{2}:\d{2}$/);
   }
   assert.ok(party.venue?.name && party.venue?.address);
   assert.match(party.venue.mapUrl,/^https:\/\//);
   assert.match(party.venue.embedUrl,/^https:\/\//);
-  assert.match(party.music.youtubeId,/^[\\w-]{11}$/);
+  assert.match(party.music.youtubeId,/^[\w-]{11}$/);
   assert.ok(party.gift.bank && party.gift.accountNumber && party.gift.qrImage);
   for (const file of [...Object.values(party.images),party.gift.qrImage]) {
     assert.ok(fs.existsSync(path.join(root,file)), "Missing single-party asset: "+file);
