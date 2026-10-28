@@ -40,14 +40,25 @@
 
   const positionPanel = () => {
     if (panel.hidden) return;
-    const rect = trigger.getBoundingClientRect();
-    const panelHeight = panel.getBoundingClientRect().height;
-    const bottomSpace = innerHeight - rect.bottom;
-    const topSpace = rect.top;
-    hub.classList.toggle("panel-above", bottomSpace < panelHeight + 18 && topSpace > bottomSpace);
-    // A dragged hub may sit away from the edge. Anchor to the nearest side,
-    // so the panel always expands inward rather than past the phone viewport.
-    hub.classList.toggle("panel-left", rect.left + rect.width / 2 < innerWidth / 2);
+    const triggerRect = trigger.getBoundingClientRect();
+    const hubRect = hub.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const edge = 10;
+    const width = panelRect.width;
+    const height = panelRect.height;
+    // Clamp in viewport coordinates, then convert to the hub's local
+    // position. This also works when the hub is dragged to the screen center.
+    const left = Math.max(edge, Math.min(innerWidth - width - edge, triggerRect.right - width));
+    const roomBelow = innerHeight - triggerRect.bottom;
+    const roomAbove = triggerRect.top;
+    const preferredTop = roomBelow >= height + edge || roomBelow >= roomAbove
+      ? triggerRect.bottom + edge
+      : triggerRect.top - height - edge;
+    const top = Math.max(edge, Math.min(innerHeight - height - edge, preferredTop));
+    panel.style.left = Math.round(left - hubRect.left) + "px";
+    panel.style.top = Math.round(top - hubRect.top) + "px";
+    panel.style.right = "auto";
+    panel.style.bottom = "auto";
   };
 
   const setOpen = (open, restoreFocus = false) => {
@@ -58,7 +69,10 @@
       hub.classList.remove("is-idle");
       positionPanel();
     } else {
-      hub.classList.remove("panel-above", "panel-left");
+      panel.style.left = "";
+      panel.style.top = "";
+      panel.style.right = "";
+      panel.style.bottom = "";
       if (restoreFocus) trigger.focus({ preventScroll: true });
     }
   };
