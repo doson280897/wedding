@@ -38,7 +38,14 @@
       const url = new URL(location.href);
       if (url.searchParams.get("_v") === latest) return;
       url.searchParams.set("_v", latest);
-      location.replace(url.href);
+      // Reload the SAME history entry so an invitation already entered in
+      // this tab stays entered even when a new deployment invalidates cache.
+      try {
+        history.replaceState(history.state, "", url.href);
+        location.reload();
+      } catch (_) {
+        location.replace(url.href);
+      }
     })
     .catch(() => {});
 })();
