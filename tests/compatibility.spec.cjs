@@ -789,7 +789,10 @@ test("music confirms playing from player state even if YouTube sends no PLAYING 
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await page.locator("#closeInvitation").click();
   await page.locator("#settingsTrigger").click();
-  await page.locator("#musicToggle").click();
+  // This test validates state polling, not pointer hit-testing (covered above).
+  // DOM click avoids a headless Chromium/Firefox actionability stall while
+  // another worker may be initializing YouTube/WebGL.
+  await page.locator("#musicToggle").evaluate(node => node.click());
   await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing", {timeout:4000});
   await expect(page.locator("#musicToggle .music-label")).not.toContainText("ĐANG TẢI");
   await page.locator("#musicBubbleTrigger").click();
