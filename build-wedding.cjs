@@ -56,17 +56,6 @@ for (const side of ["bride", "groom"]) {
     .replaceAll("__SECOND_INITIAL__", escapeXml(second));
   fs.writeFileSync(target, content);
 }
-// Drive source IDs are build-only information. Do not deliver them to guests.
-// Keep the repository source intact; strip imports only from CI build copies.
-if (process.env.GITHUB_ACTIONS === "true") {
-  const publicInfo = JSON.parse(JSON.stringify(wedding));
-  if (publicInfo.gallery) delete publicInfo.gallery.imports;
-  fs.writeFileSync(
-    path.join(root, "wedding-info.js"),
-    "window.WEDDING_INFO = " + JSON.stringify(publicInfo) + ";\n",
-  );
-}
-
 fs.writeFileSync(path.join(os.tmpdir(), "wedding-deploy-info.json"), JSON.stringify(wedding));
 fs.writeFileSync(
   path.join(root, "version.json"),
