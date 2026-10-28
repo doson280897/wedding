@@ -314,7 +314,7 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(page.locator("#settingsHub")).toBeHidden();
   await expect(page.locator("#wqToggle")).toBeHidden();
   const finalHinge = await leftDoor.evaluate(node => getComputedStyle(node).transform);
-  expect(finalHinge).toMatch(/matrix3d\\(/);
+  expect(finalHinge).toContain("matrix3d(");
   // The real hero must stay hidden during the deliberate 1.5s pause.
   await expect(page.locator("html")).not.toHaveClass(/gate-hero-revealing/);
   await expect(page.locator(".hero")).toHaveCSS("opacity", "0");
@@ -358,6 +358,77 @@ test("settings popover stays inside phone and tablet viewport when hub is dragge
   expect(rect.bottom).toBeLessThanOrEqual(rect.viewportH - 4);
 });
 
+
+test("Settings and Menu share identical drag, snap and tap behavior @smoke @core", async ({ page }) => {
+  await page.goto(base + "/index.html", { waitUntil:"domcontentloaded" });
+  const controls = [
+    { id:"settingsHub", trigger:"#settingsTrigger", open:"#settingsPanel" },
+    { id:"wqToggle", trigger:"#wqToggle", open:"#wqPanel" },
+  ];
+
+  for (const control of controls) {
+    const dock = page.locator("#" + control.id);
+    await dock.evaluate(node => node.classList.add("is-idle"));
+    await page.waitForTimeout(350);
+
+    // Dispatch pointer gestures directly to avoid desktop hover waking the
+    // button before the touch begins. The app's real drag listeners run.
+    const drag = async (towardsLeft, pointerId) => page.evaluate(
+      ({ id, trigger, towardsLeft, pointerId }) => {
+        const node = document.getElementById(id);
+        const handle = document.querySelector(trigger);
+        const before = node.getBoundingClientRect();
+        const startX = before.left + before.width / 2;
+        const startY = before.top + before.height / 2;
+        const endX = towardsLeft ? 12 : innerWidth - 12;
+        const endY = Math.min(innerHeight - 66, Math.max(66, startY + (towardsLeft ? 80 : -65)));
+        const props = { bubbles:true, cancelable:true, pointerId, pointerType:"touch", isPrimary:true, button:0 };
+        handle.dispatchEvent(new PointerEvent("pointerdown", { ...props, clientX:startX, clientY:startY }));
+        const whilePressed = node.getBoundingClientRect();
+        window.dispatchEvent(new PointerEvent("pointermove", { ...props, clientX:endX, clientY:endY }));
+        const duringDrag = node.getBoundingClientRect();
+        window.dispatchEvent(new PointerEvent("pointerup", { ...props, clientX:endX, clientY:endY }));
+        return {
+          beforeWidth:before.width,
+          pressedWidth:whilePressed.width,
+          duringLeft:duringDrag.left,
+          userMoved:node.dataset.userMoved,
+        };
+      }, { id:control.id, trigger:control.trigger, towardsLeft, pointerId }
+    );
+
+    const left = await drag(true, 34);
+    expect(Math.abs(left.pressedWidth - left.beforeWidth)).toBeLessThan(2);
+    expect(left.userMoved).toBe("true");
+    await page.waitForTimeout(380);
+    const afterLeft = await dock.evaluate(node => ({
+      edge:node.dataset.floatEdge, left:node.getBoundingClientRect().left
+    }));
+    expect(afterLeft.edge).toBe("left");
+    expect(afterLeft.left).toBeLessThanOrEqual(20);
+
+    // Drag back: both dock to the nearest right edge as one shared mechanic.
+    const right = await drag(false, 35);
+    expect(right.userMoved).toBe("true");
+    await page.waitForTimeout(380);
+    const afterRight = await dock.evaluate(node => ({
+      edge:node.dataset.floatEdge, right:innerWidth - node.getBoundingClientRect().right
+    }));
+    expect(afterRight.edge).toBe("right");
+    expect(afterRight.right).toBeLessThanOrEqual(24);
+
+    // Dragging must not accidentally open the panel; a subsequent tap does.
+    if (control.id === "settingsHub") {
+      await expect(page.locator("#settingsPanel")).toBeHidden();
+    } else {
+      await expect(page.locator("#wqPanel")).toHaveAttribute("aria-hidden", "true");
+    }
+    await page.locator(control.trigger).click();
+    await expect(page.locator(control.open)).toBeVisible();
+    if (control.id === "settingsHub") await page.locator("#settingsClose").click();
+    else await page.locator("#wqClose").click();
+  }
+});
 
 test("personal invitation keeps the bold recipient in hero across languages", async ({
   page,

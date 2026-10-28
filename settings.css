@@ -33,6 +33,9 @@
   border-radius: 999px;
   color: #edcf9e;
   cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
   white-space: nowrap;
   font: 600 10px Montserrat, sans-serif;
   letter-spacing: .12em;

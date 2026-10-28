@@ -314,7 +314,7 @@
       if (!drag.moved && Math.hypot(dx, dy) > 6) {
         drag.moved = true;
         tapStartedIdle = false;
-          control.classList.add("is-dragging");
+        control.classList.add("is-dragging");
 
         const rect = control.getBoundingClientRect();
         control.style.right = "auto";
@@ -360,11 +360,11 @@
       if (event.button != null && event.button !== 0) return;
       if (control.classList.contains("settings-hub") && event.target.closest(".settings-panel")) return;
       tapStartedIdle = control.classList.contains("is-idle");
-      // On touchscreens, expanding the collapsed Menu during pointerdown
-      // moves the button under the finger before pointerup. Safari/Chrome
-      // then cancel the native click, leaving the menu closed. Keep its
-      // geometry stable through the tap; wake during the click itself.
-      if (!(control === toggle && tapStartedIdle && coarsePointer.matches)) wake();
+      // Settings and Menu must behave identically: when a dock is collapsed,
+      // do not expand it under the pressed finger or mouse button. Expanding
+      // on pointerdown shifts the Settings trigger and can cancel the click
+      // or make the drag jump. Wake only on an actual click, not a drag.
+      if (!tapStartedIdle) wake();
 
       const rect = control.getBoundingClientRect();
       drag = {
@@ -406,7 +406,9 @@
       if (!coarsePointer.matches) scheduleIdle();
     });
     control.addEventListener("focusin", () => {
-      if (control === toggle && tapStartedIdle && coarsePointer.matches) return;
+      // Focus can arrive between pointerdown and click. Preserve the compact
+      // hit target for BOTH controls until the gesture has been classified.
+      if (tapStartedIdle) return;
       wake();
     });
     control.addEventListener("focusout", () => scheduleIdle());
