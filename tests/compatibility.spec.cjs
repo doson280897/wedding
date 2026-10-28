@@ -394,7 +394,8 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
   await expect(page.locator(".hero")).toBeVisible();
   await expect(page.locator("#settingsHub")).toBeVisible();
-  await expect(page.locator("#wqToggle")).toBeVisible();
+  await expect(page.locator("#wqToggle")).toHaveCount(0);
+  await expect(page.locator("#controlTabMenu")).toHaveCount(1);
 
   // New-tab/reload baseline intentionally shows the gate again.
   await page.reload({ waitUntil:"domcontentloaded" });
