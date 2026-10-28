@@ -263,6 +263,30 @@
   let gateOpening = false;
   let doorSettled = false;
   const leftGateDoor = moonlightGate?.querySelector(".moonlight-gate__door--left");
+  // Create a fixed, sparse arrangement only on interaction; no continuous
+  // DOM allocation or canvas render loop during the cinematic intro.
+  const spawnGateSparkles = () => {
+    if (reducedGateMotion || !moonlightGate) return;
+    const dust = moonlightGate.querySelector(".moonlight-gate__dust");
+    if (!dust || dust.childElementCount) return;
+    const positions = [
+      [11,19],[21,32],[8,49],[26,69],[15,80],[32,13],
+      [37,40],[12,62],[85,18],[92,36],[78,54],[89,70],
+      [74,81],[67,23],[95,59],[70,11],[39,77],[61,74]
+    ];
+    const nodes = document.createDocumentFragment();
+    positions.forEach(([x,y],index) => {
+      const star = document.createElement("i");
+      star.className = "moonlight-gate__spark";
+      star.style.setProperty("--sx", x + "%");
+      star.style.setProperty("--sy", y + "%");
+      star.style.setProperty("--size", (index % 5 === 0 ? 3 : 2) + "px");
+      star.style.setProperty("--duration", (1.45 + index % 4 * .32) + "s");
+      star.style.setProperty("--delay", (-index * .29) + "s");
+      nodes.append(star);
+    });
+    dust.append(nodes);
+  };
   const gateTimers = new Set();
   const scheduleGate = (callback, delay) => {
     const timer = window.setTimeout(() => {
@@ -320,6 +344,7 @@
     if (!moonlightGate || !waxOpenButton || gateOpening || moonlightGate.hidden) return;
     gateOpening = true;
     waxOpenButton.disabled = true;
+    spawnGateSparkles();
     if (reducedGateMotion) {
       finishMoonlightGate();
       return;
