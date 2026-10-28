@@ -242,19 +242,44 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeVisible();
 
-  // A real envelope open + close should persist only for this tab.
+  // The seal emits one burst; the exit flash bridges into the hero.
+  // They must never replay on F5 in the same tab.
   await page.locator("#openInvitation").click();
+  await expect(page.locator("#envelopeBurst")).toBeVisible();
+  await expect(page.locator("#envelopeBurst")).toHaveClass(/is-active/);
+  const foil = await page.locator(".envelope-burst-particle").count();
+  expect(foil).toBeGreaterThanOrEqual(10);
+  expect(foil).toBeLessThanOrEqual(24);
   await expect(page.locator("#closeInvitation")).toBeVisible();
   await page.locator("#closeInvitation").click();
+  await expect(page.locator("#invitationReveal")).toBeVisible();
   await expect(page.locator("#envelopeIntro")).toBeHidden();
+  await expect(page.locator("#invitationReveal")).toBeHidden({ timeout: 3000 });
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("#envelopeIntro")).toBeHidden();
+  await expect(page.locator("#envelopeBurst")).toBeHidden();
+  await expect(page.locator("#invitationReveal")).toBeHidden();
   await expect(page.locator("html")).toHaveClass(/envelope-resumed/);
   await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
   expect(await page.evaluate(() => history.state?.weddingEnvelopeOpened)).toBe(
     JSON.stringify(["bride", "ReloadGuest"]),
   );
+});
+
+
+test("reduced motion opens the envelope without particles or flash", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(base + "/index.html?party=groom&to=QuietGuest", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#envelopeIntro")).toBeVisible();
+  await page.locator("#openInvitation").click();
+  await expect(page.locator("#closeInvitation")).toBeVisible();
+  await expect(page.locator("#envelopeBurst")).toBeHidden();
+  await expect(page.locator(".envelope-burst-particle")).toHaveCount(0);
+  await page.locator("#closeInvitation").click();
+  await expect(page.locator("#envelopeIntro")).toBeHidden();
+  await expect(page.locator("#invitationReveal")).toBeHidden();
+  await expect(page.locator("body")).not.toHaveClass(/envelope-locked/);
 });
 
 
