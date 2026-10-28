@@ -53,6 +53,14 @@
   let locale = prefs?.getLanguage() || "vi";
 
   const t = key => renderText((translations[locale] && translations[locale][key]) || translations.vi[key] || key);
+  const build = document.querySelector('meta[name="wedding-build"]')?.content;
+  const withVersion = value => {
+    const url = new URL(value, document.baseURI);
+    if (build && build !== "__BUILD_ID__") url.searchParams.set("v", build);
+    return url;
+  };
+  const safeCssUrl = value =>
+    'url("' + withVersion(value).href.replace(/["\\\n\r]/g, "") + '")';
 
   function apply() {
     document.documentElement.lang = locale;
@@ -86,9 +94,7 @@
       if (scope && scope !== document.documentElement.dataset.party) return;
       const src = getInfo(node.dataset.infoSrc);
       if (!src) return;
-      const url = new URL(src, document.baseURI);
-      const build = document.querySelector('meta[name="wedding-build"]')?.content;
-      if (build && build !== "__BUILD_ID__") url.searchParams.set("v", build);
+      const url = withVersion(src);
       if (node.getAttribute("src") !== url.href) node.src = url.href;
     });
     document.querySelectorAll("[data-info-href]").forEach(node => {
@@ -115,12 +121,6 @@
     for (const side of ["bride", "groom", "single"]) {
       const img = getInfo("parties." + side + ".images.hero");
       const ending = getInfo("parties." + side + ".images.ending");
-      const safeCssUrl = value => {
-        const url = new URL(value, document.baseURI);
-        const build = document.querySelector('meta[name="wedding-build"]')?.content;
-        if (build && build !== "__BUILD_ID__") url.searchParams.set("v", build);
-        return 'url("' + url.href.replace(/["\\\n\r]/g, "") + '")';
-      };
       if (img) document.documentElement.style.setProperty("--hero-" + side + "-image", safeCssUrl(img));
       if (ending) document.documentElement.style.setProperty("--ending-" + side + "-image", safeCssUrl(ending));
     }

@@ -17,7 +17,7 @@
   const partySelector = document.getElementById("partySelector");
   const languageButtons = Array.from(document.querySelectorAll(".language-switch [data-lang]"));
 
-  // Keep the invitation anchored to the top while the temporary wax gate is active.
+  // Keep the invitation anchored to the top while the entrance gate is active.
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   const resetInvitationScroll = () => window.scrollTo({ top:0, left:0, behavior:"instant" });
   resetInvitationScroll();
@@ -43,8 +43,8 @@
       url.searchParams.set("party", side);
       url.hash = "";
       // Switch to the selected invitation within the same history entry.
-      // This preserves this tab's theme/language through the page reload,
-      // while a separately opened tab starts in VN + Dark.
+      // This preserves this tab's theme/language through the page reload;
+      // a new tab follows the OS theme (fallback Dark).
       try {
         history.replaceState(history.state, "", url.href);
         window.location.reload();
@@ -156,7 +156,8 @@
   function scheduleCountdown() {
     window.clearTimeout(countdownTimer);
     countdown();
-    if (document.hidden) return;
+    // Do not keep a 1 Hz timer alive after the event has finished.
+    if (document.hidden || weddingDates[selectedWedding].time <= Date.now()) return;
     const delay = 1030 - (Date.now() % 1000);
     countdownTimer = window.setTimeout(scheduleCountdown, delay);
   }

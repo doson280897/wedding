@@ -276,22 +276,25 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await page.locator("#waxOpenButton").click();
   await expect(gate).toHaveClass(/is-awakening/);
   await expect(gate).toHaveClass(/is-opening/);
+  // The class is applied before the browser paints its first transform frame.
+  // Poll the computed 3D rotation rather than sampling that stale frame.
+  const leftDoor = page.locator(".moonlight-gate__door--left");
+  const rightDoor = page.locator(".moonlight-gate__door--right");
+  await expect(leftDoor).toHaveCSS("transform", /matrix3d\(/);
+  await expect(rightDoor).toHaveCSS("transform", /matrix3d\(/);
   const hingeState = await page.evaluate(() => {
     const left = document.querySelector(".moonlight-gate__door--left");
     const right = document.querySelector(".moonlight-gate__door--right");
     const l = getComputedStyle(left);
     const r = getComputedStyle(right);
     return {
-      leftTransform:l.transform,
-      rightTransform:r.transform,
-      leftOrigin:l.transformOrigin,
-      rightOrigin:r.transformOrigin
+      leftOrigin:Number.parseFloat(l.transformOrigin),
+      rightOrigin:Number.parseFloat(r.transformOrigin),
+      rightWidth:right.getBoundingClientRect().width
     };
   });
-  expect(hingeState.leftTransform).toContain("matrix3d");
-  expect(hingeState.rightTransform).toContain("matrix3d");
-  expect(hingeState.leftOrigin.startsWith("0px")).toBe(true);
-  expect(hingeState.rightOrigin.startsWith("0px")).toBe(false);
+  expect(hingeState.leftOrigin).toBeCloseTo(0, 0);
+  expect(hingeState.rightOrigin).toBeGreaterThan(100);
   const hingeDuration = await page.locator(".moonlight-gate__door--left").evaluate(node =>
     parseFloat(getComputedStyle(node).transitionDuration) * 1000
   );
@@ -464,6 +467,24 @@ test("fresh tabs follow the OS theme while explicit choices survive F5 @smoke @c
   await lightPage.close();
 });
 
+
+
+test("menu section navigation preserves per-tab theme and language on F5 @smoke", async ({ page }) => {
+  await page.goto(base + "/index.html?party=bride", { waitUntil:"domcontentloaded" });
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:4500 });
+  await page.locator("#settingsTrigger").click();
+  await page.locator('[data-lang="en"]').click();
+  await page.locator('[data-theme-option="light"]').click();
+  await page.locator("#settingsClose").click();
+
+  await page.locator("#wqToggle").click();
+  await page.locator('#wqPanel a[href="#album"]').click();
+  await expect(page).toHaveURL(/#album$/);
+  await page.reload({ waitUntil:"domcontentloaded" });
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+});
 
 test("music orb animates when playing, pauses without hiding, stops until re-enabled @smoke @core", async ({
   page,

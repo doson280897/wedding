@@ -163,7 +163,7 @@
       return;
     }
     if (id === "wedding-gift") { setGiftOpen(true); return; }
-    history.replaceState(null,"",location.pathname+location.search+"#"+encodeURIComponent(id));
+    history.replaceState(history.state,"",location.pathname+location.search+"#"+encodeURIComponent(id));
     target.scrollIntoView({behavior:reduced.matches?"auto":"smooth",block:"start"});
     links.forEach(item => item.setAttribute("aria-current", String(item===link)));
   }));
