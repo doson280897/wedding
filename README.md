@@ -11,6 +11,47 @@ Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, 
 - Với link có `?to=Tên+khách`, cả phong bì và hero hiển thị **Kính mời** phía trên, **tên người nhận** ở dòng dưới bằng font serif đậm. Có thể sửa nhãn trong `wedding-info.js` → `text.vi["guest.recipientLabel"]` / `text.en["guest.recipientLabel"]`. Link không có tên vẫn giữ lời mời chung.
 
 
+## Một tiệc hay hai tiệc — chỉ đổi trong file thông tin
+
+Trong **[wedding-info.js](wedding-info.js)**, trường `wedding.mode` chọn kiểu tổ chức:
+
+```js
+"wedding": {
+  "mode": "double"  // Hai tiệc: nhà gái và nhà trai (đang dùng)
+}
+```
+
+Để tạo thiệp **một tiệc cưới chung**, đổi thành `"mode": "single"` và điền mục **`parties.single`** trong cùng file thông tin. Ví dụ:
+
+```js
+"single": {
+  "date": "2027-05-21",
+  "receptionTime": "17:30",
+  "receptionEnd": "20:00",
+  "city": { "vi": "TP. Hồ Chí Minh", "en": "Ho Chi Minh City" },
+  "lunar": { "vi": "Ngày âm lịch (nếu có)", "en": "Lunar date (if desired)" },
+  "venue": {
+    "name": { "vi": "Nhà hàng tiệc cưới", "en": "Wedding Venue" },
+    "address": { "vi": "Địa chỉ", "en": "Address" },
+    "calendarAddress": { "vi": "{{parties.single.venue.name}}, {{parties.single.venue.address}}", "en": "{{parties.single.venue.name}}, {{parties.single.venue.address}}" },
+    "mapUrl": "https://www.google.com/maps/...",
+    "embedUrl": "https://maps.google.com/maps?..."
+  },
+  "music": { "youtubeId": "MÃ_VIDEO" },
+  "images": { "hero": "...", "ending": "...", "favicon": "favicon-groom.svg", "portraitMain": "...", "portraitSecondary": "..." },
+  "gift": { "bank": "Tên ngân hàng", "accountHolder": "Tên chủ tài khoản", "accountNumber": "...", "qrImage": "...", "qrAlt": { "vi": "Mã QR mừng cưới", "en": "Wedding gift QR" } },
+  "region": { "vi": "Khu vực", "en": "Region" }
+}
+```
+
+Đây là cấu trúc minh họa; **không xóa các trường đang có** khi sửa file. Các trường `parties.bride` và `parties.groom` vẫn được giữ làm mẫu cho chế độ hai tiệc, nhưng **không hiển thị ở chế độ một tiệc**.
+
+**Khác biệt ở chế độ một tiệc:** khách mở link là gặp phong bì; không phải chọn nhà gái/nhà trai; lịch hiển thị **một** ngày/giờ/địa điểm; lịch tải xuống `.ics` chỉ có **một sự kiện tiệc**; popup bản đồ và mừng cưới có **một lựa chọn** theo `parties.single`. Phần giới thiệu cô dâu, chú rể và hai gia đình vẫn có thể giữ nguyên. Công cụ tạo link `/?tool=links` sẽ chỉ hỏi **tên khách**, không hiện ô chọn tiệc, và link tạo ra không cần `?party=`.
+
+**Quan trọng:** `parties.single` hiện là **dữ liệu mẫu** dựa trên ảnh/địa điểm của bộ thiệp đang có. Khi dùng cho khách mới, bắt buộc thay ngày, nhà hàng, đường dẫn map, ảnh, nhạc, tài khoản và tạo lại **mã QR đúng tài khoản mới** trước khi gửi thiệp.
+
+**Căn giữa nút Mục lục:** Khi thu nhỏ, SVG được căn chính giữa vùng chạm 44 × 44 px trên cả điện thoại và desktop.
+
 ## ⭐ Chỉ sửa một file khi làm thiệp mới
 
 **[wedding-info.js](wedding-info.js)** là **file thông tin duy nhất** phải cập nhật khi làm thiệp cho cặp đôi khác.
@@ -21,6 +62,8 @@ Không chỉnh tên, ngày, chữ viết tắt, nhạc hoặc lời mời trực
 | `site` | URL website, mô tả khi chia sẻ, múi giờ, ảnh chia sẻ |
 | `couple.bride`, `couple.groom` | Tên hiển thị, họ tên đầy đủ, chữ viết tắt (`initial` như **N**, **S**) |
 | `families.bride`, `families.groom` | Họ tên cha mẹ, địa chỉ hai gia đình (VI/EN) |
+| `wedding.mode` | `"double"` (hai tiệc) hoặc `"single"` (một tiệc) |
+| `parties.single` | Ngày, giờ, nhà hàng, bản đồ, ảnh, nhạc và QR của một tiệc chung |
 | `parties.bride`, `parties.groom` | Ngày (YYYY-MM-DD), giờ lễ/tiệc, ngày âm lịch và địa điểm |
 | `parties.*.venue` | Tên sảnh/nhà hàng, địa chỉ, URL Google Maps, URL bản đồ nhúng |
 | `parties.*.music.youtubeId` | Mã video nhạc YouTube cho từng lễ |
