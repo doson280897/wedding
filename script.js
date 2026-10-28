@@ -574,21 +574,38 @@
 
     window.__weddingYouTubeApiPromise = new Promise((resolve, reject) => {
       const previousReady = window.onYouTubeIframeAPIReady;
+      let finished = false;
+      let script = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+      const complete = error => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeout);
+        if (error) {
+          window.onYouTubeIframeAPIReady = previousReady;
+          script?.remove(); // A later tap can retry instead of hanging forever.
+          reject(error);
+        } else {
+          resolve(window.YT);
+        }
+      };
+
+      const timeout = setTimeout(() => complete(new Error("YouTube API timeout")), 12000);
       window.onYouTubeIframeAPIReady = () => {
         try { previousReady?.(); } catch (_) {}
-        resolve(window.YT);
+        if (window.YT?.Player) complete();
+        else complete(new Error("YouTube API loaded without Player"));
       };
 
-      const existing = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
-      if (existing) return;
+      if (script) {
+        script.addEventListener("error", () =>
+          complete(new Error("YouTube IFrame API failed to load")), { once:true });
+        return;
+      }
 
-      const script = document.createElement("script");
+      script = document.createElement("script");
       script.src = "https://www.youtube.com/iframe_api";
       script.async = true;
-      script.onerror = () => {
-        script.remove();
-        reject(new Error("YouTube IFrame API failed to load"));
-      };
+      script.onerror = () => complete(new Error("YouTube IFrame API failed to load"));
       document.head.appendChild(script);
     });
 
