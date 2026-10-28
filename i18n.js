@@ -30,8 +30,9 @@
     const name = String(path || "").trim();
     const derivedName = /^couple\.(bride|groom)\.fullUpper$/.exec(name);
     if (derivedName) return info.couple[derivedName[1]].full.toLocaleUpperCase("vi-VN");
-    const derivedDate = /^parties\.(bride|groom)\.(dateDots|dateSlashes|dateEnglish|dateSpaced|weekday)$/.exec(name);
+    const derivedDate = /^parties\.(bride|groom)\.(dateDots|dateSlashes|dateEnglish|dateSpaced|dateYear|weekday)$/.exec(name);
     if (derivedDate) {
+      if (derivedDate[2] === "dateYear") return String(dateParts(derivedDate[1]).year);
       const styles = {dateDots:"dots",dateSlashes:"slashes",dateEnglish:"english",dateSpaced:"spaced",weekday:"weekday"};
       return formatDate(derivedDate[1], styles[derivedDate[2]], language);
     }
