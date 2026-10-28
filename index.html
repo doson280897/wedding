@@ -53,16 +53,18 @@
 <script>
 (() => {
   const params = new URLSearchParams(location.search);
-  const party = params.get("party");
+  const settings = window.WEDDING_INFO;
+  const singleMode = settings?.wedding?.mode === "single";
+  const party = singleMode ? "single" : params.get("party");
+  document.documentElement.dataset.weddingMode = singleMode ? "single" : "double";
   // history.state survives F5 in this tab but isn't shared with newly opened tabs.
   // Include the party and personalized guest so opening a different invitation
   // does not incorrectly skip its envelope.
   const invitationKey = JSON.stringify([party, params.get("to") || ""]);
   const alreadyEntered = history.state?.weddingEnvelopeOpened === invitationKey;
-  const settings = window.WEDDING_INFO;
   const theme = document.getElementById("themeColor");
   const favicon = document.getElementById("siteFavicon");
-  if (party === "bride" || party === "groom") {
+  if (party === "bride" || party === "groom" || party === "single") {
     if (favicon && settings?.parties?.[party]?.images?.favicon) favicon.href = settings.parties[party].images.favicon + "?v=__BUILD_ID__";
     document.documentElement.dataset.party = party;
     if (alreadyEntered) {
@@ -158,11 +160,14 @@
     <form id="linkToolForm">
       <label for="linkToolGuest" data-i18n="link.guest">Tên khách mời</label>
       <input id="linkToolGuest" name="guest" type="text" maxlength="100" autocomplete="off" data-i18n-placeholder="link.placeholder" placeholder="Ví dụ: Anh Minh và chị Lan" required>
+      <div class="link-tool-party-field" id="linkToolPartyField">
       <label for="linkToolParty" data-i18n="link.party">Khách tham dự</label>
       <select id="linkToolParty" name="party" required>
         <option value="bride" data-i18n="link.bride">Nhà gái · Lễ Vu Quy ·  · Đắk Lắk</option>
         <option value="groom" data-i18n="link.groom">Nhà trai · Lễ Tân Hôn ·  · Đồng Nai</option>
+        <option value="single" data-i18n="link.single">Một tiệc cưới</option>
       </select>
+      </div>
       <div class="link-tool-actions"><button type="submit" class="link-tool-action" data-i18n="link.create">Tạo link thiệp</button></div>
     </form>
     <div class="link-tool-result" id="linkToolResult" hidden aria-live="polite">
@@ -242,7 +247,7 @@
         <p class="envelope-eyebrow" data-i18n="envelope.eyebrow">SAVE THE DATE</p>
         <span class="invitation-leaf" aria-hidden="true">❧</span>
         <h2 id="envelopeTitle" data-party-name-pair="envelope"></h2>
-        <p class="envelope-date"><span data-party-date="bride"></span><span class="party-date-separator">—</span><span data-party-date="groom"></span></p>
+        <p class="envelope-date"><span data-party-date="bride"></span><span class="party-date-separator">—</span><span data-party-date="groom"></span><span data-party-date="single"></span></p>
         <div class="invitation-leaf invitation-leaf-small" aria-hidden="true">❧</div>
         <div class="envelope-invite" id="envelopeInviteBlock">
           <span class="envelope-recipient-label" id="envelopeGuestLabel" data-i18n="envelope.invite">Trân trọng kính mời</span>
@@ -281,7 +286,7 @@
       <h1 id="heroNames" data-party-name-pair="hero"></h1>
       <div class="fine-flourish">✧</div>
       <p class="handwriting" data-i18n="hero.handwriting">Cùng nhau viết tiếp những ngày hạnh phúc...</p>
-      <div class="hero-date"><span data-party-date="bride"></span><span class="party-date-separator">—</span><span data-party-date="groom"></span></div>
+      <div class="hero-date"><span data-party-date="bride"></span><span class="party-date-separator">—</span><span data-party-date="groom"></span><span data-party-date="single"></span></div>
       <div class="hero-count-title" id="countdownTitle">ĐẾM NGƯỢC ĐẾN LỄ VU QUY</div>
       <div class="countdown" id="timer" aria-label="Đếm ngược đến lễ Vu Quy">
         <div><strong id="days">00</strong><small>NGÀY</small></div>
@@ -328,6 +333,16 @@
   <div class="event-grid">
     <article class="event-card reveal" data-party-scope="bride"><div class="event-label" data-i18n="events.brideLabel">LỄ VU QUY · NHÀ GÁI</div><div class="date-block"><div><small data-party-weekday="bride"></small><strong data-party-event-date="bride"></strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.brideCeremony"><span></span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.brideReception"><span></span> Tiệc mừng tại </div><p class="event-address" data-i18n="events.brideAddress">Địa điểm tiệc: </p><p class="lunar" data-i18n="events.brideLunar"></p><a href="#map-bride" class="map-button" data-i18n="events.map">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="bride" aria-label="Lưu lễ Vu Quy vào lịch" data-i18n="events.calendar" data-i18n-aria="events.brideCalendarAria">＋ LƯU VÀO LỊCH</button></article>
     <article class="event-card reveal" data-party-scope="groom"><div class="event-label" data-i18n="events.groomLabel">LỄ TÂN HÔN · NHÀ TRAI</div><div class="date-block"><div><small data-party-weekday="groom"></small><strong data-party-event-date="groom"></strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.groomCeremony"><span></span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.groomReception"><span></span> Tiệc mừng tại </div><p class="event-address" data-i18n="events.groomAddress"></p><p class="lunar" data-i18n="events.groomLunar"></p><a href="#map-groom" class="map-button" data-i18n="events.map">XEM ĐỊA ĐIỂM ↗</a><button class="calendar-button" type="button" data-calendar="groom" aria-label="Lưu lễ Tân Hôn vào lịch" data-i18n="events.calendar" data-i18n-aria="events.groomCalendarAria">＋ LƯU VÀO LỊCH</button></article>
+    <article class="event-card reveal" data-party-scope="single">
+      <div class="event-label" data-i18n="events.singleLabel">TIỆC CƯỚI · CHUNG VUI CÙNG HAI GIA ĐÌNH</div>
+      <div class="date-block"><div><small data-party-weekday="single"></small><strong data-party-event-date="single"></strong></div></div>
+      <div class="event-rule"></div>
+      <div class="event-detail" data-i18n-html="events.singleReception"><span></span> Tiệc cưới</div>
+      <p class="event-address" data-i18n="events.singleAddress"></p>
+      <p class="lunar" data-i18n="events.singleLunar"></p>
+      <a href="#map-single" class="map-button" data-i18n="events.map">XEM ĐỊA ĐIỂM ↗</a>
+      <button class="calendar-button" type="button" data-calendar="single" data-i18n="events.calendar" data-i18n-aria="events.singleCalendarAria">＋ LƯU VÀO LỊCH</button>
+    </article>
   </div>
 </section>
 <section class="album-section" id="album" aria-label="Bộ ảnh cưới 3D" data-i18n-aria="album.sectionAria">
@@ -366,6 +381,11 @@
   <div class="location-grid">
     <article id="map-bride" class="location-card" data-party-scope="bride"><div class="location-info"><small data-i18n="map.brideLabel">NHÀ GÁI · </small><h3 data-i18n="map.brideTitle"></h3><p data-i18n="map.brideAddress"></p><a data-info-href="parties.bride.venue.mapUrl" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div><iframe title="Bản đồ nhà gái" tabindex="-1" data-i18n-title="map.brideFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-info-embed="parties.bride.venue.embedUrl"></iframe></article>
     <article id="map-groom" class="location-card" data-party-scope="groom"><div class="location-info"><small data-i18n="map.groomLabel">NHÀ TRAI · </small><h3 data-i18n="map.groomTitle"></h3><p data-i18n="map.groomAddress"></p><a data-info-href="parties.groom.venue.mapUrl" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div><iframe title="Bản đồ nhà trai" tabindex="-1" data-i18n-title="map.groomFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-info-embed="parties.groom.venue.embedUrl"></iframe></article>
+    <article id="map-single" class="location-card" data-party-scope="single">
+      <div class="location-info"><small data-i18n="map.singleLabel"></small><h3 data-i18n="map.singleTitle"></h3><p data-i18n="map.singleAddress"></p>
+      <a data-info-href="parties.single.venue.mapUrl" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div>
+      <iframe title="Bản đồ tiệc cưới" tabindex="-1" data-i18n-title="map.singleFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-info-embed="parties.single.venue.embedUrl"></iframe>
+    </article>
   </div>
 </section>
 </div></div>
@@ -399,6 +419,13 @@
           <div class="gift-qr-shell">
             <img class="gift-qr" data-info-src="parties.groom.gift.qrImage" width="570" height="570" decoding="async" data-info-alt="parties.groom.gift.qrAlt" alt="">
           </div>
+          <p class="gift-hint" data-i18n="gift.hint">Quét mã bằng ứng dụng ngân hàng</p>
+        </article>
+        <article class="gift-card" data-party-scope="single">
+          <div class="gift-bank" data-info="parties.single.gift.bank"></div>
+          <h3 data-info="parties.single.gift.accountHolder"></h3>
+          <div class="gift-account-number" data-info="parties.single.gift.accountNumber"></div>
+          <div class="gift-qr-shell"><img class="gift-qr" data-info-src="parties.single.gift.qrImage" width="685" height="685" decoding="async" data-info-alt="parties.single.gift.qrAlt" alt=""></div>
           <p class="gift-hint" data-i18n="gift.hint">Quét mã bằng ứng dụng ngân hàng</p>
         </article>
       </div>
