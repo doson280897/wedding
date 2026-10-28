@@ -258,18 +258,20 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(page.locator("#settingsHub")).toBeVisible();
   const gateLayout = await page.evaluate(() => {
     const scene = document.querySelector(".moonlight-gate__scene").getBoundingClientRect();
-    const celestial = document.querySelector(".moonlight-gate__celestial").getBoundingClientRect();
+    const celestial = document.querySelector(".moonlight-gate__celestial");
+    const leftDoor = document.querySelector(".moonlight-gate__door--left");
     return {
       viewportW:innerWidth,
+      viewportH:innerHeight,
       sceneW:scene.width,
-      sceneTop:scene.top,
-      celestialBottom:celestial.bottom,
-      celestialZ:Number(getComputedStyle(document.querySelector(".moonlight-gate__celestial")).zIndex)
+      sceneH:scene.height,
+      celestialZ:Number(getComputedStyle(celestial).zIndex),
+      doorZ:Number(getComputedStyle(leftDoor).zIndex)
     };
   });
-  if (gateLayout.viewportW >= 1000) expect(gateLayout.sceneW).toBeGreaterThan(600);
-  if (gateLayout.viewportW <= 650) expect(gateLayout.sceneTop - gateLayout.celestialBottom).toBeGreaterThanOrEqual(-2);
-  expect(gateLayout.celestialZ).toBeGreaterThan(6);
+  expect(Math.abs(gateLayout.sceneW - gateLayout.viewportW)).toBeLessThanOrEqual(1);
+  expect(Math.abs(gateLayout.sceneH - gateLayout.viewportH)).toBeLessThanOrEqual(2);
+  expect(gateLayout.celestialZ).toBeLessThan(gateLayout.doorZ);
 
   await page.locator("#waxOpenButton").click();
   await expect(gate).toHaveClass(/is-awakening/);
