@@ -309,9 +309,12 @@
   // rotated by a guessed angle. Works on portrait and landscape viewports.
   const meteorCanvas = moonlightGate?.querySelector(".moonlight-gate__meteor-canvas");
   let meteorFrame = 0;
+  let meteorResizeObserver = null;
   const stopGateMeteors = () => {
     if (meteorFrame) cancelAnimationFrame(meteorFrame);
     meteorFrame = 0;
+    meteorResizeObserver?.disconnect();
+    meteorResizeObserver = null;
     if (meteorCanvas) {
       const ctx = meteorCanvas.getContext("2d");
       ctx?.clearRect(0, 0, meteorCanvas.width, meteorCanvas.height);
@@ -339,10 +342,16 @@
       meteorCanvas.height = Math.round(height * density);
       ctx.setTransform(density, 0, 0, density, 0, 0);
     };
+    // Measure on size changes, never force a layout read on every canvas frame.
+    fit();
+    if ("ResizeObserver" in window) {
+      meteorResizeObserver = new ResizeObserver(fit);
+      meteorResizeObserver.observe(meteorCanvas);
+    }
     const render = timestamp => {
       meteorFrame = 0;
       if (moonlightGate.hidden) return;
-      fit();
+      if (!meteorResizeObserver) fit();
       ctx.clearRect(0, 0, width, height);
       const elapsed = timestamp - start;
       const mobile = width <= 650;
