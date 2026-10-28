@@ -1626,3 +1626,45 @@ html[data-theme="light"] .envelope-cooldown-progress{stroke:#907043}
     animation:none!important;transform:translate3d(0,-12%,0);
   }
 }
+
+
+/* TWO ACT GOLDEN LIGHT — the warm flare returns without glitter storms.
+   Both scenes use just one prepainted gradient and animate opacity/transform. */
+.envelope-seal-light{
+  position:absolute;left:50%;top:79%;z-index:7;pointer-events:none;
+  width:235px;height:235px;border-radius:50%;opacity:0;
+  background:radial-gradient(circle,rgba(255,249,221,.97) 0%,
+    rgba(255,233,179,.82) 12%,rgba(236,194,126,.36) 35%,transparent 70%);
+  transform:translate(-50%,-50%) scale(.25);
+}
+.envelope-intro.is-seal-cracking .envelope-seal-light{
+  animation:sealLightReveal 900ms cubic-bezier(.18,.72,.2,1) both;
+}
+@keyframes sealLightReveal{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}
+  23%{opacity:1}
+  55%{opacity:.7}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.32)}
+}
+.invitation-reveal{
+  background:radial-gradient(ellipse at 50% 47%,
+    rgba(255,251,236,.98) 0%,rgba(248,222,175,.88) 18%,
+    rgba(219,172,108,.42) 43%,rgba(177,126,68,.12) 64%,transparent 80%);
+  transform:scale(.94);
+}
+.invitation-reveal.is-active{
+  animation:weddingWarmHeroReveal 1080ms cubic-bezier(.16,.69,.25,1) both;
+}
+@keyframes weddingWarmHeroReveal{
+  0%{opacity:0;transform:scale(.94)}
+  27%{opacity:1}
+  55%{opacity:.65}
+  100%{opacity:0;transform:scale(1.10)}
+}
+@media(max-width:650px){
+  .envelope-seal-light{width:185px;height:185px}
+}
+@media(prefers-reduced-motion:reduce){
+  .envelope-seal-light{display:none!important}
+  .invitation-reveal{display:none!important}
+}

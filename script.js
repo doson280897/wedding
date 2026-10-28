@@ -299,7 +299,7 @@
       revealCleanupTimer = window.setTimeout(() => {
         invitationReveal.hidden = true;
         invitationReveal.classList.remove("is-active");
-      }, 720);
+      }, 1100);
     };
 
     // Ivory petal bloom, deliberately separate from the card raster/flight.

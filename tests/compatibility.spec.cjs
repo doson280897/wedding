@@ -296,6 +296,8 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   // They must never replay on F5 in the same tab.
   await page.locator("#envelopeSealButton").click();
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-seal-cracking/);
+  await expect(page.locator(".envelope-seal-light")).toBeVisible();
+  await expect(page.locator(".envelope-seal-light")).toHaveCSS("animation-name", "sealLightReveal");
   await expect(page.locator("#envelopeIntro")).toHaveClass(/is-flap-open/);
   await expect(page.locator("#envelopeBurst")).toHaveCount(0);
   await expect(page.locator("#floatingPetals")).toBeHidden();
@@ -374,6 +376,7 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   )).toBe("none");
   await page.locator("#closeInvitation").click();
   await expect(page.locator("#invitationReveal")).toBeVisible();
+  await expect(page.locator("#invitationReveal")).toHaveCSS("animation-name","weddingWarmHeroReveal");
   await expect(page.locator("#invitationPortal")).toHaveCount(0);
   await expect(page.locator("#envelopeIntro")).toBeHidden();
   await expect(page.locator("#invitationReveal")).toBeHidden({ timeout: 3000 });
