@@ -1222,3 +1222,106 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
 @media(prefers-reduced-motion:reduce){
   .album-card,.album-card .album-photo{transition:none!important}
 }
+
+
+/* GOLDEN REVEAL — a single champagne foil bloom at the moment the seal breaks.
+   Decorative layers never intercept pointer events or trap focus. */
+.envelope-burst[hidden],.invitation-reveal[hidden]{display:none!important}
+.envelope-burst{
+  position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;
+  contain:layout style paint;
+  --burst-x:50%;--burst-y:54%;
+}
+.envelope-burst-glow,.envelope-burst-halo,.envelope-burst-rays,.envelope-burst-particle{
+  position:absolute;left:var(--burst-x);top:var(--burst-y);pointer-events:none;
+}
+.envelope-burst-glow{
+  width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,252,233,.94) 0%,rgba(249,221,164,.71) 17%,rgba(222,173,100,.19) 47%,transparent 72%);
+  filter:blur(3px);opacity:0;
+}
+.envelope-burst-halo{
+  width:100px;height:100px;border:2px solid rgba(250,227,180,.85);
+  border-radius:50%;box-shadow:0 0 17px rgba(218,173,106,.52),inset 0 0 16px rgba(255,241,202,.32);
+  opacity:0;
+}
+.envelope-burst-rays{
+  width:360px;height:360px;border-radius:50%;opacity:0;
+  background:repeating-conic-gradient(from 5deg,rgba(251,225,166,.25) 0deg,transparent 3.5deg,transparent 23deg);
+  -webkit-mask-image:radial-gradient(circle,transparent 0 19%,#000 32%,transparent 71%);
+  mask-image:radial-gradient(circle,transparent 0 19%,#000 32%,transparent 71%);
+}
+.envelope-burst-particle{
+  width:var(--particle-size,4px);height:calc(var(--particle-size,4px) * 2.4);
+  border-radius:60% 60% 30% 30%;
+  background:linear-gradient(180deg,#fff8d9 0%,#e5bb74 44%,rgba(181,123,61,.45) 100%);
+  box-shadow:0 0 10px rgba(245,210,148,.6);
+  opacity:0;
+}
+.envelope-burst-particle.is-petal{
+  width:var(--particle-size,10px);height:calc(var(--particle-size,10px) * 1.6);
+  border-radius:90% 4% 90% 8%;
+  background:linear-gradient(135deg,#fff7e9,#e8ceac 55%,#d6a96f);
+  box-shadow:0 0 9px rgba(239,212,166,.3);
+}
+.envelope-burst.is-active .envelope-burst-glow{
+  animation:weddingSealGlow 1.25s cubic-bezier(.12,.55,.2,1) both;
+}
+.envelope-burst.is-active .envelope-burst-halo{
+  animation:weddingSealHalo 1.3s cubic-bezier(.12,.54,.2,1) both;
+}
+.envelope-burst.is-active .envelope-burst-rays{
+  animation:weddingSealRays 1.35s cubic-bezier(.12,.54,.2,1) both;
+}
+.envelope-burst.is-active .envelope-burst-particle{
+  animation:weddingSealFoil 1.5s cubic-bezier(.1,.54,.22,1) var(--burst-delay,0ms) both;
+}
+@keyframes weddingSealGlow{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.13)}
+  20%{opacity:1}
+  53%{opacity:.52}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(2.6)}
+}
+@keyframes weddingSealHalo{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}
+  20%{opacity:.87}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(7)}
+}
+@keyframes weddingSealRays{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(-9deg)}
+  24%{opacity:.64}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.6) rotate(14deg)}
+}
+@keyframes weddingSealFoil{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(0) scale(.4)}
+  16%{opacity:1}
+  58%{opacity:.84}
+  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(var(--travel)) scale(.12)}
+}
+/* Second act: cinematic warm flare when entering the revealed invitation. */
+.invitation-reveal{
+  position:fixed;inset:0;z-index:4000;pointer-events:none;opacity:0;
+  background:
+    radial-gradient(ellipse at 50% 46%,rgba(255,250,230,.95) 0%,rgba(241,212,164,.76) 19%,rgba(184,135,74,.19) 45%,transparent 76%),
+    linear-gradient(90deg,rgba(54,43,28,.08),transparent 24%,transparent 76%,rgba(54,43,28,.08));
+}
+.invitation-reveal.is-active{
+  animation:weddingInvitationReveal 1s cubic-bezier(.2,.66,.2,1) both;
+}
+@keyframes weddingInvitationReveal{
+  0%{opacity:0}
+  29%{opacity:1}
+  55%{opacity:.34}
+  100%{opacity:0}
+}
+@media(max-width:650px){
+  .envelope-burst-glow{width:170px;height:170px}
+  .envelope-burst-rays{width:260px;height:260px}
+  .invitation-reveal{
+    background:radial-gradient(ellipse at 50% 44%,rgba(255,249,228,.93),rgba(239,211,167,.59) 24%,transparent 72%);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .envelope-burst,.invitation-reveal{display:none!important}
+  .envelope-burst *, .invitation-reveal{animation:none!important}
+}

@@ -257,6 +257,8 @@
   const openInvitation = document.getElementById("openInvitation");
   const closeInvitation = document.getElementById("closeInvitation");
   const skipInvitation = document.getElementById("skipInvitation");
+  const envelopeBurst = document.getElementById("envelopeBurst");
+  const invitationReveal = document.getElementById("invitationReveal");
   const envelopeCooldown = document.getElementById("envelopeCooldown");
   const envelopeCooldownValue = document.getElementById("envelopeCooldownValue");
   // A reload in the same tab resumes the invitation without replaying its
@@ -279,6 +281,58 @@
     let leaving = false;
     let autoCloseTimer = 0;
     let cooldownTickTimer = 0;
+    let burstCleanupTimer = 0;
+    let revealCleanupTimer = 0;
+    const prefersReducedMotion = () =>
+      matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // One short, user-triggered burst of champagne foil from the actual seal.
+    // Geometry is measured BEFORE the flap moves so mobile stays centered.
+    const burstFromSeal = () => {
+      if (!envelopeBurst || prefersReducedMotion()) return;
+      const seal = intro.querySelector(".envelope-seal");
+      if (!seal) return;
+      const rect = seal.getBoundingClientRect();
+      envelopeBurst.style.setProperty("--burst-x", (rect.left + rect.width / 2) + "px");
+      envelopeBurst.style.setProperty("--burst-y", (rect.top + rect.height / 2) + "px");
+      const compact = matchMedia("(max-width: 650px)").matches;
+      const saveData = navigator.connection?.saveData === true;
+      const count = saveData ? 10 : compact ? 16 : 24;
+      const fragment = document.createDocumentFragment();
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement("span");
+        const petal = i % 4 === 0;
+        particle.className = "envelope-burst-particle" + (petal ? " is-petal" : "");
+        particle.style.setProperty("--angle", ((360 / count) * i + 9) + "deg");
+        particle.style.setProperty("--travel", "-" + (compact ? 92 + (i % 5) * 17 : 138 + (i % 6) * 25) + "px");
+        particle.style.setProperty("--particle-size", (petal ? 10 : 3 + (i % 3) * 2) + "px");
+        particle.style.setProperty("--burst-delay", ((i % 5) * 24) + "ms");
+        fragment.append(particle);
+      }
+      envelopeBurst.querySelectorAll(".envelope-burst-particle").forEach(node => node.remove());
+      envelopeBurst.append(fragment);
+      envelopeBurst.hidden = false;
+      envelopeBurst.classList.add("is-active");
+      window.clearTimeout(burstCleanupTimer);
+      burstCleanupTimer = window.setTimeout(() => {
+        envelopeBurst.hidden = true;
+        envelopeBurst.classList.remove("is-active");
+        envelopeBurst.querySelectorAll(".envelope-burst-particle").forEach(node => node.remove());
+      }, 1850);
+    };
+
+    // A single champagne light wash bridges the closing envelope and hero.
+    // Skip and reduce-motion remain instant; no fake loading or autoplay.
+    const showInvitationReveal = () => {
+      if (!invitationReveal || prefersReducedMotion()) return;
+      invitationReveal.hidden = false;
+      invitationReveal.classList.add("is-active");
+      window.clearTimeout(revealCleanupTimer);
+      revealCleanupTimer = window.setTimeout(() => {
+        invitationReveal.hidden = true;
+        invitationReveal.classList.remove("is-active");
+      }, 1050);
+    };
 
     const stopAutoClose = () => {
       window.clearTimeout(autoCloseTimer);
@@ -326,7 +380,7 @@
         history.replaceState({ ...currentState, weddingEnvelopeOpened: invitationKey }, "");
       } catch (_) { /* Storage/history restrictions must not block opening. */ }
 
-      if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (instant || prefersReducedMotion()) {
         intro.hidden = true;
         resetInvitationScroll();
         document.body.classList.remove("envelope-locked");
@@ -336,6 +390,7 @@
         return;
       }
 
+      showInvitationReveal();
       intro.classList.add("is-leaving");
       window.setTimeout(() => {
         intro.hidden = true;
@@ -350,6 +405,7 @@
     const openEnvelope = () => {
       if (opened || leaving) return;
       opened = true;
+      burstFromSeal();
 
       // Open flap and lift the card in the same frame: no staged delays or auto-close timer.
       requestAnimationFrame(() => {
