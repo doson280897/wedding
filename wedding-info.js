@@ -29,14 +29,12 @@ window.WEDDING_INFO = {
     "bride": {
       "short": "Tố Nga",
       "full": "Lữ Thị Tố Nga",
-      "initial": "N",
-      "slug": "to-nga"
+      "initial": "N"
     },
     "groom": {
       "short": "Thành Sơn",
       "full": "Đỗ Ngọc Thành Sơn",
-      "initial": "S",
-      "slug": "thanh-son"
+      "initial": "S"
     }
   },
   "families": {
@@ -106,12 +104,12 @@ window.WEDDING_INFO = {
       },
       "gift": {
         "bank": "MB",
-        "accountHolder": "Lữ Thị Tố Nga",
+        "accountHolder": "{{couple.bride.fullUpper}}",
         "accountNumber": "8789 3224 6384 9",
         "qrImage": "images/optimized/assets/gift-qr-bride.svg",
         "qrAlt": {
-          "vi": "Mã QR MB mừng cưới Tố Nga",
-          "en": "MB wedding gift QR for Tố Nga"
+          "vi": "Mã QR {{parties.bride.gift.bank}} mừng cưới {{couple.bride.short}}",
+          "en": "{{parties.bride.gift.bank}} wedding gift QR for {{couple.bride.short}}"
         }
       },
       "region": {
@@ -167,12 +165,12 @@ window.WEDDING_INFO = {
       },
       "gift": {
         "bank": "TPBank",
-        "accountHolder": "Đỗ Ngọc Thành Sơn",
+        "accountHolder": "{{couple.groom.fullUpper}}",
         "accountNumber": "0266 8421 401",
         "qrImage": "images/optimized/assets/gift-qr-groom.png",
         "qrAlt": {
-          "vi": "Mã QR TPBank mừng cưới Thành Sơn",
-          "en": "TPBank wedding gift QR for Thành Sơn"
+          "vi": "Mã QR {{parties.groom.gift.bank}} mừng cưới {{couple.groom.short}}",
+          "en": "{{parties.groom.gift.bank}} wedding gift QR for {{couple.groom.short}}"
         }
       },
       "region": {
