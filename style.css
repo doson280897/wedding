@@ -319,7 +319,7 @@ html.envelope-theme body{
 html.envelope-resumed #envelopeIntro{display:none!important}
 html.party-pending #envelopeIntro{display:none!important}
 html.envelope-pending body{overflow:hidden;background:#f2eee4}
-html.envelope-pending body> :not(#envelopeIntro):not(.language-switch):not(#musicBubble){visibility:hidden!important}
+html.envelope-pending body> :not(#envelopeIntro):not(.language-switch):not(#musicBubble):not(#invitationReveal){visibility:hidden!important}
 html.envelope-pending #envelopeIntro{visibility:visible!important}
 html.envelope-pending body>.language-switch{visibility:visible!important;pointer-events:auto!important}
 .envelope-intro{
