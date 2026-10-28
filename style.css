@@ -1359,3 +1359,34 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
   .envelope-intro.is-seal-cracking .envelope-seal,
   .envelope-intro.is-seal-cracking .seal-fracture{animation:none!important}
 }
+
+
+/* FEAT 02 — the embossed invitation lifts into the scene, then settles.
+   Transform-only: no WebGL, raster effects, or extra image assets. */
+@media(prefers-reduced-motion:no-preference){
+  .envelope-intro.is-card-lifted:not(.is-leaving) .invitation-card{
+    transform-origin:50% 70%;
+    animation:luxInvitationFlight 1100ms cubic-bezier(.18,.69,.2,1) both;
+    transition:none;
+  }
+}
+@keyframes luxInvitationFlight{
+  0%{transform:translate3d(0,16%,0) rotateX(0) rotateY(0) scale(1)}
+  32%{transform:translate3d(0,-10%,50px) rotateX(4deg) rotateY(-3deg) scale(1.045)}
+  65%{transform:translate3d(0,-19%,90px) rotateX(0) rotateY(2deg) scale(1.075)}
+  87%{transform:translate3d(0,-10%,15px) rotateX(-1deg) rotateY(0) scale(.995)}
+  100%{transform:translate3d(0,-12%,0) rotateX(0) rotateY(0) scale(1)}
+}
+@media(max-width:650px){
+  @keyframes luxInvitationFlight{
+    0%{transform:translate3d(0,15%,0) rotateX(0) scale(1)}
+    38%{transform:translate3d(0,-8%,28px) rotateX(2deg) scale(1.022)}
+    68%{transform:translate3d(0,-16%,42px) rotateX(0) scale(1.038)}
+    100%{transform:translate3d(0,-12%,0) rotateX(0) scale(1)}
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .envelope-intro.is-card-lifted .invitation-card{
+    animation:none!important;transform:translate3d(0,-12%,0)!important;
+  }
+}

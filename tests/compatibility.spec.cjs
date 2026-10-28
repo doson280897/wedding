@@ -252,6 +252,9 @@ test("F5 keeps the invitation open within the same tab @core", async ({ page }) 
   expect(foil).toBeGreaterThanOrEqual(10);
   expect(foil).toBeLessThanOrEqual(24);
   await expect(page.locator("#closeInvitation")).toBeVisible();
+  expect(await page.locator(".invitation-card").evaluate(node =>
+    getComputedStyle(node).animationName
+  )).toContain("luxInvitationFlight");
   await page.locator("#closeInvitation").click();
   await expect(page.locator("#invitationReveal")).toBeVisible();
   await expect(page.locator("#envelopeIntro")).toBeHidden();
