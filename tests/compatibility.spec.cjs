@@ -650,14 +650,14 @@ test("story last row centres and hero shade follows the photo after rotation", a
   await page.locator('#waxOpenButton').click();
   await expect(page.locator('#moonlightGate')).toBeHidden();
   let twoColumnChecks=0;
-  for(const size of [{width:393,height:850},{width:621,height:700},{width:844,height:390},{width:1024,height:768},{width:1366,height:768}]) {
+  for(const size of [{width:393,height:850},{width:621,height:700},{width:844,height:390},{width:932,height:430},{width:1180,height:480},{width:1024,height:768},{width:1366,height:768}]) {
     await page.setViewportSize(size);
     await page.locator('.hero-media').scrollIntoViewIfNeeded();
     await expect.poll(()=>page.locator('.hero-media').evaluate(node=>{
       const photo=node.querySelector('.hero-photo'),shade=node.querySelector('.hero-shade');
       return Math.max(Math.abs(photo.offsetHeight-shade.offsetHeight),Math.abs(photo.offsetHeight-node.clientHeight));
     })).toBeLessThanOrEqual(1);
-    if (size.width <= 900) {
+    if (size.width <= 900 || size.height <= 576) {
       const photo=page.locator('img.hero-photo');
       await expect.poll(()=>photo.evaluate(node=>node.naturalWidth)).toBeGreaterThan(0);
       expect(await photo.evaluate(node=>getComputedStyle(node).objectFit)).toBe('contain');

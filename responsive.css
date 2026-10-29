@@ -39,7 +39,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* Photo and shade share one real box, including min-height in landscape. */
 .hero-media{position:absolute;inset:0;overflow:hidden}
 .hero-media .hero-shade{inset:0;height:100%}
-@media(max-width:900px){
+@media(max-width:900px),(max-height:36rem){
   .hero-media{position:relative;inset:auto;isolation:isolate}
   /* Fill the frame with the same cached asset; the sharp image stays whole. */
   .hero-media:before{

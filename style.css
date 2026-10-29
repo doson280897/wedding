@@ -366,7 +366,7 @@ html[data-party="groom"] .family-grid .family-groom{order:1}
 html[data-party="groom"] .family-grid .family-bride{order:2}
 
 /* HERO CONTENT BELOW PHOTO — mobile/tablet */
-@media(max-width:900px){
+@media(max-width:900px),(max-height:36rem){
   .hero{
     --hero-photo-height:min(66svh,680px);
     height:auto;
@@ -718,7 +718,7 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
   @media (max-width: 700px) {
     .hero { height: 90vh; }
   }
-  @media (max-width: 900px) {
+  @media (max-width: 900px), (max-height: 36rem) {
     .hero { --hero-photo-height: min(66vh, 680px); height: auto; }
   }
   @media (max-width: 650px) {
