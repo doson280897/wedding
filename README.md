@@ -1,6 +1,6 @@
 # Wedding Invitation Template — Thiệp cưới dùng lại
 
-Website thiệp cưới **Cinematic Editorial / Jade & Champagne** triển khai bằng GitHub Pages.
+Website thiệp cưới **Cinematic Editorial / Peacock Blue & Champagne** triển khai bằng GitHub Pages.
 Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, nhạc, lịch, bản đồ, QR và tiếng Việt / Anh.
 
 ### Giao diện và khách mời cá nhân hóa
@@ -8,7 +8,7 @@ Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, 
 - **Một nút điều khiển chung** mặc định ở **góc dưới bên phải**, có thể kéo và tự hít vào mép gần nhất. Ở màn chọn tiệc / tạo link, bảng chỉ có **Cài đặt** (VN/EN); sau khi mở thiệp, bảng thêm tab **Mục lục** (mở mặc định) trước tab **Cài đặt** (VN/EN, nhạc). Nút Mục lục nổi riêng đã được loại bỏ.
 - Bong bóng nhạc **chỉ xuất hiện sau khi YouTube xác nhận `PLAYING`**, không hiện khi đang tải/buffering. Mặc định ở góc dưới trái; kéo/thả được cả lúc nhạc đang chạy, cùng cơ chế hít mép và tránh chồng lên nút chính. Chạm bong bóng mở **Pause / Resume / Stop**; Pause giữ vị trí phát, giữ bong bóng nhưng ngừng lắc và đổi màu; Resume phát tiếp tại vị trí cũ (tự seek nếu iframe bị tua về đầu); Stop dừng hẳn và ẩn bong bóng cho đến khi bật lại từ Cài đặt.
 - Link tạo khi chọn **EN** mang `lang=en`: cảnh mở cửa, lời mời và toàn bộ nội dung thiệp mở bằng tiếng Anh; tên riêng được giữ nguyên. Các chữ trong cảnh mở cửa nằm trong `wedding-info.js` → `text.vi/en["gate.*"]`.
-- Thiệp chỉ dùng **xanh ngọc bích phối vàng champagne** trên mọi thiết bị. Không tự đổi theo giao diện hệ điều hành và không có lựa chọn Sáng/Tối. F5 giữ ngôn ngữ trong tab đang xem; tab mới mặc định VN (trừ link có `lang=en`).
+- Thiệp chỉ dùng **xanh lam khổng tước phối vàng champagne** trên mọi thiết bị. Không tự đổi theo giao diện hệ điều hành và không có lựa chọn Sáng/Tối. F5 giữ ngôn ngữ trong tab đang xem; tab mới mặc định VN (trừ link có `lang=en`).
 - Trong cảnh sao rơi **Ngày chung đôi** khi mở cửa, hiển thị **Trân trọng kính mời**; với link có `?to=Tên+khách`, **tên người nhận** nằm ngay dưới bằng font serif đậm, màu vàng sáng. Hero không lặp lại lời mời. Có thể sửa nhãn trong `wedding-info.js` → `text.vi["guest.recipientLabel"]` / `text.en["guest.recipientLabel"]`. Link không có tên chỉ hiện lời mời, không để dòng tên trống.
 
 
@@ -206,6 +206,6 @@ Bấm **Lưu vào lịch** để chọn sự kiện lễ/tiệc, sau đó mở G
 
 Hai nút **Xem địa điểm / Lưu vào lịch** trong thẻ tiệc dùng hai cột bằng nhau, cùng chiều cao và khoảng cách riêng; biểu tượng SVG dùng chung nét, không phụ thuộc emoji của thiết bị.
 
-### Jade and champagne appearance
+### Peacock blue and champagne appearance
 
-`jade-theme.css` contains the shared jade-green palette and static floral accents for the entrance, invitation, controls and dialogs. It is loaded after the component styles. The site has one fixed appearance; language remains selectable. Change the `--jade-*` variables here to adjust the palette.
+`theme.css` contains the shared peacock-blue palette and static floral accents for the entrance, invitation, controls and dialogs. It is loaded after the component styles. The site has one fixed appearance; language remains selectable. Change the `--theme-*` variables here to adjust the palette.
