@@ -1497,3 +1497,8 @@ html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
   .promise-copy{padding-top:18px}
   .closing{min-height:75svh}
 }
+
+/* Keep each person's name together, including narrow in-app browsers. */
+.closing-names{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:0 .2em;font-size:clamp(28px,7.5vw,44px);line-height:1.4}
+.closing-names .closing-name{white-space:nowrap;color:inherit}
+.closing-names .closing-join{flex:none}

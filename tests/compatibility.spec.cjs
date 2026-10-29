@@ -1185,3 +1185,42 @@ test("album loads after the gate without IntersectionObserver @smoke @core", asy
   await page.locator("#albumLightboxNext").click();
   await expect(page.locator("#albumLightboxCounter")).toHaveText(/^02 \/ /);
 });
+
+test("closing names stay whole and modal close buttons stay at the right edge @smoke @core", async ({page}) => {
+  test.setTimeout(60000);
+  await page.emulateMedia({reducedMotion:"reduce"});
+  for (const width of [320,393,430]) {
+    await page.setViewportSize({width,height:850});
+    await page.goto(base+"/index.html?party=groom",{waitUntil:"domcontentloaded"});
+    await page.locator("#waxOpenButton").click();
+    await expect(page.locator("#moonlightGate")).toBeHidden();
+    await page.locator("#closingNames").scrollIntoViewIfNeeded();
+    await page.evaluate(()=>document.fonts.ready);
+    const names=await page.locator("#closingNames").evaluate(node=>({
+      overflow:node.scrollWidth-node.clientWidth,
+      names:[...node.querySelectorAll('.closing-name')].map(name=>({text:name.textContent,wrap:getComputedStyle(name).whiteSpace})),
+    }));
+    expect(names.overflow).toBeLessThanOrEqual(1);
+    expect(names.names).toEqual([{text:"Thành Sơn",wrap:"nowrap"},{text:"Tố Nga",wrap:"nowrap"}]);
+    await page.locator("#settingsTrigger").click();
+    await page.locator('#wqPanel a[href="#locations"]').click();
+    const mapGap=await page.locator("#wmClose").evaluate(button=>{
+      const a=button.getBoundingClientRect(),b=button.closest('.wm-dialog').getBoundingClientRect();
+      return {gap:b.right-a.right,width:a.width,height:a.height};
+    });
+    expect(mapGap.gap).toBeLessThanOrEqual(16);
+    expect(mapGap.gap).toBeGreaterThanOrEqual(8);
+    expect(mapGap.width).toBeGreaterThanOrEqual(44);
+    expect(mapGap.height).toBeGreaterThanOrEqual(44);
+    await page.locator("#wmClose").click();
+    await page.locator("#settingsTrigger").click();
+    await page.locator('#wqPanel a[href="#wedding-gift"]').click();
+    const giftGap=await page.locator("#wgClose").evaluate(button=>{
+      const a=button.getBoundingClientRect(),b=button.closest('.wg-dialog').getBoundingClientRect();
+      return b.right-a.right;
+    });
+    expect(giftGap).toBeLessThanOrEqual(16);
+    expect(giftGap).toBeGreaterThanOrEqual(8);
+    await page.locator("#wgClose").click();
+  }
+});

@@ -60,10 +60,13 @@ body.wg-open{overflow:hidden}
 /* Keep modal close buttons comfortably sized on touch devices. */
 @media (max-width: 700px) {
   .wm-header, .wg-header {
-    padding-right: max(76px, calc(env(safe-area-inset-right) + 66px));
+    gap:12px;
+    padding:10px 12px;
   }
   .wm-close, .wg-close {
+    width: 44px;
     min-width: 44px;
+    margin-left: auto;
     min-height: 44px;
     display: inline-grid;
     place-items: center;

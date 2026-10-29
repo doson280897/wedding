@@ -753,7 +753,9 @@
     const pairs = {
       hero: pair(upper(first.short), upper(second.short), "&amp;"),
       gate: pair(first.short, second.short, "&amp;"),
-      closing: pair(first.short, second.short, "&amp;"),
+      closing: '<span class="closing-name">' + escapeHtml(first.short) +
+        '</span><span class="closing-join">&amp;</span><span class="closing-name">' +
+        escapeHtml(second.short) + '</span>',
       footer: "© " + new Date(partyInfo(selectedParty).date + "T00:00:00Z").getUTCFullYear() +
         " " + pair(upper(first.short), upper(second.short), "&amp;"),
       menu: pair(upper(first.short), upper(second.short), "♡")
