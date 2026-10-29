@@ -66,6 +66,15 @@
       document.documentElement.classList.add("wax-pending");
     }
 
+    if (params.get("tool") !== "links" && settings?.site?.entrance) {
+      for (const source of [settings.site.entrance.image, settings.site.entrance.lock]) {
+        const preload = document.createElement("link");
+        preload.rel = "preload"; preload.as = "image"; preload.type = "image/webp";
+        preload.href = source + "?v=__BUILD_ID__";
+        document.head.appendChild(preload);
+      }
+    }
+
     const heroPreload = document.createElement("link");
     heroPreload.rel = "preload";
     heroPreload.as = "image";
@@ -86,6 +95,7 @@
 <link rel="stylesheet" href="link-tool.css?v=__BUILD_ID__">
 <link rel="stylesheet" href="settings.css?v=__BUILD_ID__">
 <link rel="stylesheet" href="calendar.css?v=__BUILD_ID__">
+<link rel="stylesheet" href="fairy-gate.css?v=__BUILD_ID__">
 </head>
 <body>
 <div class="reading-progress" id="progress"></div>
@@ -197,6 +207,9 @@
   </div>
 </section>
 <section class="moonlight-gate" id="moonlightGate" data-i18n-aria="gate.label" aria-label="Cổng mở thiệp cưới">
+  <div class="moonlight-gate__scene">
+    <img class="fairy-surround" data-info-src="site.entrance.image" alt="" aria-hidden="true" decoding="async">
+    <div class="fairy-artboard">
   <div class="moonlight-gate__backdrop" aria-hidden="true">
     <span class="moonlight-gate__stars"></span>
     <span class="moonlight-gate__land"></span>
@@ -237,70 +250,31 @@
       <strong class="moonlight-gate__recipient-name" id="gateGuestName" hidden></strong>
     </div>
   </div>
-  <div class="moonlight-gate__scene">
-    <span class="moonlight-gate__portal" aria-hidden="true"></span>
-    <span class="moonlight-gate__seam" aria-hidden="true"></span>
-    <div class="moonlight-gate__door moonlight-gate__door--left" aria-hidden="true">
-      <div class="moonlight-gate__door-face">
-        <span class="moonlight-gate__door-light"></span>
-        <span class="moonlight-gate__door-arch"></span>
-        <span class="moonlight-gate__door-flower">✧</span>
-        <span class="moonlight-gate__orbit moonlight-gate__orbit--sun">
-          <span class="moonlight-gate__top-caption" data-i18n="gate.topCaption" aria-hidden="true">DUYÊN LÀNH TRỜI ĐỊNH</span>
-          <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" aria-hidden="true">
-            <circle cx="60" cy="60" r="25" stroke-width="2.2"/>
-            <circle cx="60" cy="60" r="20" stroke-width=".65"/>
-            <g class="gate-sun-rays" stroke-width="2.2" stroke-linecap="round">
-              <path d="M60 7v20M60 93v20M7 60h20M93 60h20M22.5 22.5l14 14M83.5 83.5l14 14M97.5 22.5l-14 14M36.5 83.5l-14 14"/>
-              <path d="M39 9l8 17M73 94l8 17M9 39l17 8M94 73l17 8M81 9l-8 17M47 94l-8 17M111 39l-17 8M26 73L9 81" opacity=".7"/>
-            </g>
-            <circle cx="60" cy="60" r="8" fill="currentColor" opacity=".36" stroke="none"/>
-          </svg>
-          <span class="moonlight-gate__door-label" data-i18n="gate.sun">MẶT TRỜI</span>
-        </span>
-        <span class="moonlight-gate__door-rule"></span>
+      <span class="moonlight-gate__portal" aria-hidden="true"></span>
+      <div class="moonlight-gate__door moonlight-gate__door--left" aria-hidden="true">
+        <div class="moonlight-gate__door-face">
+          <img class="fairy-panel" data-info-src="site.entrance.image" alt="" decoding="async">
+          <span class="moonlight-gate__orbit moonlight-gate__orbit--sun">
+            <span class="moonlight-gate__top-caption" data-i18n="gate.topCaption"></span>
+          </span>
+        </div>
       </div>
-    </div>
-    <div class="moonlight-gate__door moonlight-gate__door--right" aria-hidden="true">
-      <div class="moonlight-gate__door-face">
-        <span class="moonlight-gate__door-light"></span>
-        <span class="moonlight-gate__door-arch"></span>
-        <span class="moonlight-gate__door-flower">✧</span>
-        <span class="moonlight-gate__orbit moonlight-gate__orbit--moon">
-          <span class="moonlight-gate__bottom-caption" data-i18n="gate.bottomCaption" aria-hidden="true">✧ TRỌN ĐỜI TỪ ĐÂY ✧</span>
-          <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" aria-hidden="true">
-            <path class="gate-moon-crescent" d="M76 22C39 32 34 78 67 93C43 97 21 80 21 55C21 29 45 13 76 22Z" stroke-width="2.4" fill="currentColor" fill-opacity=".12"/>
-            <path class="gate-moon-star gate-moon-star--one" d="M86 43l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" stroke-width="1.5" fill="currentColor" fill-opacity=".25"/>
-            <path class="gate-moon-star gate-moon-star--two" d="M103 26l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" stroke-width="1.2"/>
-            <circle class="gate-moon-star gate-moon-star--three" cx="91" cy="82" r="2.3" fill="currentColor" stroke="none"/>
-            <circle class="gate-moon-star gate-moon-star--four" cx="106" cy="70" r="1.6" fill="currentColor" stroke="none"/>
-          </svg>
-          <span class="moonlight-gate__door-label" data-i18n="gate.moon">MẶT TRĂNG</span>
-        </span>
-        <span class="moonlight-gate__door-rule"></span>
+      <div class="moonlight-gate__door moonlight-gate__door--right" aria-hidden="true">
+        <div class="moonlight-gate__door-face">
+          <img class="fairy-panel" data-info-src="site.entrance.image" alt="" decoding="async">
+          <span class="moonlight-gate__orbit moonlight-gate__orbit--moon">
+            <span class="moonlight-gate__bottom-caption" data-i18n="gate.bottomCaption"></span>
+            <span class="fairy-star fairy-star--one"></span><span class="fairy-star fairy-star--two"></span>
+            <span class="fairy-star fairy-star--three"></span><span class="fairy-star fairy-star--four"></span>
+          </span>
+        </div>
       </div>
+      <img class="fairy-frame" data-info-src="site.entrance.image" alt="" aria-hidden="true" decoding="async">
+      <span class="moonlight-gate__seam" aria-hidden="true"></span>
+      <button type="button" class="wax-open-button" id="waxOpenButton" data-i18n-aria="gate.openAria" aria-label="Chạm ổ khóa để mở cổng">
+        <span class="wax-monogram" id="waxMonogram" aria-hidden="true"><img class="fairy-lock" data-info-src="site.entrance.lock" alt="" decoding="async"></span>
+      </button>
     </div>
-    <button type="button" class="wax-open-button" id="waxOpenButton" data-i18n-aria="gate.openAria" aria-label="Chạm ổ khóa để mở cổng">
-      <span class="wax-monogram" id="waxMonogram" aria-hidden="true">
-        <svg class="wax-lock" viewBox="0 0 48 56" fill="none" aria-hidden="true" focusable="false">
-          <path class="wax-lock__shackle" d="M12 24V17a12 12 0 0 1 24 0v7h-6v-7a6 6 0 0 0-12 0v7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <rect class="wax-lock__body" x="7" y="22" width="34" height="29" rx="6" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="2"/>
-          <rect x="11" y="26" width="26" height="21" rx="3" stroke="currentColor" stroke-opacity=".44"/>
-          <path d="M24 30a5 5 0 0 0-2.5 9.3L20 44h8l-1.5-4.7A5 5 0 0 0 24 30Z" fill="#50332e" stroke="currentColor" stroke-width=".9"/>
-          <path d="M14 25h20M14 48h20" stroke="currentColor" stroke-opacity=".52" stroke-width="1"/>
-          <!-- The tip enters the keyhole first. The nested group then twists
-               edge-on around the horizontal shaft, never orbiting the tip. -->
-          <g class="wax-lock__key-insert">
-            <g class="wax-lock__key-turn">
-              <path d="M23.5 36H41" stroke="#ffecc1" stroke-width="3.2" stroke-linecap="round"/>
-              <path d="M28 36v-4M33 36v-3.6" stroke="#ffecc1" stroke-width="2.1" stroke-linecap="round"/>
-              <circle cx="47" cy="36" r="6.5" fill="#5c3930" stroke="#ffe5a8" stroke-width="3"/>
-              <circle cx="47" cy="36" r="2" fill="#ffe7b0"/>
-            </g>
-          </g>
-        </svg>
-      </span>
-    </button>
   </div>
 </section>
 <header class="hero" id="home">

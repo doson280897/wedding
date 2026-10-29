@@ -29,7 +29,7 @@ jobs:
         run: |
           ./node_modules/.bin/prettier --write \
             index.html link-tool.html \
-            style.css quick-nav.css link-tool.css settings.css calendar.css \
+            style.css quick-nav.css link-tool.css settings.css calendar.css fairy-gate.css \
             script.js calendar.js quick-nav.js gallery.js i18n.js link-tool.js settings.js preferences.js wedding-info.js \
             build-wedding.cjs playwright.config.cjs tests/*.cjs \
             .github/workflows/deploy.yml \

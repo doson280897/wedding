@@ -215,3 +215,7 @@ Mặt trời có quầng sáng nhịp chậm, tia nghiêng nhẹ và sáng lên 
 ### Kiểm tra hồi quy và tiết kiệm tài nguyên
 
 Animation của cổng được tạm dừng khi tab ẩn và khôi phục khi quay lại. Nhạc có watchdog 10 giây cho cả lần phát đầu lẫn khi buffering lại: nếu không phát tiếp được, giao diện cho thử lại và giữ vị trí phát gần nhất. CI kiểm tra riêng cổng/nhạc trước bộ kiểm tra đầy đủ; chuyển cảnh được kiểm tra theo thời lượng chung và trạng thái hiển thị thực tế.
+
+### Secret garden entrance
+
+The approved gate artwork is layered in `fairy-gate.css`: two masked leaves rotate around the inner jambs while the floral arch stays fixed. The lock is a separate transparent image and uses a gentle light highlight instead of visible instruction text. Captions remain live VN/EN text. Change the artwork paths in `wedding-info.js` → `site.entrance`. Both WebP assets together are about 220 KB.

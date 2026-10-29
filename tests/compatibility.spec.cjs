@@ -173,7 +173,7 @@ test("party link, wax gate and album lightbox interactions", async ({
   const initials = await page.evaluate(() =>
     window.WEDDING_INFO.couple.bride.initial + " · " + window.WEDDING_INFO.couple.groom.initial
   );
-  await expect(page.locator("#waxMonogram svg.wax-lock")).toHaveCount(1);
+  await expect(page.locator("#waxMonogram img.fairy-lock")).toHaveCount(1);
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#moonlightGate")).toHaveClass(/is-awakening/);
   await expect(page.locator("#moonlightGate")).toHaveClass(/is-opening/);
@@ -364,7 +364,7 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   const gate = page.locator("#moonlightGate");
   await expect(gate).toBeVisible();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
-  await expect(page.locator("#waxMonogram svg.wax-lock")).toHaveCount(1);
+  await expect(page.locator("#waxMonogram img.fairy-lock")).toHaveCount(1);
   await expect(page.locator(".moonlight-gate__reveal-overline")).toHaveText("NGÀY CHUNG ĐÔI");
   await expect(page.locator(".moonlight-gate__reveal-overline")).not.toContainText("KÍNH MỜI");
   await expect(page.locator(".moonlight-gate__celestial")).toBeVisible();
@@ -421,11 +421,11 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
     return {
       leftOrigin:Number.parseFloat(l.transformOrigin),
       rightOrigin:Number.parseFloat(r.transformOrigin),
-      rightWidth:right.getBoundingClientRect().width
+      artboardWidth:document.querySelector(".fairy-artboard").clientWidth
     };
   });
-  expect(hingeState.leftOrigin).toBeCloseTo(0, 0);
-  expect(hingeState.rightOrigin).toBeGreaterThan(100);
+  expect(hingeState.leftOrigin / hingeState.artboardWidth).toBeCloseTo(.17, 2);
+  expect(hingeState.rightOrigin / hingeState.artboardWidth).toBeCloseTo(.83, 2);
   const hingeDuration = await page.locator(".moonlight-gate__door--left").evaluate(node =>
     parseFloat(getComputedStyle(node).animationDuration) * 1000
   );
@@ -947,7 +947,7 @@ test("reduced-motion album can switch, close and reopen without losing its image
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#moonlightGate")).toHaveClass(/is-opened/);
   await expect(page.locator("#gateGuestLabel")).toBeVisible();
-  await expect(page.locator(".moonlight-gate__scene")).toBeHidden();
+  await expect(page.locator(".moonlight-gate__door--left")).toBeHidden();
   await expect(page.locator("#moonlightGate")).toBeHidden();
   const viewport = page.locator("#albumViewport");
   // Use the guest-facing navigation: WebKit can ignore an automation scroll
@@ -1084,8 +1084,8 @@ test("gate ornaments keep captions clear, pause in background and stop after ent
   const gate = page.locator("#moonlightGate");
   const ornaments = await page.evaluate(() => ({
     sun:getComputedStyle(document.querySelector(".moonlight-gate__orbit--sun"),"::after").animationName,
-    rays:getComputedStyle(document.querySelector(".gate-sun-rays")).animationName,
-    delays:[...document.querySelectorAll(".gate-moon-star")].map(node => getComputedStyle(node).animationDelay),
+    rays:getComputedStyle(document.querySelector(".fairy-star")).animationName,
+    delays:[...document.querySelectorAll(".fairy-star")].map(node => getComputedStyle(node).animationDelay),
     captions:[...document.querySelectorAll(".moonlight-gate__top-caption,.moonlight-gate__bottom-caption")].map(node => {
       const orbit = node.closest(".moonlight-gate__orbit");
       const text = node.getBoundingClientRect();
@@ -1094,7 +1094,7 @@ test("gate ornaments keep captions clear, pause in background and stop after ent
     width:innerWidth
   }));
   expect(ornaments.sun).toBe("gateSunBreath");
-  expect(ornaments.rays).toBe("gateSunRaySway");
+  expect(ornaments.rays).toBe("gateMoonTwinkle");
   expect(ornaments.delays).toHaveLength(4);
   expect(new Set(ornaments.delays).size).toBe(4);
   for (const caption of ornaments.captions) {
@@ -1106,19 +1106,19 @@ test("gate ornaments keep captions clear, pause in background and stop after ent
     Object.defineProperty(document, "hidden", {configurable:true, get:() => true});
     document.dispatchEvent(new Event("visibilitychange"));
   });
-  await expect(page.locator(".gate-sun-rays")).toHaveCSS("animation-play-state", "paused");
+  await expect(page.locator(".fairy-star").first()).toHaveCSS("animation-play-state", "paused");
   await page.evaluate(() => {
     delete document.hidden;
     document.dispatchEvent(new Event("visibilitychange"));
   });
-  await expect(page.locator(".gate-sun-rays")).toHaveCSS("animation-play-state", "running");
+  await expect(page.locator(".fairy-star").first()).toHaveCSS("animation-play-state", "running");
   await page.locator("#waxOpenButton").click();
   await expect(gate).toHaveClass(/is-opening/);
-  await expect(page.locator(".gate-sun-rays")).toHaveCSS("animation-name", "none");
+  await expect(page.locator(".fairy-star").first()).toHaveCSS("animation-name", "none");
   await expect(gate).toBeHidden({timeout:16000});
   const stopped = await page.evaluate(() => ({
     sun:getComputedStyle(document.querySelector(".moonlight-gate__orbit--sun"),"::after").animationName,
-    stars:[...document.querySelectorAll(".gate-moon-star")].map(node => getComputedStyle(node).animationName)
+    stars:[...document.querySelectorAll(".fairy-star")].map(node => getComputedStyle(node).animationName)
   }));
   expect(stopped.sun).toBe("none");
   expect(stopped.stars.every(name => name === "none")).toBe(true);

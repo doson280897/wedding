@@ -1,0 +1,52 @@
+/* Shared artwork coordinates keep the fixed arch and hinged leaves aligned. */
+.moonlight-gate__door--left .moonlight-gate__door-face{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201536%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M512%20133%20C323%20132%20181%20252%20174%20418%20L174%201338%20L512%201338%20Z%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201536%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M512%20133%20C323%20132%20181%20252%20174%20418%20L174%201338%20L512%201338%20Z%22%2F%3E%3C%2Fsvg%3E")}
+.moonlight-gate__door--right .moonlight-gate__door-face{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201536%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M512%20133%20C701%20132%20843%20252%20850%20418%20L850%201338%20L512%201338%20Z%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201536%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M512%20133%20C701%20132%20843%20252%20850%20418%20L850%201338%20L512%201338%20Z%22%2F%3E%3C%2Fsvg%3E")}
+.fairy-frame{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201536%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M0%200H1024V1536H0Z%20M174%201338%20L174%20418%20C181%20252%20323%20132%20512%20133%20C701%20132%20843%20252%20850%20418%20L850%201338%20Z%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201536%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M0%200H1024V1536H0Z%20M174%201338%20L174%20418%20C181%20252%20323%20132%20512%20133%20C701%20132%20843%20252%20850%20418%20L850%201338%20Z%22%2F%3E%3C%2Fsvg%3E")}
+
+.moonlight-gate__scene{display:grid;place-items:center;perspective:none;transform-style:flat;background:#080f1c}
+.fairy-surround{position:absolute;inset:-4%;width:108%;height:108%;object-fit:cover;filter:blur(22px);opacity:.22;pointer-events:none}
+.fairy-artboard{position:relative;width:min(100vw,66.6667svh);aspect-ratio:2/3;container-type:inline-size;perspective:1150px;isolation:isolate}
+.fairy-panel,.fairy-frame{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:fill;pointer-events:none}
+.fairy-frame{z-index:5}
+.moonlight-gate__door{position:absolute;inset:0;width:100%;height:100%;flex:none;z-index:4}
+.moonlight-gate__door--left{transform-origin:17% 50%}
+.moonlight-gate__door--right{transform-origin:83% 50%}
+.moonlight-gate__door .moonlight-gate__door-face{background:none;border:0;box-shadow:none}
+.moonlight-gate__door-face,.fairy-frame{-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+.moonlight-gate__door-face::before,.moonlight-gate__door-face::after{display:none}
+.moonlight-gate__orbit{top:32.4%;width:20%;height:13.333%;aspect-ratio:auto;border:0;background:none;box-shadow:none}
+.moonlight-gate__orbit--sun{left:34%}
+.moonlight-gate__orbit--moon{left:66.3%}
+.moonlight-gate__orbit::before{display:none}
+.moonlight-gate__top-caption,.moonlight-gate__bottom-caption{bottom:calc(100% + 4cqw);width:150%;max-width:none;font:500 clamp(8px,1.55cqw,15px)/1.65 Georgia,serif;letter-spacing:.07em;color:#f0d9a6;text-shadow:0 1px 4px #000}
+.moonlight-gate__seam{top:9%;bottom:13%}
+.moonlight-gate__reveal{inset:18% 18% 13%;padding:10px}
+.moonlight-gate__reveal-names{font-size:clamp(25px,7cqw,56px);margin:18px auto}
+.moonlight-gate__reveal-overline,.moonlight-gate__reveal-subtitle{font-size:clamp(8px,2cqw,12px);letter-spacing:.15em}
+.moonlight-gate__recipient-label{font-size:clamp(8px,2cqw,13px)}
+.moonlight-gate__recipient-name{font-size:clamp(21px,5cqw,36px)}
+#waxOpenButton{top:49.1%;width:17.8%;height:16%;min-width:44px;min-height:44px;aspect-ratio:auto;border:0;border-radius:15%;background:none;box-shadow:none}
+#waxOpenButton::before{display:none}
+#waxOpenButton::after{content:"";position:absolute;inset:17% 8%;border-radius:50%;background:radial-gradient(ellipse,#fff1c496,#edbe652e 45%,transparent 72%);pointer-events:none;opacity:.2;mix-blend-mode:screen}
+#waxMonogram{width:100%;height:100%;filter:none}
+.fairy-lock{display:block;width:100%;height:100%;object-fit:contain}
+.fairy-star{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff1cd;box-shadow:0 0 7px #ffe7a6;pointer-events:none}
+.fairy-star--one{left:28%;top:26%}
+.fairy-star--two{left:66%;top:38%}
+.fairy-star--three{left:75%;top:68%}
+.fairy-star--four{left:42%;top:79%}
+@media(prefers-reduced-motion:no-preference){
+ .moonlight-gate:not([hidden]) #waxOpenButton::after{animation:fairyLockHighlight 3.2s ease-in-out infinite}
+ .moonlight-gate:not([hidden]) .fairy-star{animation:gateMoonTwinkle 3.4s ease-in-out infinite}
+ .moonlight-gate .fairy-star--two{animation-delay:-1.2s}
+ .moonlight-gate .fairy-star--three{animation-delay:-2.4s}
+ .moonlight-gate .fairy-star--four{animation-delay:-.6s}
+ .moonlight-gate.is-unlocking #waxOpenButton::after{animation:fairyLockAwaken var(--gate-unlock-time,1.4s) ease-out both}
+}
+@keyframes fairyLockHighlight{0%,100%{opacity:.12;transform:scale(.88)}50%{opacity:.7;transform:scale(1.12)}}
+@keyframes fairyLockAwaken{0%{opacity:.3}60%{opacity:1}100%{opacity:.3}}
+.moonlight-gate.is-opening #waxOpenButton::after,.moonlight-gate.is-opened #waxOpenButton::after,.moonlight-gate[hidden] #waxOpenButton::after,.moonlight-gate.is-opening .fairy-star,.moonlight-gate.is-opened .fairy-star,.moonlight-gate[hidden] .fairy-star{animation:none}
+@media(prefers-reduced-motion:reduce){
+ .moonlight-gate.is-opened .moonlight-gate__scene{visibility:visible}
+ .moonlight-gate.is-opened .moonlight-gate__door,.moonlight-gate.is-opened #waxOpenButton{visibility:hidden}
+}

@@ -26,6 +26,10 @@ window.WEDDING_INFO = {
     "timezone": "+07:00",
     "socialImage": "og-preview.jpg",
     "introSound": "",
+    "entrance": {
+      "image": "images/optimized/assets/secret-garden-gate.webp",
+      "lock": "images/optimized/assets/secret-garden-lock.webp"
+    },
     "titlePrefix": {
       "vi": "Thiệp cưới",
       "en": "Wedding Invitation"

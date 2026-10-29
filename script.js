@@ -444,8 +444,7 @@
       return;
     }
 
-    // Only open the wings after the key has entered, turned, and freed the
-    // shackle. The portal glow begins in the short beat after unlocking.
+    // Warm the keyhole before opening the leaves; the portal glow follows.
     moonlightGate.classList.add("is-unlocking");
     scheduleGate(() => {
       if (moonlightGate.hidden) return;
