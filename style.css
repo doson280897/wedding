@@ -950,7 +950,7 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
   background:radial-gradient(ellipse at 50% 68%,#91613b 0%,#47383d 17%,#20283b 46%,#090f1d 83%);
   transform:scale(1);
-  transition:transform 1.35s cubic-bezier(.22,.72,.2,1);
+  transition:transform var(--gate-handoff-time,1.1s) cubic-bezier(.22,.72,.2,1);
   transform-origin:50% 50%;
 }
 .moonlight-gate__backdrop:after{
@@ -984,7 +984,7 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate.is-handoff .moonlight-gate__magic{
   opacity:0;transform:scale(1.12);
   transition:opacity 1.2s cubic-bezier(.22,.72,.2,1),
-             transform 1.35s cubic-bezier(.22,.72,.2,1);
+             transform var(--gate-handoff-time,1.1s) cubic-bezier(.22,.72,.2,1);
 }
 .moonlight-gate__dust{position:absolute;inset:0;z-index:2;pointer-events:none}
 .moonlight-gate__spark{
@@ -1022,9 +1022,9 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate__butterfly-body{
   fill:none;stroke:#ffe1a3;stroke-width:1.85;stroke-linecap:round;
 }
-.moonlight-gate__butterfly--one{--bx:13%;--by:64%;--fly-x:78px;--fly-y:-120px;--fly-tilt:-13deg;--fly-delay:.85s;--fly-time:4.25s}
-.moonlight-gate__butterfly--two{--bx:87%;--by:57%;--fly-x:-82px;--fly-y:-135px;--fly-tilt:13deg;--fly-delay:1.05s;--fly-time:4.15s}
-.moonlight-gate__butterfly--three{--bx:25%;--by:78%;--fly-x:65px;--fly-y:-85px;--fly-tilt:-9deg;--fly-delay:1.45s;--fly-time:3.8s;width:clamp(21px,2.8vw,35px)}
+.moonlight-gate__butterfly--one{--bx:13%;--by:64%;--fly-x:78px;--fly-y:-120px;--fly-tilt:-13deg;--fly-delay:.45s;--fly-time:2.8s}
+.moonlight-gate__butterfly--two{--bx:87%;--by:57%;--fly-x:-82px;--fly-y:-135px;--fly-tilt:13deg;--fly-delay:.65s;--fly-time:2.85s}
+.moonlight-gate__butterfly--three{--bx:25%;--by:78%;--fly-x:65px;--fly-y:-85px;--fly-tilt:-9deg;--fly-delay:1.05s;--fly-time:2.5s;width:clamp(21px,2.8vw,35px)}
 .moonlight-gate.is-opening .moonlight-gate__butterfly{
   animation:gateButterflyDrift var(--fly-time) ease-in-out var(--fly-delay) both;
 }
@@ -1056,7 +1056,7 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   aspect-ratio:1;transform:translateX(-50%) scale(1);border:1px solid #e1bb7a5e;
   border-radius:50%;pointer-events:none;
   box-shadow:0 0 0 34px #e0b4720b,0 0 0 70px #e0b47208,0 0 85px #e5b36c28;
-  transition:transform 1.35s cubic-bezier(.22,.72,.2,1);
+  transition:transform var(--gate-handoff-time,1.1s) cubic-bezier(.22,.72,.2,1);
 }
 .moonlight-gate__reveal{
   position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;
@@ -1117,6 +1117,27 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   background:radial-gradient(ellipse 38% 65% at 50% 52%,#fff6d69c 0%,#e9b87439 51%,transparent 85%);
   filter:blur(20px);
 }
+/* A thin seam opens into warm light; only transform and opacity animate. */
+.moonlight-gate__seam{
+  position:absolute;z-index:6;left:calc(50% - 1px);top:5%;bottom:5%;width:2px;
+  pointer-events:none;opacity:0;transform-origin:center;
+  background:linear-gradient(transparent,#ffedc4 22%,#fff9e9 52%,#f5d398 80%,transparent);
+  box-shadow:0 0 12px #ffe6b2a6,0 0 38px #eec48466;
+}
+.moonlight-gate.is-unlocking .moonlight-gate__seam{animation:gateSeamWake var(--gate-unlock-time,1.4s) both}
+.moonlight-gate.is-awakening .moonlight-gate__seam{opacity:.8}
+.moonlight-gate.is-opening .moonlight-gate__seam{animation:gateSeamBloom var(--gate-door-time,2.4s) both}
+@keyframes gateSeamWake{0%,70%{opacity:0;transform:scaleY(.6)}100%{opacity:.8;transform:scaleY(1)}}
+@keyframes gateSeamBloom{0%{opacity:.8;transform:scaleX(1)}24%{opacity:.75;transform:scaleX(24)}48%,100%{opacity:0;transform:scaleX(70)}}
+.moonlight-gate__door-light{
+  position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:linear-gradient(270deg,#f6d89b55,transparent 24%);
+}
+.moonlight-gate__door--right .moonlight-gate__door-light{background:linear-gradient(90deg,#f6d89b55,transparent 24%)}
+.moonlight-gate.is-awakening .moonlight-gate__door-light{opacity:.2}
+.moonlight-gate.is-opening .moonlight-gate__door-light{animation:gateEdgeLight var(--gate-door-time,2.4s) both}
+@keyframes gateEdgeLight{0%{opacity:.2}30%{opacity:.85}70%{opacity:.3}100%{opacity:.08}}
+
 .moonlight-gate__door{
   position:relative;flex:0 0 50%;height:100%;z-index:3;
   transform-style:preserve-3d;backface-visibility:hidden;
@@ -1124,34 +1145,34 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 }
 .moonlight-gate__door--left{transform-origin:0% 50%}
 .moonlight-gate__door--right{transform-origin:100% 50%}
-/* Start slowly, reach 30 degrees after 52% of the opening, then accelerate. */
-.moonlight-gate.is-opening .moonlight-gate__door--left{animation:gateDoorOpenLeft 3.2s both}
-.moonlight-gate.is-opening .moonlight-gate__door--right{animation:gateDoorOpenRight 3.2s both}
+/* Ease away from the hinges, then settle softly; the right leaf follows by 60ms. */
+.moonlight-gate.is-opening .moonlight-gate__door--left{animation:gateDoorOpenLeft var(--gate-door-time,2.4s) both}
+.moonlight-gate.is-opening .moonlight-gate__door--right{animation:gateDoorOpenRight var(--gate-door-time,2.4s) 60ms both}
 @keyframes gateDoorOpenLeft{
-  0%{transform:rotateY(0deg);animation-timing-function:cubic-bezier(.45,.02,.72,.65)}
-  52%{transform:rotateY(-30deg);animation-timing-function:cubic-bezier(.16,.62,.36,1)}
-  100%{transform:rotateY(-82deg)}
+  0%{transform:rotateY(0deg);animation-timing-function:cubic-bezier(.42,.02,.65,.8)}
+  42%{transform:rotateY(-26deg);animation-timing-function:cubic-bezier(.16,.72,.2,1)}
+  100%{transform:rotateY(-84deg)}
 }
 @keyframes gateDoorOpenRight{
-  0%{transform:rotateY(0deg);animation-timing-function:cubic-bezier(.45,.02,.72,.65)}
-  52%{transform:rotateY(30deg);animation-timing-function:cubic-bezier(.16,.62,.36,1)}
-  100%{transform:rotateY(82deg)}
+  0%{transform:rotateY(0deg);animation-timing-function:cubic-bezier(.42,.02,.65,.8)}
+  42%{transform:rotateY(26deg);animation-timing-function:cubic-bezier(.16,.72,.2,1)}
+  100%{transform:rotateY(84deg)}
 }
 
 .moonlight-gate.is-awakening .moonlight-gate__portal{opacity:.55}
-.moonlight-gate.is-opening .moonlight-gate__portal{animation:gatePortalBloom 3.2s both}
+.moonlight-gate.is-opening .moonlight-gate__portal{animation:gatePortalBloom var(--gate-door-time,2.4s) both}
 @keyframes gatePortalBloom{
-  0%{opacity:.55}
-  15%{opacity:.92}
-  52%{opacity:1}
-  73%{opacity:.35}
+  0%{opacity:.45}
+  22%{opacity:.92}
+  45%{opacity:.72}
+  76%{opacity:.18}
   100%{opacity:0}
 }
 
 .moonlight-gate__door-face{
   position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;
   background:linear-gradient(110deg,#1c2938,#111b2c 38%,#18283a 70%,#0b1321);
-  box-shadow:inset 0 0 64px #0008;
+  box-shadow:inset 0 0 64px #0008,0 12px 34px #0007;
   border-right:2px solid #a17b48;
 }
 .moonlight-gate__door--right .moonlight-gate__door-face{
@@ -1259,16 +1280,16 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   transform-origin:12px 24px;
 }
 .moonlight-gate.is-unlocking .wax-lock__key-insert{
-  animation:gateKeyInsert 1.6s cubic-bezier(.25,.72,.25,1) both;
+  animation:gateKeyInsert var(--gate-unlock-time,1.4s) cubic-bezier(.25,.72,.25,1) both;
 }
 .moonlight-gate.is-unlocking .wax-lock__key-turn{
-  animation:gateKeyTwist 1.6s ease-in-out both;
+  animation:gateKeyTwist var(--gate-unlock-time,1.4s) ease-in-out both;
 }
 .moonlight-gate.is-unlocking .wax-lock__shackle{
-  animation:gateLockShackle 1.6s cubic-bezier(.16,.72,.3,1) both;
+  animation:gateLockShackle var(--gate-unlock-time,1.4s) cubic-bezier(.16,.72,.3,1) both;
 }
 .moonlight-gate.is-unlocking .wax-lock__body{
-  animation:gateLockBodyGlow 1.6s ease-in-out both;
+  animation:gateLockBodyGlow var(--gate-unlock-time,1.4s) ease-in-out both;
 }
 @keyframes gateKeyInsert{
   0%{opacity:0;transform:translate(38px,5px) rotate(-9deg)}
@@ -1304,27 +1325,34 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate.is-opening .moonlight-gate__bottom-caption{opacity:0}
 /* Names rise into view while the door gap widens, without an empty dead beat. */
 .moonlight-gate.is-opening .moonlight-gate__reveal{
-  opacity:1;transform:scale(1);transition-delay:1.4s;
+  opacity:1;transform:scale(1);transition-delay:.95s;
 }
 .moonlight-gate.is-opened .moonlight-gate__reveal{
   opacity:1;transform:scale(1);transition-delay:0s;
 }
+@media(prefers-reduced-motion:no-preference){
+  .moonlight-gate.is-opening .moonlight-gate__reveal-overline{animation:gateLetterReveal .55s 1s both}
+  .moonlight-gate.is-opening .moonlight-gate__reveal-names{animation:gateLetterReveal .65s 1.1s both}
+  .moonlight-gate.is-opening .moonlight-gate__reveal-subtitle{animation:gateLetterReveal .55s 1.25s both}
+  .moonlight-gate.is-opening .moonlight-gate__greeting{animation:gateLetterReveal .55s 1.4s both}
+}
+@keyframes gateLetterReveal{from{opacity:0;transform:translate3d(0,10px,0)}to{opacity:1;transform:none}}
 /* The gate opacity exposes the actual hero underneath while the foreground
    scenery scales toward the guest. All durations match the JS handoff clock. */
 .moonlight-gate.is-handoff{
   opacity:0;pointer-events:none;
-  transition:opacity 1.35s cubic-bezier(.22,.72,.2,1);
+  transition:opacity var(--gate-handoff-time,1.1s) cubic-bezier(.22,.72,.2,1);
 }
 .moonlight-gate.is-handoff .moonlight-gate__backdrop{
-  transform:scale(1.14);
+  transform:scale(1.09);
 }
 .moonlight-gate.is-handoff .moonlight-gate__celestial{
   transform:translateX(-50%) scale(1.12);
 }
 .moonlight-gate.is-handoff .moonlight-gate__reveal{
-  opacity:0;transform:scale(1.18);
-  transition:opacity 1.35s cubic-bezier(.22,.72,.2,1),
-             transform 1.35s cubic-bezier(.22,.72,.2,1);
+  opacity:0;transform:scale(1.06);
+  transition:opacity var(--gate-handoff-time,1.1s) cubic-bezier(.22,.72,.2,1),
+             transform var(--gate-handoff-time,1.1s) cubic-bezier(.22,.72,.2,1);
   transition-delay:0s;
 }
 .moonlight-gate.is-handoff .moonlight-gate__scene{
@@ -1332,9 +1360,9 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   transition:opacity .65s ease;
 }
 html.wax-pending .hero{
-  opacity:0;transform:scale(1.08);
-  transition:opacity 1.35s cubic-bezier(.22,.72,.2,1),
-             transform 1.35s cubic-bezier(.22,.72,.2,1);
+  opacity:0;transform:scale(1.035);
+  transition:opacity var(--gate-handoff-time,1.1s) cubic-bezier(.22,.72,.2,1),
+             transform var(--gate-handoff-time,1.1s) cubic-bezier(.22,.72,.2,1);
 }
 html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
 /* A transparent wash bridges the portal glow and the real photograph.
@@ -1345,7 +1373,7 @@ html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
 }
 
 @media(prefers-reduced-motion:no-preference){
-  html.gate-hero-revealing .hero-arrival-light{animation:heroArrivalLight 1.35s ease-out both}
+  html.gate-hero-revealing .hero-arrival-light{animation:heroArrivalLight var(--gate-handoff-time,1.1s) ease-out both}
   html.wax-pending.gate-hero-revealing .hero{will-change:transform,opacity}
 }
 @keyframes heroArrivalLight{

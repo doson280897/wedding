@@ -205,3 +205,7 @@ CI tự chạy smoke trên desktop Chromium, Android Chromium, iPhone WebKit và
 Bấm **Lưu vào lịch** để chọn sự kiện lễ/tiệc, sau đó mở Google Calendar, Outlook.com hoặc tải tệp `.ics` cho ứng dụng lịch trên máy. Ứng dụng phù hợp với hệ điều hành nằm đầu, các lựa chọn còn lại thu trong **Ứng dụng khác** (mặc định đóng). Thiết bị Apple gợi ý Apple Calendar, Android gợi ý Google Calendar, Windows gợi ý Outlook.com; đây là gợi ý theo thiết bị, không phải phát hiện app đã cài. Nếu trình duyệt chia sẻ được tệp lịch, có thêm nút mở bảng chọn ứng dụng của hệ điều hành. Khách tự xem và xác nhận lưu; thiệp không tự thêm sự kiện vào tài khoản. Nút tải cả lễ và tiệc vẫn giữ hai sự kiện riêng với đúng ngày giờ/địa điểm từ `wedding-info.js`. Chế độ một tiệc chỉ có một sự kiện. Bảng chọn dùng chung ngôn ngữ VN/EN.
 
 Hai nút **Xem địa điểm / Lưu vào lịch** trong thẻ tiệc dùng hai cột bằng nhau, cùng chiều cao và khoảng cách riêng; biểu tượng SVG dùng chung nét, không phụ thuộc emoji của thiết bị.
+
+### Nhịp mở cổng
+
+Cổng mở khoảng 6,5 giây: mở khóa → ánh vàng ở khe cửa và viền cánh → hai cánh mở lệch nhẹ 60 ms → tên và lời mời hiện lần lượt → hòa vào hero. Các mốc chính nằm ở `GATE_*_MS` trong `script.js`; thời lượng CSS nhận cùng giá trị qua biến `--gate-*-time`. Chế độ giảm chuyển động vẫn giữ lời mời tĩnh khoảng 2,2 giây.

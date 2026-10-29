@@ -196,14 +196,18 @@
   };
   // Enjoy the names and full-screen shooting stars after the doors settle,
   // then crossfade the night sky and the real hero together.
-  const GATE_UNLOCK_MS = 1600;
-  const GATE_AWAKEN_MS = 240;
-  const GATE_DOOR_MS = 3200;
-  const GATE_REVEAL_BEAT_MS = 2200;
-  const GATE_HANDOFF_MS = 1350;
+  const GATE_UNLOCK_MS = 1400;
+  const GATE_AWAKEN_MS = 180;
+  const GATE_DOOR_MS = 2400;
+  const GATE_REVEAL_BEAT_MS = 1400;
+  const GATE_HANDOFF_MS = 1100;
+  // CSS and the fallback timers share one clock.
+  for (const [name, time] of [["unlock", GATE_UNLOCK_MS], ["door", GATE_DOOR_MS], ["handoff", GATE_HANDOFF_MS]]) {
+    document.documentElement.style.setProperty("--gate-" + name + "-time", time + "ms");
+  }
   let gateOpening = false;
   let doorSettled = false;
-  const leftGateDoor = moonlightGate?.querySelector(".moonlight-gate__door--left");
+  const lastGateDoor = moonlightGate?.querySelector(".moonlight-gate__door--right");
   // Create a fixed, sparse arrangement only on interaction; no continuous
   // DOM allocation or canvas render loop during the cinematic intro.
   const spawnGateSparkles = () => {
@@ -250,8 +254,8 @@
     if (!ctx) return;
     stopGateMeteors();
     const tracks = [
-      { from:[1.03,-.23], to:[-.31,1.27], delay:450, duration:3500, strength:1 },
-      { from:[1.13,-.25], to:[-.22,1.28], delay:1350, duration:3650, strength:.82 }
+      { from:[1.03,-.23], to:[-.31,1.27], delay:180, duration:2650, strength:1 },
+      { from:[1.13,-.25], to:[-.22,1.28], delay:780, duration:2750, strength:.82 }
     ];
     const start = performance.now();
     let width = 0, height = 0, density = 0;
@@ -337,7 +341,7 @@
         ctx.fillRect(hx - 19, hy - 19, 38, 38);
         ctx.restore();
       });
-      if (elapsed < 5150) meteorFrame = requestAnimationFrame(render);
+      if (elapsed < 3650) meteorFrame = requestAnimationFrame(render);
     };
     meteorFrame = requestAnimationFrame(render);
   };
@@ -363,7 +367,7 @@
       introSound.pause();
       try { introSound.currentTime = 0; } catch (_) {}
     }
-    leftGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
+    lastGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.hidden = true;
     moonlightGate.classList.remove(
       "is-unlocking", "is-awakening", "is-opening", "is-opened", "is-handoff", "is-leaving"
@@ -393,7 +397,7 @@
     handoffStarted = true;
     // A bounded wait avoids revealing undecoded pixels on slower phones.
     // The open sky stays visible and animated throughout this short wait.
-    await Promise.race([heroPreparation, new Promise(resolve => scheduleGate(resolve, 650))]);
+    await Promise.race([heroPreparation, new Promise(resolve => scheduleGate(resolve, 450))]);
     if (moonlightGate.hidden) return;
     document.documentElement.classList.add("gate-hero-revealing");
     if (reducedGateMotion) {
@@ -405,19 +409,19 @@
     moonlightGate.classList.add("is-handoff");
     // Bring the lettering in once the gate has begun to dissolve, instead
     // of spending its entire entrance animation behind the opaque scenery.
-    scheduleGate(() => document.documentElement.classList.add("cinematic-entered"), 420);
+    scheduleGate(() => document.documentElement.classList.add("cinematic-entered"), 280);
     scheduleGate(completeMoonlightGate, GATE_HANDOFF_MS);
   };
   const settleOpenDoor = () => {
     if (doorSettled || !moonlightGate || moonlightGate.hidden) return;
     doorSettled = true;
-    leftGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
+    lastGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.classList.add("is-opened");
     // Hold the opened sky until both shooting stars travel off-screen.
     scheduleGate(finishMoonlightGate, GATE_REVEAL_BEAT_MS);
   };
   function onDoorAnimationEnd(event) {
-    if (event.target === leftGateDoor && event.animationName === "gateDoorOpenLeft") {
+    if (event.target === lastGateDoor && event.animationName === "gateDoorOpenRight") {
       settleOpenDoor();
     }
   }
@@ -431,7 +435,7 @@
     if (reducedGateMotion) {
       // Keep the invitation readable even when decorative motion is disabled.
       moonlightGate.classList.add("is-opened");
-      scheduleGate(finishMoonlightGate, GATE_REVEAL_BEAT_MS);
+      scheduleGate(finishMoonlightGate, 2200);
       return;
     }
 
@@ -446,7 +450,7 @@
         if (moonlightGate.hidden) return;
         // Match the two-stage hinge's actual CSS animation end; retain the
         // time fallback for browsers which suppress animationend.
-        leftGateDoor?.addEventListener("animationend", onDoorAnimationEnd);
+        lastGateDoor?.addEventListener("animationend", onDoorAnimationEnd);
         moonlightGate.classList.add("is-opening");
         startGateMeteors();
         scheduleGate(settleOpenDoor, GATE_DOOR_MS + 180);
