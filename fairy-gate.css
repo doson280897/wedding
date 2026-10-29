@@ -37,10 +37,10 @@
 .fairy-star--four{left:42%;top:79%}
 @media(prefers-reduced-motion:no-preference){
  .moonlight-gate:not([hidden]) #waxOpenButton::after{animation:fairyLockHighlight 3.2s ease-in-out infinite}
- .moonlight-gate:not([hidden]) .fairy-star{animation:gateMoonTwinkle 3.4s ease-in-out infinite}
- .moonlight-gate .fairy-star--two{animation-delay:-1.2s}
- .moonlight-gate .fairy-star--three{animation-delay:-2.4s}
- .moonlight-gate .fairy-star--four{animation-delay:-.6s}
+ .moonlight-gate:not([hidden]) .fairy-star{animation:gateMoonTwinkle 3.4s ease-in-out var(--twinkle-delay,0s) infinite}
+ .moonlight-gate .fairy-star--two{--twinkle-delay:-1.2s}
+ .moonlight-gate .fairy-star--three{--twinkle-delay:-2.4s}
+ .moonlight-gate .fairy-star--four{--twinkle-delay:-.6s}
  .moonlight-gate.is-unlocking #waxOpenButton::after{animation:fairyLockAwaken var(--gate-unlock-time,1.4s) ease-out both}
 }
 @keyframes fairyLockHighlight{0%,100%{opacity:.12;transform:scale(.88)}50%{opacity:.7;transform:scale(1.12)}}

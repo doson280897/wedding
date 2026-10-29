@@ -1084,6 +1084,7 @@ test("gate ornaments keep captions clear, pause in background and stop after ent
   const gate = page.locator("#moonlightGate");
   const ornaments = await page.evaluate(() => ({
     sun:getComputedStyle(document.querySelector(".moonlight-gate__orbit--sun"),"::after").animationName,
+    lock:getComputedStyle(document.querySelector("#waxOpenButton"),"::after").animationName,
     rays:getComputedStyle(document.querySelector(".fairy-star")).animationName,
     delays:[...document.querySelectorAll(".fairy-star")].map(node => getComputedStyle(node).animationDelay),
     captions:[...document.querySelectorAll(".moonlight-gate__top-caption,.moonlight-gate__bottom-caption")].map(node => {
@@ -1094,6 +1095,7 @@ test("gate ornaments keep captions clear, pause in background and stop after ent
     width:innerWidth
   }));
   expect(ornaments.sun).toBe("gateSunBreath");
+  expect(ornaments.lock).toBe("fairyLockHighlight");
   expect(ornaments.rays).toBe("gateMoonTwinkle");
   expect(ornaments.delays).toHaveLength(4);
   expect(new Set(ornaments.delays).size).toBe(4);
