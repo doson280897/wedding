@@ -144,27 +144,25 @@
  .moonlight-gate__greeting{gap:6px;transform:none}
 }
 
-/* Static scenery fills the space around the portrait artwork on every ratio.
-   Small gradients add starlight without extra images, blur or animation loops. */
-.moonlight-gate__scene::before{
- content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+/* Blend the artwork into the surrounding night instead of boxing it in.
+   The static edge fade leaves the arch, hinges and lock fully opaque. */
+.moonlight-gate__scene::before,.moonlight-gate__scene::after{content:none}
+.moonlight-gate__scene>.moonlight-gate__backdrop{
  background:
-  radial-gradient(circle at 7% 19%,#f6dfaecc 0 1px,transparent 2px),
-  radial-gradient(circle at 18% 42%,#d3c2a780 0 1px,transparent 2px),
-  radial-gradient(circle at 8% 72%,#efd6a780 0 1px,transparent 2px),
-  radial-gradient(circle at 27% 12%,#f6dfae99 0 1px,transparent 2px),
-  radial-gradient(circle at 91% 24%,#f6dfaecc 0 1px,transparent 2px),
-  radial-gradient(circle at 80% 49%,#d3c2a780 0 1px,transparent 2px),
-  radial-gradient(circle at 93% 79%,#efd6a799 0 1px,transparent 2px),
-  radial-gradient(circle at 71% 9%,#f6dfae99 0 1px,transparent 2px),
-  radial-gradient(ellipse at 0% 65%,#b58a4926,transparent 45%),
-  radial-gradient(ellipse at 100% 35%,#547c9638,transparent 45%),
-  radial-gradient(ellipse at 50% 100%,#c79d5426,transparent 55%);
+  radial-gradient(ellipse at 50% 85%,#4c3b292e,transparent 55%),
+  linear-gradient(#0a101d,#101b27 55%,#141a20);
 }
-.moonlight-gate__scene::after{
- content:"";position:absolute;inset:clamp(12px,2.5vw,36px);
- z-index:1;pointer-events:none;border:1px solid #d4b78026;
- border-radius:3px;
+.fairy-artboard{
+ -webkit-mask-image:linear-gradient(to bottom,transparent,#000 8%,#000 92%,transparent);
+ mask-image:linear-gradient(to bottom,transparent,#000 8%,#000 92%,transparent);
+ -webkit-mask-size:100% 100%;mask-size:100% 100%;
+ -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+}
+@media(min-aspect-ratio:2/3){
+ .fairy-artboard{
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent);
+  mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent);
+ }
 }
 /* Rasterize the static frame once; reserve moving layers for the opening only. */
 .moonlight-gate{perspective:none}
