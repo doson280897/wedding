@@ -103,3 +103,6 @@
 @media(prefers-reduced-motion:reduce){
  .moonlight-gate.is-opened .fairy-artboard,.moonlight-gate.is-opened .fairy-surround{visibility:hidden}
 }
+/* Keep the final invitation beat stable even if a slow tab drops animation frames. */
+.moonlight-gate.is-opened .fairy-artboard{animation:none;transform:translate3d(0,-2%,0) scale(1.85);opacity:0}
+.moonlight-gate.is-opened .moonlight-gate__greeting{animation:none;opacity:1;transform:none}

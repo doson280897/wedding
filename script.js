@@ -199,7 +199,7 @@
       introSound.play().catch(() => {}); // A failed SFX must not block the gate.
     } catch (_) {}
   };
-  // Enjoy the names and full-screen shooting stars after the doors settle,
+  // Hold the standalone invitation after passing through the gate,
   // then crossfade the night sky and the real hero together.
   const GATE_UNLOCK_MS = 1400;
   const GATE_AWAKEN_MS = 180;
