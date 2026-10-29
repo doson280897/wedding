@@ -204,7 +204,7 @@
   const GATE_UNLOCK_MS = 1400;
   const GATE_AWAKEN_MS = 180;
   const GATE_DOOR_MS = 2400;
-  const GATE_REVEAL_BEAT_MS = 2800;
+  const GATE_REVEAL_BEAT_MS = 2000;
   const GATE_HANDOFF_MS = 1100;
   // CSS and the fallback timers share one clock.
   for (const [name, time] of [["unlock", GATE_UNLOCK_MS], ["door", GATE_DOOR_MS], ["handoff", GATE_HANDOFF_MS]]) {
@@ -453,7 +453,7 @@
     if (reducedGateMotion) {
       // Keep the invitation readable even when decorative motion is disabled.
       moonlightGate.classList.add("is-opened");
-      scheduleGate(finishMoonlightGate, 2200);
+      scheduleGate(finishMoonlightGate, GATE_REVEAL_BEAT_MS);
       return;
     }
 

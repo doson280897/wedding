@@ -107,13 +107,65 @@
 .moonlight-gate.is-opened .moonlight-gate__greeting{animation:none;opacity:1;transform:none}
 
 /* Both text groups share the same disappearance clock on their reveal parent. */
-.moonlight-gate__reveal-heading{position:absolute;left:50%;top:29%;transform:translate(-50%,-50%);width:min(85vw,760px);display:flex;flex-direction:column;align-items:center;opacity:1;transition:opacity .6s ease,transform .6s ease}
-.moonlight-gate__reveal-heading .moonlight-gate__reveal-names{font-size:clamp(32px,7vw,56px);margin:14px auto}
-.moonlight-gate__reveal-heading .moonlight-gate__reveal-overline,.moonlight-gate__reveal-heading .moonlight-gate__reveal-subtitle{font-size:clamp(9px,1.5vw,12px)}
+.moonlight-gate__reveal{gap:clamp(24px,4svh,44px);padding:24px max(20px,env(safe-area-inset-right)) 24px max(20px,env(safe-area-inset-left))}
+.moonlight-gate__reveal-heading{
+ position:static;left:auto;top:auto;transform:none;width:min(85vw,760px);
+ display:flex;flex-direction:column;align-items:center;opacity:1;
+}
+.moonlight-gate__reveal-heading .moonlight-gate__reveal-overline{
+ font:500 clamp(9px,1.4vw,12px)/1.6 Montserrat,sans-serif;
+ letter-spacing:.22em;color:#d8bc8d;
+}
+.moonlight-gate__reveal-heading .moonlight-gate__reveal-names{
+ font:italic 500 clamp(42px,7.5vw,76px)/1.12 'Cormorant Garamond',Georgia,serif;
+ letter-spacing:.01em;margin:14px auto 18px;color:#ebd1a3;
+}
+.moonlight-gate__reveal-heading .moonlight-gate__reveal-rule{width:72px;margin-bottom:16px}
+.moonlight-gate__reveal-heading .moonlight-gate__reveal-subtitle{
+ font:italic 400 clamp(18px,2.8vw,27px)/1.4 'Cormorant Garamond',Georgia,serif;
+ letter-spacing:.025em;color:#f0e6d6;
+}
+.moonlight-gate__greeting{margin:0;gap:10px;width:min(85vw,680px)}
+.moonlight-gate__recipient-label{
+ font:500 clamp(10px,1.45vw,13px)/1.7 Montserrat,sans-serif;
+ letter-spacing:.12em;color:#dac39e;text-wrap:balance;
+}
+.moonlight-gate__recipient-name{
+ font:600 clamp(30px,5.2vw,52px)/1.2 'Cormorant Garamond',Georgia,serif;
+ letter-spacing:.01em;color:#ffe4b5;text-wrap:balance;
+}
 .moonlight-gate.is-opened:not(.is-handoff) .moonlight-gate__reveal{opacity:1;transform:scale(1);transition:none}
-@media(max-height:500px){.moonlight-gate__reveal-heading{top:25%}.moonlight-gate__reveal-heading .moonlight-gate__reveal-names{font-size:28px;margin:5px auto}.moonlight-gate__reveal-heading .moonlight-gate__reveal-rule{margin-bottom:6px}.moonlight-gate__greeting{transform:translateY(30px)}}
+@media(max-height:500px){
+ .moonlight-gate__reveal{gap:16px;padding-block:16px}
+ .moonlight-gate__reveal-heading .moonlight-gate__reveal-names{font-size:34px;margin:6px auto 8px}
+ .moonlight-gate__reveal-heading .moonlight-gate__reveal-rule{margin-bottom:8px}
+ .moonlight-gate__reveal-heading .moonlight-gate__reveal-subtitle{font-size:18px}
+ .moonlight-gate__recipient-name{font-size:28px}
+ .moonlight-gate__greeting{gap:6px;transform:none}
+}
 
-
+/* Static scenery fills the space around the portrait artwork on every ratio.
+   Small gradients add starlight without extra images, blur or animation loops. */
+.moonlight-gate__scene::before{
+ content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+ background:
+  radial-gradient(circle at 7% 19%,#f6dfaecc 0 1px,transparent 2px),
+  radial-gradient(circle at 18% 42%,#d3c2a780 0 1px,transparent 2px),
+  radial-gradient(circle at 8% 72%,#efd6a780 0 1px,transparent 2px),
+  radial-gradient(circle at 27% 12%,#f6dfae99 0 1px,transparent 2px),
+  radial-gradient(circle at 91% 24%,#f6dfaecc 0 1px,transparent 2px),
+  radial-gradient(circle at 80% 49%,#d3c2a780 0 1px,transparent 2px),
+  radial-gradient(circle at 93% 79%,#efd6a799 0 1px,transparent 2px),
+  radial-gradient(circle at 71% 9%,#f6dfae99 0 1px,transparent 2px),
+  radial-gradient(ellipse at 0% 65%,#b58a4926,transparent 45%),
+  radial-gradient(ellipse at 100% 35%,#547c9638,transparent 45%),
+  radial-gradient(ellipse at 50% 100%,#c79d5426,transparent 55%);
+}
+.moonlight-gate__scene::after{
+ content:"";position:absolute;inset:clamp(12px,2.5vw,36px);
+ z-index:1;pointer-events:none;border:1px solid #d4b78026;
+ border-radius:3px;
+}
 /* Rasterize the static frame once; reserve moving layers for the opening only. */
 .moonlight-gate{perspective:none}
 .moonlight-gate__door{will-change:auto;transform-style:flat}
