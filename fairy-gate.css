@@ -1,7 +1,7 @@
 /* Shared artwork coordinates keep the fixed arch and hinged leaves aligned. */
 .moonlight-gate__door--left .moonlight-gate__door-face{clip-path:polygon(50.0000% 8.6589%,47.7174% 8.6914%,45.4863% 8.8039%,43.3105% 8.9942%,41.1938% 9.2602%,39.1397% 9.5997%,37.1521% 10.0108%,35.2347% 10.4912%,33.3912% 11.0388%,31.6254% 11.6515%,29.9409% 12.3272%,28.3416% 13.0637%,26.8311% 13.8590%,25.4131% 14.7110%,24.0915% 15.6174%,22.8699% 16.5763%,21.7520% 17.5854%,20.7417% 18.6426%,19.8425% 19.7459%,19.0583% 20.8931%,18.3928% 22.0821%,17.8497% 23.3107%,17.4328% 24.5769%,17.1457% 25.8786%,16.9922% 27.2135%,16.9922% 87.1094%,50% 87.1094%)}
 .moonlight-gate__door--right .moonlight-gate__door-face{clip-path:polygon(50.0000% 8.6589%,52.2826% 8.6914%,54.5137% 8.8039%,56.6895% 8.9942%,58.8062% 9.2602%,60.8603% 9.5997%,62.8479% 10.0108%,64.7653% 10.4912%,66.6088% 11.0388%,68.3746% 11.6515%,70.0591% 12.3272%,71.6584% 13.0637%,73.1689% 13.8590%,74.5869% 14.7110%,75.9085% 15.6174%,77.1301% 16.5763%,78.2480% 17.5854%,79.2583% 18.6426%,80.1575% 19.7459%,80.9417% 20.8931%,81.6072% 22.0821%,82.1503% 23.3107%,82.5672% 24.5769%,82.8543% 25.8786%,83.0078% 27.2135%,83.0078% 87.1094%,50% 87.1094%)}
-.fairy-frame{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201536%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M0%200H1024V1536H0Z%20M174%201338%20L174%20418%20C181%20252%20323%20132%20512%20133%20C701%20132%20843%20252%20850%20418%20L850%201338%20Z%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201536%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M0%200H1024V1536H0Z%20M174%201338%20L174%20418%20C181%20252%20323%20132%20512%20133%20C701%20132%20843%20252%20850%20418%20L850%201338%20Z%22%2F%3E%3C%2Fsvg%3E")}
+.fairy-frame{--frame-cutout:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201536%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M0%200H1024V1536H0Z%20M174%201338%20L174%20418%20C181%20252%20323%20132%20512%20133%20C701%20132%20843%20252%20850%20418%20L850%201338%20Z%22%2F%3E%3C%2Fsvg%3E")}
 
 .moonlight-gate__scene{display:grid;place-items:center;perspective:none;transform-style:flat;background:#080f1c}
 .moonlight-gate__scene{background:radial-gradient(ellipse at 50% 45%,#172a3e,#080f1c 78%)}
@@ -152,18 +152,25 @@
   radial-gradient(ellipse at 50% 85%,#4c3b292e,transparent 55%),
   linear-gradient(#0a101d,#101b27 55%,#141a20);
 }
-.fairy-artboard{
- -webkit-mask-image:linear-gradient(to bottom,transparent,#000 8%,#000 92%,transparent);
- mask-image:linear-gradient(to bottom,transparent,#000 8%,#000 92%,transparent);
+.fairy-frame{
+ --edge-fade:linear-gradient(to bottom,transparent,#000 8%,#000 92%,transparent);
+ -webkit-mask-image:var(--frame-cutout),var(--edge-fade);
+ mask-image:var(--frame-cutout),var(--edge-fade);
+ -webkit-mask-composite:source-in;
+ mask-composite:intersect;
  -webkit-mask-size:100% 100%;mask-size:100% 100%;
  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
 }
 @media(min-aspect-ratio:2/3){
- .fairy-artboard{
-  -webkit-mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent);
-  mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent);
+ .fairy-frame{
+  --edge-fade:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent);
  }
 }
+/* Keep edge masking off the perspective parent: only the static frame
+   needs feathering; the door polygons already sit inside the opaque area.
+   Prepare the zoom surface during the lock beat, before its first moving frame. */
+.moonlight-gate:is(.is-unlocking,.is-awakening,.is-opening) .fairy-artboard{will-change:transform,opacity}
+.moonlight-gate.is-opened .fairy-artboard{will-change:auto}
 /* Rasterize the static frame once; reserve moving layers for the opening only. */
 .moonlight-gate{perspective:none}
 .moonlight-gate__door{will-change:auto;transform-style:flat}
