@@ -506,6 +506,27 @@
   const musicBubblePause = document.getElementById("musicBubblePause");
   const musicBubbleStop = document.getElementById("musicBubbleStop");
   const YOUTUBE_MUSIC_ID = partyInfo(selectedParty || "groom").music.youtubeId;
+  // Embedded chat browsers can force YouTube into their native video overlay,
+  // ignoring playsinline. Never start a video player there from the gate tap.
+  const musicUserAgent = navigator.userAgent || "";
+  const embeddedMusicBrowser = /FBAN|FBAV|FB_IAB|Instagram|Zalo|Line\/|MicroMessenger|Telegram|TikTok|Bytedance|; wv\)/i.test(musicUserAgent) ||
+    (/Android/i.test(musicUserAgent) && /Version\/4\.0/i.test(musicUserAgent)) ||
+    (/iPhone|iPad|iPod/i.test(musicUserAgent) &&
+      !/Safari\/|CriOS\/|FxiOS\/|EdgiOS\//i.test(musicUserAgent));
+  const explainEmbeddedMusic = () => {
+    let note = document.getElementById("embeddedMusicNotice");
+    if (!note && musicButton) {
+      note = document.createElement("p");
+      note.id = "embeddedMusicNotice";
+      note.setAttribute("role", "status");
+      note.style.cssText = "max-width:280px;margin:10px 0;font-size:12px;line-height:1.6;color:#ead3aa;";
+      musicButton.insertAdjacentElement("afterend", note);
+    }
+    if (note) note.textContent = i18n?.getLocale() === "en"
+      ? "To hear the music, open this invitation in Safari or Chrome using this app's menu."
+      : "Để nghe nhạc, hãy chọn Mở bằng Safari hoặc Chrome trong menu của ứng dụng chat.";
+  };
+
   let youtubePlayer = null;
   let youtubePlayerReady = false;
   let youtubePlayerPromise = null;
@@ -667,6 +688,7 @@
 
   const requestMusicPlayback = () => {
     if (!selectedParty || musicStarting || musicPlaying) return;
+    if (embeddedMusicBrowser) { explainEmbeddedMusic(); return; }
     const requestId = ++musicRequestId;
     clearMusicWait();
     musicEnabled = true;
@@ -908,7 +930,7 @@
   // the seal starts audible music; the transition to Hero never touches the
   // player's play/pause/volume state. iOS still requires the iframe to have
   // finished loading before that first gesture; manual retry remains possible.
-  if (selectedParty && !linkToolInitial) {
+  if (selectedParty && !linkToolInitial && !embeddedMusicBrowser) {
     initYouTubeMusicPlayer().catch(() => {});
     waxOpenButton?.addEventListener("click", requestMusicPlayback, { once:true });
     document.addEventListener("wedding:waxopen", setMusicUI, { once:true });
