@@ -47,9 +47,26 @@ test("one shared language control, in-page generator, back navigation @smoke @co
     "lang=en",
   );
 
+  const englishInvitation = await page.locator("#linkToolPreview").getAttribute("href");
   await page.locator("#linkToolBack").click();
   await expect(page.locator("#linkToolScreen")).toBeHidden();
   await expect(page.locator("#partySelector")).toBeVisible();
+
+  // Follow the generated URL as a recipient: its language must reach the gate
+  // and every invitation section, not just the generator's preview text.
+  await page.goto(englishInvitation, { waitUntil:"domcontentloaded" });
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator(".moonlight-gate__reveal-overline")).toHaveText("OUR WEDDING DAY");
+  await expect(page.locator(".moonlight-gate__reveal-subtitle")).toHaveText("TOGETHER · FOREVER");
+  await expect(page.locator("#gateGuestLabel")).toHaveText("Cordially inviting");
+  await expect(page.locator("#gateGuestName")).toHaveText("Minh & Lan");
+  await expect(page.locator("#waxOpenButton")).toHaveAttribute("aria-label", "Tap the lock to open the invitation");
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
+  await expect(page.locator("#heroCeremonyLabel")).toHaveText("— GROOM'S CEREMONY —");
+  await expect(page.locator('#family [data-i18n="family.title"]')).toHaveText("With joy, our families announce");
+  await expect(page.locator('#events [data-i18n="events.title"]')).toHaveText("Wedding details");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
   expect(errors).toEqual([]);
 });
 
