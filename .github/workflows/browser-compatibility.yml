@@ -106,7 +106,7 @@ jobs:
           exit 1
 
       - name: Verify adaptive typography and viewport changes first
-        run: npx playwright test tests/compatibility.spec.cjs --grep "responsive typography fits|adaptive layout survives" --reporter=line --workers=2
+        run: npx playwright test tests/compatibility.spec.cjs --grep "responsive typography fits|adaptive layout survives|story last row centres" --reporter=line --workers=2
         env:
           CI: "true"
 

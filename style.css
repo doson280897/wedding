@@ -1523,3 +1523,21 @@ html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
 
 /* Avoid WebView font inflation after rotation; browser/user zoom still works. */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+
+/* Photo and shade share one real box, including min-height in landscape. */
+.hero-media{position:absolute;inset:0;overflow:hidden}
+.hero-media .hero-shade{inset:0;height:100%}
+@media(max-width:900px){.hero-media{position:relative;inset:auto}}
+
+/* Centre incomplete story rows using tracks derived from card space. */
+@supports(container-type:inline-size){
+  .promise-grid{grid-template-columns:repeat(12,minmax(0,1fr));max-width:none}
+  .promise-card{grid-column:1 / -1}
+  @container story-layout (min-width:31.75rem){
+    .promise-card{grid-column:span 6}
+    .promise-card:last-child:nth-child(odd){grid-column:4 / span 6}
+  }
+  @container story-layout (min-width:48.5rem){
+    .promise-card,.promise-card:last-child:nth-child(odd){grid-column:span 4}
+  }
+}

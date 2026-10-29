@@ -1344,3 +1344,34 @@ test("adaptive layout survives rotation and interrupted album dragging @smoke @c
   expect(await page.evaluate(()=>window.__plays)).toBe(1);
   await expect(page.locator('#musicBubble')).toHaveAttribute('data-music-state','playing');
 });
+
+
+test("story last row centres and hero shade follows the photo after rotation @smoke @core", async ({page}) => {
+  test.setTimeout(60000);
+  await page.emulateMedia({reducedMotion:"reduce"});
+  await page.goto(base+"/index.html?party=bride",{waitUntil:"domcontentloaded"});
+  await page.locator('#waxOpenButton').click();
+  await expect(page.locator('#moonlightGate')).toBeHidden();
+  let twoColumnChecks=0;
+  for(const size of [{width:393,height:850},{width:621,height:700},{width:844,height:390},{width:1024,height:768},{width:1366,height:768}]) {
+    await page.setViewportSize(size);
+    await page.locator('.hero-media').scrollIntoViewIfNeeded();
+    await expect.poll(()=>page.locator('.hero-media').evaluate(node=>{
+      const photo=node.querySelector('.hero-photo'),shade=node.querySelector('.hero-shade');
+      return Math.max(Math.abs(photo.offsetHeight-shade.offsetHeight),Math.abs(photo.offsetHeight-node.clientHeight));
+    })).toBeLessThanOrEqual(1);
+    await page.locator('.promise-grid').scrollIntoViewIfNeeded();
+    const geometry=await page.locator('.promise-grid').evaluate(node=>{
+      const g=node.getBoundingClientRect(),cards=[...node.children].map(n=>n.getBoundingClientRect());
+      const [a,b,c]=cards;
+      return {twoColumns:Math.abs(a.left-b.left)>10&&c.top>Math.max(a.top,b.top)+Math.min(a.height,b.height)/2,
+        center:Math.abs((c.left+c.right-g.left-g.right)/2),widthDiff:Math.abs(a.width-c.width)};
+    });
+    if(geometry.twoColumns){
+      twoColumnChecks++;
+      expect(geometry.center).toBeLessThanOrEqual(2);
+      expect(geometry.widthDiff).toBeLessThanOrEqual(2);
+    }
+  }
+  expect(twoColumnChecks).toBeGreaterThan(0);
+});
