@@ -894,6 +894,10 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await expect(page.locator("#calendarDialog")).toBeVisible();
   await expect(page.locator("#calendarEventField")).toBeHidden();
   await expect(page.locator("#calendarAll")).toBeHidden();
+  // Android recommends Google; its native file option is inside Other apps.
+  if (await page.locator("#calendarOtherOptions #calendarNative").count()) {
+    await page.locator("#calendarOther summary").click();
+  }
   const downloadPromise = page.waitForEvent("download");
   await page.locator("#calendarNative").click();
   const download = await downloadPromise;
