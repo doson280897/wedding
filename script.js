@@ -225,7 +225,7 @@
       [74,81],[67,23],[95,59],[70,11],[39,77],[61,74]
     ];
     const nodes = document.createDocumentFragment();
-    positions.forEach(([x,y],index) => {
+    positions.slice(0, matchMedia("(pointer: coarse)").matches ? 8 : 12).forEach(([x,y],index) => {
       const star = document.createElement("i");
       star.className = "moonlight-gate__spark";
       star.style.setProperty("--sx", x + "%");
@@ -263,12 +263,14 @@
       { from:[1.13,-.25], to:[-.22,1.28], delay:780, duration:2750, strength:.82 }
     ];
     const start = performance.now();
+    let lastPaint = -Infinity;
     let width = 0, height = 0, density = 0;
     const fit = () => {
       const rect = meteorCanvas.getBoundingClientRect();
       const w = Math.max(1, Math.round(rect.width));
       const h = Math.max(1, Math.round(rect.height));
-      const d = Math.min(window.devicePixelRatio || 1, 1.5);
+      // Decorative trails need no high-DPI full-screen backing store.
+      const d = Math.min(1, 960 / w, 960 / h);
       if (w === width && h === height && d === density) return;
       width = w; height = h; density = d;
       meteorCanvas.width = Math.round(width * density);
@@ -283,7 +285,13 @@
     }
     const render = timestamp => {
       meteorFrame = 0;
-      if (moonlightGate.hidden) return;
+      if (moonlightGate.hidden || doorSettled || document.hidden) return;
+      // Cap canvas work at 30fps independently of 60/120Hz door animation.
+      if (timestamp - lastPaint < 32) {
+        meteorFrame = requestAnimationFrame(render);
+        return;
+      }
+      lastPaint = timestamp;
       if (!meteorResizeObserver) fit();
       ctx.clearRect(0, 0, width, height);
       const elapsed = timestamp - start;
@@ -324,7 +332,7 @@
         // A few subtle fragments remain at places the star passed earlier.
         const distance = Math.hypot(dx,dy) || 1;
         const sideX = -dy / distance, sideY = dx / distance;
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < (mobile ? 3 : 5); i++) {
           const age = .016 + i * .017;
           if (t <= age) continue;
           const offset = Math.sin((i + index * 11) * 8.7) * (1.8 + i * .45);
@@ -386,7 +394,10 @@
   // Warm the exact hero asset during the existing door sequence. Decoding
   // runs asynchronously and never postpones the guest's opening gesture.
   let heroPreparation = Promise.resolve();
+  let heroPrepared = false;
   const prepareHero = () => {
+    if (heroPrepared) return;
+    heroPrepared = true;
     const src = partyInfo(selectedParty)?.images?.hero;
     if (!src) return;
     const image = new Image();
@@ -420,10 +431,10 @@
   const settleOpenDoor = () => {
     if (doorSettled || !moonlightGate || moonlightGate.hidden) return;
     doorSettled = true;
+    stopGateMeteors();
     lastGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.classList.add("is-opened");
-    // Read the wedding introduction first, then leave the guest invitation alone.
-    scheduleGate(() => moonlightGate.classList.add("is-inviting"), 800);
+    // Keep the introduction and guest name together until the shared handoff.
     scheduleGate(finishMoonlightGate, GATE_REVEAL_BEAT_MS);
   };
   function onDoorAnimationEnd(event) {
@@ -440,7 +451,7 @@
     spawnGateSparkles();
     if (reducedGateMotion) {
       // Keep the invitation readable even when decorative motion is disabled.
-      moonlightGate.classList.add("is-opened", "is-inviting");
+      moonlightGate.classList.add("is-opened");
       scheduleGate(finishMoonlightGate, 2200);
       return;
     }
@@ -467,7 +478,11 @@
       moonlightGate.hidden = false;
       waxOpenButton.disabled = false;
       waxOpenButton.addEventListener("click", openFromWax, { once:true });
-      requestAnimationFrame(() => waxOpenButton.focus({ preventScroll:true }));
+      requestAnimationFrame(() => {
+        waxOpenButton.focus({ preventScroll:true });
+        // Leave the first gate paint free, then prepare the existing hero asset.
+        scheduleGate(prepareHero, 200);
+      });
     } else {
       moonlightGate.hidden = true;
     }
