@@ -1445,6 +1445,12 @@ html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
   }
 }
 
+/* Suspend idle sun/moon/lock effects when the tab is hidden. */
+.moonlight-gate.is-motion-paused,
+.moonlight-gate.is-motion-paused *,
+.moonlight-gate.is-motion-paused *::before,
+.moonlight-gate.is-motion-paused *::after{animation-play-state:paused!important}
+
 /* A shared engraved crest: live initials keep the ceremony's name order. */
 .wedding-crest{position:relative;display:inline-grid;grid-template-columns:1fr 1fr;place-items:center;width:78px;height:86px;border:1px solid currentColor;border-radius:48% 48% 45% 45%;color:#d7b884;font-family:'Cormorant Garamond',serif;letter-spacing:0;isolation:isolate}
 .wedding-crest:before{content:"";position:absolute;inset:5px;border:1px solid currentColor;border-radius:inherit;opacity:.45;pointer-events:none}

@@ -99,6 +99,7 @@ test("unified hub shows Settings only outside and defaults to Menu inside @smoke
 });
 
 test("music bubble waits for PLAYING and resume preserves paused time @smoke @core", async ({page}) => {
+  test.setTimeout(45000);
   await page.addInitScript(() => {
     window.YT = {
       PlayerState:{PLAYING:1,PAUSED:2,ENDED:0,BUFFERING:3},
@@ -120,6 +121,7 @@ test("music bubble waits for PLAYING and resume preserves paused time @smoke @co
           stopVideo(){options.events.onStateChange({data:0});}
         };
         window.__advanceMusic = value => {playbackTime=value;};
+        window.__musicTestEmit = data => options.events.onStateChange({data,target:player});
         queueMicrotask(()=>options.events.onReady({target:player}));
         return player;
       }
@@ -141,6 +143,17 @@ test("music bubble waits for PLAYING and resume preserves paused time @smoke @co
   await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing",{timeout:3500});
   const seek=await page.evaluate(()=>window.__seeks||[]);
   expect(seek.some(time=>Math.abs(time-83.5)<.01)).toBe(true);
+  // A connection can fail AFTER playback began, not just on the first tap.
+  await page.evaluate(() => { window.__advanceMusic(127.25); window.__musicTestEmit(3); });
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state", "starting");
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state", "paused", {timeout:12000});
+  // A late iframe callback must not resume after the watchdog has cancelled it.
+  await page.evaluate(() => window.__musicTestEmit(1));
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state", "paused");
+  await page.locator("#musicBubbleTrigger").click();
+  await page.locator("#musicBubblePause").click();
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state", "playing", {timeout:3500});
+  expect(await page.evaluate(() => (window.__seeks || []).some(time => Math.abs(time - 127.25) < .01))).toBe(true);
 });
 
 test("party link, wax gate and album lightbox interactions", async ({
@@ -428,32 +441,26 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   // out WHILE the actual hero zooms in and both layers crossfade.
   await expect(gate).toHaveClass(/is-handoff/, { timeout:4500 });
   await expect(page.locator("html")).toHaveClass(/gate-hero-revealing/);
-  const zoomConfig = await page.evaluate(() => {
-    const sky = document.querySelector(".moonlight-gate__backdrop");
-    const title = document.querySelector(".moonlight-gate__reveal");
-    const hero = document.querySelector(".hero");
-    const cover = document.getElementById("moonlightGate");
-    const rules = [...document.styleSheets].flatMap(sheet => {
-      try { return [...sheet.cssRules]; } catch (_) { return []; }
-    });
-    const getRule = selector => rules.find(rule => rule.selectorText === selector)?.cssText || "";
+  const handoff = await page.evaluate(() => {
+    const style = node => getComputedStyle(document.querySelector(node));
     return {
-      gateDuration:parseFloat(getComputedStyle(cover).transitionDuration),
-      skyRule:getRule(".moonlight-gate.is-handoff .moonlight-gate__backdrop"),
-      titleRule:getRule(".moonlight-gate.is-handoff .moonlight-gate__reveal"),
-      heroRule:getRule("html.wax-pending .hero"),
-      skyTransition:getComputedStyle(sky).transitionDuration,
-      titleTransition:getComputedStyle(title).transitionDuration,
-      heroTransition:getComputedStyle(hero).transitionDuration
+      duration:parseFloat(style("#moonlightGate").transitionDuration),
+      clock:parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--gate-handoff-time")) / 1000,
+      moving:[".moonlight-gate__backdrop", ".moonlight-gate__reveal", ".hero"].map(selector => ({
+        durations:style(selector).transitionDuration.split(",").map(Number.parseFloat),
+        properties:style(selector).transitionProperty
+      }))
     };
   });
-  expect(zoomConfig.gateDuration).toBeGreaterThanOrEqual(1.3);
-  expect(zoomConfig.skyRule).toContain("scale(1.14)");
-  expect(zoomConfig.titleRule).toContain("scale(1.18)");
-  expect(zoomConfig.heroRule).toContain("scale(1.08)");
-  expect(zoomConfig.skyTransition).toContain("1.35s");
-  expect(zoomConfig.titleTransition).toContain("1.35s");
-  expect(zoomConfig.heroTransition).toContain("1.35s");
+  // The approved faster handoff remains a real crossfade, with every moving
+  // layer on the same clock. Avoid assertions tied to obsolete CSS strings.
+  expect(handoff.duration).toBeGreaterThanOrEqual(.9);
+  expect(handoff.duration).toBeLessThanOrEqual(1.3);
+  expect(handoff.duration).toBeCloseTo(handoff.clock, 2);
+  for (const layer of handoff.moving) {
+    expect(layer.properties).toContain("transform");
+    expect(layer.durations.every(time => Math.abs(time - handoff.duration) < .02)).toBe(true);
+  }
   await expect(page.locator(".hero")).toHaveCSS("opacity","1");
   await expect(gate).toBeHidden({ timeout:16000 });
   await expect(page.locator("html")).not.toHaveClass(/wax-pending/);
@@ -1069,4 +1076,50 @@ test("calendar chooser offers matching provider drafts and files without claimin
   await expect(page.locator("#calendarOther")).toHaveJSProperty("open", false);
   await page.locator("#calendarClose").press("Escape");
   await expect(dialog).toBeHidden();
+});
+
+
+test("gate ornaments keep captions clear, pause in background and stop after entry @smoke @core", async ({page}) => {
+  await page.goto(base + "/index.html?party=groom&to=Guest", {waitUntil:"domcontentloaded"});
+  const gate = page.locator("#moonlightGate");
+  const ornaments = await page.evaluate(() => ({
+    sun:getComputedStyle(document.querySelector(".moonlight-gate__orbit--sun"),"::after").animationName,
+    rays:getComputedStyle(document.querySelector(".gate-sun-rays")).animationName,
+    delays:[...document.querySelectorAll(".gate-moon-star")].map(node => getComputedStyle(node).animationDelay),
+    captions:[...document.querySelectorAll(".moonlight-gate__top-caption,.moonlight-gate__bottom-caption")].map(node => {
+      const orbit = node.closest(".moonlight-gate__orbit");
+      const text = node.getBoundingClientRect();
+      return {gap:orbit.getBoundingClientRect().top - text.bottom, left:text.left, right:text.right};
+    }),
+    width:innerWidth
+  }));
+  expect(ornaments.sun).toBe("gateSunBreath");
+  expect(ornaments.rays).toBe("gateSunRaySway");
+  expect(ornaments.delays).toHaveLength(4);
+  expect(new Set(ornaments.delays).size).toBe(4);
+  for (const caption of ornaments.captions) {
+    expect(caption.gap).toBeGreaterThanOrEqual(8);
+    expect(caption.left).toBeGreaterThanOrEqual(0);
+    expect(caption.right).toBeLessThanOrEqual(ornaments.width);
+  }
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", {configurable:true, get:() => true});
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(page.locator(".gate-sun-rays")).toHaveCSS("animation-play-state", "paused");
+  await page.evaluate(() => {
+    delete document.hidden;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(page.locator(".gate-sun-rays")).toHaveCSS("animation-play-state", "running");
+  await page.locator("#waxOpenButton").click();
+  await expect(gate).toHaveClass(/is-opening/);
+  await expect(page.locator(".gate-sun-rays")).toHaveCSS("animation-name", "none");
+  await expect(gate).toBeHidden({timeout:16000});
+  const stopped = await page.evaluate(() => ({
+    sun:getComputedStyle(document.querySelector(".moonlight-gate__orbit--sun"),"::after").animationName,
+    stars:[...document.querySelectorAll(".gate-moon-star")].map(node => getComputedStyle(node).animationName)
+  }));
+  expect(stopped.sun).toBe("none");
+  expect(stopped.stars.every(name => name === "none")).toBe(true);
 });

@@ -114,6 +114,11 @@ jobs:
         env:
           CI: "true"
 
+      - name: Verify gate motion and stalled-music recovery first
+        run: npx playwright test tests/compatibility.spec.cjs --grep "Moonlight Gate opens|gate ornaments|music bubble waits" --reporter=line --workers=2
+        env:
+          CI: "true"
+
       - name: Test desktop functionality and targeted cross-device smoke
         run: npx playwright test tests/compatibility.spec.cjs --reporter=line --workers=2
         env:

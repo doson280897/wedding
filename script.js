@@ -178,6 +178,11 @@
   const moonlightGate = document.getElementById("moonlightGate");
   const waxOpenButton = document.getElementById("waxOpenButton");
   const reducedGateMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const updateGateVisibility = () => {
+    moonlightGate?.classList.toggle("is-motion-paused", document.hidden);
+  };
+  document.addEventListener("visibilitychange", updateGateVisibility);
+  updateGateVisibility();
   // One optional sound clip for the whole lock-to-door sequence. It starts
   // directly on the seal gesture and is independent from the YouTube iframe.
   const introSoundUrl = typeof info.site?.introSound === "string" ? info.site.introSound.trim() : "";
@@ -520,8 +525,16 @@
     setMusicUI();
   };
 
+  const rememberMusicPosition = () => {
+    try {
+      const current = youtubePlayerReady ? youtubePlayer?.getCurrentTime?.() : undefined;
+      if (Number.isFinite(current) && current > 0) musicPausePosition = current;
+    } catch (_) {}
+  };
+
   const failMusicAttempt = requestId => {
     if (!musicEnabled || requestId !== musicRequestId) return;
+    rememberMusicPosition();
     ++musicRequestId;
     clearMusicWait();
     musicWantsPlayback = false;
@@ -602,19 +615,10 @@
     } catch (_) {}
   };
 
-  const requestMusicPlayback = () => {
-    if (!selectedParty || musicStarting || musicPlaying) return;
-    const requestId = ++musicRequestId;
+  const monitorMusicWait = requestId => {
     clearMusicWait();
-    musicEnabled = true;
-    musicWantsPlayback = true;
-    musicPlaybackFailed = false;
-    musicStarting = true;
-    musicResumePending = musicHasStarted && musicPausePosition > 1;
-    setMusicUI();
-
     musicStartTimer = setTimeout(() => {
-      // Some mobile browsers block YouTube playback without sending PLAYING.
+      // Both a blocked start and a stalled rebuffer need a bounded wait.
       // Switch to a retryable paused orb instead of spinning indefinitely.
       failMusicAttempt(requestId);
     }, 10000);
@@ -632,6 +636,20 @@
         }
       } catch (_) {}
     }, 600);
+  };
+
+  const requestMusicPlayback = () => {
+    if (!selectedParty || musicStarting || musicPlaying) return;
+    const requestId = ++musicRequestId;
+    clearMusicWait();
+    musicEnabled = true;
+    musicWantsPlayback = true;
+    musicPlaybackFailed = false;
+    musicStarting = true;
+    musicResumePending = musicHasStarted && musicPausePosition > 1;
+    setMusicUI();
+
+    monitorMusicWait(requestId);
 
     const play = player => {
       if (!musicEnabled || !musicWantsPlayback || requestId !== musicRequestId) return;
@@ -666,10 +684,7 @@
     musicPlaying = false;
     musicStarting = false;
     musicPlaybackFailed = false;
-    try {
-      const current = youtubePlayerReady ? youtubePlayer?.getCurrentTime?.() : undefined;
-      if (Number.isFinite(current) && current > 0) musicPausePosition = current;
-    } catch (_) {}
+    rememberMusicPosition();
     musicResumePending = false;
     setMusicUI();
     try {
@@ -806,6 +821,9 @@
               return;
             }
             if (event.data === window.YT.PlayerState.BUFFERING && musicWantsPlayback) {
+              // PLAYING cleared the original watchdog. Re-arm once per stall,
+              // without extending the deadline on repeated BUFFERING events.
+              if (!musicStarting) monitorMusicWait(musicRequestId);
               musicPlaying = false;
               musicStarting = true;
               setMusicUI();
