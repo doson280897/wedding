@@ -802,14 +802,22 @@
         reject(new Error("YouTube player readiness timeout"));
       }, 12000);
 
+      // YT replaces its target with an iframe. Keep positioning on a
+      // permanent parent so replacement cannot expose a thumbnail in the page.
+      let container = document.getElementById("youtubeWeddingMusicContainer");
+      if (!container) {
+        container = document.createElement("div");
+        container.id = "youtubeWeddingMusicContainer";
+        container.setAttribute("aria-hidden", "true");
+        container.style.cssText =
+          "position:fixed;width:200px;height:200px;left:-9999px;top:0;opacity:.01;pointer-events:none;overflow:hidden;";
+        document.body.appendChild(container);
+      }
       let host = document.getElementById("youtubeWeddingMusic");
       if (!host) {
         host = document.createElement("div");
         host.id = "youtubeWeddingMusic";
-        host.setAttribute("aria-hidden", "true");
-        host.style.cssText =
-          "position:fixed;width:200px;height:200px;left:-9999px;bottom:0;opacity:.01;pointer-events:none;overflow:hidden;";
-        document.body.appendChild(host);
+        container.appendChild(host);
       }
 
       youtubePlayer = new window.YT.Player(host, {

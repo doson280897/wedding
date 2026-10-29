@@ -1127,3 +1127,35 @@ test("gate ornaments and idle butterflies pause in background and stop after ent
   expect(stopped.sun).toBe("none");
   expect(stopped.stars.every(name => name === "none")).toBe(true);
 });
+
+test("music iframe replacement stays outside the invitation @smoke @core", async ({page}) => {
+  await page.addInitScript(() => {
+    window.YT = {
+      PlayerState:{PLAYING:1,PAUSED:2,BUFFERING:3,ENDED:0},
+      Player:function(host, options) {
+        const frame = document.createElement("iframe");
+        frame.id = host.id;
+        frame.width = "200"; frame.height = "200";
+        frame.srcdoc = '<body style="background:red">Video thumbnail</body>';
+        host.replaceWith(frame); // Match the real API's replacement behavior.
+        const player = {
+          getIframe:()=>frame,setVolume(){},unMute(){},
+          playVideo(){options.events.onStateChange({data:1,target:player});},
+          pauseVideo(){options.events.onStateChange({data:2,target:player});}
+        };
+        queueMicrotask(()=>options.events.onReady({target:player}));
+        return player;
+      }
+    };
+  });
+  await page.goto(base+"/index.html?party=groom",{waitUntil:"domcontentloaded"});
+  const frame = page.locator("#youtubeWeddingMusic");
+  await expect(frame).toHaveAttribute("tabindex","-1");
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden({timeout:16000});
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing");
+  const bounds = await frame.boundingBox();
+  expect(bounds).not.toBeNull();
+  expect(bounds.x + bounds.width).toBeLessThan(0);
+  await expect(frame).not.toHaveAttribute("allowfullscreen","");
+});
