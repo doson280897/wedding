@@ -85,6 +85,7 @@
 <link rel="stylesheet" href="quick-nav.css?v=__BUILD_ID__">
 <link rel="stylesheet" href="link-tool.css?v=__BUILD_ID__">
 <link rel="stylesheet" href="settings.css?v=__BUILD_ID__">
+<link rel="stylesheet" href="calendar.css?v=__BUILD_ID__">
 </head>
 <body>
 <div class="reading-progress" id="progress"></div>
@@ -478,6 +479,23 @@
     <span class="music-float-note" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5.7L20 3v12.3"/><ellipse cx="6" cy="18" rx="3" ry="2.1" transform="rotate(-18 6 18)"/><ellipse cx="17" cy="15.3" rx="3" ry="2.1" transform="rotate(-18 17 15.3)"/><path d="M9 9.2 20 6.5"/></svg></span>
   </button>
 </div>
+<dialog class="calendar-dialog" id="calendarDialog" aria-labelledby="calendarTitle" aria-describedby="calendarDescription">
+  <div class="calendar-top"><span id="calendarSummary"></span><button type="button" class="calendar-close" id="calendarClose" data-i18n-aria="calendar.close" aria-label="Đóng chọn ứng dụng lịch">×</button></div>
+  <h2 id="calendarTitle" data-i18n="calendar.title">Thêm vào lịch</h2>
+  <p class="calendar-description" id="calendarDescription" data-i18n="calendar.description">Chọn sự kiện và nơi bạn muốn lưu lịch hẹn.</p>
+  <div class="calendar-event-field" id="calendarEventField"><label for="calendarEvent" data-i18n="calendar.event">Sự kiện muốn lưu</label><select id="calendarEvent"></select></div>
+  <p class="calendar-place" id="calendarEventPlace"></p>
+  <div class="calendar-options">
+    <a class="calendar-option" id="calendarGoogle" data-calendar-app="google" target="_blank" rel="noopener noreferrer"><span class="calendar-icon" aria-hidden="true">G</span><span class="calendar-option-copy"><strong data-i18n="calendar.google">Google Calendar</strong><small data-i18n="calendar.googleHint">Mở trang tạo sự kiện Google</small></span><span class="calendar-recommended" data-i18n="calendar.suggested" hidden>Gợi ý</span></a>
+    <a class="calendar-option" id="calendarOutlook" data-calendar-app="outlook" target="_blank" rel="noopener noreferrer"><span class="calendar-icon" aria-hidden="true">O</span><span class="calendar-option-copy"><strong data-i18n="calendar.outlook">Outlook.com</strong><small data-i18n="calendar.outlookHint">Mở lịch Microsoft cá nhân trên web</small></span><span class="calendar-recommended" data-i18n="calendar.suggested" hidden>Gợi ý</span></a>
+    <button type="button" class="calendar-option" id="calendarNative" data-calendar-app="native"><span class="calendar-icon" aria-hidden="true">＋</span><span class="calendar-option-copy"><strong id="calendarNativeLabel"></strong><small data-i18n="calendar.nativeHint">Tải tệp lịch để mở bằng ứng dụng của bạn</small></span><span class="calendar-recommended" data-i18n="calendar.suggested" hidden>Gợi ý</span></button>
+  </div>
+  <button type="button" class="calendar-share" id="calendarShare" data-i18n="calendar.share" hidden>Chọn ứng dụng trên thiết bị</button>
+  <button type="button" class="calendar-all" id="calendarAll" data-i18n="calendar.all" hidden>Tải cả lễ và tiệc (.ics)</button>
+  <p class="calendar-hint" data-i18n="calendar.hint">Bạn sẽ xem và xác nhận trước khi lưu. Ứng dụng mở được tùy thuộc thiết bị và trình duyệt.</p>
+  <p class="calendar-status" id="calendarStatus" role="status" aria-live="polite"></p>
+</dialog>
+<script src="calendar.js?v=__BUILD_ID__" defer></script>
 <script src="quick-nav.js?v=__BUILD_ID__" defer></script>
 <script src="settings.js?v=__BUILD_ID__" defer></script>
 <script src="link-tool.js?v=__BUILD_ID__" defer></script>

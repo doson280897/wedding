@@ -199,3 +199,7 @@ Album chỉ tải ảnh ở gần vùng hiển thị; animation mở cổng dùn
 Dự án dùng Playwright **1.64.1** cố định trong `package.json` và workflow CI (không dùng `latest`).
 Dành cho máy local: chạy `npm install`, `npx playwright install chromium webkit firefox`, sau đó `npm run test:unit` và `npm run test:browser` (cần mở HTTP server cổng 8000 tại thư mục repo trước khi chạy browser test).
 CI tự chạy smoke trên desktop Chromium, Android Chromium, iPhone WebKit và Firefox; full 8-device matrix có thể chạy từ **Actions → Cross-device browser compatibility → Run workflow → extended**.
+
+### Chọn ứng dụng lịch
+
+Bấm **Lưu vào lịch** để chọn sự kiện lễ/tiệc, sau đó mở Google Calendar, Outlook.com hoặc tải tệp `.ics` cho ứng dụng lịch trên máy. Thiết bị Apple gợi ý Apple Calendar, Android gợi ý Google Calendar, Windows gợi ý Outlook.com; đây là gợi ý theo thiết bị, không phải phát hiện app đã cài. Nếu trình duyệt chia sẻ được tệp lịch, có thêm nút mở bảng chọn ứng dụng của hệ điều hành. Khách tự xem và xác nhận lưu; thiệp không tự thêm sự kiện vào tài khoản. Nút tải cả lễ và tiệc vẫn giữ hai sự kiện riêng với đúng ngày giờ/địa điểm từ `wedding-info.js`. Chế độ một tiệc chỉ có một sự kiện. Bảng chọn dùng chung ngôn ngữ VN/EN.

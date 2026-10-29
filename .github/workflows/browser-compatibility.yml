@@ -78,6 +78,7 @@ jobs:
           node --check preferences.js
           node --check settings.js
           node --check script.js
+          node --check calendar.js
           node --check gallery.js
           node --check link-tool.js
           node --check quick-nav.js

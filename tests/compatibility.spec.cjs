@@ -890,10 +890,15 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await expect(page.locator(".event-card:visible")).toHaveCount(1);
   await expect(page.locator('[data-party-scope="single"] .event-detail')).toContainText("17:30");
   await expect(page.locator(".family-card:visible")).toHaveCount(2);
-  const downloadPromise = page.waitForEvent("download");
   await page.locator('[data-calendar="single"]').click();
+  await expect(page.locator("#calendarDialog")).toBeVisible();
+  await expect(page.locator("#calendarEventField")).toBeHidden();
+  await expect(page.locator("#calendarAll")).toBeHidden();
+  const downloadPromise = page.waitForEvent("download");
+  await page.locator("#calendarNative").click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/tiec-cuoi-.*[.]ics$/);
+  await page.locator("#calendarClose").click();
   await page.locator('a[href="#map-single"].map-button').click();
   await expect(page.locator("#map-single")).toBeVisible();
   await expect(page.locator("#map-single h3")).toHaveText("Trung Tâm Tiệc Cưới Sen Vàng");
@@ -957,4 +962,51 @@ test("reduced-motion album can switch, close and reopen without losing its image
   await expect.poll(() => page.locator("#albumLightboxImage").evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
   await page.locator("#albumLightboxNext").click();
   await expect(page.locator("#albumLightboxCounter")).not.toHaveText(before);
+});
+
+
+test("calendar chooser offers matching provider drafts and files without claiming installed apps @smoke @core", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "canShare", { configurable:true, value:() => true });
+    Object.defineProperty(navigator, "share", { configurable:true, value:async data => {
+      window.__calendarShared = { name:data.files[0].name, body:await data.files[0].text() };
+      throw new DOMException("Cancelled", "AbortError");
+    }});
+  });
+  await page.goto(base + "/index.html?party=bride&lang=en", { waitUntil:"domcontentloaded" });
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
+  const trigger = page.locator('[data-calendar="bride"]');
+  await trigger.click();
+  const dialog = page.locator("#calendarDialog");
+  await expect(dialog).toBeVisible();
+  await expect(page.locator("#calendarTitle")).toHaveText("Add to calendar");
+  await expect(page.locator("#calendarEvent option")).toHaveCount(2);
+  await expect(page.locator("#calendarEvent")).toHaveValue("1");
+  const reception = new URL(await page.locator("#calendarGoogle").getAttribute("href"));
+  expect(reception.searchParams.get("text")).toContain("Reception");
+  expect(reception.searchParams.get("dates")).toMatch(/T\d{6}Z\/\d{8}T\d{6}Z/);
+  await page.locator("#calendarEvent").selectOption("0");
+  const ceremony = new URL(await page.locator("#calendarGoogle").getAttribute("href"));
+  expect(ceremony.searchParams.get("text")).toContain("Ceremony");
+  expect(ceremony.searchParams.get("dates")).not.toBe(reception.searchParams.get("dates"));
+  const outlook = new URL(await page.locator("#calendarOutlook").getAttribute("href"));
+  expect(outlook.searchParams.get("subject")).toBe(ceremony.searchParams.get("text"));
+  expect(outlook.searchParams.get("location")).toBe(ceremony.searchParams.get("location"));
+  await page.locator("#calendarShare").click();
+  await expect.poll(() => page.evaluate(() => window.__calendarShared?.name || "")).toMatch(/ceremony[.]ics$/);
+  await expect(page.locator("#calendarStatus")).toHaveText("");
+  const downloadPromise = page.waitForEvent("download");
+  await page.locator("#calendarAll").click();
+  const download = await downloadPromise;
+  const body = require("node:fs").readFileSync(await download.path(), "utf8").replace(/\r\n /g, "");
+  expect((body.match(/BEGIN:VEVENT/g) || []).length).toBe(2);
+  expect(body).toContain("DTSTART:" + ceremony.searchParams.get("dates").split("/")[0]);
+  expect(body).toContain("DTSTART:" + reception.searchParams.get("dates").split("/")[0]);
+  await page.locator("#calendarClose").click();
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await page.locator("#calendarClose").press("Escape");
+  await expect(dialog).toBeHidden();
 });
