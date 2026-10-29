@@ -30,22 +30,25 @@
 <script src="wedding-info.js?v=__BUILD_ID__"></script>
 <script>
 (() => {
+  // Keep shared guest links clean, including links copied from an older build.
+  const url = new URL(location.href);
+  if (url.searchParams.has("_v")) {
+    url.searchParams.delete("_v");
+    try { history.replaceState(history.state, "", url.href); } catch (_) {}
+  }
   const current = document.querySelector('meta[name="wedding-build"]')?.content || "";
   fetch("./version.json?t=" + Date.now(), { cache: "no-store" })
     .then(response => response.ok ? response.json() : null)
     .then(data => {
       const latest = data?.build || "";
       if (!latest || latest === current || latest === "__BUILD_ID__") return;
-      const url = new URL(location.href);
-      if (url.searchParams.get("_v") === latest) return;
-      url.searchParams.set("_v", latest);
-      // Reload the SAME history entry so an invitation already entered in
-      // this tab stays entered even when a new deployment invalidates cache.
+      // A reload guard belongs to this history entry, not the invitation URL.
+      if (history.state?.weddingRefreshBuild === latest) return;
       try {
-        history.replaceState(history.state, "", url.href);
+        history.replaceState({ ...(history.state || {}), weddingRefreshBuild: latest }, "");
         location.reload();
       } catch (_) {
-        location.replace(url.href);
+        // If history is unavailable, skip the automatic reload to avoid a loop.
       }
     })
     .catch(() => {});
