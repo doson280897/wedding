@@ -305,6 +305,13 @@ html[data-party="groom"] .closing {
 .music-toggle:focus-visible{outline:2px solid #eccf98;outline-offset:3px}
 .calendar-button{display:inline-block;margin:15px 0 0 8px;padding:10px 15px;border:1px solid #ba9d7199;border-radius:30px;background:#0a0e0c;color:#efd8b4;font:500 10px Montserrat,sans-serif;letter-spacing:.1em;cursor:pointer}
 .calendar-button:hover{background:#b99b7035}
+/* Equal actions remain side by side with real space on compact screens. */
+.event-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:22px}
+.event-actions :is(.map-button,.calendar-button){display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin:0;padding:11px 10px;border-radius:999px;font:500 10px/1.4 Montserrat,sans-serif;letter-spacing:.06em;text-align:center;box-sizing:border-box}
+.event-actions svg{display:block;flex:0 0 16px;width:16px;height:16px}
+.event-actions span{min-width:0;text-wrap:balance}
+@media(max-width:360px){.event-actions{gap:8px}.event-actions :is(.map-button,.calendar-button){gap:6px;padding:10px 8px;font-size:9px;letter-spacing:.03em}}
+
 .music-toggle{position:fixed;left:20px;bottom:24px;z-index:1003;border:1px solid #bfa47888;border-radius:50px;background:#171b19ed;color:#eed7ac;padding:11px 14px;display:flex;align-items:center;gap:8px;font:500 10px Montserrat,sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 10px 36px #0009;backdrop-filter:blur(7px)}
 .music-toggle[aria-pressed=true]{border-color:#e8c789;background:#343024ed;box-shadow:0 10px 36px #0009,0 0 24px #d0aa6b1e}
 @media(max-width:650px){

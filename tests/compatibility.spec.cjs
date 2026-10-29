@@ -981,6 +981,20 @@ test("calendar chooser offers matching provider drafts and files without claimin
   const dialog = page.locator("#calendarDialog");
   await expect(dialog).toBeVisible();
   await expect(page.locator("#calendarTitle")).toHaveText("Add to calendar");
+  const actions = await trigger.evaluate(button => {
+    const map = button.closest(".event-actions").querySelector(".map-button").getBoundingClientRect();
+    const calendar = button.getBoundingClientRect();
+    return { widthDelta:Math.abs(map.width-calendar.width), heightDelta:Math.abs(map.height-calendar.height), topDelta:Math.abs(map.top-calendar.top), gap:calendar.left-map.right };
+  });
+  expect(actions.widthDelta).toBeLessThanOrEqual(1);
+  expect(actions.heightDelta).toBeLessThanOrEqual(1);
+  expect(actions.topDelta).toBeLessThanOrEqual(1);
+  expect(actions.gap).toBeGreaterThanOrEqual(8);
+  await expect(page.locator("#calendarSuggested .calendar-option")).toHaveCount(1);
+  await expect(page.locator("#calendarSuggested .calendar-option")).toHaveClass(/is-recommended/);
+  await expect(page.locator("#calendarOtherOptions .calendar-option")).toHaveCount(2);
+  await expect(page.locator("#calendarOther")).toHaveJSProperty("open", false);
+  await expect(page.locator("#calendarOtherOptions")).toBeHidden();
   await expect(page.locator("#calendarEvent option")).toHaveCount(2);
   await expect(page.locator("#calendarEvent")).toHaveValue("1");
   const reception = new URL(await page.locator("#calendarGoogle").getAttribute("href"));
@@ -993,6 +1007,8 @@ test("calendar chooser offers matching provider drafts and files without claimin
   const outlook = new URL(await page.locator("#calendarOutlook").getAttribute("href"));
   expect(outlook.searchParams.get("subject")).toBe(ceremony.searchParams.get("text"));
   expect(outlook.searchParams.get("location")).toBe(ceremony.searchParams.get("location"));
+  await page.locator("#calendarOther summary").click();
+  await expect(page.locator("#calendarOtherOptions")).toBeVisible();
   await page.locator("#calendarShare").click();
   await expect.poll(() => page.evaluate(() => window.__calendarShared?.name || "")).toMatch(/ceremony[.]ics$/);
   await expect(page.locator("#calendarStatus")).toHaveText("");
@@ -1007,6 +1023,7 @@ test("calendar chooser offers matching provider drafts and files without claimin
   await expect(dialog).toBeHidden();
   await expect(trigger).toBeFocused();
   await trigger.click();
+  await expect(page.locator("#calendarOther")).toHaveJSProperty("open", false);
   await page.locator("#calendarClose").press("Escape");
   await expect(dialog).toBeHidden();
 });

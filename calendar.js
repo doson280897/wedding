@@ -37,8 +37,15 @@
     for (const [key, value] of Object.entries(fields)) url.searchParams.set(key, value);
     return url.href.replace(/\+/g, "%20");
   };
+  const recommendedProvider = ({ platform = "", userAgent = "" } = {}) => {
+    const device = platform + " " + userAgent;
+    if (/iPhone|iPad|iPod|Mac/i.test(device)) return "native";
+    if (/Android/i.test(device)) return "google";
+    if (/Win/i.test(device)) return "outlook";
+    return "native";
+  };
   if (typeof module === "object" && module.exports) {
-    module.exports = { buildICS, providerURL };
+    module.exports = { buildICS, providerURL, recommendedProvider };
     return;
   }
 
@@ -54,8 +61,12 @@
   const close = document.getElementById("calendarClose");
   const status = document.getElementById("calendarStatus");
   const platform = navigator.userAgentData?.platform || navigator.platform || "";
-  const apple = /iPhone|iPad|iPod|Mac/i.test(platform);
-  const recommended = apple ? "native" : /Win/i.test(platform) ? "outlook" : /Android/i.test(navigator.userAgent) ? "google" : "";
+  const apple = /iPhone|iPad|iPod|Mac/i.test(platform + " " + navigator.userAgent);
+  const recommended = recommendedProvider({ platform, userAgent:navigator.userAgent });
+  const suggested = document.getElementById("calendarSuggested");
+  const other = document.getElementById("calendarOther");
+  const otherOptions = document.getElementById("calendarOtherOptions");
+  const appRows = [...dialog.querySelectorAll("[data-calendar-app]")];
   let side = null, schedule = null, returnFocus = null, generation = 0;
 
   const utc = (party, time) => new Date(info.parties[party].date + "T" + time + ":00" + info.site.timezone)
@@ -112,10 +123,10 @@
     let canShare = false;
     try { canShare = Boolean(navigator.share && navigator.canShare?.({ files:[fileFor()] })); } catch (_) {}
     share.hidden = !canShare;
-    dialog.querySelectorAll("[data-calendar-app]").forEach(row => {
+    appRows.forEach(row => {
       const preferred = row.dataset.calendarApp === recommended;
       row.classList.toggle("is-recommended", preferred);
-      row.querySelector(".calendar-recommended").hidden = !preferred;
+      (preferred ? suggested : otherOptions).append(row);
     });
   };
   const updateSchedule = () => {
@@ -148,6 +159,7 @@
     side = button.dataset.calendar;
     schedule = null;
     returnFocus = button;
+    other.open = false;
     window.WeddingControlHub?.close(false);
     updateSchedule();
     document.body.classList.add("calendar-open");

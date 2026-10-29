@@ -1,7 +1,7 @@
 "use strict";
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { buildICS, providerURL } = require("../calendar.js");
+const { buildICS, providerURL, recommendedProvider } = require("../calendar.js");
 
 const event = {
   id:"reception", title:"Tiệc cưới · Minh & Lan", start:"20261114T040000Z", end:"20261114T060000Z",
@@ -46,4 +46,17 @@ test("Google and Outlook drafts use the same event, UTC dates and encoded locati
   assert.equal(outlook.searchParams.get("enddt"), "2026-11-14T06:00:00Z");
   assert.equal(outlook.searchParams.get("location"), event.place);
   assert.equal(outlook.searchParams.get("body"), event.note + "\n" + options.timezone);
+});
+
+
+test("calendar recommendation follows the OS with a native-file fallback", () => {
+  for (const [device, provider] of [
+    [{ platform:"iPhone", userAgent:"iPhone OS" }, "native"],
+    [{ platform:"MacIntel", userAgent:"iPad; CPU OS" }, "native"],
+    [{ platform:"MacIntel", userAgent:"Macintosh" }, "native"],
+    [{ platform:"Linux armv8l", userAgent:"Linux; Android 15" }, "google"],
+    [{ platform:"Windows", userAgent:"Windows NT" }, "outlook"],
+    [{ platform:"Win32", userAgent:"" }, "outlook"],
+    [{ platform:"Linux x86_64", userAgent:"Firefox" }, "native"]
+  ]) assert.equal(recommendedProvider(device), provider);
 });
