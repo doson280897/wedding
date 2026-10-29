@@ -1414,3 +1414,40 @@ test("active backgrounds and shared popup shells fit each celebration @smoke @co
     }
   }
 });
+
+test("shared viewport keeps fixed surfaces inside a reduced visible area @smoke @core", async ({page}) => {
+  test.setTimeout(60000);
+  await page.addInitScript(()=>{
+    let state={left:0,top:0,width:innerWidth,height:innerHeight};
+    const view=new EventTarget();
+    for(const [property,key] of [['offsetLeft','left'],['offsetTop','top'],['width','width'],['height','height']])
+      Object.defineProperty(view,property,{get:()=>state[key]});
+    Object.defineProperty(window,'visualViewport',{configurable:true,value:view});
+    window.__visibleArea=value=>{state={...value};view.dispatchEvent(new Event('resize'));};
+  });
+  await mockWeddingAudio(page);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.goto(base+'/index.html?party=groom',{waitUntil:'domcontentloaded'});
+  await page.locator('#waxOpenButton').click();
+  await expect(page.locator('#moonlightGate')).toBeHidden();
+  const reduced=await page.evaluate(()=>({left:18,top:24,width:innerWidth-36,height:Math.max(240,innerHeight*.6)}));
+  await page.evaluate(area=>window.__visibleArea(area),reduced);
+  await expect.poll(()=>page.evaluate(()=>window.WeddingLayout.viewport().width)).toBe(reduced.width);
+  const overflow=selector=>page.locator(selector).evaluate(node=>{
+    const a=node.getBoundingClientRect(),v=window.WeddingLayout.viewport();
+    return Math.max(0,v.left-a.left,a.right-v.right,v.top-a.top,a.bottom-v.bottom);
+  });
+  await expect.poll(()=>overflow('#settingsHub')).toBeLessThanOrEqual(2);
+  await page.locator('#settingsTrigger').click();
+  await expect.poll(()=>overflow('#settingsPanel')).toBeLessThanOrEqual(2);
+  await page.locator('#wqPanel a[href="#locations"]').click();
+  await expect.poll(()=>overflow('.wm-dialog')).toBeLessThanOrEqual(2);
+  await page.locator('#wmClose').click();
+  await page.locator('[data-calendar="groom"]').click();
+  await expect(page.locator('#calendarDialog')).toBeVisible();
+  await expect.poll(()=>overflow('#calendarDialog')).toBeLessThanOrEqual(2);
+  await page.locator('#calendarClose').click();
+  await page.evaluate(()=>window.__visibleArea({left:0,top:0,width:innerWidth,height:innerHeight}));
+  await expect.poll(()=>overflow('#settingsHub')).toBeLessThanOrEqual(2);
+  await expect(page.locator('#musicBubble')).toHaveAttribute('data-music-state','playing');
+});

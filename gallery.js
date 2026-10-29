@@ -900,7 +900,7 @@
   if ("ResizeObserver" in window) {
     new ResizeObserver(scheduleSceneResize).observe(viewport);
   } else {
-    addEventListener("resize", scheduleSceneResize, { passive:true });
+    window.WeddingLayout.subscribe(scheduleSceneResize);
   }
 
   async function start() {

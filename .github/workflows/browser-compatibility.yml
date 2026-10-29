@@ -39,6 +39,8 @@ jobs:
   browser-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      PRIORITY_TESTS: "shared viewport keeps|active backgrounds and shared popup shells|responsive typography fits|adaptive layout survives|story last row centres|reduced-motion album|album recovers|Moonlight Gate opens|gate ornaments|music bubble waits|closing names stay whole|couple names stay whole"
     steps:
       - name: Checkout website
         uses: actions/checkout@v4
@@ -83,6 +85,7 @@ jobs:
           node --check settings.js
           node --check script.js
           node --check typography.js
+          node --check layout.js
           node --check calendar.js
           node --check gallery.js
           node --check link-tool.js
@@ -104,6 +107,11 @@ jobs:
           done
           cat /tmp/wedding-http.log
           exit 1
+
+      - name: Verify shared layout primitives
+        run: npx playwright test tests/compatibility.spec.cjs --grep "shared viewport keeps" --reporter=line --workers=2
+        env:
+          CI: "true"
 
       - name: Verify celebration backgrounds and shared popup layout
         run: npx playwright test tests/compatibility.spec.cjs --grep "active backgrounds and shared popup shells" --reporter=line --workers=2
@@ -130,8 +138,13 @@ jobs:
         env:
           CI: "true"
 
-      - name: Test desktop functionality and targeted cross-device smoke
-        run: npx playwright test tests/compatibility.spec.cjs --reporter=line --workers=2
+      - name: Test remaining desktop functionality and targeted cross-device smoke
+        run: |
+          if [ "$WEDDING_EXTENDED_TESTS" = "true" ]; then
+            npx playwright test tests/compatibility.spec.cjs --reporter=line --workers=2
+          else
+            npx playwright test tests/compatibility.spec.cjs --grep-invert "$PRIORITY_TESTS" --reporter=line --workers=2
+          fi
         env:
           CI: "true"
           WEDDING_EXTENDED_TESTS: ${{ github.event.inputs.extended || 'false' }}

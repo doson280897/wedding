@@ -148,29 +148,10 @@
   const SNAP_MS = 340;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const coarsePointer = window.matchMedia("(hover: none), (pointer: coarse)");
-  const readSafeArea = () => {
-    const probe = document.createElement("div");
-    probe.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;inset:0;" +
-      "padding-top:env(safe-area-inset-top,0px);" +
-      "padding-right:env(safe-area-inset-right,0px);" +
-      "padding-bottom:env(safe-area-inset-bottom,0px);" +
-      "padding-left:env(safe-area-inset-left,0px)";
-    document.body.append(probe);
-    const css = getComputedStyle(probe);
-    const inset = side => parseFloat(css.getPropertyValue("padding-" + side)) || 0;
-    const result = {top:inset("top"),right:inset("right"),
-      bottom:inset("bottom"),left:inset("left")};
-    probe.remove();
-    return result;
-  };
-  const safeArea = readSafeArea();
-  // Insets can change after rotation; do not cache the portrait notch forever.
-  window.addEventListener("resize", () => Object.assign(safeArea, readSafeArea()), {passive:true});
-  const visualBounds = () => {
-    const view = window.visualViewport;
-    return {left:view?.offsetLeft || 0,top:view?.offsetTop || 0,
-      width:view?.width || innerWidth,height:view?.height || innerHeight};
-  };
+  const layout = window.WeddingLayout;
+  const visualBounds = () => layout.viewport();
+  let safeArea = layout.viewport().safe;
+  layout.subscribe(view => {safeArea=view.safe;});
   const visualCenter = () => {const view=visualBounds();return view.left+view.width/2;};
 
   const minLeft = () => FLOAT_EDGE + safeArea.left;
@@ -434,9 +415,7 @@
         reset();
       });
     };
-    window.addEventListener("resize",scheduleViewportReset,{passive:true});
-    window.visualViewport?.addEventListener("resize",scheduleViewportReset,{passive:true});
-    window.visualViewport?.addEventListener("scroll",scheduleViewportReset,{passive:true});
+    layout.subscribe(scheduleViewportReset);
     if (node === musicDock) {
       // The orb is initially hidden; its first real PLAYING event gives it
       // dimensions and therefore a valid dock position.

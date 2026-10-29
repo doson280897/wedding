@@ -3,14 +3,7 @@
 
   // Fit short display copy to its actual container, not a device breakpoint.
   // Explicit <br> lines remain deliberate; paragraphs keep a readable size.
-  const selector = [
-    '.section-title', '.album-header h2', '.family-card h3', '.family-card h4',
-    '.promise-copy h3', '.person-copy h3', '.location-info h3', '.gift-card h3',
-    '.closing h2', '.wq-heading', '#partySelectorTitle', '#linkToolTitle',
-    '.overline', '.album-eyebrow', '.event-label', '.hero-count-title',
-    '.moonlight-gate__recipient-label', '.moonlight-gate__reveal-subtitle', '.event-actions span'
-  ].join(',');
-  const nodes = [...document.querySelectorAll(selector)];
+  const nodes = [...document.querySelectorAll('[data-text-fit]')];
   const pending = new Set();
   const visible = new Set();
   const widths = new WeakMap();
@@ -48,7 +41,7 @@
       const available = node.clientWidth - padding;
       const natural = node.scrollWidth - padding;
       const scale = natural <= available ? 1 : Math.min(1, Math.max(0, (available - 2) / Math.max(1, natural)));
-      const minimum = node.matches('h2,h3,h4') ? 18 : 8;
+      const minimum = parseFloat(css.getPropertyValue('--text-fit-min')) || 18;
       const parts = [node, ...node.querySelectorAll('em,span,strong')].map(part => {
         const style = getComputedStyle(part);
         return {part,size:parseFloat(style.fontSize),spacing:parseFloat(style.letterSpacing)};
@@ -82,7 +75,7 @@
       const css = getComputedStyle(node);
       const padding = parseFloat(css.paddingLeft) + parseFloat(css.paddingRight);
       const scale = (node.clientWidth - padding - 2) / Math.max(1,node.scrollWidth - padding);
-      const minimum = node.matches('h2,h3,h4') ? 18 : 8;
+      const minimum = parseFloat(css.getPropertyValue('--text-fit-min')) || 18;
       const parts = [node,...node.querySelectorAll('em,span,strong')].map(part => {
         const style=getComputedStyle(part);
         return {part,size:parseFloat(style.fontSize),spacing:parseFloat(style.letterSpacing)};
@@ -100,7 +93,7 @@
   }
 
   const tidyParagraphs = () => {
-    document.querySelectorAll('.section-lead,.promise-copy p,.closing-note,.person-copy p,.family-address,.event-address,.lunar,.location-info p,.invitation-promise,.handwriting,.album-header > p:last-child').forEach(node => {
+    document.querySelectorAll('[data-text-flow="prose"]').forEach(node => {
       if (node.childElementCount) return;
       const text = node.textContent.replace(/(\S+)\s+(\S+)\s*$/, '$1\u00a0$2');
       if (text !== node.textContent) node.textContent = text;
@@ -139,8 +132,10 @@
     });
     parents.forEach((_,parent) => observer.observe(parent));
   }
-  window.addEventListener('resize', queueAll, {passive:true});
-  window.visualViewport?.addEventListener('resize', queueVisible, {passive:true});
+  let previousWidth = window.WeddingLayout.viewport().layoutWidth;
+  window.WeddingLayout.subscribe(view => {
+    if (view.layoutWidth !== previousWidth) {previousWidth=view.layoutWidth;queueAll();}
+  });
   // Fallback browsers must also re-fit panels revealed after initial load.
   if (!('IntersectionObserver' in window)) {
     const observer = new MutationObserver(queueVisible);

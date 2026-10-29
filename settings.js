@@ -21,11 +21,11 @@
   const positionPanel = () => {
     if (panel.hidden) return;
     const edge = 10;
-    const viewport = window.visualViewport;
-    const viewportLeft = viewport?.offsetLeft || 0;
-    const viewportTop = viewport?.offsetTop || 0;
-    const viewportWidth = viewport?.width || innerWidth;
-    const viewportHeight = viewport?.height || innerHeight;
+    const viewport = window.WeddingLayout.viewport();
+    const viewportLeft = viewport.left;
+    const viewportTop = viewport.top;
+    const viewportWidth = viewport.width;
+    const viewportHeight = viewport.height;
     const viewportRight = viewportLeft + viewportWidth;
     const viewportBottom = viewportTop + viewportHeight;
     // The visible area can shrink independently of CSS vh when keyboards open.
@@ -132,10 +132,7 @@
       positionPanel();
     });
   };
-  window.addEventListener("resize", schedulePanelPosition, { passive: true });
-  window.addEventListener("scroll", schedulePanelPosition, { passive: true });
-  window.visualViewport?.addEventListener("resize", schedulePanelPosition, { passive: true });
-  window.visualViewport?.addEventListener("scroll", schedulePanelPosition, { passive: true });
+  window.WeddingLayout.subscribe(schedulePanelPosition);
   hub.addEventListener("pointerup", schedulePanelPosition);
 
 })();

@@ -227,3 +227,11 @@ The approved gate artwork is layered in `fairy-gate.css`: two masked leaves rota
 Tiêu đề và nhãn ngắn được đo theo khung chứa thực tế trong `typography.js`, tính lại khi đổi kích thước hoặc ngôn ngữ và khi font tải xong. Đoạn dài giữ cỡ dễ đọc; các ngắt dòng chủ ý vẫn được giữ.
 
 Lưới dùng kích thước nội dung để tự đổi số cột. Album nội suy kích thước, khoảng cách và độ sâu từ chiều rộng khung, đồng thời hủy tọa độ kéo cũ khi xoay máy. Nút nổi và bảng tùy chỉnh bám vùng `visualViewport`, có tính lại khoảng tránh tai thỏ sau khi đổi chiều. Các hằng số khoảng cách và cỡ tối thiểu là giới hạn thiết kế, không phải danh sách mẫu điện thoại.
+
+
+### Quy tắc phát triển giao diện chung
+
+- `layout.js` là nguồn duy nhất đọc vùng hiển thị và safe-area, gom sự kiện vào một animation frame. Các nút và panel dùng `WeddingLayout.viewport()` / `subscribe()`; CSS dùng `--viewport-width/height/left/top` và có fallback khi JavaScript chưa tải.
+- `responsive.css` quản lý reflow, lưới, viewport và quy tắc chữ. CSS của từng thành phần chỉ quản lý hình thức riêng; không thêm nhánh theo tên điện thoại hoặc hệ điều hành.
+- Tiêu đề/câu ngắn có `data-text-fit="heading"` hoặc `"label"`; đoạn dài có `data-text-flow="prose"`. CSS xử lý bố cục trước, `typography.js` chỉ bổ sung phép đo khi cần giữ câu ngắn trong một dòng, có giới hạn cỡ dễ đọc.
+- Kiểm tra bằng tình huống khung hẹp/rộng, xoay chiều, giảm vùng nhìn thấy và tăng lại kích thước. Các trình duyệt chạy cùng bộ hành vi để phát hiện khác biệt; không duy trì giao diện riêng cho từng nền tảng.
