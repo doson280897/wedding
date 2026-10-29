@@ -986,6 +986,10 @@ test("album recovers after a failed manifest and restores focus after pointer vi
   const retry = page.locator("#albumRetry");
   await expect(retry).toBeVisible();
   await expect(retry).toHaveText("Try loading photos again");
+  // Delayed gate/visibility callbacks must leave the failed state intact.
+  await viewport.focus();
+  await expect(retry).toBeVisible();
+  expect(requests).toBe(1);
   await retry.click();
   await expect(retry).toBeHidden();
   await expect(page.locator("#albumStatus")).toBeHidden();

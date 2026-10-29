@@ -955,6 +955,7 @@
       console.error(error);
       setStatus("album.error");
       albumStarted = false;
+      albumFailed = true;
       if (retry) retry.hidden = false;
     } finally {
       clearTimeout(timeout);
@@ -963,21 +964,27 @@
 
   const albumSection = document.getElementById("album") || viewport;
   let albumStarted = false;
+  let albumFailed = false;
   let lazyObserver = null;
   const ensureAlbumStarted = () => {
-    if (albumStarted) return;
+    if (albumStarted || albumFailed) return;
     albumStarted = true;
     lazyObserver?.disconnect();
     window.removeEventListener("scroll", checkAlbumVisibility);
     window.removeEventListener("resize", checkAlbumVisibility);
     start();
   };
-  retry?.addEventListener("click", ensureAlbumStarted);
+  retry?.addEventListener("click", () => {
+    // Late visibility/focus callbacks must not dismiss an error by retrying
+    // silently. Only this explicit action starts another network request.
+    albumFailed = false;
+    ensureAlbumStarted();
+  });
 
   // WebKit (especially iOS emulation and some embedded WebViews) may delay
   // IntersectionObserver after programmatic scrolling. Keep a passive fallback.
   function checkAlbumVisibility() {
-    if (albumStarted || document.documentElement.classList.contains("party-pending")) return;
+    if (albumStarted || albumFailed || document.documentElement.classList.contains("party-pending")) return;
     const rect = albumSection.getBoundingClientRect();
     if (rect.top < innerHeight + 1000 && rect.bottom > -600) ensureAlbumStarted();
   }
