@@ -148,6 +148,20 @@ jobs:
           import tempfile
 
           info = json.loads((Path(tempfile.gettempdir()) / "wedding-deploy-info.json").read_text(encoding="utf-8"))
+          # Include every configured local MP3, preserving spaces/Unicode and
+          # subdirectories. Repository uploads alone are not in the Pages bundle.
+          for party in info["parties"].values():
+              source = party["music"]["src"]
+              parsed = urlparse(source)
+              if parsed.scheme in ("https", "http"):
+                  continue
+              path = Path(unquote(parsed.path))
+              if path.is_absolute() or ".." in path.parts or path.suffix.lower() != ".mp3" or not path.is_file():
+                  raise SystemExit("Invalid local music source: " + source)
+              target = Path("site") / path
+              target.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(path, target)
+
           source = info["site"].get("socialImage", "og-preview.jpg")
           parsed = urlparse(source)
           if parsed.scheme in ("https", "http") or source == "og-preview.jpg":

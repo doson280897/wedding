@@ -1,6 +1,45 @@
 const { test, expect } = require("@playwright/test");
 const base = "http://127.0.0.1:8000";
 
+// Native media mock: deterministic buffering/rejection without external video.
+async function mockWeddingAudio(page, delay = 0) {
+  await page.addInitScript(delay => {
+    const state = new WeakMap();
+    const get = audio => {
+      if (!state.has(audio)) state.set(audio, {paused:true,time:0});
+      return state.get(audio);
+    };
+    Object.defineProperty(HTMLMediaElement.prototype, "paused", {get(){return get(this).paused;}});
+    Object.defineProperty(HTMLMediaElement.prototype, "currentTime", {
+      get(){return get(this).time;},
+      set(value){get(this).time=value;}
+    });
+    HTMLMediaElement.prototype.play = function() {
+      const audio=this;
+      window.__plays=(window.__plays||0)+1;
+      window.__playInActivation=navigator.userActivation?.isActive;
+      if (window.__rejectNextPlay) {
+        window.__rejectNextPlay=false;
+        return Promise.reject(new DOMException("Blocked", "NotAllowedError"));
+      }
+      get(audio).paused=false;
+      window.__advanceMusic=value=>{audio.currentTime=value;};
+      window.__musicTestEmit=type=>audio.dispatchEvent(new Event(type));
+      if (delay) audio.dispatchEvent(new Event("waiting"));
+      return new Promise(resolve => setTimeout(() => {
+        // Late playing events deliberately exercise cancellation after Pause.
+        audio.dispatchEvent(new Event("playing"));
+        resolve();
+      },delay));
+    };
+    HTMLMediaElement.prototype.pause = function() {
+      window.__pauses=(window.__pauses||0)+1;
+      get(this).paused=true;
+      this.dispatchEvent(new Event("pause"));
+    };
+  }, delay);
+}
+
 test("one shared language control, in-page generator, back navigation @smoke @core", async ({
   page,
 }) => {
@@ -99,34 +138,8 @@ test("unified hub shows Settings only outside and defaults to Menu inside @smoke
 });
 
 test("music bubble waits for PLAYING and resume preserves paused time @smoke @core", async ({page}) => {
-  test.setTimeout(45000);
-  await page.addInitScript(() => {
-    window.YT = {
-      PlayerState:{PLAYING:1,PAUSED:2,ENDED:0,BUFFERING:3},
-      Player:function(_host,options) {
-        let playbackTime=0;
-        const player={
-          setVolume(){},
-          getCurrentTime(){return playbackTime;},
-          seekTo(time){playbackTime=time;window.__seeks=(window.__seeks||[]).concat(time);},
-          playVideo(){
-            window.__plays=(window.__plays||0)+1;
-            options.events.onStateChange({data:3});
-            setTimeout(()=>options.events.onStateChange({data:1}),400);
-          },
-          pauseVideo(){
-            playbackTime=0; // Simulate an iframe that loses time while buffering.
-            options.events.onStateChange({data:2});
-          },
-          stopVideo(){options.events.onStateChange({data:0});}
-        };
-        window.__advanceMusic = value => {playbackTime=value;};
-        window.__musicTestEmit = data => options.events.onStateChange({data,target:player});
-        queueMicrotask(()=>options.events.onReady({target:player}));
-        return player;
-      }
-    };
-  });
+  test.setTimeout(55000);
+  await mockWeddingAudio(page, 400);
   await page.goto(base+"/index.html?party=bride",{waitUntil:"domcontentloaded"});
   await page.locator("#waxOpenButton").click();
   // The seal tap starts playback, while the orb stays hidden over the gate.
@@ -141,19 +154,18 @@ test("music bubble waits for PLAYING and resume preserves paused time @smoke @co
   await page.locator("#musicBubbleTrigger").click();
   await page.locator("#musicBubblePause").click();
   await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing",{timeout:3500});
-  const seek=await page.evaluate(()=>window.__seeks||[]);
-  expect(seek.some(time=>Math.abs(time-83.5)<.01)).toBe(true);
+  expect(await page.locator("#weddingMusic").evaluate(audio=>audio.currentTime)).toBe(83.5);
   // A connection can fail AFTER playback began, not just on the first tap.
-  await page.evaluate(() => { window.__advanceMusic(127.25); window.__musicTestEmit(3); });
+  await page.evaluate(() => { window.__advanceMusic(127.25); window.__musicTestEmit("waiting"); });
   await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state", "starting");
-  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state", "paused", {timeout:12000});
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state", "paused", {timeout:18000});
   // A late iframe callback must not resume after the watchdog has cancelled it.
-  await page.evaluate(() => window.__musicTestEmit(1));
+  await page.evaluate(() => window.__musicTestEmit("playing"));
   await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state", "paused");
   await page.locator("#musicBubbleTrigger").click();
   await page.locator("#musicBubblePause").click();
   await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state", "playing", {timeout:3500});
-  expect(await page.evaluate(() => (window.__seeks || []).some(time => Math.abs(time - 127.25) < .01))).toBe(true);
+  expect(await page.locator("#weddingMusic").evaluate(audio=>audio.currentTime)).toBe(127.25);
 });
 
 test("party link, wax gate and album lightbox interactions", async ({
@@ -167,8 +179,9 @@ test("party link, wax gate and album lightbox interactions", async ({
   );
   await expect(page.locator("#moonlightGate")).toBeVisible();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
-  // Preloading the YouTube API is intentional: the first seal tap can play music.
-  expect(await page.evaluate(() => Boolean(window.__weddingYouTubeApiPromise))).toBe(true);
+  // Preload the MP3 while the gate is locked.
+  await expect(page.locator("#weddingMusic")).toHaveAttribute("preload", "auto");
+  await expect(page.locator("iframe[src*=youtube]")).toHaveCount(0);
   // The seal is personalized from data, not hard-coded into the HTML.
   const initials = await page.evaluate(() =>
     window.WEDDING_INFO.couple.bride.initial + " · " + window.WEDDING_INFO.couple.groom.initial
@@ -273,19 +286,7 @@ test("menu, map and gift overlays open and close on each device @smoke", async (
 test("editing only wedding-info.js updates names, initials, dates, venue and gifts", async ({
   page,
 }) => {
-  // Local YouTube API stub verifies which configured video would be played
-  // without contacting YouTube or triggering autoplay.
-  await page.addInitScript(() => {
-    window.YT = {
-      PlayerState: { PLAYING: 1, PAUSED: 2, ENDED: 0 },
-      Player: function (_host, options) {
-        window.__configuredWeddingMusicId = options.videoId;
-        const player = { setVolume() {}, playVideo() {}, pauseVideo() {} };
-        setTimeout(() => options.events.onReady({ target: player }), 0);
-        return player;
-      },
-    };
-  });
+  await mockWeddingAudio(page);
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
   // Simulate a new couple by replacing ONLY the response body of the data file.
@@ -306,7 +307,7 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
       initial: "T",
     });
     config.parties.bride.date = "2027-03-15";
-    config.parties.bride.music.youtubeId = config.parties.groom.music.youtubeId;
+    config.parties.bride.music.src = config.parties.groom.music.src;
     config.parties.bride.images.hero = config.parties.groom.images.hero;
     config.parties.bride.venue.name = {
       vi: "Nhà hàng Hoa Sen",
@@ -340,8 +341,8 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
   );
   const computed = await page.evaluate(() => ({
     hero: document.documentElement.style.getPropertyValue("--hero-bride-image"),
-    music: window.__configuredWeddingMusicId,
-    configuredMusic: window.WEDDING_INFO.parties.bride.music.youtubeId,
+    music: decodeURI(new URL(document.getElementById("weddingMusic").src).pathname).split("/").pop(),
+    configuredMusic: window.WEDDING_INFO.parties.bride.music.src,
     calendarFilename: window.WeddingI18n.t("calendar.brideFile"),
   }));
   expect(computed.hero).toContain("hero_groom.webp");
@@ -594,24 +595,7 @@ test("tap immediately after a drag is not swallowed on touch screens @smoke @cor
 });
 
 test("music orb drags while playing, snaps to edges and keeps player running @smoke @core", async ({page}) => {
-  await page.addInitScript(() => {
-    window.YT = {
-      PlayerState:{PLAYING:1,PAUSED:2,ENDED:0,BUFFERING:3},
-      Player:function(_host,options) {
-        const player = {
-          setVolume(){},
-          playVideo() {
-            window.__musicDragPlayCalls = (window.__musicDragPlayCalls || 0) + 1;
-            options.events.onStateChange({data:1});
-          },
-          pauseVideo() {window.__musicDragPauses=(window.__musicDragPauses||0)+1;options.events.onStateChange({data:2});},
-          stopVideo() {options.events.onStateChange({data:0});}
-        };
-        queueMicrotask(()=>options.events.onReady({target:player}));
-        return player;
-      }
-    };
-  });
+  await mockWeddingAudio(page);
   await page.goto(base+"/index.html?party=groom",{waitUntil:"domcontentloaded"});
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#moonlightGate")).toBeHidden({timeout:16000});
@@ -647,8 +631,8 @@ test("music orb drags while playing, snaps to edges and keeps player running @sm
   position=await orb.evaluate(node=>node.getBoundingClientRect().left);
   expect(position).toBeLessThanOrEqual(25);
   await expect(orb).toHaveAttribute("data-music-state","playing");
-  expect(await page.evaluate(()=>window.__musicDragPlayCalls)).toBe(1);
-  expect(await page.evaluate(()=>window.__musicDragPauses||0)).toBe(0);
+  expect(await page.evaluate(()=>window.__plays)).toBe(1);
+  expect(await page.evaluate(()=>window.__pauses||0)).toBe(0);
   await page.locator("#musicBubbleTrigger").click();
   await expect(page.locator("#musicBubbleActions")).toBeVisible();
 });
@@ -798,38 +782,11 @@ test("menu section navigation keeps Dark and preserves per-tab language on F5 @s
 test("music orb animates when playing, pauses without hiding, stops until re-enabled @smoke @core", async ({
   page,
 }) => {
-  // Deterministic YouTube mock: no external network or media autoplay required.
-  await page.addInitScript(() => {
-    window.YT = {
-      PlayerState: { PLAYING: 1, PAUSED: 2, ENDED: 0 },
-      Player: function (_host, options) {
-        const player = {
-          setVolume() {},
-          playVideo() {
-            window.__musicTestPlayCalls = (window.__musicTestPlayCalls || 0) + 1;
-            options.events.onStateChange({ data: 1 });
-          },
-          pauseVideo() {
-            options.events.onStateChange({ data: 2 });
-          },
-          stopVideo() {
-            window.__musicTestStopCalls = (window.__musicTestStopCalls || 0) + 1;
-            options.events.onStateChange({ data: 0 });
-          },
-        };
-        queueMicrotask(() => {
-          window.__musicMockReady = true;
-          options.events.onReady({ target: player });
-        });
-        return player;
-      },
-    };
-  });
+  await mockWeddingAudio(page);
 
   await page.goto(base + "/index.html?party=bride", { waitUntil: "domcontentloaded" });
   await page.locator("#waxOpenButton").click();
   await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
-  await page.waitForFunction(() => window.__musicMockReady === true);
 
   const bubble = page.locator("#musicBubble");
   // The seal activated the player; the orb appears when the gate is gone.
@@ -866,7 +823,7 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
   await page.locator("#musicBubbleStop").click();
   await expect(bubble).toBeHidden();
   await expect(page.locator("#musicToggle")).toHaveAttribute("aria-pressed", "false");
-  expect(await page.evaluate(() => window.__musicTestStopCalls)).toBe(1);
+  expect(await page.locator("#weddingMusic").evaluate(audio => audio.currentTime)).toBe(0);
 
   // The stopped bubble cannot start music itself; guests must use Settings.
   await page.locator("#settingsTrigger").click();
@@ -874,7 +831,7 @@ test("music orb animates when playing, pauses without hiding, stops until re-ena
   await page.locator("#musicToggle").evaluate(node => node.click());
   await expect(bubble).toBeVisible();
   await expect(bubble).toHaveAttribute("data-music-state", "playing");
-  expect(await page.evaluate(() => window.__musicTestPlayCalls)).toBe(3);
+  expect(await page.evaluate(() => window.__plays)).toBe(3);
 });
 
 
@@ -1126,4 +1083,49 @@ test("gate ornaments and idle butterflies pause in background and stop after ent
   }));
   expect(stopped.sun).toBe("none");
   expect(stopped.stars.every(name => name === "none")).toBe(true);
+});
+
+
+test("native MP3 starts in gate gesture, retries rejection, cancels late playback @smoke @core", async ({page}) => {
+  await mockWeddingAudio(page, 400);
+  const youtubeRequests=[];
+  page.on("request", request=>{if (/youtube|ytimg|googlevideo/.test(request.url())) youtubeRequests.push(request.url());});
+  for (const party of ["bride","groom"]) {
+    await page.goto(base+"/index.html?party="+party,{waitUntil:"domcontentloaded"});
+    expect(await page.locator("#weddingMusic").evaluate(audio=>decodeURI(new URL(audio.src).pathname))).toBe(
+      party === "bride" ? "/A Thousand Years.mp3" : "/破茧.mp3"
+    );
+    await page.evaluate(()=>{window.__rejectNextPlay=true;});
+    await page.locator("#waxOpenButton").click();
+    expect(await page.evaluate(()=>window.__plays)).toBe(1);
+    expect(await page.evaluate(()=>window.__playInActivation)).toBe(true);
+    await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","paused");
+    // Retry through Settings, then cancel while play() is still pending.
+    await page.locator("#musicToggle").evaluate(button=>button.click());
+    await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","starting");
+    await page.locator("#musicToggle").evaluate(button=>button.click());
+    await page.waitForTimeout(600);
+    await expect(page.locator("#musicToggle")).toHaveAttribute("aria-pressed","false");
+    expect(await page.locator("#weddingMusic").evaluate(audio=>audio.paused)).toBe(true);
+    await page.locator("#musicToggle").evaluate(button=>button.click());
+    await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing");
+    await expect(page.locator("iframe[src*=youtube]")).toHaveCount(0);
+  }
+  expect(youtubeRequests).toEqual([]);
+});
+
+test("real MP3 plays across the gate transition without a video player @smoke @core", async ({page}) => {
+  test.setTimeout(60000);
+  const videoRequests=[];
+  page.on("request", request=>{if (/youtube|ytimg|googlevideo/.test(request.url())) videoRequests.push(request.url());});
+  for (const party of ["bride","groom"]) {
+    await page.goto(base+"/index.html?party="+party,{waitUntil:"domcontentloaded"});
+    await page.locator("#waxOpenButton").click();
+    await expect.poll(()=>page.locator("#weddingMusic").evaluate(audio=>audio.currentTime),{timeout:15000}).toBeGreaterThan(0.2);
+    await expect(page.locator("#moonlightGate")).toBeHidden({timeout:16000});
+    await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing");
+    expect(await page.locator("#weddingMusic").evaluate(audio=>({paused:audio.paused,error:audio.error?.code||0,loop:audio.loop}))).toEqual({paused:false,error:0,loop:true});
+    await expect(page.locator("video, iframe[src*=youtube]")).toHaveCount(0);
+  }
+  expect(videoRequests).toEqual([]);
 });

@@ -103,7 +103,7 @@ window.WEDDING_INFO = {
         "embedUrl": "https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"
       },
       "music": {
-        "youtubeId": "TA1W-pHNKl8"
+        "src": "A Thousand Years.mp3"
       },
       "images": {
         "hero": "images/optimized/assets/hero_bride.webp",
@@ -164,7 +164,7 @@ window.WEDDING_INFO = {
         "embedUrl": "https://maps.google.com/maps?q=11.163389,107.390139&z=16&output=embed"
       },
       "music": {
-        "youtubeId": "Pnoco4_lM-8"
+        "src": "破茧.mp3"
       },
       "images": {
         "hero": "images/optimized/assets/hero_groom.webp",
@@ -217,7 +217,7 @@ window.WEDDING_INFO = {
         "embedUrl": "https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"
       },
       "music": {
-        "youtubeId": "TA1W-pHNKl8"
+        "src": "A Thousand Years.mp3"
       },
       "images": {
         "hero": "images/optimized/assets/hero_bride.webp",

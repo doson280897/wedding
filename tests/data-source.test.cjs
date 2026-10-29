@@ -26,7 +26,7 @@ test("one wedding-info.js holds all customer data", () => {
     for (const key of ["ceremonyTime", "ceremonyEnd", "receptionTime", "receptionEnd"]) {
       assert.match(party[key], /^\d{2}:\d{2}$/);
     }
-    assert.match(party.music.youtubeId, /^[\w-]{11}$/);
+    assert.ok(fs.existsSync(path.join(root, party.music.src)), "Missing MP3: " + party.music.src);
     assert.ok(party.venue.mapUrl.startsWith("https://"));
     assert.ok(party.venue.embedUrl.startsWith("https://"));
     assert.ok(party.gift.accountNumber);
@@ -53,7 +53,7 @@ test("one-reception data is independent and complete without a second-party acco
   assert.ok(party.venue?.name && party.venue?.address);
   assert.match(party.venue.mapUrl,/^https:\/\//);
   assert.match(party.venue.embedUrl,/^https:\/\//);
-  assert.match(party.music.youtubeId,/^[\w-]{11}$/);
+  assert.ok(fs.existsSync(path.join(root, party.music.src)), "Missing MP3: " + party.music.src);
   assert.ok(party.gift.bank && party.gift.accountNumber && party.gift.qrImage);
   for (const file of [...Object.values(party.images),party.gift.qrImage]) {
     assert.ok(fs.existsSync(path.join(root,file)), "Missing single-party asset: "+file);
@@ -97,8 +97,8 @@ test("template and engine files contain no customer-specific information", () =>
     info.couple.groom.full,
     info.parties.bride.date,
     info.parties.groom.date,
-    info.parties.bride.music.youtubeId,
-    info.parties.groom.music.youtubeId,
+    info.parties.bride.music.src,
+    info.parties.groom.music.src,
     info.parties.bride.gift.accountNumber,
     info.parties.groom.gift.accountNumber,
   ];

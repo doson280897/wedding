@@ -6,7 +6,7 @@ Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, 
 ### Giao diện và khách mời cá nhân hóa
 
 - **Một nút điều khiển chung** mặc định ở **góc dưới bên phải**, có thể kéo và tự hít vào mép gần nhất. Ở màn chọn tiệc / tạo link, bảng chỉ có **Cài đặt** (VN/EN); sau khi mở thiệp, bảng thêm tab **Mục lục** (mở mặc định) trước tab **Cài đặt** (VN/EN, nhạc). Nút Mục lục nổi riêng đã được loại bỏ.
-- Bong bóng nhạc **chỉ xuất hiện sau khi YouTube xác nhận `PLAYING`**, không hiện khi đang tải/buffering. Mặc định ở góc dưới trái; kéo/thả được cả lúc nhạc đang chạy, cùng cơ chế hít mép và tránh chồng lên nút chính. Chạm bong bóng mở **Pause / Resume / Stop**; Pause giữ vị trí phát, giữ bong bóng nhưng ngừng lắc và đổi màu; Resume phát tiếp tại vị trí cũ (tự seek nếu iframe bị tua về đầu); Stop dừng hẳn và ẩn bong bóng cho đến khi bật lại từ Cài đặt.
+- Bong bóng nhạc **chỉ xuất hiện sau khi âm thanh phát sự kiện `playing`**, không hiện khi đang tải/buffering. Mặc định ở góc dưới trái; kéo/thả được cả lúc nhạc đang chạy, cùng cơ chế hít mép và tránh chồng lên nút chính. Chạm bong bóng mở **Pause / Resume / Stop**; Pause giữ vị trí phát, giữ bong bóng nhưng ngừng lắc và đổi màu; Resume phát tiếp tại vị trí cũ; Stop dừng hẳn và ẩn bong bóng cho đến khi bật lại từ Cài đặt.
 - Link tạo khi chọn **EN** mang `lang=en`: cảnh mở cửa, lời mời và toàn bộ nội dung thiệp mở bằng tiếng Anh; tên riêng được giữ nguyên. Các chữ trong cảnh mở cửa nằm trong `wedding-info.js` → `text.vi/en["gate.*"]`.
 - Thiệp chỉ dùng **Dark Luxury** trên mọi thiết bị. Không tự đổi theo giao diện hệ điều hành và không có lựa chọn Sáng/Tối. F5 giữ ngôn ngữ trong tab đang xem; tab mới mặc định VN (trừ link có `lang=en`).
 - Trong cảnh sao rơi **Ngày chung đôi** khi mở cửa, hiển thị **Trân trọng kính mời**; với link có `?to=Tên+khách`, **tên người nhận** nằm ngay dưới bằng font serif đậm, màu vàng sáng. Hero không lặp lại lời mời. Có thể sửa nhãn trong `wedding-info.js` → `text.vi["guest.recipientLabel"]` / `text.en["guest.recipientLabel"]`. Link không có tên chỉ hiện lời mời, không để dòng tên trống.
@@ -38,7 +38,7 @@ Trong **[wedding-info.js](wedding-info.js)**, trường `wedding.mode` chọn ki
     "mapUrl": "https://www.google.com/maps/...",
     "embedUrl": "https://maps.google.com/maps?..."
   },
-  "music": { "youtubeId": "MÃ_VIDEO" },
+  "music": { "src": "music.mp3" },
   "images": { "hero": "...", "ending": "...", "favicon": "favicon-groom.svg", "portraitMain": "...", "portraitSecondary": "..." },
   "gift": { "bank": "Tên ngân hàng", "accountHolder": "Tên chủ tài khoản", "accountNumber": "...", "qrImage": "...", "qrAlt": { "vi": "Mã QR mừng cưới", "en": "Wedding gift QR" } },
   "region": { "vi": "Khu vực", "en": "Region" }
@@ -68,7 +68,7 @@ Trong **[wedding-info.js](wedding-info.js)**, trường `wedding.mode` chọn ki
 | `parties.single` | Ngày, giờ, nhà hàng, bản đồ, ảnh, nhạc và QR của một tiệc chung |
 | `parties.bride`, `parties.groom` | Ngày (YYYY-MM-DD), giờ lễ/tiệc, ngày âm lịch và địa điểm |
 | `parties.*.venue` | Tên sảnh/nhà hàng, địa chỉ, URL Google Maps, URL bản đồ nhúng |
-| `parties.*.music.youtubeId` | Mã video nhạc YouTube cho từng lễ |
+| `parties.*.music.src` | Đường dẫn file MP3 cho từng lễ |
 | `parties.*.images` | Ảnh hero, ảnh kết, chân dung, favicon |
 | `parties.*.gift` | Tên ngân hàng, chủ tài khoản, số tài khoản, mã QR |
 | `text.vi` và `text.en` | **Toàn bộ lời mời, câu chữ, thông báo, tiêu đề** của cả hai ngôn ngữ |
@@ -95,7 +95,8 @@ Mẫu `{{couple.bride.short}}`, `{{parties.groom.dateDots}}`, `{{parties.bride.v
 - `date`: định dạng `YYYY-MM-DD`, ví dụ `2027-03-15`.
 - `ceremonyTime`, `ceremonyEnd`, `receptionTime`, `receptionEnd`: giờ 24h như `09:00`.
 - `site.timezone`: dạng `+07:00`. Countdown và lịch ICS đều đọc từ đó.
-- `music.youtubeId`: phần ID của link `youtube.com/watch?v=...`, **không** nhập cả URL.
+- `music.src`: đường dẫn MP3 tương đối với trang thiệp, giữ nguyên tên file (kể cả dấu cách/Unicode). Vu Quy dùng `A Thousand Years.mp3`; Tân Hôn dùng `破茧.mp3`.
+- Nhạc được tải trước và gọi phát trực tiếp khi chạm ổ khóa. Dùng âm thanh HTML, không tải YouTube/iframe nên không bật trình phát video. Tạm dừng giữ vị trí; Dừng đặt về đầu bài. Nếu trình duyệt chặn phát hoặc mất mạng, có thể thử lại trong Tùy chỉnh → Âm nhạc.
 
 ### Hình ảnh, QR và album
 

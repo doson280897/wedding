@@ -184,7 +184,7 @@
   document.addEventListener("visibilitychange", updateGateVisibility);
   updateGateVisibility();
   // One optional sound clip for the whole lock-to-door sequence. It starts
-  // directly on the seal gesture and is independent from the YouTube iframe.
+  // directly on the seal gesture and is independent from the gate animation.
   const introSoundUrl = typeof info.site?.introSound === "string" ? info.site.introSound.trim() : "";
   const introSound = selectedParty && !linkToolInitial && introSoundUrl
     ? new Audio(introSoundUrl) : null;
@@ -505,72 +505,61 @@
   const musicBubbleActions = document.getElementById("musicBubbleActions");
   const musicBubblePause = document.getElementById("musicBubblePause");
   const musicBubbleStop = document.getElementById("musicBubbleStop");
-  const YOUTUBE_MUSIC_ID = partyInfo(selectedParty || "groom").music.youtubeId;
-  let youtubePlayer = null;
-  let youtubePlayerReady = false;
-  let youtubePlayerPromise = null;
+  // A native audio element cannot open a YouTube/native video overlay.
+  // Resolve relative to the page so GitHub Pages' /wedding/ prefix is retained.
+  const musicAudio = selectedParty && !linkToolInitial ? document.createElement("audio") : null;
+  if (musicAudio) {
+    musicAudio.id = "weddingMusic";
+    musicAudio.src = new URL(partyInfo(selectedParty).music.src, document.baseURI).href;
+    musicAudio.preload = "auto";
+    musicAudio.loop = true;
+    musicAudio.volume = 0.7;
+    musicAudio.hidden = true;
+    document.body.appendChild(musicAudio);
+  }
   let musicPlaying = false;
   let musicEnabled = false;
   let musicHasStarted = false;
-  let musicPausePosition = 0;
-  let musicResumePending = false;
   let musicStarting = false;
   let bubbleActionsOpen = false;
   let musicWantsPlayback = false;
   let musicPlaybackFailed = false;
   let musicRequestId = 0;
   let musicStartTimer = 0;
-  let musicStatePoll = 0;
 
   const clearMusicWait = () => {
     clearTimeout(musicStartTimer);
-    clearInterval(musicStatePoll);
     musicStartTimer = 0;
-    musicStatePoll = 0;
-  };
-
-  // PLAYING is confirmed by YouTube's event or getPlayerState(), never by
-  // merely showing the bubble. The watchdog prevents endless "Loading".
-  const confirmMusicPlaying = () => {
-    if (!musicEnabled || !musicWantsPlayback) return;
-    clearMusicWait();
-    musicPlaying = true;
-    musicStarting = false;
-    musicPlaybackFailed = false;
-    musicHasStarted = true;
-    if (musicResumePending && musicPausePosition > 1) {
-      musicResumePending = false;
-      try {
-        const now = youtubePlayer?.getCurrentTime?.();
-        if (Number.isFinite(now) && now < musicPausePosition - 2) {
-          youtubePlayer?.seekTo?.(musicPausePosition, true);
-        }
-      } catch (_) {}
-    } else {
-      musicResumePending = false;
-    }
-    setMusicUI();
-  };
-
-  const rememberMusicPosition = () => {
-    try {
-      const current = youtubePlayerReady ? youtubePlayer?.getCurrentTime?.() : undefined;
-      if (Number.isFinite(current) && current > 0) musicPausePosition = current;
-    } catch (_) {}
   };
 
   const failMusicAttempt = requestId => {
     if (!musicEnabled || requestId !== musicRequestId) return;
-    rememberMusicPosition();
     ++musicRequestId;
     clearMusicWait();
     musicWantsPlayback = false;
     musicPlaying = false;
     musicStarting = false;
     musicPlaybackFailed = true;
+    musicAudio?.pause();
     setMusicUI();
-    // If a delayed play command eventually takes effect, silence it.
-    try { if (youtubePlayerReady) youtubePlayer?.pauseVideo(); } catch (_) {}
+  };
+
+  const monitorMusicWait = requestId => {
+    clearMusicWait();
+    musicStartTimer = setTimeout(() => failMusicAttempt(requestId), 15000);
+  };
+
+  const confirmMusicPlaying = () => {
+    if (!musicEnabled || !musicWantsPlayback) {
+      musicAudio?.pause();
+      return;
+    }
+    clearMusicWait();
+    musicPlaying = true;
+    musicStarting = false;
+    musicPlaybackFailed = false;
+    musicHasStarted = true;
+    setMusicUI();
   };
 
   const setBubbleActionsOpen = open => {
@@ -612,7 +601,7 @@
         musicPlaying ? "music.pauseAria" : "music.resumeAria";
       musicBubblePause.setAttribute("aria-label", tr(key));
       musicBubblePause.setAttribute("title", tr(key));
-      // Never lock Pause while YouTube is buffering or API-ready is pending.
+      // Never lock Pause while the MP3 is buffering.
       musicBubblePause.disabled = false;
     }
     if (musicBubbleStop) {
@@ -630,94 +619,60 @@
     musicPlaying = false;
     musicStarting = false;
     musicHasStarted = false;
-    musicPausePosition = 0;
-    musicResumePending = false;
+    musicAudio?.pause();
+    try { if (musicAudio) musicAudio.currentTime = 0; } catch (_) {}
     setBubbleActionsOpen(false);
     setMusicUI();
-    try {
-      if (youtubePlayerReady && youtubePlayer) {
-        if (typeof youtubePlayer.stopVideo === "function") youtubePlayer.stopVideo();
-        else youtubePlayer.pauseVideo();
-      }
-    } catch (_) {}
-  };
-
-  const monitorMusicWait = requestId => {
-    clearMusicWait();
-    musicStartTimer = setTimeout(() => {
-      // Both a blocked start and a stalled rebuffer need a bounded wait.
-      // Switch to a retryable paused orb instead of spinning indefinitely.
-      failMusicAttempt(requestId);
-    }, 10000);
-
-    musicStatePoll = setInterval(() => {
-      if (!musicEnabled || !musicWantsPlayback || requestId !== musicRequestId) {
-        clearMusicWait();
-        return;
-      }
-      try {
-        if (youtubePlayerReady &&
-            typeof youtubePlayer?.getPlayerState === "function" &&
-            youtubePlayer.getPlayerState() === window.YT?.PlayerState?.PLAYING) {
-          confirmMusicPlaying();
-        }
-      } catch (_) {}
-    }, 600);
   };
 
   const requestMusicPlayback = () => {
-    if (!selectedParty || musicStarting || musicPlaying) return;
+    if (!musicAudio || musicStarting || musicPlaying) return;
     const requestId = ++musicRequestId;
     clearMusicWait();
     musicEnabled = true;
     musicWantsPlayback = true;
     musicPlaybackFailed = false;
     musicStarting = true;
-    musicResumePending = musicHasStarted && musicPausePosition > 1;
     setMusicUI();
-
     monitorMusicWait(requestId);
-
-    const play = player => {
-      if (!musicEnabled || !musicWantsPlayback || requestId !== musicRequestId) return;
-      try {
-        if (musicResumePending && musicPausePosition > 1 &&
-            typeof player.getCurrentTime === "function" &&
-            typeof player.seekTo === "function") {
-          const current = player.getCurrentTime();
-          if (Number.isFinite(current) && current < musicPausePosition - 2) {
-            player.seekTo(musicPausePosition, true);
-          }
-        }
-        // This is called synchronously from the seal's tap if YouTube is
-        // already ready, preserving mobile browsers' user activation.
-        player.unMute?.();
-        player.setVolume?.(70);
-        player.playVideo(); // Keep the same iframe and playback position.
-      } catch (_) { failMusicAttempt(requestId); }
-    };
-    if (youtubePlayerReady && youtubePlayer) {
-      play(youtubePlayer);
-    } else {
-      initYouTubeMusicPlayer().then(play).catch(() => failMusicAttempt(requestId));
-    }
+    try {
+      // Call play directly in the gate click, before any await/timer, to keep
+      // iOS user activation. Pause/resume reuses this element and currentTime.
+      musicAudio.play()?.catch(() => failMusicAttempt(requestId));
+    } catch (_) { failMusicAttempt(requestId); }
   };
 
   const pauseMusic = () => {
     if (!musicEnabled || (!musicPlaying && !musicStarting)) return;
-    ++musicRequestId; // Cancel even if the YouTube iframe isn't ready yet.
+    ++musicRequestId;
     clearMusicWait();
     musicWantsPlayback = false;
     musicPlaying = false;
     musicStarting = false;
     musicPlaybackFailed = false;
-    rememberMusicPosition();
-    musicResumePending = false;
+    musicAudio?.pause();
     setMusicUI();
-    try {
-      if (youtubePlayerReady && youtubePlayer) youtubePlayer.pauseVideo();
-    } catch (_) {}
   };
+
+  musicAudio?.addEventListener("playing", confirmMusicPlaying);
+  musicAudio?.addEventListener("waiting", () => {
+    if (!musicWantsPlayback || musicStarting) return;
+    musicPlaying = false;
+    musicStarting = true;
+    monitorMusicWait(musicRequestId);
+    setMusicUI();
+  });
+  musicAudio?.addEventListener("pause", () => {
+    // Ignore queued pause events after a newer play has already resumed.
+    if (!musicAudio.paused || !musicWantsPlayback) return;
+    ++musicRequestId;
+    clearMusicWait();
+    musicWantsPlayback = false;
+    musicPlaying = false;
+    musicStarting = false;
+    setMusicUI();
+  });
+  musicAudio?.addEventListener("error", () => failMusicAttempt(musicRequestId));
 
   musicBubbleTrigger?.addEventListener("click", () => {
     if (musicEnabled) setBubbleActionsOpen(!bubbleActionsOpen);
@@ -741,167 +696,8 @@
     }
   });
 
-  function loadYouTubeIframeAPI() {
-    if (window.YT?.Player) return Promise.resolve(window.YT);
-    if (window.__weddingYouTubeApiPromise) return window.__weddingYouTubeApiPromise;
-
-    window.__weddingYouTubeApiPromise = new Promise((resolve, reject) => {
-      const previousReady = window.onYouTubeIframeAPIReady;
-      let finished = false;
-      let script = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
-      const complete = error => {
-        if (finished) return;
-        finished = true;
-        clearTimeout(timeout);
-        if (error) {
-          window.onYouTubeIframeAPIReady = previousReady;
-          script?.remove(); // A later tap can retry instead of hanging forever.
-          reject(error);
-        } else {
-          resolve(window.YT);
-        }
-      };
-
-      const timeout = setTimeout(() => complete(new Error("YouTube API timeout")), 12000);
-      window.onYouTubeIframeAPIReady = () => {
-        try { previousReady?.(); } catch (_) {}
-        if (window.YT?.Player) complete();
-        else complete(new Error("YouTube API loaded without Player"));
-      };
-
-      if (script) {
-        script.addEventListener("error", () =>
-          complete(new Error("YouTube IFrame API failed to load")), { once:true });
-        return;
-      }
-
-      script = document.createElement("script");
-      script.src = "https://www.youtube.com/iframe_api";
-      script.async = true;
-      script.onerror = () => complete(new Error("YouTube IFrame API failed to load"));
-      document.head.appendChild(script);
-    });
-
-    window.__weddingYouTubeApiPromise.catch(() => {
-      window.__weddingYouTubeApiPromise = null;
-    });
-    return window.__weddingYouTubeApiPromise;
-  }
-
-  function initYouTubeMusicPlayer() {
-    if (youtubePlayerPromise) return youtubePlayerPromise;
-
-    youtubePlayerPromise = loadYouTubeIframeAPI().then(() => new Promise((resolve, reject) => {
-      let readySettled = false;
-      const readyTimeout = setTimeout(() => {
-        if (readySettled) return;
-        readySettled = true;
-        youtubePlayerReady = false;
-        try { youtubePlayer?.destroy?.(); } catch (_) {}
-        youtubePlayer = null;
-        reject(new Error("YouTube player readiness timeout"));
-      }, 12000);
-
-      let host = document.getElementById("youtubeWeddingMusic");
-      if (!host) {
-        host = document.createElement("div");
-        host.id = "youtubeWeddingMusic";
-        host.setAttribute("aria-hidden", "true");
-        host.style.cssText =
-          "position:fixed;width:200px;height:200px;left:-9999px;bottom:0;opacity:.01;pointer-events:none;overflow:hidden;";
-        document.body.appendChild(host);
-      }
-
-      youtubePlayer = new window.YT.Player(host, {
-        // YouTube requires a player iframe of at least 200px; a 2×2 iframe
-        // can fail to initialize or report state on mobile Safari.
-        width: "200",
-        height: "200",
-        videoId: YOUTUBE_MUSIC_ID,
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          loop: 1,
-          playlist: YOUTUBE_MUSIC_ID,
-          playsinline: 1,
-          rel: 0,
-          origin: window.location.origin
-        },
-        events: {
-          onReady: event => {
-            if (readySettled) return;
-            readySettled = true;
-            clearTimeout(readyTimeout);
-            youtubePlayerReady = true;
-            try { event.target.setVolume(70); } catch (_) {}
-            resolve(event.target);
-          },
-          onStateChange: event => {
-            // A late PLAYING callback after Pause/Stop must never bring the
-            // music back, even if the iframe resumed itself while hidden.
-            if (!musicEnabled || !musicWantsPlayback) {
-              if (event.data === window.YT.PlayerState.PLAYING) {
-                try { event.target.pauseVideo(); } catch (_) {}
-              }
-              return;
-            }
-            if (event.data === window.YT.PlayerState.BUFFERING && musicWantsPlayback) {
-              // PLAYING cleared the original watchdog. Re-arm once per stall,
-              // without extending the deadline on repeated BUFFERING events.
-              if (!musicStarting) monitorMusicWait(musicRequestId);
-              musicPlaying = false;
-              musicStarting = true;
-              setMusicUI();
-            } else if (event.data === window.YT.PlayerState.PLAYING) {
-              if (!musicWantsPlayback) {
-                // A delayed start must not restart after Pause/Stop/timeout.
-                try { event.target.pauseVideo(); } catch (_) {}
-                return;
-              }
-              confirmMusicPlaying();
-            } else if (
-              event.data === window.YT.PlayerState.PAUSED ||
-              event.data === window.YT.PlayerState.ENDED
-            ) {
-              // Initial PAUSED may arrive during an in-flight play request.
-              // Wait for PLAYING or timeout rather than flashing the icon.
-              if (musicStarting && musicWantsPlayback) return;
-              ++musicRequestId;
-              clearMusicWait();
-              musicWantsPlayback = false;
-              musicPlaying = false;
-              musicStarting = false;
-              setMusicUI();
-            }
-          },
-          onError: error => {
-            failMusicAttempt(musicRequestId);
-            if (!readySettled) {
-              readySettled = true;
-              clearTimeout(readyTimeout);
-              reject(new Error("YouTube player error " + error.data));
-            }
-          }
-        }
-      });
-    }));
-
-    // Allow a later user tap to retry after a transient YouTube/network error.
-    youtubePlayerPromise.catch(() => {
-      youtubePlayerPromise = null;
-      youtubePlayerReady = false;
-    });
-    return youtubePlayerPromise;
-  }
-
-  // Preload YouTube while the locked gate is displayed. A direct tap on
-  // the seal starts audible music; the transition to Hero never touches the
-  // player's play/pause/volume state. iOS still requires the iframe to have
-  // finished loading before that first gesture; manual retry remains possible.
-  if (selectedParty && !linkToolInitial) {
-    initYouTubeMusicPlayer().catch(() => {});
+  // Preload only audio; no iframe/API/network dependency on YouTube remains.
+  if (musicAudio) {
     waxOpenButton?.addEventListener("click", requestMusicPlayback, { once:true });
     document.addEventListener("wedding:waxopen", setMusicUI, { once:true });
   }
