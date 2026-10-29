@@ -276,8 +276,8 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
   );
   const computed = await page.evaluate(() => ({
     hero: document.documentElement.style.getPropertyValue("--hero-image"),
-    music: decodeURI(new URL(document.getElementById("weddingMusic").src).pathname).split("/").pop(),
-    configuredMusic: window.WEDDING_INFO.parties.bride.music.src,
+    music: document.getElementById("weddingMusic").src,
+    configuredMusic: new URL(window.WEDDING_INFO.parties.bride.music.src, document.baseURI).href,
     calendarFilename: window.WeddingI18n.t("calendar.brideFile"),
   }));
   expect(computed.hero).toContain("hero_groom.webp");
