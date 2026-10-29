@@ -50,3 +50,6 @@
  .moonlight-gate.is-opened .moonlight-gate__scene{visibility:visible}
  .moonlight-gate.is-opened .moonlight-gate__door,.moonlight-gate.is-opened #waxOpenButton{visibility:hidden}
 }
+/* Keep keyboard focus visible without drawing a box over the ornament. */
+#waxOpenButton:focus-visible{outline:none}
+#waxOpenButton:focus-visible .fairy-lock{filter:drop-shadow(0 0 5px #ffe4a7) drop-shadow(0 0 12px #dba64e80)}
