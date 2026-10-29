@@ -749,14 +749,14 @@ test("Dark stays fixed across OS settings and tabs while language survives F5 @s
   await expect(lightPage.locator("#moonlightGate")).toBeVisible();
   await expect(lightPage.locator(".moonlight-gate__celestial")).toBeVisible();
   await expect(lightPage.locator("#settingsHub")).toBeHidden();
-  await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#12495b");
+  await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#0b161e");
   await lightPage.locator("#waxOpenButton").click();
   await expect(lightPage.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   await expect(lightPage.locator("#settingsHub")).toBeVisible();
   await lightPage.locator("#settingsTrigger").click();
   await lightPage.locator("#controlTabSettings").click();
   await expect(lightPage.locator("[data-theme-option]")).toHaveCount(0);
-  await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#14566b");
+  await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#0b0e0e");
   await lightPage.close();
 });
 
