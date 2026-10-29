@@ -37,6 +37,9 @@ test("one shared language control, in-page generator, back navigation @smoke @co
     "Create a personalized invitation",
   );
 
+  // Native Safari pickers must not expose a disabled template-only third row.
+  await expect(page.locator("#linkToolParty option")).toHaveCount(2);
+  expect(await page.locator("#linkToolParty option").evaluateAll(options => options.map(option => option.value))).toEqual(["bride", "groom"]);
   await page.locator("#linkToolGuest").fill("Minh & Lan");
   await page.locator("#linkToolParty").selectOption("groom");
   await page.locator('#linkToolForm button[type="submit"]').click();
@@ -909,6 +912,8 @@ test("single reception shows one event, date, venue, map and gift @smoke", async
   await page.goto(base + "/index.html?tool=links&lang=en", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#linkToolScreen")).toBeVisible();
   await expect(page.locator("#linkToolPartyField")).toBeHidden();
+  await expect(page.locator("#linkToolParty option")).toHaveCount(1);
+  await expect(page.locator("#linkToolParty option")).toHaveAttribute("value", "single");
   await page.locator("#linkToolGuest").fill("Alex & Jamie");
   await page.locator('#linkToolForm button[type="submit"]').click();
   const invitation = await page.locator("#linkToolGenerated").textContent();

@@ -15,12 +15,12 @@
   const guestInput = document.getElementById("linkToolGuest");
   const partySelect = document.getElementById("linkToolParty");
   const singleMode = window.WEDDING_INFO.wedding?.mode === "single";
-  // A one-reception website must not offer bride/groom choices. In double
-  // mode, the single-party example option must not appear either.
+  // Remove unavailable choices: iOS's native picker can still list an option
+  // marked hidden/disabled, so CSS/attributes alone leak the template option.
   [...partySelect.options].forEach(option => {
-    const available = singleMode ? option.value === "single" : option.value !== "single";
-    option.hidden = !available;
-    option.disabled = !available;
+    const available = singleMode ? option.value === "single"
+      : option.value === "bride" || option.value === "groom";
+    if (!available) option.remove();
   });
   if (singleMode) partySelect.value = "single";
   const result = document.getElementById("linkToolResult");
