@@ -18,7 +18,6 @@
 .moonlight-gate__orbit--sun{left:34%}
 .moonlight-gate__orbit--moon{left:66.3%}
 .moonlight-gate__orbit::before{display:none}
-.moonlight-gate__top-caption,.moonlight-gate__bottom-caption{bottom:calc(100% + 4cqw);width:150%;max-width:none;font:500 clamp(8px,1.55cqw,15px)/1.65 Georgia,serif;letter-spacing:.07em;color:#f0d9a6;text-shadow:0 1px 4px #000}
 .moonlight-gate__seam{top:9%;bottom:13%}
 .moonlight-gate__reveal{inset:18% 18% 13%;padding:10px}
 .moonlight-gate__reveal-names{font-size:clamp(25px,7cqw,56px);margin:18px auto}
@@ -53,3 +52,31 @@
 /* Keep keyboard focus visible without drawing a box over the ornament. */
 #waxOpenButton:focus-visible{outline:none}
 #waxOpenButton:focus-visible .fairy-lock{filter:drop-shadow(0 0 5px #ffe4a7) drop-shadow(0 0 12px #dba64e80)}
+
+/* Small gold butterflies drift near the flowers while the gate is closed. */
+.fairy-butterflies{position:absolute;inset:0;z-index:6;pointer-events:none;transition:opacity .45s ease}
+.fairy-butterfly{position:absolute;left:var(--butterfly-x);top:var(--butterfly-y);width:clamp(18px,5cqw,36px);aspect-ratio:64/52;opacity:.7;color:#f6d99e}
+.fairy-butterfly svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 4px #e8b562aa)}
+.fairy-butterfly__wing{fill:#edcb8266;stroke:currentColor;stroke-width:1.4;transform-box:fill-box}
+.fairy-butterfly__wing--left{transform-origin:right center}
+.fairy-butterfly__wing--right{transform-origin:left center}
+.fairy-butterfly__body{fill:none;stroke:#fff0c5;stroke-width:1.6;stroke-linecap:round}
+.fairy-butterfly--one{--butterfly-x:18%;--butterfly-y:27%;--drift-x:12cqw;--drift-y:-8cqw;--flight-time:9s;--flight-delay:-2s;--flight-tilt:-14deg}
+.fairy-butterfly--two{--butterfly-x:78%;--butterfly-y:22%;--drift-x:-11cqw;--drift-y:9cqw;--flight-time:11s;--flight-delay:-6s;--flight-tilt:18deg}
+.fairy-butterfly--three{--butterfly-x:25%;--butterfly-y:77%;--drift-x:10cqw;--drift-y:-14cqw;--flight-time:13s;--flight-delay:-4s;--flight-tilt:-8deg;width:clamp(16px,4cqw,29px)}
+@media(prefers-reduced-motion:no-preference){
+ .moonlight-gate:not([hidden]) .fairy-butterfly{animation:fairyButterflyFlight var(--flight-time) ease-in-out var(--flight-delay) infinite}
+ .moonlight-gate:not([hidden]) .fairy-butterfly__wing{animation:fairyWingFlutter .28s ease-in-out infinite alternate}
+ .moonlight-gate:not([hidden]) .fairy-butterfly--two .fairy-butterfly__wing{animation-duration:.34s}
+}
+@keyframes fairyButterflyFlight{
+ 0%,100%{opacity:0;transform:translate3d(0,0,0) rotate(var(--flight-tilt)) scale(.85)}
+ 15%{opacity:.8}
+ 40%{opacity:.9;transform:translate3d(var(--drift-x),var(--drift-y),0) rotate(calc(var(--flight-tilt) * -1)) scale(1)}
+ 70%{opacity:.65;transform:translate3d(calc(var(--drift-x) * .4),calc(var(--drift-y) * 1.3),0) rotate(var(--flight-tilt)) scale(.9)}
+ 85%{opacity:.5}
+}
+@keyframes fairyWingFlutter{from{transform:scaleX(.35)}to{transform:scaleX(1)}}
+.moonlight-gate.is-unlocking .fairy-butterflies,.moonlight-gate.is-awakening .fairy-butterflies,.moonlight-gate.is-opening .fairy-butterflies,.moonlight-gate.is-opened .fairy-butterflies{opacity:0}
+.moonlight-gate:is(.is-opening,.is-opened,[hidden]) .fairy-butterfly,.moonlight-gate:is(.is-opening,.is-opened,[hidden]) .fairy-butterfly__wing{animation:none}
+@media(prefers-reduced-motion:reduce){.fairy-butterflies{display:none}}

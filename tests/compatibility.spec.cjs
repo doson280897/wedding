@@ -1079,7 +1079,7 @@ test("calendar chooser offers matching provider drafts and files without claimin
 });
 
 
-test("gate ornaments keep captions clear, pause in background and stop after entry @smoke @core", async ({page}) => {
+test("gate ornaments and idle butterflies pause in background and stop after entry @smoke @core", async ({page}) => {
   await page.goto(base + "/index.html?party=groom&to=Guest", {waitUntil:"domcontentloaded"});
   const gate = page.locator("#moonlightGate");
   const ornaments = await page.evaluate(() => ({
@@ -1087,28 +1087,22 @@ test("gate ornaments keep captions clear, pause in background and stop after ent
     lock:getComputedStyle(document.querySelector("#waxOpenButton"),"::after").animationName,
     rays:getComputedStyle(document.querySelector(".fairy-star")).animationName,
     delays:[...document.querySelectorAll(".fairy-star")].map(node => getComputedStyle(node).animationDelay),
-    captions:[...document.querySelectorAll(".moonlight-gate__top-caption,.moonlight-gate__bottom-caption")].map(node => {
-      const orbit = node.closest(".moonlight-gate__orbit");
-      const text = node.getBoundingClientRect();
-      return {gap:orbit.getBoundingClientRect().top - text.bottom, left:text.left, right:text.right};
-    }),
-    width:innerWidth
+    captions:document.querySelectorAll(".moonlight-gate__top-caption,.moonlight-gate__bottom-caption").length,
+    butterflies:[...document.querySelectorAll(".fairy-butterfly")].map(node => getComputedStyle(node).animationName)
   }));
   expect(ornaments.sun).toBe("gateSunBreath");
   expect(ornaments.lock).toBe("fairyLockHighlight");
   expect(ornaments.rays).toBe("gateMoonTwinkle");
   expect(ornaments.delays).toHaveLength(4);
   expect(new Set(ornaments.delays).size).toBe(4);
-  for (const caption of ornaments.captions) {
-    expect(caption.gap).toBeGreaterThanOrEqual(8);
-    expect(caption.left).toBeGreaterThanOrEqual(0);
-    expect(caption.right).toBeLessThanOrEqual(ornaments.width);
-  }
+  expect(ornaments.captions).toBe(0);
+  expect(ornaments.butterflies).toEqual(Array(3).fill("fairyButterflyFlight"));
   await page.evaluate(() => {
     Object.defineProperty(document, "hidden", {configurable:true, get:() => true});
     document.dispatchEvent(new Event("visibilitychange"));
   });
   await expect(page.locator(".fairy-star").first()).toHaveCSS("animation-play-state", "paused");
+  await expect(page.locator(".fairy-butterfly").first()).toHaveCSS("animation-play-state", "paused");
   await page.evaluate(() => {
     delete document.hidden;
     document.dispatchEvent(new Event("visibilitychange"));
@@ -1117,6 +1111,7 @@ test("gate ornaments keep captions clear, pause in background and stop after ent
   await page.locator("#waxOpenButton").click();
   await expect(gate).toHaveClass(/is-opening/);
   await expect(page.locator(".fairy-star").first()).toHaveCSS("animation-name", "none");
+  await expect(page.locator(".fairy-butterfly").first()).toHaveCSS("animation-name", "none");
   await expect(gate).toBeHidden({timeout:16000});
   const stopped = await page.evaluate(() => ({
     sun:getComputedStyle(document.querySelector(".moonlight-gate__orbit--sun"),"::after").animationName,
