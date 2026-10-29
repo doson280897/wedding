@@ -153,6 +153,11 @@
     const activeParty = document.documentElement.dataset.party;
     for (const [property,field] of [["--hero-image","hero"],["--ending-image","ending"]]) {
       const source = activeParty && getInfo("parties." + activeParty + ".images." + field);
+      if (field === "hero" && source) {
+        const image = document.querySelector("img.hero-photo");
+        const url = withVersion(source).href;
+        if (image && image.src !== url) image.src = url;
+      }
       const value = source ? safeCssUrl(source) : "none";
       if (document.documentElement.style.getPropertyValue(property) !== value)
         document.documentElement.style.setProperty(property,value);

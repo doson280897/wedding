@@ -253,7 +253,7 @@ footer { background: #050806; color: #c5b9a4; }
 }
 
 /* Active celebration backgrounds come only from wedding-info.js. */
-.hero-photo{background-image:var(--hero-image,none)}
+.hero-photo{display:block;width:100%;height:100%;object-fit:cover;object-position:center 40%}
 .closing{background-image:var(--ending-image,none)}
 @media(max-width:650px) {
 }
@@ -380,10 +380,11 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
     inset:auto;
     width:100%;
     height:var(--hero-photo-height);
-    min-height:420px;
+    min-height:0;
     animation:none;
     transform:none!important;
-    background-position:center center;
+    object-fit:contain;
+    object-position:center;
   }
 
   .hero-shade{
@@ -436,11 +437,6 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
     --hero-photo-height:min(58svh,520px);
   }
 
-  .hero-photo{
-    min-height:360px;
-    background-position:center center;
-  }
-
   .hero-layout{
     display:block;
     align-items:initial;
@@ -477,10 +473,6 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
 @media(max-width:390px){
   .hero{
     --hero-photo-height:min(54svh,470px);
-  }
-
-  .hero-photo{
-    min-height:330px;
   }
 }
 

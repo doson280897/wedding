@@ -657,6 +657,12 @@ test("story last row centres and hero shade follows the photo after rotation", a
       const photo=node.querySelector('.hero-photo'),shade=node.querySelector('.hero-shade');
       return Math.max(Math.abs(photo.offsetHeight-shade.offsetHeight),Math.abs(photo.offsetHeight-node.clientHeight));
     })).toBeLessThanOrEqual(1);
+    if (size.width <= 900) {
+      const photo=page.locator('img.hero-photo');
+      await expect.poll(()=>photo.evaluate(node=>node.naturalWidth)).toBeGreaterThan(0);
+      expect(await photo.evaluate(node=>getComputedStyle(node).objectFit)).toBe('contain');
+      expect(await photo.evaluate(node=>node.getBoundingClientRect().height <= innerHeight)).toBe(true);
+    }
     await page.locator('.promise-grid').scrollIntoViewIfNeeded();
     const geometry=await page.locator('.promise-grid').evaluate(node=>{
       const g=node.getBoundingClientRect(),cards=[...node.children].map(n=>n.getBoundingClientRect());

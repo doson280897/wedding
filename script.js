@@ -413,10 +413,8 @@
     heroPrepared = true;
     const src = partyInfo(selectedParty)?.images?.hero;
     if (!src) return;
-    const image = new Image();
-    image.decoding = "async";
-    image.src = src + (src.includes("?") ? "&" : "?") + "v=" +
-      (document.querySelector('meta[name="wedding-build"]')?.content || "dev");
+    const image = document.querySelector("img.hero-photo");
+    if (!image) return;
     heroPreparation = image.decode ? image.decode().catch(() => {}) : Promise.resolve();
   };
   let handoffStarted = false;
