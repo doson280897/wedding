@@ -59,8 +59,8 @@ test("one shared language control, in-page generator, back navigation @smoke @co
   // and every invitation section, not just the generator's preview text.
   await page.goto(englishInvitation, { waitUntil:"domcontentloaded" });
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.locator(".moonlight-gate__reveal-overline")).toHaveText("OUR WEDDING DAY");
-  await expect(page.locator(".moonlight-gate__reveal-subtitle")).toHaveText("TOGETHER · FOREVER");
+  await expect(page.locator(".moonlight-gate__reveal-overline")).toHaveCount(0);
+  await expect(page.locator(".moonlight-gate__reveal-subtitle")).toHaveCount(0);
   await expect(page.locator("#gateGuestLabel")).toHaveText("Cordially inviting");
   await expect(page.locator("#gateGuestName")).toHaveText("Minh & Lan");
   await expect(page.locator("#waxOpenButton")).toHaveAttribute("aria-label", "Tap the lock to open the invitation");
@@ -365,32 +365,26 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(gate).toBeVisible();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
   await expect(page.locator("#waxMonogram img.fairy-lock")).toHaveCount(1);
-  await expect(page.locator(".moonlight-gate__reveal-overline")).toHaveText("NGÀY CHUNG ĐÔI");
-  await expect(page.locator(".moonlight-gate__reveal-overline")).not.toContainText("KÍNH MỜI");
-  await expect(page.locator(".moonlight-gate__celestial")).toBeVisible();
+  await expect(page.locator(".moonlight-gate__reveal-names,.moonlight-gate__reveal-overline,.moonlight-gate__celestial")).toHaveCount(0);
   await expect(page.locator(".moonlight-gate__hint")).toHaveCount(0);
-  const celestialWidth = await page.locator(".moonlight-gate__celestial").evaluate(node =>
-    node.getBoundingClientRect().width
-  );
-  expect(celestialWidth).toBeGreaterThanOrEqual(98);
   await expect(page.locator("#settingsHub")).toBeHidden();
   await expect(page.locator("#wqToggle")).toBeHidden();
   const gateLayout = await page.evaluate(() => {
     const scene = document.querySelector(".moonlight-gate__scene").getBoundingClientRect();
-    const celestial = document.querySelector(".moonlight-gate__celestial");
+    const backdrop = document.querySelector(".moonlight-gate__backdrop");
     const leftDoor = document.querySelector(".moonlight-gate__door--left");
     return {
       viewportW:innerWidth,
       viewportH:innerHeight,
       sceneW:scene.width,
       sceneH:scene.height,
-      celestialZ:Number(getComputedStyle(celestial).zIndex),
+      backdropZ:Number(getComputedStyle(backdrop).zIndex),
       doorZ:Number(getComputedStyle(leftDoor).zIndex)
     };
   });
   expect(Math.abs(gateLayout.sceneW - gateLayout.viewportW)).toBeLessThanOrEqual(1);
   expect(Math.abs(gateLayout.sceneH - gateLayout.viewportH)).toBeLessThanOrEqual(2);
-  expect(gateLayout.celestialZ).toBeLessThan(gateLayout.doorZ);
+  expect(gateLayout.backdropZ).toBeLessThan(gateLayout.doorZ);
 
   await page.locator("#waxOpenButton").click();
   await expect(gate).toHaveClass(/is-awakening/);
@@ -431,8 +425,11 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   );
   expect(hingeDuration).toBeGreaterThanOrEqual(1400);
   await expect(gate).toHaveClass(/is-opened/, { timeout:6000 });
-  await expect(page.locator(".moonlight-gate__reveal-names")).toBeVisible();
-  await expect(page.locator(".moonlight-gate__reveal-names")).toContainText("Nga");
+  await expect(page.locator("#gateGreeting")).toBeVisible();
+  await expect(page.locator("#gateGuestName")).toHaveText("ReloadGuest");
+  await expect(page.locator(".fairy-artboard")).toHaveCSS("opacity", "0");
+  const approach = await page.locator(".fairy-artboard").evaluate(node => getComputedStyle(node).transform);
+  expect(approach).not.toBe("none");
   await expect(page.locator("#settingsHub")).toBeHidden();
   await expect(page.locator("#wqToggle")).toBeHidden();
   const finalHinge = await leftDoor.evaluate(node => getComputedStyle(node).transform);
@@ -754,7 +751,7 @@ test("Dark stays fixed across OS settings and tabs while language survives F5 @s
   await lightPage.goto(url + "?party=bride", { waitUntil:"domcontentloaded" });
   await expect(lightPage.locator("html")).toHaveAttribute("data-theme","dark");
   await expect(lightPage.locator("#moonlightGate")).toBeVisible();
-  await expect(lightPage.locator(".moonlight-gate__celestial")).toBeVisible();
+  await expect(lightPage.locator(".moonlight-gate__backdrop")).toBeVisible();
   await expect(lightPage.locator("#settingsHub")).toBeHidden();
   await expect(lightPage.locator('meta[name="theme-color"]')).toHaveAttribute("content","#0b161e");
   await lightPage.locator("#waxOpenButton").click();

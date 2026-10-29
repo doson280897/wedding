@@ -204,7 +204,7 @@
   const GATE_UNLOCK_MS = 1400;
   const GATE_AWAKEN_MS = 180;
   const GATE_DOOR_MS = 2400;
-  const GATE_REVEAL_BEAT_MS = 1400;
+  const GATE_REVEAL_BEAT_MS = 2000;
   const GATE_HANDOFF_MS = 1100;
   // CSS and the fallback timers share one clock.
   for (const [name, time] of [["unlock", GATE_UNLOCK_MS], ["door", GATE_DOOR_MS], ["handoff", GATE_HANDOFF_MS]]) {
@@ -422,7 +422,7 @@
     doorSettled = true;
     lastGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.classList.add("is-opened");
-    // Hold the opened sky until both shooting stars travel off-screen.
+    // Let the invitation stand alone after the gate dissolves.
     scheduleGate(finishMoonlightGate, GATE_REVEAL_BEAT_MS);
   };
   function onDoorAnimationEnd(event) {

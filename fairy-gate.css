@@ -80,3 +80,26 @@
 .moonlight-gate.is-unlocking .fairy-butterflies,.moonlight-gate.is-awakening .fairy-butterflies,.moonlight-gate.is-opening .fairy-butterflies,.moonlight-gate.is-opened .fairy-butterflies{opacity:0}
 .moonlight-gate:is(.is-opening,.is-opened,[hidden]) .fairy-butterfly,.moonlight-gate:is(.is-opening,.is-opened,[hidden]) .fairy-butterfly__wing{animation:none}
 @media(prefers-reduced-motion:reduce){.fairy-butterflies{display:none}}
+
+/* Walk through the opening: scenery approaches, then dissolves behind the invitation. */
+.fairy-artboard{z-index:4;transform-origin:50% 48%}
+.moonlight-gate__scene>.moonlight-gate__backdrop{z-index:0}
+.moonlight-gate__scene>.moonlight-gate__magic{z-index:2}
+.moonlight-gate__reveal{inset:0;z-index:3;padding:28px;display:flex;align-items:center;justify-content:center}
+.moonlight-gate__greeting{margin:0;gap:16px;width:min(85vw,760px)}
+.moonlight-gate__recipient-label{font-size:clamp(17px,2.5vw,28px);letter-spacing:.2em;text-wrap:balance}
+.moonlight-gate__recipient-name{font-size:clamp(30px,5vw,56px);text-wrap:balance}
+@media(prefers-reduced-motion:no-preference){
+ .moonlight-gate.is-opening .fairy-artboard{animation:fairyWalkForward var(--gate-door-time,2.4s) cubic-bezier(.3,.08,.25,1) both}
+ .moonlight-gate.is-opening .fairy-surround{opacity:0;transition:opacity var(--gate-door-time,2.4s) ease}
+}
+@keyframes fairyWalkForward{
+ 0%{transform:translate3d(0,0,0) scale(1);opacity:1}
+ 30%{opacity:1}
+ 65%{opacity:.65}
+ 100%{transform:translate3d(0,-2%,0) scale(1.85);opacity:0}
+}
+.moonlight-gate.is-opened .fairy-artboard,.moonlight-gate.is-opened .fairy-surround{opacity:0;pointer-events:none}
+@media(prefers-reduced-motion:reduce){
+ .moonlight-gate.is-opened .fairy-artboard,.moonlight-gate.is-opened .fairy-surround{visibility:hidden}
+}
