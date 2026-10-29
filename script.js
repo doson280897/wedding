@@ -79,22 +79,13 @@
 
   const rawGuest = params.get("to");
   const displayGuest = rawGuest ? rawGuest.replace(/[_+]/g, " ").trim().slice(0, 100) : "";
-  const guestNode = document.getElementById("guestName");
-  const heroGuestLabel = document.getElementById("heroGuestLabel");
+  const guestNode = document.getElementById("gateGuestName");
 
   function updateGuest() {
-    const named = Boolean(displayGuest);
-    const label = tr("guest.recipientLabel");
-    const heroKey = selectedParty === "single" ? "guest.heroSingle" :
-      selectedParty === "bride" ? "guest.heroBride" : "guest.heroGroom";
-    const heroTemplate = tr(heroKey);
-    // Only personalized invitations use the two-line typographic treatment.
-    // Unnamed links keep the original generic invitation message.
-    if (heroGuestLabel) heroGuestLabel.textContent = named
-      ? label : heroTemplate.replace("{guest}", tr("guest.default"));
     if (guestNode) {
-      guestNode.textContent = named ? displayGuest : "";
-      guestNode.hidden = !named;
+      // Guest-supplied text stays plain text, including angle brackets/quotes.
+      guestNode.textContent = displayGuest;
+      guestNode.hidden = !displayGuest;
     }
   }
 
@@ -507,7 +498,9 @@
     playIntroSound();
     spawnGateSparkles();
     if (reducedGateMotion) {
-      finishMoonlightGate();
+      // Keep the invitation readable even when decorative motion is disabled.
+      moonlightGate.classList.add("is-opened");
+      scheduleGate(finishMoonlightGate, GATE_REVEAL_BEAT_MS);
       return;
     }
 

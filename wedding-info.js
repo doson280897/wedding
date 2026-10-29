@@ -416,7 +416,7 @@ window.WEDDING_INFO = {
       "link.copied": "Đã sao chép link!",
       "link.copyFail": "Không thể sao chép tự động. Hãy chọn và sao chép link phía trên.",
       "link.shareFail": "Không thể chia sẻ. Hãy dùng nút Sao chép link.",
-      "guest.recipientLabel": "Kính mời",
+      "guest.recipientLabel": "Trân trọng kính mời",
       "settings.title": "TÙY CHỈNH THIỆP",
       "settings.open": "Mở tùy chỉnh ngôn ngữ và nhạc",
       "settings.close": "Đóng tùy chỉnh",

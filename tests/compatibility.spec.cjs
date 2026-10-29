@@ -619,29 +619,39 @@ test("music orb drags while playing, snaps to edges and keeps player running @sm
   await expect(page.locator("#musicBubbleActions")).toBeVisible();
 });
 
-test("personal invitation keeps the bold recipient in hero across languages", async ({
-  page,
-}) => {
+test("personal invitation highlights its recipient only in the falling-star gate @smoke @core", async ({ page }) => {
   const guest = "Anh Minh và chị Lan";
   await page.goto(base + "/index.html?party=bride&to=" + encodeURIComponent(guest), {
     waitUntil:"domcontentloaded",
   });
+  await expect(page.locator("#gateGuestLabel")).toHaveText("Trân trọng kính mời");
+  await expect(page.locator("#gateGuestName")).toHaveText(guest);
+  await expect(page.locator("#home #gateGreeting, #heroGreeting, #heroGuestLabel, #guestName")).toHaveCount(0);
   await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toHaveClass(/is-opened/, { timeout:10000 });
+  const name = page.locator(".moonlight-gate__reveal #gateGuestName");
+  await expect(name).toBeVisible();
+  expect(await name.evaluate(node => Number(getComputedStyle(node).fontWeight))).toBeGreaterThanOrEqual(600);
+  const box = await name.boundingBox();
+  const viewport = page.viewportSize();
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1);
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height).toBeLessThanOrEqual(viewport.height + 1);
   await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
-  await expect(page.locator("#heroGuestLabel")).toHaveText("Kính mời");
-  await expect(page.locator("#guestName")).toHaveText(guest);
-  await expect(page.locator("#guestName")).toBeVisible();
-  await page.locator("#settingsTrigger").click();
-  await page.locator("#controlTabSettings").click();
-  await page.locator('[data-lang="en"]').click();
-  await expect(page.locator("#heroGuestLabel")).toHaveText("Cordially inviting");
-  await expect(page.locator("#guestName")).toHaveText(guest);
+  await expect(page.locator("#home")).not.toContainText(guest);
+  await expect(page.locator("#home")).not.toContainText("Trân trọng kính mời");
 
-  // A generic link must not render an empty personalized-name line.
-  await page.goto(base + "/index.html?party=groom", { waitUntil: "domcontentloaded" });
-  await page.locator("#waxOpenButton").click();
-  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
-  await expect(page.locator("#guestName")).toBeHidden();
+  // The scene uses the same global language/config as the invitation.
+  await page.goto(base + "/index.html?party=groom&lang=en&to=" + encodeURIComponent(guest), { waitUntil:"domcontentloaded" });
+  await expect(page.locator("#gateGuestLabel")).toHaveText("Cordially inviting");
+  await expect(page.locator("#gateGuestName")).toHaveText(guest);
+
+  // No name means a complete invitation line with no empty highlighted row.
+  await page.goto(base + "/index.html?party=groom", { waitUntil:"domcontentloaded" });
+  await expect(page.locator("#gateGuestLabel")).toHaveText("Trân trọng kính mời");
+  await expect(page.locator("#gateGuestName")).toBeHidden();
+  await expect(page.locator("#gateGuestName")).toHaveText("");
 });
 
 
@@ -897,6 +907,9 @@ test("reduced-motion album can switch, close and reopen without losing its image
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(base + "/index.html?party=bride", { waitUntil: "domcontentloaded" });
   await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toHaveClass(/is-opened/);
+  await expect(page.locator("#gateGuestLabel")).toBeVisible();
+  await expect(page.locator(".moonlight-gate__scene")).toBeHidden();
   await expect(page.locator("#moonlightGate")).toBeHidden();
   const viewport = page.locator("#albumViewport");
   // Use the guest-facing navigation: WebKit can ignore an automation scroll
