@@ -1505,3 +1505,9 @@ html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
 
 /* Names may move to a new line as a unit; a lone final word must not drop. */
 [data-party-name-pair],.person-copy h3,.family-card h4,.gift-card h3{text-wrap:balance;word-break:normal;overflow-wrap:normal}
+
+/* Short display copy fits its container; authored <br> remains a line break. */
+.responsive-line{white-space:nowrap;max-width:100%;min-width:0}
+.responsive-line[data-type-mode="wrap"]{white-space:normal;text-wrap:balance}
+.section-lead,.promise-copy p,.closing-note,.person-copy p,.family-address,.event-address,.lunar,.location-info p,.invitation-promise,.handwriting,.album-header > p:last-child{text-wrap:pretty;overflow-wrap:break-word}
+.event-actions :is(a,button) span{white-space:nowrap;font-size:clamp(8px,2.5vw,10px);letter-spacing:.08em}

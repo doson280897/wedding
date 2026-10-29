@@ -1260,3 +1260,41 @@ test("couple names stay whole across gate, hero, menu, profiles and footer @smok
     }
   }
 });
+
+test("responsive typography fits short sentences after resize and language changes @smoke @core", async ({page}) => {
+  test.setTimeout(120000);
+  await page.emulateMedia({reducedMotion:"reduce"});
+  await page.goto(base+"/index.html?party=groom",{waitUntil:"domcontentloaded"});
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden();
+  const fonts=[];
+  for (const locale of ['vi','en']) {
+    if(locale==='en') {
+      await page.locator('#settingsTrigger').click();
+      await page.locator('#controlTabSettings').click();
+      await page.locator('[data-lang="en"]').click();
+      await page.locator('#settingsClose').click();
+    }
+    for(const width of [320,360,393,430,768,1024]) {
+      await page.setViewportSize({width,height:850});
+      for(const selector of ['[data-i18n="family.title"]','#coupleHeading','.promise-copy h3','.album-header h2','[data-i18n="events.title"]']) {
+        for(const heading of await page.locator(selector).all()) {
+          await heading.scrollIntoViewIfNeeded();
+          await expect.poll(()=>heading.evaluate(node=>node.scrollWidth-node.clientWidth)).toBeLessThanOrEqual(1);
+          await expect(heading).toHaveAttribute('data-type-mode','line');
+          const lines=await heading.evaluate(node=>{
+            const range=document.createRange();range.selectNodeContents(node);
+            return new Set([...range.getClientRects()].filter(r=>r.width).map(r=>Math.round(r.top))).size;
+          });
+          // Mixed fonts can have different ascenders; the block still must fit one line.
+          const size=await heading.evaluate(node=>({height:node.clientHeight,line:parseFloat(getComputedStyle(node).lineHeight)||parseFloat(getComputedStyle(node).fontSize)*1.5}));
+          expect(size.height).toBeLessThanOrEqual(size.line+2);
+          expect(lines).toBeGreaterThan(0);
+        }
+      }
+      if(locale==='vi') fonts.push(await page.locator('[data-i18n="family.title"]').evaluate(node=>parseFloat(getComputedStyle(node).fontSize)));
+    }
+  }
+  expect(Math.max(...fonts)).toBeGreaterThan(Math.min(...fonts)+2);
+  expect(await page.locator('[data-i18n="family.lead"]').textContent()).toMatch(/\S\u00a0\S+$/);
+});

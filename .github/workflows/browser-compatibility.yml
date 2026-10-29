@@ -82,6 +82,7 @@ jobs:
           node --check preferences.js
           node --check settings.js
           node --check script.js
+          node --check typography.js
           node --check calendar.js
           node --check gallery.js
           node --check link-tool.js
@@ -115,7 +116,7 @@ jobs:
           CI: "true"
 
       - name: Verify gate motion and stalled-music recovery first
-        run: npx playwright test tests/compatibility.spec.cjs --grep "Moonlight Gate opens|gate ornaments|music bubble waits|closing names stay whole|couple names stay whole" --reporter=line --workers=2
+        run: npx playwright test tests/compatibility.spec.cjs --grep "Moonlight Gate opens|gate ornaments|music bubble waits|closing names stay whole|couple names stay whole|responsive typography fits" --reporter=line --workers=2
         env:
           CI: "true"
 

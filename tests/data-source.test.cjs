@@ -86,7 +86,7 @@ test("Vietnamese and English strings have matching keys and valid data placehold
 test("template and engine files contain no customer-specific information", () => {
   const files = [
     "index.html", "script.js", "calendar.js", "i18n.js", "gallery.js", "link-tool.js",
-    "settings.js", "settings.css",
+    "settings.js", "settings.css", "typography.js",
     "link-tool.html", "quick-nav.js", "style.css", "quick-nav.css",
     "build-wedding.cjs",
   ];
