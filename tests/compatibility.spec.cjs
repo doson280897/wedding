@@ -1224,3 +1224,39 @@ test("closing names stay whole and modal close buttons stay at the right edge @s
     await page.locator("#wgClose").click();
   }
 });
+
+test("couple names stay whole across gate, hero, menu, profiles and footer @smoke @core", async ({page}) => {
+  test.setTimeout(90000);
+  await page.emulateMedia({reducedMotion:"reduce"});
+  for (const party of ["bride","groom"]) {
+    for (const width of [320,393,430]) {
+      await page.setViewportSize({width,height:850});
+      await page.goto(base+"/index.html?party="+party,{waitUntil:"domcontentloaded"});
+      await page.evaluate(()=>document.fonts.ready);
+      const pairs=await page.locator('[data-party-name-pair]:not(#closingNames)').evaluateAll(nodes=>nodes.map(node=>({
+        key:node.dataset.partyNamePair,
+        names:[...node.childNodes].filter(child=>child.nodeType===Node.TEXT_NODE)
+          .map(child=>child.textContent.trim()).filter(Boolean),
+      })));
+      for (const pair of pairs) {
+        const text=pair.names.join(" ").toLocaleUpperCase("vi-VN");
+        expect(text).toContain("THÀNH\u00a0SƠN");
+        expect(text).toContain("TỐ\u00a0NGA");
+      }
+      await page.locator("#waxOpenButton").click();
+      await expect(page.locator("#moonlightGate")).toHaveClass(/is-opened/);
+      const gateOverflow=await page.locator('[data-party-name-pair="gate"]').evaluate(node=>node.scrollWidth-node.clientWidth);
+      expect(gateOverflow).toBeLessThanOrEqual(1);
+      await expect(page.locator("#moonlightGate")).toBeHidden();
+      await page.locator("#heroNames").scrollIntoViewIfNeeded();
+      expect(await page.locator("#heroNames").evaluate(node=>node.scrollWidth-node.clientWidth)).toBeLessThanOrEqual(1);
+      for (const selector of ['.person-copy h3','.family-card h4']) {
+        for (const heading of await page.locator(selector).all()) {
+          await heading.scrollIntoViewIfNeeded();
+          expect(await heading.textContent()).toMatch(/(?:THÀNH\u00a0SƠN|TỐ\u00a0NGA|Thành\u00a0Sơn|Tố\u00a0Nga)$/);
+          expect(await heading.evaluate(node=>node.scrollWidth-node.clientWidth)).toBeLessThanOrEqual(1);
+        }
+      }
+    }
+  }
+});

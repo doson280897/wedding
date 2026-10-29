@@ -191,3 +191,6 @@
 @media(prefers-reduced-motion:reduce){
  .moonlight-gate.is-handoff .moonlight-gate__reveal{transform:none}
 }
+
+/* Constrain the invitation names to the reveal area on narrow WebViews. */
+.moonlight-gate__reveal-heading .moonlight-gate__reveal-names{max-width:100%;text-wrap:balance;word-break:normal;overflow-wrap:normal}

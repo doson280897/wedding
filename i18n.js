@@ -85,7 +85,16 @@
     });
     // Static placeholders for personal information, images and map links.
     document.querySelectorAll("[data-info]").forEach(node => {
-      node.textContent = getInfo(node.dataset.info);
+      let value = getInfo(node.dataset.info);
+      // Full names may wrap between surname and given name, but never split
+      // the configured short name (also covers bank account-holder headings).
+      const person = Object.values(info.couple).find(person =>
+        value.toLocaleUpperCase("vi-VN") === person.full.toLocaleUpperCase("vi-VN"));
+      if (person && value.toLocaleUpperCase("vi-VN").endsWith(person.short.toLocaleUpperCase("vi-VN"))) {
+        const split = value.length - person.short.length;
+        value = value.slice(0, split) + value.slice(split).replace(/\s+/g, "\u00a0");
+      }
+      node.textContent = value;
     });
     document.querySelectorAll("[data-info-src]").forEach(node => {
       // Only load the active celebration's QR; dormant bride/groom/single

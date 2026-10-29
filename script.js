@@ -747,8 +747,11 @@
     const escapeHtml = value => String(value).replace(/[&<>"']/g, character =>
       ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[character])
     );
+    // A person's display name is one typographic unit in EVERY pair.
+    // Keep the separator breakable so narrow screens wrap between people.
+    const wholeName = value => escapeHtml(value).replace(/\s+/g, "&nbsp;");
     const pair = (left, right, separator) =>
-      escapeHtml(left) + " <span>" + separator + "</span> " + escapeHtml(right);
+      wholeName(left) + " <span>" + separator + "</span> " + wholeName(right);
 
     const pairs = {
       hero: pair(upper(first.short), upper(second.short), "&amp;"),

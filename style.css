@@ -1502,3 +1502,6 @@ html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
 .closing-names{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:0 .2em;font-size:clamp(28px,7.5vw,44px);line-height:1.4}
 .closing-names .closing-name{white-space:nowrap;color:inherit}
 .closing-names .closing-join{flex:none}
+
+/* Names may move to a new line as a unit; a lone final word must not drop. */
+[data-party-name-pair],.person-copy h3,.family-card h4,.gift-card h3{text-wrap:balance;word-break:normal;overflow-wrap:normal}
