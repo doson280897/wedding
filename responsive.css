@@ -32,7 +32,8 @@
 @container couple-layout (width < 34rem){.person-bride .person-copy{order:2}}
 @container story-layout (width < 50rem){.promise-card:nth-child(2){padding-top:0}}
 
-/* Avoid WebView font inflation after rotation; browser/user zoom still works. */
+/* Keep native scrolling while disabling touch zoom and double-tap zoom. */
+html,body{touch-action:pan-x pan-y}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
 /* Photo and shade share one real box, including min-height in landscape. */

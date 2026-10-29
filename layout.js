@@ -3,6 +3,13 @@
 
   // One source of viewport geometry for all UI. No device-name detection.
   const root = document.documentElement;
+  // CSS owns gesture policy; these cancelable-event guards also cover
+  // WebViews that do not fully honour touch-action or viewport constraints.
+  const preventTouchZoom = event => {
+    if (event.cancelable && (!event.touches || event.touches.length > 1)) event.preventDefault();
+  };
+  for (const type of ["touchstart", "touchmove", "gesturestart", "gesturechange"])
+    document.addEventListener(type, preventTouchZoom, {passive:false});
   const subscribers = new Set();
   const probe = document.createElement("div");
   probe.setAttribute("aria-hidden", "true");

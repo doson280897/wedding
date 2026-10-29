@@ -688,7 +688,7 @@ test("fullscreen album follows swipes in both directions and recovers cancellati
   const counter = page.locator('#albumLightboxCounter');
   await expect(image).toBeVisible();
   await expect.poll(()=>image.evaluate(node=>node.naturalWidth)).toBeGreaterThan(0);
-  expect(await stage.evaluate(node=>getComputedStyle(node).touchAction)).toBe('pinch-zoom');
+  expect(await stage.evaluate(node=>getComputedStyle(node).touchAction)).toBe('none');
   const box = await stage.boundingBox();
   const x = box.x + box.width / 2, y = box.y + box.height / 2;
   const distance = Math.min(100, box.width * .35);
@@ -737,5 +737,16 @@ test("fullscreen album follows swipes in both directions and recovers cancellati
   await expect(counter).toHaveText(before);
   await page.locator('#albumLightboxClose').click();
   await expect(page.locator('#albumLightbox')).toBeHidden();
+  // The same touch stream must not zoom the page after closing the viewer.
+  if (session) {
+    await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:x-20,y},{x:x+20,y}]});
+    for (let i=1;i<=5;i++) await session.send('Input.dispatchTouchEvent',{
+      type:'touchMove',touchPoints:[{x:x-20-i*8,y},{x:x+20+i*8,y}]
+    });
+    await session.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    await expect.poll(()=>page.evaluate(()=>visualViewport.scale)).toBe(1);
+  }
+  await expect(page.locator('meta[name="viewport"]')).toHaveAttribute('content',/user-scalable=no/);
+  expect(await page.locator('html').evaluate(node=>getComputedStyle(node).touchAction)).toBe('pan-x pan-y');
   await session?.detach();
 });
