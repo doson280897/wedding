@@ -168,8 +168,17 @@
     close.focus({ preventScroll:true });
   }));
   eventSelect.addEventListener("change", updateChoices);
-  native.addEventListener("click", () => download(false));
-  all.addEventListener("click", () => download(true));
+  const saveFromBrowser = whole => {
+    // Avoid blob: .ics downloads which can fail in in-app browsers like Zalo.
+    if (window.WeddingExternalBrowser?.isEmbedded) {
+      closeDialog();
+      window.WeddingExternalBrowser.request("calendar");
+      return;
+    }
+    download(whole);
+  };
+  native.addEventListener("click", () => saveFromBrowser(false));
+  all.addEventListener("click", () => saveFromBrowser(true));
   close.addEventListener("click", closeDialog);
   dialog.addEventListener("close", finish);
   dialog.addEventListener("click", event => {
