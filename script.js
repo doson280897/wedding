@@ -285,7 +285,7 @@
     }
     const render = timestamp => {
       meteorFrame = 0;
-      if (moonlightGate.hidden || doorSettled || document.hidden) return;
+      if (moonlightGate.hidden || document.hidden) return;
       // Cap canvas work at 30fps independently of 60/120Hz door animation.
       if (timestamp - lastPaint < 32) {
         meteorFrame = requestAnimationFrame(render);
@@ -298,7 +298,9 @@
       const mobile = width <= 650;
       tracks.forEach((track, index) => {
         if (index === 1 && mobile) return;
-        const t = (elapsed - track.delay) / track.duration;
+        // Keep trails alive for the entire invitation; the gate owns their fade.
+        const cycle = (elapsed - track.delay) % (track.duration + 650);
+        const t = elapsed < track.delay ? -1 : cycle / track.duration;
         if (t <= 0 || t >= 1) return;
         const x0 = track.from[0] * width, y0 = track.from[1] * height;
         const dx = (track.to[0] - track.from[0]) * width;
@@ -354,7 +356,7 @@
         ctx.fillRect(hx - 19, hy - 19, 38, 38);
         ctx.restore();
       });
-      if (elapsed < 3650) meteorFrame = requestAnimationFrame(render);
+      meteorFrame = requestAnimationFrame(render);
     };
     meteorFrame = requestAnimationFrame(render);
   };
@@ -431,7 +433,6 @@
   const settleOpenDoor = () => {
     if (doorSettled || !moonlightGate || moonlightGate.hidden) return;
     doorSettled = true;
-    stopGateMeteors();
     lastGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.classList.add("is-opened");
     // Keep the introduction and guest name together until the shared handoff.

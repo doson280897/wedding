@@ -123,9 +123,6 @@
 .moonlight-gate.is-opened .fairy-artboard{visibility:hidden}
 .moonlight-gate__portal,.moonlight-gate__portal::before{filter:none}
 .fairy-butterfly svg,.moonlight-gate__butterfly svg{filter:none}
-.moonlight-gate.is-opened .moonlight-gate__spark,
-.moonlight-gate.is-opened .moonlight-gate__wing--left,
-.moonlight-gate.is-opened .moonlight-gate__wing--right{animation:none}
 /* One fade on the cover avoids multiplying opacity across nested surfaces.
    The whole invitation lifts away together, with a warm wash over the Hero. */
 .moonlight-gate.is-handoff .moonlight-gate__scene{opacity:1;transition:none}
