@@ -171,7 +171,8 @@
   const setBrowserTheme = color => themeColor?.setAttribute("content", color);
   const setContentBrowserTheme = () => {
     const gateVisible = document.documentElement.classList.contains("wax-pending");
-    setBrowserTheme(gateVisible ? "#0b161e" : "#0b0e0e");
+    const palette = getComputedStyle(document.documentElement);
+    setBrowserTheme(palette.getPropertyValue(gateVisible ? "--jade-gate" : "--jade-base").trim() || "#174f48");
   };
   setContentBrowserTheme();
 
