@@ -220,3 +220,10 @@ Animation của cổng được tạm dừng khi tab ẩn và khôi phục khi q
 ### Secret garden entrance
 
 The approved gate artwork is layered in `fairy-gate.css`: two masked leaves rotate around the inner jambs while the floral arch stays fixed. The lock is a separate transparent image and uses a gentle light highlight instead of visible instruction text. The closed gate has no captions; three small butterflies drift around the flowers and stop after entry. As the leaves open, the camera approaches and the entire gate dissolves, revealing the wedding day, couple names and tagline. These introduction lines then fade, leaving only the invitation greeting and optional guest name before the hero appears. Change the artwork paths in `wedding-info.js` → `site.entrance`. Both WebP assets together are about 220 KB.
+
+
+### Bố cục thích ứng
+
+Tiêu đề và nhãn ngắn được đo theo khung chứa thực tế trong `typography.js`, tính lại khi đổi kích thước hoặc ngôn ngữ và khi font tải xong. Đoạn dài giữ cỡ dễ đọc; các ngắt dòng chủ ý vẫn được giữ.
+
+Lưới dùng kích thước nội dung để tự đổi số cột. Album nội suy kích thước, khoảng cách và độ sâu từ chiều rộng khung, đồng thời hủy tọa độ kéo cũ khi xoay máy. Nút nổi và bảng tùy chỉnh bám vùng `visualViewport`, có tính lại khoảng tránh tai thỏ sau khi đổi chiều. Các hằng số khoảng cách và cỡ tối thiểu là giới hạn thiết kế, không phải danh sách mẫu điện thoại.

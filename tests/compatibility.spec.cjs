@@ -1280,7 +1280,7 @@ test("responsive typography fits short sentences after resize and language chang
       for(const selector of ['[data-i18n="family.title"]','#coupleHeading','.promise-copy h3','.album-header h2','[data-i18n="events.title"]']) {
         for(const heading of await page.locator(selector).all()) {
           await heading.scrollIntoViewIfNeeded();
-          await expect.poll(()=>heading.evaluate(node=>node.scrollWidth-node.clientWidth)).toBeLessThanOrEqual(1);
+          await expect.poll(()=>heading.evaluate(node=>node.scrollWidth-node.clientWidth),{message:`${locale} ${width}px ${selector}`}).toBeLessThanOrEqual(1);
           await expect(heading).toHaveAttribute('data-type-mode','line');
           const lines=await heading.evaluate(node=>{
             const range=document.createRange();range.selectNodeContents(node);
@@ -1297,4 +1297,50 @@ test("responsive typography fits short sentences after resize and language chang
   }
   expect(Math.max(...fonts)).toBeGreaterThan(Math.min(...fonts)+2);
   expect(await page.locator('[data-i18n="family.lead"]').textContent()).toMatch(/\S\u00a0\S+$/);
+});
+
+test("adaptive layout survives rotation and interrupted album dragging @smoke @core", async ({page}) => {
+  test.setTimeout(60000);
+  await mockWeddingAudio(page);
+  await page.emulateMedia({reducedMotion:"reduce"});
+  await page.goto(base+"/index.html?party=groom",{waitUntil:"domcontentloaded"});
+  await page.locator('#waxOpenButton').click();
+  await expect(page.locator('#moonlightGate')).toBeHidden();
+  await page.locator('#settingsTrigger').click();
+  await page.locator('#wqPanel a[href="#album"]').click();
+  const album=page.locator('#albumViewport');
+  await album.focus();
+  await expect(page.locator('.album-card.is-main')).toHaveCount(1);
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('#albumCount')).toHaveText(/^02 \/ /);
+  await expect(album).toBeInViewport();
+  const point=await album.evaluate(node=>{
+    const r=node.getBoundingClientRect();
+    return {x:r.left+r.width/2,y:(Math.max(0,r.top)+Math.min(innerHeight,r.bottom))/2};
+  });
+  await page.mouse.move(point.x,point.y);
+  await page.mouse.down();
+  await expect(album).toHaveClass(/is-dragging/);
+  await page.mouse.move(point.x+15,point.y);
+  await page.setViewportSize({width:337,height:760});
+  await page.mouse.up();
+  await expect(album).not.toHaveClass(/is-dragging/);
+  await expect(page.locator('#albumLightbox')).toBeHidden();
+  for(const size of [{width:812,height:375},{width:621,height:700},{width:1024,height:768},{width:393,height:850}]) {
+    await page.setViewportSize(size);
+    await album.scrollIntoViewIfNeeded();
+    await expect(page.locator('#albumCount')).toHaveText(/^02 \/ /);
+    await expect.poll(()=>page.locator('.album-slide').filter({has:page.locator('.album-card.is-main')}).evaluate(node=>{
+      const a=node.getBoundingClientRect(),b=document.getElementById('albumViewport').getBoundingClientRect();
+      return Math.abs((a.left+a.right-b.left-b.right)/2);
+    })).toBeLessThanOrEqual(4);
+    await page.locator('#settingsTrigger').click();
+    await expect.poll(()=>page.locator('#settingsPanel').evaluate(node=>{
+      const r=node.getBoundingClientRect(),v=visualViewport;
+      return Math.max(0,(v?.offsetLeft||0)-r.left,r.right-(v?(v.offsetLeft+v.width):innerWidth),(v?.offsetTop||0)-r.top,r.bottom-(v?(v.offsetTop+v.height):innerHeight));
+    })).toBeLessThanOrEqual(2);
+    await page.locator('#settingsClose').click();
+  }
+  expect(await page.evaluate(()=>window.__plays)).toBe(1);
+  await expect(page.locator('#musicBubble')).toHaveAttribute('data-music-state','playing');
 });

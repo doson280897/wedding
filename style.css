@@ -1511,3 +1511,15 @@ html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
 .responsive-line[data-type-mode="wrap"]{white-space:normal;text-wrap:balance}
 .section-lead,.promise-copy p,.closing-note,.person-copy p,.family-address,.event-address,.lunar,.location-info p,.invitation-promise,.handwriting,.album-header > p:last-child{text-wrap:pretty;overflow-wrap:break-word}
 .event-actions :is(a,button) span{white-space:nowrap;font-size:clamp(8px,2.5vw,10px);letter-spacing:.08em}
+
+/* Content-sized tracks respond to the available container, including split view. */
+.family-grid,.event-grid,.location-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr))}
+.couple-editorial{container:couple-layout / inline-size}
+.person,.person-bride{grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr))}
+.promise-story{container:story-layout / inline-size}
+.promise-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))}
+@container couple-layout (width < 34rem){.person-bride .person-copy{order:2}}
+@container story-layout (width < 50rem){.promise-card:nth-child(2){padding-top:0}}
+
+/* Avoid WebView font inflation after rotation; browser/user zoom still works. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}

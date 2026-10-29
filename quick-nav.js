@@ -148,7 +148,7 @@
   const SNAP_MS = 340;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const coarsePointer = window.matchMedia("(hover: none), (pointer: coarse)");
-  const safeArea = (() => {
+  const readSafeArea = () => {
     const probe = document.createElement("div");
     probe.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;inset:0;" +
       "padding-top:env(safe-area-inset-top,0px);" +
@@ -162,18 +162,28 @@
       bottom:inset("bottom"),left:inset("left")};
     probe.remove();
     return result;
-  })();
+  };
+  const safeArea = readSafeArea();
+  // Insets can change after rotation; do not cache the portrait notch forever.
+  window.addEventListener("resize", () => Object.assign(safeArea, readSafeArea()), {passive:true});
+  const visualBounds = () => {
+    const view = window.visualViewport;
+    return {left:view?.offsetLeft || 0,top:view?.offsetTop || 0,
+      width:view?.width || innerWidth,height:view?.height || innerHeight};
+  };
+  const visualCenter = () => {const view=visualBounds();return view.left+view.width/2;};
 
   const minLeft = () => FLOAT_EDGE + safeArea.left;
   const minTop = () => FLOAT_EDGE + safeArea.top;
   const clamp = (value, min, max) => Math.max(min, Math.min(Math.max(min, max), value));
   const bounds = rect => {
-    const viewport = window.visualViewport;
-    const top = (viewport?.offsetTop || 0) + minTop();
-    const bottom = (viewport?.offsetTop || 0) + (viewport?.height || innerHeight);
+    const viewport = visualBounds();
+    const left = viewport.left + minLeft();
+    const top = viewport.top + minTop();
+    const bottom = viewport.top + viewport.height;
     return {
-      left:minLeft(),
-      right:Math.max(minLeft(), innerWidth - rect.width - FLOAT_EDGE - safeArea.right),
+      left,
+      right:Math.max(left, viewport.left + viewport.width - rect.width - FLOAT_EDGE - safeArea.right),
       top,
       bottom:Math.max(top, bottom - rect.height - FLOAT_EDGE - safeArea.bottom)
     };
@@ -195,7 +205,7 @@
       node.style.left = limits.left + "px";
       node.style.right = "auto";
     } else {
-      node.style.right = (FLOAT_EDGE + safeArea.right) + "px";
+      node.style.right = Math.max(0, innerWidth - limits.right - rect.width) + "px";
       node.style.left = "auto";
     }
   };
@@ -209,9 +219,12 @@
     node.dataset.floatEdge = edge;
     node.style.transform = "none";
     node.style.top = "auto";
-    node.style.bottom = "max(8px, env(safe-area-inset-bottom, 0px))";
-    node.style.left = edge === "left" ? "max(8px, env(safe-area-inset-left, 0px))" : "auto";
-    node.style.right = edge === "right" ? "max(8px, env(safe-area-inset-right, 0px))" : "auto";
+    const view = visualBounds();
+    node.style.bottom = Math.max(FLOAT_EDGE + safeArea.bottom,
+      innerHeight - view.top - view.height + FLOAT_EDGE + safeArea.bottom) + "px";
+    node.style.left = edge === "left" ? (view.left + minLeft()) + "px" : "auto";
+    node.style.right = edge === "right"
+      ? Math.max(0, innerWidth - view.left - view.width + FLOAT_EDGE + safeArea.right) + "px" : "auto";
   };
   const setupFloating = (node,handle) => {
     if (!handle) return;
@@ -265,7 +278,7 @@
       if (!visible(other)) return proposedTop;
       const their = other.getBoundingClientRect();
       const theirEdge = other.dataset.floatEdge ||
-        (their.left + their.width / 2 < innerWidth / 2 ? "left" : "right");
+        (their.left + their.width / 2 < visualCenter() ? "left" : "right");
       if (theirEdge !== edge || proposedTop + rect.height + FLOAT_GAP <= their.top ||
           their.bottom + FLOAT_GAP <= proposedTop) return proposedTop;
       const limits = bounds(rect);
@@ -278,7 +291,7 @@
     const glide = () => {
       if (!visible(node)) return;
       const rect = node.getBoundingClientRect();
-      const edge = rect.left + rect.width / 2 < innerWidth / 2 ? "left" : "right";
+      const edge = rect.left + rect.width / 2 < visualCenter() ? "left" : "right";
       const limits = bounds(rect);
       const top = clamp(avoidOverlap(edge,rect.top,rect),limits.top,limits.bottom);
       const targetLeft = edge === "left" ? limits.left : limits.right;

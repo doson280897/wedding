@@ -101,17 +101,15 @@
     item.ratio = safeRatio;
 
     const metrics = sceneMetrics();
-    const compact = metrics.compact;
-    const sceneHeight = metrics.height || (compact ? 520 : 680);
-    let height = compact ? Math.min(sceneHeight * .61, 340) : Math.min(sceneHeight * .66, 475);
+    const blend = metrics.blend;
+    const sceneHeight = metrics.height || blend(680,520);
+    let height = Math.min(sceneHeight * blend(.66,.61), blend(475,340));
 
-    if (safeRatio >= 1.35) height *= compact ? .61 : .64;
+    if (safeRatio >= 1.35) height *= blend(.64,.61);
     else if (safeRatio >= .92) height *= .80;
 
     let width = height * safeRatio;
-    const maxWidth = compact
-      ? Math.min(metrics.width * .74, 320)
-      : Math.min(metrics.width * .36, 540);
+    const maxWidth = Math.min(metrics.width * blend(.36,.74), blend(540,320));
 
     if (width > maxWidth) {
       const factor = maxWidth / width;
@@ -119,7 +117,7 @@
       height *= factor;
     }
 
-    const minWidth = compact ? 118 : 150;
+    const minWidth = Math.min(metrics.width * .6, blend(150,118));
     if (width < minWidth) {
       const factor = minWidth / width;
       width *= factor;
@@ -229,14 +227,17 @@
     if (cachedMetrics) return cachedMetrics;
     const width = viewport.clientWidth;
     const height = viewport.clientHeight;
-    const compact = width < 700;
-    // Read viewport geometry once, not after every slide style mutation.
+    // Blend the design continuously as available card space changes, rather
+    // than jumping between two phone/desktop presets at one viewport width.
+    const narrow = clamp((840 - width) / 280, 0, 1);
+    const blend = (wide, small) => wide + (small - wide) * narrow;
     return (cachedMetrics = {
-      width, height, compact,
-      spacing:compact ? width * .34 : width * .285,
-      activeRange:compact ? 3.25 : 4.10,
-      centerZ:compact ? 235 : 325,
-      depthStep:compact ? 132 : 164
+      width, height, blend,
+      spacing:width * blend(.285, .34),
+      activeRange:blend(4.10, 3.25),
+      centerZ:blend(325, 235), depthStep:blend(164, 132),
+      gestureStep:Math.max(blend(220,145), width * blend(.22,.43)),
+      maxJump:blend(3,2)
     });
   }
 
@@ -293,7 +294,7 @@
 
       // Stable per-photo offsets. They never jump when the camera crosses
       // half/integer boundaries; only the continuous relative value changes.
-      const floatY = item.floatY * (metrics.compact ? 62 : 104);
+      const floatY = item.floatY * (metrics.blend(104,62));
       const floatTilt = item.floatTilt;
       const floatMix = Math.min(1, abs * .90);
 
@@ -302,13 +303,13 @@
       const spacingCurve = 1 + Math.min(abs, 3.5) * .085;
       let x = relative * metrics.spacing * spacingCurve;
       let y = floatY * floatMix;
-      let z = metrics.centerZ - abs * metrics.depthStep - abs * abs * (metrics.compact ? 12 : 17);
-      let rotateY = clamp(-relative * (metrics.compact ? 12.5 : 11.5), -42, 42);
+      let z = metrics.centerZ - abs * metrics.depthStep - abs * abs * (metrics.blend(17,12));
+      let rotateY = clamp(-relative * (metrics.blend(11.5,12.5)), -42, 42);
       let rotateZ = floatTilt * floatMix;
 
       // Demo-3 hierarchy: the current photo owns the light.
       // Neighbors become much smaller/darker as they fall back in depth.
-      let scale = Math.max(metrics.compact ? .46 : .42, 1.04 - abs * (metrics.compact ? .17 : .19));
+      let scale = Math.max(metrics.blend(.42,.46), 1.04 - abs * (metrics.blend(.19,.17)));
       let opacity = Math.max(.10, Math.pow(.58, abs));
 
       // Ease the focused photo into dead center without a threshold snap.
@@ -318,8 +319,8 @@
       y *= 1 - focusEase;
       rotateY *= 1 - focusEase;
       rotateZ *= 1 - focusEase;
-      z += focusEase * (metrics.compact ? 62 : 88);
-      scale += focusEase * (metrics.compact ? .085 : .105);
+      z += focusEase * (metrics.blend(88,62));
+      scale += focusEase * (metrics.blend(.105,.085));
       opacity += (1 - opacity) * focusEase;
 
       const isMain = abs < .46;
@@ -415,9 +416,7 @@
       lastTime:performance.now(),
       velocityX:0,
       startPosition:position,
-      step:sceneMetrics().width < 700
-        ? Math.max(145, sceneMetrics().width * .43)
-        : Math.max(220, sceneMetrics().width * .22),
+      step:sceneMetrics().gestureStep,
       moved:false,
       cancelled:false
     };
@@ -469,12 +468,10 @@
     }
 
     if (state.moved) {
-      const step = viewport.clientWidth < 700
-        ? Math.max(145, viewport.clientWidth * .43)
-        : Math.max(220, viewport.clientWidth * .22);
+      const step = sceneMetrics().gestureStep;
 
       const projected = position - state.velocityX * 125 / step;
-      const maxJump = viewport.clientWidth < 700 ? 2 : 3;
+      const maxJump = sceneMetrics().maxJump;
       moveTo(Math.round(clamp(projected, position - maxJump, position + maxJump)));
       return;
     }
@@ -879,17 +876,26 @@
     if (lightbox && !lightbox.hidden) updateLightboxMeta();
   });
 
-  let resizeTimer = 0;
+  let resizeFrame = 0;
   const scheduleSceneResize = () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
+    if (resizeFrame) return;
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = 0;
       const width = viewport.clientWidth;
       const height = viewport.clientHeight;
       if (cachedMetrics?.width === width && cachedMetrics?.height === height) return;
+      // A resize invalidates the gesture's start geometry. Release it without
+      // treating the pointer release as a tap or launching the wrong photo.
+      if (drag) {
+        if (viewport.hasPointerCapture?.(drag.id)) viewport.releasePointerCapture(drag.id);
+        drag = null;
+        viewport.classList.remove("is-dragging");
+        targetPosition = Math.round(position);
+      }
       cachedMetrics = null;
       for (const item of items) applyCardSize(item, item.ratio);
       requestSceneFrame();
-    }, 80);
+    });
   };
   if ("ResizeObserver" in window) {
     new ResizeObserver(scheduleSceneResize).observe(viewport);

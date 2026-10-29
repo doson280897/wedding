@@ -20,15 +20,20 @@
 
   const positionPanel = () => {
     if (panel.hidden) return;
-    const triggerRect = trigger.getBoundingClientRect();
-    const hubRect = hub.getBoundingClientRect();
-    const panelRect = panel.getBoundingClientRect();
     const edge = 10;
     const viewport = window.visualViewport;
     const viewportLeft = viewport?.offsetLeft || 0;
     const viewportTop = viewport?.offsetTop || 0;
-    const viewportRight = viewportLeft + (viewport?.width || innerWidth);
-    const viewportBottom = viewportTop + (viewport?.height || innerHeight);
+    const viewportWidth = viewport?.width || innerWidth;
+    const viewportHeight = viewport?.height || innerHeight;
+    const viewportRight = viewportLeft + viewportWidth;
+    const viewportBottom = viewportTop + viewportHeight;
+    // The visible area can shrink independently of CSS vh when keyboards open.
+    panel.style.maxWidth = Math.max(0, viewportWidth - edge * 2) + "px";
+    panel.style.maxHeight = Math.max(0, viewportHeight - edge * 2) + "px";
+    const triggerRect = trigger.getBoundingClientRect();
+    const hubRect = hub.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
     const width = panelRect.width;
     const height = panelRect.height;
     // Clamp in viewport coordinates, then convert to the hub's local
