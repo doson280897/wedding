@@ -1,0 +1,17 @@
+.browser-handoff{position:fixed;z-index:10020;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));width:min(410px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;box-sizing:border-box;border:1px solid #c8a87999;border-radius:18px;padding:16px;background:linear-gradient(145deg,#202d2c,#0b1418);color:#eadfcf;box-shadow:0 14px 54px #000b;font-family:Montserrat,system-ui,sans-serif}
+.browser-handoff[hidden]{display:none!important}
+.browser-handoff__heading{display:flex;align-items:flex-start;gap:10px}
+.browser-handoff__icon{display:grid;place-items:center;flex:0 0 32px;height:32px;border:1px solid #c8a87966;border-radius:10px;color:#e9ce9d;font-size:20px}
+.browser-handoff__main{flex:1;min-width:0}
+.browser-handoff__main strong{display:block;color:#f3d8aa;font-size:13px;line-height:1.5}
+.browser-handoff__close{width:30px;height:30px;flex:0 0 30px;border:1px solid #c8a87955;border-radius:50%;background:transparent;color:#eddbbc;font:20px sans-serif;cursor:pointer}
+.browser-handoff p{margin:7px 0 0;font-size:11px;line-height:1.65;color:#bec9c5}
+.browser-handoff__actions{display:flex;gap:8px;margin-top:12px}
+.browser-handoff__open,.browser-handoff__copy{display:grid;place-items:center;min-height:42px;box-sizing:border-box;padding:10px 11px;border:1px solid #c8a879bb;border-radius:11px;font:600 11px/1.3 Montserrat,system-ui,sans-serif;text-align:center;text-decoration:none;cursor:pointer}
+.browser-handoff__open{flex:1.5;background:#d8bc89;color:#14201e}
+.browser-handoff__copy{flex:1;background:transparent;color:#e9ce9d}
+.browser-handoff__steps{padding:9px 11px;border:1px solid #c8a87933;border-radius:9px;background:#ffffff08}
+.browser-handoff__dismiss{display:block;margin:9px auto 0;padding:7px 9px;border:0;background:transparent;color:#c8b590;font:500 10px Montserrat,system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.browser-handoff__status:empty{display:none}
+.browser-handoff :is(a,button):focus-visible{outline:2px solid #f1d49f;outline-offset:3px}
+@media(max-width:420px){.browser-handoff{padding:14px}.browser-handoff__actions{flex-wrap:wrap}.browser-handoff__open,.browser-handoff__copy{flex-basis:calc(50% - 4px)}}
