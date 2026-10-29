@@ -368,7 +368,6 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
 /* HERO CONTENT BELOW PHOTO — mobile/tablet */
 @media(max-width:900px),(max-height:36rem){
   .hero{
-    --hero-photo-height:min(66svh,680px);
     height:auto;
     min-height:0;
     overflow:hidden;
@@ -379,7 +378,7 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
     position:relative;
     inset:auto;
     width:100%;
-    height:var(--hero-photo-height);
+    height:auto;
     min-height:0;
     animation:none;
     transform:none!important;
@@ -390,7 +389,7 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
   .hero-shade{
     position:absolute;
     inset:0 0 auto;
-    height:var(--hero-photo-height);
+    height:100%;
     background:linear-gradient(
       180deg,
       rgba(4,7,6,.08) 0%,
@@ -433,10 +432,6 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
 }
 
 @media(max-width:650px){
-  .hero{
-    --hero-photo-height:min(58svh,520px);
-  }
-
   .hero-layout{
     display:block;
     align-items:initial;
@@ -467,12 +462,6 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
 
   .countdown strong{
     font-size:25px;
-  }
-}
-
-@media(max-width:390px){
-  .hero{
-    --hero-photo-height:min(54svh,470px);
   }
 }
 
@@ -719,10 +708,7 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
     .hero { height: 90vh; }
   }
   @media (max-width: 900px), (max-height: 36rem) {
-    .hero { --hero-photo-height: min(66vh, 680px); height: auto; }
-  }
-  @media (max-width: 650px) {
-    .hero { --hero-photo-height: min(58vh, 520px); }
+    .hero { height: auto; }
   }
 }
 

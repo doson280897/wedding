@@ -661,7 +661,13 @@ test("story last row centres and hero shade follows the photo after rotation", a
       const photo=page.locator('img.hero-photo');
       await expect.poll(()=>photo.evaluate(node=>node.naturalWidth)).toBeGreaterThan(0);
       expect(await photo.evaluate(node=>getComputedStyle(node).objectFit)).toBe('contain');
-      expect(await photo.evaluate(node=>node.getBoundingClientRect().height <= innerHeight)).toBe(true);
+      const fit=await photo.evaluate(node=>{
+        const box=node.getBoundingClientRect();
+        return {widthError:Math.abs(box.width-node.parentElement.clientWidth),
+          heightError:Math.abs(box.height-box.width*node.naturalHeight/node.naturalWidth)};
+      });
+      expect(fit.widthError).toBeLessThanOrEqual(1);
+      expect(fit.heightError).toBeLessThanOrEqual(1);
     }
     await page.locator('.promise-grid').scrollIntoViewIfNeeded();
     const geometry=await page.locator('.promise-grid').evaluate(node=>{

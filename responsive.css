@@ -36,17 +36,11 @@
 html,body{touch-action:pan-x pan-y}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
-/* Photo and shade share one real box, including min-height in landscape. */
+/* The image determines the stacked hero height; the shade follows it. */
 .hero-media{position:absolute;inset:0;overflow:hidden}
 .hero-media .hero-shade{inset:0;height:100%}
 @media(max-width:900px),(max-height:36rem){
-  .hero-media{position:relative;inset:auto;isolation:isolate}
-  /* Fill the frame with the same cached asset; the sharp image stays whole. */
-  .hero-media:before{
-    content:"";position:absolute;inset:-16px;z-index:-1;
-    background:var(--hero-image) center / cover no-repeat;
-    filter:blur(12px) brightness(.65);pointer-events:none;
-  }
+  .hero-media{position:relative;inset:auto}
 }
 
 /* Centre incomplete story rows using tracks derived from card space. */
