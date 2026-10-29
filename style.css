@@ -83,6 +83,9 @@
 @keyframes albumCaptionIn{0%{opacity:.28;transform:translateY(6px);letter-spacing:.30em}100%{opacity:1;transform:none;letter-spacing:.22em}}
 .album-status{text-align:center;color:#ddc49c;padding:5px 20px 15px;font-size:12px}
 .album-status[hidden]{display:none}
+.album-retry{display:block;margin:0 auto 20px;padding:12px 20px;min-height:44px;border:1px solid #c8a87980;border-radius:999px;background:transparent;color:#ead3aa;font:500 12px Montserrat,sans-serif;cursor:pointer}
+.album-retry[hidden]{display:none}
+.album-retry:focus-visible{outline:2px solid #ead3aa;outline-offset:4px}
 .album-bottom{
   position:relative;z-index:5;max-width:900px;padding:0 25px;display:flex;justify-content:space-between;
   align-items:center;gap:15px;margin:10px auto 0;font-size:9px;color:#bebbb6;letter-spacing:1.35px

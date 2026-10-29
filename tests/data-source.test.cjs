@@ -131,6 +131,9 @@ test("album settings, captions and photo list live only in images/manifest.json"
   assert.equal(manifest.total, manifest.photos.length);
   assert.equal(new Set(manifest.photos.map(photo => photo.src)).size, manifest.photos.length);
   assert.ok(manifest.photos.every(photo => photo.src.startsWith("images/optimized/album/")));
+  for (const photo of manifest.photos) {
+    assert.ok(fs.existsSync(path.join(root, decodeURIComponent(photo.src))), "Missing album photo: " + photo.src);
+  }
   const generator = read("generate_gallery.py");
   const renderer = read("gallery.js");
   assert.ok(generator.includes('MANIFEST_FILE = IMAGE_ROOT / "manifest.json"'));

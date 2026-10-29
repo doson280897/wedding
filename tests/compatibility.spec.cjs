@@ -969,6 +969,37 @@ test("reduced-motion album can switch, close and reopen without losing its image
 });
 
 
+test("album recovers after a failed manifest and restores focus after pointer viewing @smoke @core", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion:"reduce" });
+  let requests = 0;
+  await page.route("**/images/manifest.json*", route => {
+    requests++;
+    return requests === 1
+      ? route.fulfill({ status:503, contentType:"text/plain", body:"Temporarily unavailable" })
+      : route.continue();
+  });
+  await page.goto(base + "/index.html?party=groom&lang=en", { waitUntil:"domcontentloaded" });
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
+  const viewport = page.locator("#albumViewport");
+  await viewport.scrollIntoViewIfNeeded();
+  const retry = page.locator("#albumRetry");
+  await expect(retry).toBeVisible();
+  await expect(retry).toHaveText("Try loading photos again");
+  await retry.click();
+  await expect(retry).toBeHidden();
+  await expect(page.locator("#albumStatus")).toBeHidden();
+  expect(requests).toBe(2);
+  const main = page.locator(".album-card.is-main .album-photo");
+  await expect(main).toBeVisible();
+  await expect.poll(() => main.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
+  await main.click();
+  await expect(page.locator("#albumLightboxClose")).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#albumLightbox")).toBeHidden();
+  await expect(viewport).toBeFocused();
+});
+
 test("calendar chooser offers matching provider drafts and files without claiming installed apps @smoke @core", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "canShare", { configurable:true, value:() => true });

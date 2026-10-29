@@ -6,6 +6,7 @@
   const counter = document.getElementById("albumCount");
   const progress = document.getElementById("albumProgress");
   const status = document.getElementById("albumStatus");
+  const retry = document.getElementById("albumRetry");
   const editorialCaption = document.getElementById("albumEditorialCaption");
   const captionText = document.getElementById("albumCaptionText");
 
@@ -756,7 +757,11 @@
     lightboxImage.style.visibility = "";
     lightboxImage.removeAttribute("src");
 
+    // Photo cards are plain divs, so a pointer-opened photo cannot receive
+    // focus. Return to the keyboard-operable album instead of a hidden close.
     lightboxReturnFocus?.focus?.({ preventScroll:true });
+    if (lightbox.contains(document.activeElement) ||
+        document.activeElement === document.body) viewport.focus({ preventScroll:true });
     lightboxReturnFocus = null;
   }
 
@@ -890,13 +895,18 @@
   }
 
   async function start() {
+    if (document.activeElement === retry) viewport.focus({ preventScroll:true });
+    if (retry) retry.hidden = true;
+    if (status) status.hidden = false;
     setStatus("album.loading");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
 
     try {
       // Album data lives only in images/manifest.json.
       const manifestUrl = new URL("images/manifest.json", document.baseURI);
       manifestUrl.searchParams.set("v", buildId);
-      const response = await fetch(manifestUrl, { cache:"no-cache" });
+      const response = await fetch(manifestUrl, { cache:"no-cache", signal:controller.signal });
       if (!response.ok) throw new Error("Album manifest HTTP " + response.status);
       const manifest = await response.json();
       if (!manifest || !Array.isArray(manifest.photos))
@@ -944,6 +954,10 @@
     } catch (error) {
       console.error(error);
       setStatus("album.error");
+      albumStarted = false;
+      if (retry) retry.hidden = false;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -958,6 +972,7 @@
     window.removeEventListener("resize", checkAlbumVisibility);
     start();
   };
+  retry?.addEventListener("click", ensureAlbumStarted);
 
   // WebKit (especially iOS emulation and some embedded WebViews) may delay
   // IntersectionObserver after programmatic scrolling. Keep a passive fallback.
