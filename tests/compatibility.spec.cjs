@@ -663,8 +663,10 @@ test("story last row centres and hero shade follows the photo after rotation", a
       expect(await photo.evaluate(node=>getComputedStyle(node).objectFit)).toBe('contain');
       const fit=await photo.evaluate(node=>{
         const box=node.getBoundingClientRect();
+        const naturalHeight=box.width*node.naturalHeight/node.naturalWidth;
+        const cap=parseFloat(getComputedStyle(node).maxHeight);
         return {widthError:Math.abs(box.width-node.parentElement.clientWidth),
-          heightError:Math.abs(box.height-box.width*node.naturalHeight/node.naturalWidth)};
+          heightError:Math.abs(box.height-Math.min(naturalHeight,cap))};
       });
       expect(fit.widthError).toBeLessThanOrEqual(1);
       expect(fit.heightError).toBeLessThanOrEqual(1);

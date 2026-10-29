@@ -379,6 +379,8 @@ html[data-party="groom"] .family-grid .family-bride{order:2}
     inset:auto;
     width:100%;
     height:auto;
+    max-height:100vh;
+    max-height:100svh;
     min-height:0;
     animation:none;
     transform:none!important;
