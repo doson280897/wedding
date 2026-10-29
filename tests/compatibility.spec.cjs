@@ -391,7 +391,8 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(gate).toHaveClass(/is-awakening/);
   await expect(gate).toHaveClass(/is-opening/);
   // Lightweight visual accents start with the doors, never in the pre-open view.
-  await expect(page.locator("#gateMagic .moonlight-gate__spark")).toHaveCount(18);
+  const expectedSparks = await page.evaluate(() => matchMedia("(pointer: coarse)").matches ? 8 : 12);
+  await expect(page.locator("#gateMagic .moonlight-gate__spark")).toHaveCount(expectedSparks);
   await expect(page.locator("#gateMagic canvas.moonlight-gate__meteor-canvas")).toHaveCount(1);
   await expect.poll(() => page.locator(".moonlight-gate__meteor-canvas")
     .evaluate(node => node.width)).toBeGreaterThan(0);
@@ -434,8 +435,15 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   expect(approach).not.toBe("none");
   await expect(page.locator("#settingsHub")).toBeHidden();
   await expect(page.locator("#wqToggle")).toBeHidden();
-  const finalHinge = await leftDoor.evaluate(node => getComputedStyle(node).transform);
-  expect(finalHinge).toContain("matrix3d(");
+  await expect(leftDoor).toBeHidden();
+  const invitationMotion = await page.evaluate(() => ({
+    wings:getComputedStyle(document.querySelector(".moonlight-gate__wing--left")).animationName,
+    butterflies:getComputedStyle(document.querySelector(".moonlight-gate__butterfly")).animationIterationCount,
+    heading:getComputedStyle(document.querySelector(".moonlight-gate__reveal-heading")).opacity
+  }));
+  expect(invitationMotion.wings).toBe("gateWingLeft");
+  expect(invitationMotion.butterflies).toBe("infinite");
+  expect(invitationMotion.heading).toBe("1");
   // The cinematic reveal beat precedes the sky/title zoom
   // out WHILE the actual hero zooms in and both layers crossfade.
   await expect(gate).toHaveClass(/is-handoff/, { timeout:4500 });

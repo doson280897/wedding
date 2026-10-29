@@ -246,6 +246,7 @@
   const stopGateMeteors = () => {
     if (meteorFrame) cancelAnimationFrame(meteorFrame);
     meteorFrame = 0;
+    resumeGateMeteors = null;
     meteorResizeObserver?.disconnect();
     meteorResizeObserver = null;
     if (meteorCanvas) {
@@ -253,6 +254,15 @@
       ctx?.clearRect(0, 0, meteorCanvas.width, meteorCanvas.height);
     }
   };
+  let resumeGateMeteors = null;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (meteorFrame) cancelAnimationFrame(meteorFrame);
+      meteorFrame = 0;
+    } else if (!moonlightGate?.hidden && resumeGateMeteors && !meteorFrame) {
+      meteorFrame = requestAnimationFrame(resumeGateMeteors);
+    }
+  });
   const startGateMeteors = () => {
     if (reducedGateMotion || !meteorCanvas) return;
     const ctx = meteorCanvas.getContext("2d", { alpha:true });
@@ -358,6 +368,7 @@
       });
       meteorFrame = requestAnimationFrame(render);
     };
+    resumeGateMeteors = render;
     meteorFrame = requestAnimationFrame(render);
   };
   const gateTimers = new Set();

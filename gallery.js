@@ -967,7 +967,9 @@
   let albumFailed = false;
   let lazyObserver = null;
   const ensureAlbumStarted = () => {
-    if (albumStarted || albumFailed) return;
+    if (albumStarted || albumFailed || document.documentElement.classList.contains("wax-pending") ||
+        document.documentElement.classList.contains("party-pending") ||
+        document.documentElement.classList.contains("link-tool-active")) return;
     albumStarted = true;
     lazyObserver?.disconnect();
     window.removeEventListener("scroll", checkAlbumVisibility);
