@@ -109,6 +109,11 @@ jobs:
         env:
           CI: "true"
 
+      - name: Verify failed album recovery on all default browser projects
+        run: npx playwright test tests/compatibility.spec.cjs --grep "album recovers" --reporter=line --workers=2
+        env:
+          CI: "true"
+
       - name: Test desktop functionality and targeted cross-device smoke
         run: npx playwright test tests/compatibility.spec.cjs --reporter=line --workers=2
         env:

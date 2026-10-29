@@ -983,6 +983,10 @@ test("album recovers after a failed manifest and restores focus after pointer vi
   await expect(page.locator("#moonlightGate")).toBeHidden({ timeout:16000 });
   const viewport = page.locator("#albumViewport");
   await viewport.scrollIntoViewIfNeeded();
+  // WebKit may defer IntersectionObserver after programmatic scrolling.
+  // Keyboard entry is also a supported, deterministic lazy-load trigger.
+  await viewport.focus();
+  await expect.poll(() => requests).toBe(1);
   const retry = page.locator("#albumRetry");
   await expect(retry).toBeVisible();
   await expect(retry).toHaveText("Try loading photos again");
