@@ -26,7 +26,7 @@
 .moonlight-gate__recipient-name{font-size:clamp(21px,5cqw,36px)}
 #waxOpenButton{top:49.1%;width:17.8%;height:16%;min-width:44px;min-height:44px;aspect-ratio:auto;border:0;border-radius:15%;background:none;box-shadow:none}
 #waxOpenButton::before{display:none}
-#waxOpenButton::after{content:"";position:absolute;inset:17% 8%;border-radius:50%;background:radial-gradient(ellipse,#fff1c496,#edbe652e 45%,transparent 72%);pointer-events:none;opacity:.2;mix-blend-mode:screen}
+#waxOpenButton::after{content:"";position:absolute;inset:5% -8%;border-radius:50%;background:radial-gradient(ellipse,#fff8dfc4 0%,#ffe2a78c 24%,#efbd514d 48%,transparent 74%);pointer-events:none;opacity:.55;mix-blend-mode:screen}
 #waxMonogram{width:100%;height:100%;filter:none}
 .fairy-lock{display:block;width:100%;height:100%;object-fit:contain}
 .fairy-star{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff1cd;box-shadow:0 0 7px #ffe7a6;pointer-events:none}
@@ -35,14 +35,14 @@
 .fairy-star--three{left:75%;top:68%}
 .fairy-star--four{left:42%;top:79%}
 @media(prefers-reduced-motion:no-preference){
- .moonlight-gate:not([hidden]) #waxOpenButton::after{animation:fairyLockHighlight 3.2s ease-in-out infinite}
+ .moonlight-gate:not([hidden]) #waxOpenButton::after{animation:fairyLockHighlight 2.6s ease-in-out infinite}
  .moonlight-gate:not([hidden]) .fairy-star{animation:gateMoonTwinkle 3.4s ease-in-out var(--twinkle-delay,0s) infinite}
  .moonlight-gate .fairy-star--two{--twinkle-delay:-1.2s}
  .moonlight-gate .fairy-star--three{--twinkle-delay:-2.4s}
  .moonlight-gate .fairy-star--four{--twinkle-delay:-.6s}
  .moonlight-gate.is-unlocking #waxOpenButton::after{animation:fairyLockAwaken var(--gate-unlock-time,1.4s) ease-out both}
 }
-@keyframes fairyLockHighlight{0%,100%{opacity:.12;transform:scale(.88)}50%{opacity:.7;transform:scale(1.12)}}
+@keyframes fairyLockHighlight{0%,100%{opacity:.4;transform:scale(.94)}40%{opacity:1;transform:scale(1.16)}62%{opacity:.5;transform:scale(1)}78%{opacity:.9;transform:scale(1.1)}}
 @keyframes fairyLockAwaken{0%{opacity:.3}60%{opacity:1}100%{opacity:.3}}
 .moonlight-gate.is-opening #waxOpenButton::after,.moonlight-gate.is-opened #waxOpenButton::after,.moonlight-gate[hidden] #waxOpenButton::after,.moonlight-gate.is-opening .fairy-star,.moonlight-gate.is-opened .fairy-star,.moonlight-gate[hidden] .fairy-star{animation:none}
 @media(prefers-reduced-motion:reduce){
