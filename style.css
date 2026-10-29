@@ -939,7 +939,7 @@ html:not(.party-pending) section[id] { scroll-margin-top:18px; }
    zoom-out and hero zoom-in crossfade; no stationary post-opening pause. */
 html.wax-pending,html.wax-pending body{overflow:hidden}
 .moonlight-gate{
-  --gate-gold:#d8b477;
+  --gate-gold:#f0d29b;
   --gate-seal-y:56%;
   position:fixed;inset:0;z-index:10000;isolation:isolate;overflow:hidden;
   background:#0a101d;perspective:1150px;perspective-origin:50% 50%;
@@ -1171,41 +1171,42 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
 
 .moonlight-gate__door-face{
   position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;
-  background:linear-gradient(110deg,#1c2938,#111b2c 38%,#18283a 70%,#0b1321);
-  box-shadow:inset 0 0 64px #0008,0 12px 34px #0007;
-  border-right:2px solid #a17b48;
+  background:radial-gradient(ellipse at 68% 35%,#344d6155,transparent 62%),linear-gradient(110deg,#30465b,#1e3046 38%,#2a4157 70%,#182b40);
+  box-shadow:inset 0 1px 0 #ecdeb52b,inset 0 0 36px #07101b66,0 12px 34px #0007;
+  border-right:2px solid #d5b77e;
 }
 .moonlight-gate__door--right .moonlight-gate__door-face{
-  background:linear-gradient(245deg,#1c2938,#111b2c 40%,#18283a 72%,#0b1321);
-  border-right:0;border-left:2px solid #a17b48;
+  background:radial-gradient(ellipse at 32% 35%,#344d6155,transparent 62%),linear-gradient(245deg,#30465b,#1e3046 40%,#2a4157 72%,#182b40);
+  border-right:0;border-left:2px solid #d5b77e;
 }
 .moonlight-gate__door-face:before,.moonlight-gate__door-face:after{
-  content:"";position:absolute;pointer-events:none;border:1px solid #bf935c78;
+  content:"";position:absolute;pointer-events:none;border:1px solid #e6c58da6;
 }
 .moonlight-gate__door-face:before{inset:13px}
-.moonlight-gate__door-face:after{inset:19px;border-color:#b88e5155}
+.moonlight-gate__door-face:after{inset:19px;border-color:#c6a36580}
 .moonlight-gate__door-arch{
-  position:absolute;inset:35px 10% 48px;border:1px solid #bc965d66;
+  position:absolute;inset:35px 10% 48px;border:1px solid #d7b7839c;
   border-radius:130px 130px 3px 3px;
 }
 .moonlight-gate__door-arch:after{
-  content:"";position:absolute;inset:7px;border:1px solid #bb976248;border-radius:110px 110px 1px 1px;
+  content:"";position:absolute;inset:7px;border:1px solid #d7b78366;border-radius:110px 110px 1px 1px;
 }
 .moonlight-gate__door-flower{
   position:absolute;top:22px;left:50%;transform:translateX(-50%);
   color:#d9b778;opacity:.82;font-size:23px;line-height:1;
 }
 .moonlight-gate__orbit{
-  position:absolute;width:clamp(122px,16vw,210px);aspect-ratio:1;
+  position:absolute;width:clamp(132px,17vw,216px);aspect-ratio:1;
   left:50%;top:37%;transform:translate(-50%,-50%);
-  display:grid;place-items:center;border:1px solid #b99559a3;border-radius:50%;
+  display:grid;place-items:center;border:1px solid #e5c78cc4;border-radius:50%;
+  background:radial-gradient(circle,#263c5055,#10223666);
   color:var(--gate-gold);
   box-shadow:0 0 0 12px #b9955910,0 0 0 24px #b9955908,inset 0 0 30px #c7a06814;
 }
 .moonlight-gate__orbit:before{
-  content:"";position:absolute;inset:-9px;border:1px dashed #b9955980;border-radius:50%;
+  content:"";position:absolute;inset:-9px;border:1px dashed #d7b985a3;border-radius:50%;
 }
-.moonlight-gate__orbit svg{width:63%;height:63%;overflow:visible;filter:drop-shadow(0 0 8px #edc57d66)}
+.moonlight-gate__orbit svg{width:68%;height:68%;overflow:visible;filter:drop-shadow(0 1px 5px #edc57d55)}
 /* Quiet sun and moon: static gradients, animated opacity/transform only.
    The effects stop with the opening doors and never compete with the greeting. */
 .moonlight-gate__orbit > svg{position:relative;z-index:1;transition:opacity .65s ease}
@@ -1256,29 +1257,31 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   background:linear-gradient(90deg,transparent,#ba915f,transparent);
 }
 .moonlight-gate__door-label{
-  position:absolute;bottom:17%;left:50%;transform:translateX(-50%);
-  font:12px Georgia,serif;letter-spacing:.55em;color:#c8a365;
+  position:absolute;top:calc(100% + 20px);left:50%;transform:translateX(-50%);
+  width:150%;max-width:calc(50vw - 28px);text-align:center;
+  font:500 11px/1.6 Montserrat,sans-serif;letter-spacing:.22em;color:#efdbb4;
 }
 .moonlight-gate__top-caption,.moonlight-gate__bottom-caption{
   position:absolute;z-index:5;left:50%;bottom:calc(100% + 25px);
   width:170%;max-width:calc(50vw - 28px);transform:translateX(-50%);
   text-align:center;text-wrap:balance;
-  font:500 clamp(8px,.8vw,10px)/1.7 Montserrat,sans-serif;
-  letter-spacing:.2em;color:#edcf9d;pointer-events:none;
+  font:600 clamp(10px,1vw,12px)/1.7 Montserrat,sans-serif;
+  letter-spacing:.16em;color:#f5dfb4;pointer-events:none;
+  text-shadow:0 1px 3px #0a1422c4;
 }
 #waxOpenButton{
   position:absolute;z-index:7;left:50%;top:var(--gate-seal-y);
-  display:grid;place-items:center;width:clamp(78px,8vw,98px);aspect-ratio:1;
-  padding:0;border-radius:50%;border:1px solid #8d6851;
+  display:grid;place-items:center;width:clamp(88px,8vw,108px);aspect-ratio:1;
+  padding:0;border-radius:50%;border:2px solid #e2bd7e;
   appearance:none;-webkit-appearance:none;cursor:pointer;
   transform:translate(-50%,-50%);touch-action:manipulation;
   color:#ffe4be;
-  background:radial-gradient(circle at 35% 25%,#b97967,#7a3b3a 58%,#48242d);
+  background:radial-gradient(circle at 35% 25%,#c79d62,#886039 58%,#503923);
   box-shadow:0 4px 28px #000b,0 0 0 6px #b58a5480,0 0 0 8px #533928,0 0 24px #d7a36b70;
   transition:opacity .35s ease,transform .45s ease;
 }
 #waxOpenButton:before{
-  content:"";position:absolute;inset:9px;border:1px solid #e3b08b9c;border-radius:50%;
+  content:"";position:absolute;inset:9px;border:1px solid #f3d59ab8;border-radius:50%;
   pointer-events:none;
 }
 #waxOpenButton:focus-visible{outline:3px solid #f1d9a4;outline-offset:11px}
@@ -1427,16 +1430,17 @@ html.wax-pending.gate-hero-revealing .hero{opacity:1;transform:scale(1)}
   .moonlight-gate__door-face:before{inset:8px}
   .moonlight-gate__door-face:after{inset:13px}
   .moonlight-gate__door-arch{inset:32px 8% 43px}
-  .moonlight-gate__orbit{width:min(72%,168px)}
+  .moonlight-gate__orbit{width:min(78%,176px)}
   .moonlight-gate__reveal-names{font-size:clamp(36px,10vw,52px)}
   .moonlight-gate__reveal-subtitle{letter-spacing:.14em}
-  .moonlight-gate__door-label{font-size:10px}
-  #waxOpenButton{width:clamp(72px,19vw,86px)}
+  .moonlight-gate__door-label{font-size:10px;top:calc(100% + 18px)}
+  #waxOpenButton{width:clamp(80px,21vw,94px)}
   .moonlight-gate__top-caption,.moonlight-gate__bottom-caption{bottom:calc(100% + 21px);letter-spacing:.12em}
 }
 @media(max-height:500px){
   .moonlight-gate__orbit{width:min(30vh,160px)}
-  .moonlight-gate__top-caption,.moonlight-gate__bottom-caption{bottom:calc(100% + 10px);font-size:8px;letter-spacing:.12em}
+  .moonlight-gate__door-label{top:calc(100% + 12px);font-size:9px}
+  .moonlight-gate__top-caption,.moonlight-gate__bottom-caption{bottom:calc(100% + 10px);font-size:9px;letter-spacing:.1em}
 }
 @media(prefers-reduced-motion:reduce){
   .moonlight-gate.is-opened .moonlight-gate__scene{visibility:hidden}
