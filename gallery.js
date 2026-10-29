@@ -130,7 +130,7 @@
     item.slide.style.height = Math.round(height) + "px";
   }
 
-  function createItem(photo, photoIndex) {
+  function createItem(photo, photoIndex, container) {
     const slide = document.createElement("div");
     slide.className = "album-slide";
     slide.setAttribute("aria-hidden", "true");
@@ -176,7 +176,7 @@
 
     card.append(img);
     slide.append(card);
-    space.append(slide);
+    container.append(slide);
     itemBySlide.set(slide, item);
     return item;
   }
@@ -463,7 +463,10 @@
     drag = null;
     viewport.classList.remove("is-dragging");
 
-    if (state.cancelled) return;
+    if (state.cancelled) {
+      moveTo(Math.round(position));
+      return;
+    }
 
     if (state.moved) {
       const step = viewport.clientWidth < 700
@@ -943,7 +946,11 @@
       space.replaceChildren();
       loadedImageCount = 0;
       cachedMetrics = null;
-      items = photos.map(createItem);
+      // Construct the full album off-DOM, then attach once. Geometry above
+      // is cached before any card writes; full-resolution sources are unchanged.
+      const cards = document.createDocumentFragment();
+      items = photos.map((photo, index) => createItem(photo, index, cards));
+      space.append(cards);
       position = 0;
       targetPosition = 0;
       focusedPhotoIndex = -1;
@@ -966,14 +973,17 @@
   let albumStarted = false;
   let albumFailed = false;
   let lazyObserver = null;
+  let visibilityFrame = 0;
   const ensureAlbumStarted = () => {
     if (albumStarted || albumFailed || document.documentElement.classList.contains("wax-pending") ||
         document.documentElement.classList.contains("party-pending") ||
         document.documentElement.classList.contains("link-tool-active")) return;
     albumStarted = true;
     lazyObserver?.disconnect();
-    window.removeEventListener("scroll", checkAlbumVisibility);
-    window.removeEventListener("resize", checkAlbumVisibility);
+    window.removeEventListener("scroll", scheduleAlbumVisibility);
+    window.removeEventListener("resize", scheduleAlbumVisibility);
+    if (visibilityFrame) cancelAnimationFrame(visibilityFrame);
+    visibilityFrame = 0;
     start();
   };
   retry?.addEventListener("click", () => {
@@ -991,24 +1001,30 @@
     if (rect.top < innerHeight + 1000 && rect.bottom > -600) ensureAlbumStarted();
   }
 
+  function scheduleAlbumVisibility() {
+    if (albumStarted || albumFailed || visibilityFrame) return;
+    visibilityFrame = requestAnimationFrame(() => {
+      visibilityFrame = 0;
+      checkAlbumVisibility();
+    });
+  }
+
   if ("IntersectionObserver" in window) {
     lazyObserver = new IntersectionObserver(entries => {
       if (entries.some(entry => entry.isIntersecting)) ensureAlbumStarted();
     }, { rootMargin:"1200px 0px", threshold:0 });
     lazyObserver.observe(albumSection);
-    window.addEventListener("scroll", checkAlbumVisibility, { passive:true });
-    window.addEventListener("resize", checkAlbumVisibility, { passive:true });
-    viewport.addEventListener("focus", ensureAlbumStarted, { once:true });
-    viewport.addEventListener("pointerdown", ensureAlbumStarted, { once:true });
-    checkAlbumVisibility();
-    // The entrance should not compete with a speculative album load.
-    // Check visibility after opening, without fetching any distant images.
-    if (document.documentElement.dataset.party) {
-      document.addEventListener("wedding:waxopen", () => {
-        window.setTimeout(checkAlbumVisibility, 200);
-      }, { once:true });
-    }
-  } else {
-    ensureAlbumStarted();
+  }
+  // Keep the same lazy-load and keyboard fallback when IntersectionObserver
+  // is missing. Calling start only during wax-pending would never retry it.
+  window.addEventListener("scroll", scheduleAlbumVisibility, { passive:true });
+  window.addEventListener("resize", scheduleAlbumVisibility, { passive:true });
+  viewport.addEventListener("focus", ensureAlbumStarted, { once:true });
+  viewport.addEventListener("pointerdown", ensureAlbumStarted, { once:true });
+  checkAlbumVisibility();
+  if (document.documentElement.dataset.party) {
+    document.addEventListener("wedding:waxopen", () => {
+      window.setTimeout(scheduleAlbumVisibility, 200);
+    }, { once:true });
   }
 })();

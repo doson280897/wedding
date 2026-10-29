@@ -102,7 +102,7 @@
   });
 
   // Keep language and music in a single compact panel, but let the
-  // existing language and YouTube handlers control their own behavior.
+  // existing language and audio handlers control their own behavior.
   document.addEventListener("pointerdown", event => {
     if (!panel.hidden && !hub.contains(event.target)) setOpen(false);
   }, true);

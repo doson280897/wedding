@@ -14,6 +14,12 @@ async function mockWeddingAudio(page, delay = 0) {
       get(){return get(this).time;},
       set(value){get(this).time=value;}
     });
+    Object.defineProperty(HTMLMediaElement.prototype, "error", {get(){return get(this).error || null;}});
+    HTMLMediaElement.prototype.load = function() {
+      window.__audioReloadCalls=(window.__audioReloadCalls||0)+1;
+      get(this).error=null;
+      get(this).time=0;
+    };
     HTMLMediaElement.prototype.play = function() {
       const audio=this;
       window.__plays=(window.__plays||0)+1;
@@ -24,6 +30,10 @@ async function mockWeddingAudio(page, delay = 0) {
       }
       get(audio).paused=false;
       window.__advanceMusic=value=>{audio.currentTime=value;};
+      window.__failAudio=()=>{
+        get(audio).error={code:2};
+        audio.dispatchEvent(new Event("error"));
+      };
       window.__musicTestEmit=type=>audio.dispatchEvent(new Event(type));
       if (delay) audio.dispatchEvent(new Event("waiting"));
       return new Promise(resolve => setTimeout(() => {
@@ -1093,7 +1103,7 @@ test("native MP3 starts in gate gesture, retries rejection, cancels late playbac
   for (const party of ["bride","groom"]) {
     await page.goto(base+"/index.html?party="+party,{waitUntil:"domcontentloaded"});
     expect(await page.locator("#weddingMusic").evaluate(audio=>decodeURI(new URL(audio.src).pathname))).toBe(
-      party === "bride" ? "/A Thousand Years.mp3" : "/破茧.mp3"
+      party === "bride" ? "/audio/bride.mp3" : "/audio/groom.mp3"
     );
     await page.evaluate(()=>{window.__rejectNextPlay=true;});
     await page.locator("#waxOpenButton").click();
@@ -1128,4 +1138,50 @@ test("real MP3 plays across the gate transition without a video player @smoke @c
     await expect(page.locator("video, iframe[src*=youtube]")).toHaveCount(0);
   }
   expect(videoRequests).toEqual([]);
+});
+
+
+test("MP3 retry reloads failed media but normal resume preserves playback @smoke @core", async ({page}) => {
+  await mockWeddingAudio(page);
+  await page.emulateMedia({reducedMotion:"reduce"});
+  await page.goto(base+"/index.html?party=groom",{waitUntil:"domcontentloaded"});
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden();
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing");
+  await page.evaluate(()=>{window.__advanceMusic(42);window.__failAudio();});
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","paused");
+  await page.locator("#musicBubbleTrigger").click();
+  await page.locator("#musicBubblePause").click();
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing");
+  expect(await page.evaluate(()=>window.__audioReloadCalls)).toBe(1);
+  await page.evaluate(()=>window.__advanceMusic(37));
+  await page.locator("#musicBubbleTrigger").click();
+  await page.locator("#musicBubblePause").click();
+  await page.locator("#musicBubbleTrigger").click();
+  await page.locator("#musicBubblePause").click();
+  await expect(page.locator("#musicBubble")).toHaveAttribute("data-music-state","playing");
+  expect(await page.locator("#weddingMusic").evaluate(audio=>audio.currentTime)).toBe(37);
+  expect(await page.evaluate(()=>window.__audioReloadCalls)).toBe(1);
+});
+
+test("album loads after the gate without IntersectionObserver @smoke @core", async ({page}) => {
+  await page.addInitScript(()=>{delete window.IntersectionObserver;});
+  await page.emulateMedia({reducedMotion:"reduce"});
+  let manifestRequests=0;
+  page.on("request",request=>{if(request.url().includes("images/manifest.json")) manifestRequests++;});
+  await page.goto(base+"/index.html?party=bride",{waitUntil:"domcontentloaded"});
+  expect(await page.evaluate(()=>"IntersectionObserver" in window)).toBe(false);
+  expect(manifestRequests).toBe(0);
+  await page.locator("#waxOpenButton").click();
+  await expect(page.locator("#moonlightGate")).toBeHidden();
+  await page.locator("#settingsTrigger").click();
+  await page.locator('#wqPanel a[href="#album"]').click();
+  await expect(page.locator(".album-card.is-main")).toHaveCount(1);
+  await expect.poll(()=>page.locator(".album-card.is-main img").evaluate(image=>image.naturalWidth)).toBeGreaterThan(0);
+  expect(manifestRequests).toBe(1);
+  await page.locator("#albumViewport").focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#albumLightbox")).toBeVisible();
+  await page.locator("#albumLightboxNext").click();
+  await expect(page.locator("#albumLightboxCounter")).toHaveText(/^02 \/ /);
 });

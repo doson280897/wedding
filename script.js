@@ -638,6 +638,9 @@
     try {
       // Call play directly in the gate click, before any await/timer, to keep
       // iOS user activation. Pause/resume reuses this element and currentTime.
+      // A media error remains sticky until load() selects the source again.
+      // Reset only failed sources; normal resume must retain currentTime.
+      if (musicAudio.error) musicAudio.load();
       musicAudio.play()?.catch(() => failMusicAttempt(requestId));
     } catch (_) { failMusicAttempt(requestId); }
   };

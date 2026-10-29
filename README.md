@@ -95,7 +95,7 @@ Mẫu `{{couple.bride.short}}`, `{{parties.groom.dateDots}}`, `{{parties.bride.v
 - `date`: định dạng `YYYY-MM-DD`, ví dụ `2027-03-15`.
 - `ceremonyTime`, `ceremonyEnd`, `receptionTime`, `receptionEnd`: giờ 24h như `09:00`.
 - `site.timezone`: dạng `+07:00`. Countdown và lịch ICS đều đọc từ đó.
-- `music.src`: đường dẫn MP3 tương đối với trang thiệp, giữ nguyên tên file (kể cả dấu cách/Unicode). Vu Quy dùng `A Thousand Years.mp3`; Tân Hôn dùng `破茧.mp3`.
+- `music.src`: đường dẫn MP3 tương đối với trang thiệp, giữ nguyên tên file (kể cả dấu cách/Unicode). Vu Quy dùng `audio/bride.mp3`; Tân Hôn dùng `audio/groom.mp3`. Các file được giữ nguyên chất lượng âm thanh gốc.
 - Nhạc được tải trước và gọi phát trực tiếp khi chạm ổ khóa. Dùng âm thanh HTML, không tải YouTube/iframe nên không bật trình phát video. Tạm dừng giữ vị trí; Dừng đặt về đầu bài. Nếu trình duyệt chặn phát hoặc mất mạng, có thể thử lại trong Tùy chỉnh → Âm nhạc.
 
 ### Hình ảnh, QR và album
