@@ -1206,6 +1206,51 @@ html.wax-pending,html.wax-pending body{overflow:hidden}
   content:"";position:absolute;inset:-9px;border:1px dashed #b9955980;border-radius:50%;
 }
 .moonlight-gate__orbit svg{width:63%;height:63%;overflow:visible;filter:drop-shadow(0 0 8px #edc57d66)}
+/* Quiet sun and moon: static gradients, animated opacity/transform only.
+   The effects stop with the opening doors and never compete with the greeting. */
+.moonlight-gate__orbit > svg{position:relative;z-index:1;transition:opacity .65s ease}
+.moonlight-gate__orbit::after{
+  content:"";position:absolute;inset:-12%;border-radius:50%;pointer-events:none;
+  opacity:.25;transform:scale(.96);
+}
+.moonlight-gate__orbit--sun::after{
+  background:radial-gradient(circle,#edc57d30 0%,#edc57d1f 38%,#edc57d0a 57%,transparent 72%);
+}
+.moonlight-gate__orbit--moon::after{
+  background:radial-gradient(circle,#e1e4f323 0%,#ccd6ed12 45%,transparent 72%);
+}
+.gate-sun-rays{transform-box:view-box;transform-origin:60px 60px}
+.gate-moon-crescent{stroke:#efe1c6}
+.gate-moon-star{transform-box:fill-box;transform-origin:center;opacity:.8}
+@media(prefers-reduced-motion:no-preference){
+  .moonlight-gate:not([hidden]) .moonlight-gate__orbit--sun::after{animation:gateSunBreath 5.6s ease-in-out infinite}
+  .moonlight-gate:not([hidden]) .gate-sun-rays{animation:gateSunRaySway 9s ease-in-out infinite}
+  .moonlight-gate:not([hidden]) .moonlight-gate__orbit--moon::after{animation:gateMoonGlow 7s ease-in-out -2s infinite}
+  .moonlight-gate:not([hidden]) .gate-moon-star{animation:gateMoonTwinkle 3.4s ease-in-out infinite}
+  .moonlight-gate:not([hidden]) .gate-moon-star--two{animation-delay:-1.2s}
+  .moonlight-gate:not([hidden]) .gate-moon-star--three{animation-delay:-2.4s;animation-duration:4.2s}
+  .moonlight-gate:not([hidden]) .gate-moon-star--four{animation-delay:-.6s;animation-duration:3.8s}
+  .moonlight-gate.is-unlocking .moonlight-gate__orbit--sun::after{animation:gateSunAwaken var(--gate-unlock-time,1.4s) ease-out both}
+}
+@keyframes gateSunBreath{0%,100%{opacity:.24;transform:scale(.96)}50%{opacity:.65;transform:scale(1.045)}}
+@keyframes gateSunRaySway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes gateMoonGlow{0%,100%{opacity:.2;transform:scale(.97)}50%{opacity:.48;transform:scale(1.025)}}
+@keyframes gateMoonTwinkle{0%,100%{opacity:.48;transform:scale(.86)}45%{opacity:1;transform:scale(1.06)}70%{opacity:.7;transform:scale(.96)}}
+@keyframes gateSunAwaken{0%,45%{opacity:.35;transform:scale(1)}78%{opacity:.88;transform:scale(1.10)}100%{opacity:.55;transform:scale(1.04)}}
+/* Match or exceed the idle selector specificity, so no loop runs offscreen. */
+.moonlight-gate.is-opening .moonlight-gate__orbit::after,
+.moonlight-gate.is-opened .moonlight-gate__orbit::after,
+.moonlight-gate[hidden] .moonlight-gate__orbit::after{animation:none;opacity:.1;transform:scale(1)}
+.moonlight-gate.is-opening :is(.gate-sun-rays,.gate-moon-star),
+.moonlight-gate.is-opened :is(.gate-sun-rays,.gate-moon-star),
+.moonlight-gate[hidden] :is(.gate-sun-rays,.gate-moon-star){animation:none;transform:none}
+.moonlight-gate.is-opening .gate-moon-star{opacity:.65}
+.moonlight-gate.is-opening .moonlight-gate__orbit > svg{opacity:.68}
+@media(prefers-reduced-motion:reduce){
+  .moonlight-gate__orbit::after{animation:none!important;opacity:.2;transform:none}
+  .gate-sun-rays,.gate-moon-star{animation:none!important;transform:none}
+}
+
 .moonlight-gate__door-rule{
   position:absolute;bottom:30%;height:1px;width:50%;left:25%;
   background:linear-gradient(90deg,transparent,#ba915f,transparent);

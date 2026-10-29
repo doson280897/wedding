@@ -209,3 +209,5 @@ Hai nút **Xem địa điểm / Lưu vào lịch** trong thẻ tiệc dùng hai 
 ### Nhịp mở cổng
 
 Cổng mở khoảng 6,5 giây: mở khóa → ánh vàng ở khe cửa và viền cánh → hai cánh mở lệch nhẹ 60 ms → tên và lời mời hiện lần lượt → hòa vào hero. Các mốc chính nằm ở `GATE_*_MS` trong `script.js`; thời lượng CSS nhận cùng giá trị qua biến `--gate-*-time`. Chế độ giảm chuyển động vẫn giữ lời mời tĩnh khoảng 2,2 giây.
+
+Mặt trời có quầng sáng nhịp chậm, tia nghiêng nhẹ và sáng lên một nhịp khi mở khóa. Mặt trăng có ánh bạc ấm, bốn sao sáng lệch nhịp. Các vòng lặp dừng khi cửa mở hoặc bị ẩn; chế độ giảm chuyển động dùng hình tĩnh. Hiệu ứng dùng CSS, không thêm ảnh hay vòng lặp JavaScript.
