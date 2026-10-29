@@ -106,3 +106,12 @@
 /* Keep the final invitation beat stable even if a slow tab drops animation frames. */
 .moonlight-gate.is-opened .fairy-artboard{animation:none;transform:translate3d(0,-2%,0) scale(1.85);opacity:0}
 .moonlight-gate.is-opened .moonlight-gate__greeting{animation:none;opacity:1;transform:none}
+
+/* Preserve the wedding introduction before the final, guest-only invitation beat. */
+.moonlight-gate__reveal-heading{position:absolute;left:50%;top:29%;transform:translate(-50%,-50%);width:min(85vw,760px);display:flex;flex-direction:column;align-items:center;opacity:1;transition:opacity .6s ease,transform .6s ease}
+.moonlight-gate__reveal-heading .moonlight-gate__reveal-names{font-size:clamp(32px,7vw,56px);margin:14px auto}
+.moonlight-gate__reveal-heading .moonlight-gate__reveal-overline,.moonlight-gate__reveal-heading .moonlight-gate__reveal-subtitle{font-size:clamp(9px,1.5vw,12px)}
+.moonlight-gate.is-inviting .moonlight-gate__reveal-heading{opacity:0;transform:translate(-50%,-60%);pointer-events:none}
+.moonlight-gate.is-opened:not(.is-handoff) .moonlight-gate__reveal{opacity:1;transform:scale(1);transition:none}
+@media(max-height:500px){.moonlight-gate__reveal-heading{top:25%}.moonlight-gate__reveal-heading .moonlight-gate__reveal-names{font-size:28px;margin:5px auto}.moonlight-gate__reveal-heading .moonlight-gate__reveal-rule{margin-bottom:6px}.moonlight-gate__greeting{transform:translateY(30px)}}
+@media(prefers-reduced-motion:reduce){.moonlight-gate.is-inviting .moonlight-gate__reveal-heading{visibility:hidden}}

@@ -59,8 +59,8 @@ test("one shared language control, in-page generator, back navigation @smoke @co
   // and every invitation section, not just the generator's preview text.
   await page.goto(englishInvitation, { waitUntil:"domcontentloaded" });
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.locator(".moonlight-gate__reveal-overline")).toHaveCount(0);
-  await expect(page.locator(".moonlight-gate__reveal-subtitle")).toHaveCount(0);
+  await expect(page.locator(".moonlight-gate__reveal-overline")).toHaveText("OUR WEDDING DAY");
+  await expect(page.locator(".moonlight-gate__reveal-subtitle")).toHaveText("TOGETHER · FOREVER");
   await expect(page.locator("#gateGuestLabel")).toHaveText("Cordially inviting");
   await expect(page.locator("#gateGuestName")).toHaveText("Minh & Lan");
   await expect(page.locator("#waxOpenButton")).toHaveAttribute("aria-label", "Tap the lock to open the invitation");
@@ -365,7 +365,8 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   await expect(gate).toBeVisible();
   await expect(page.locator("#waxOpenButton")).toBeVisible();
   await expect(page.locator("#waxMonogram img.fairy-lock")).toHaveCount(1);
-  await expect(page.locator(".moonlight-gate__reveal-names,.moonlight-gate__reveal-overline,.moonlight-gate__celestial")).toHaveCount(0);
+  await expect(page.locator(".moonlight-gate__reveal-overline")).toHaveText("NGÀY CHUNG ĐÔI");
+  await expect(page.locator(".moonlight-gate__celestial")).toHaveCount(0);
   await expect(page.locator(".moonlight-gate__hint")).toHaveCount(0);
   await expect(page.locator("#settingsHub")).toBeHidden();
   await expect(page.locator("#wqToggle")).toBeHidden();
@@ -426,6 +427,7 @@ test("Moonlight Gate opens from personalized wax and reveals the invitation @cor
   expect(hingeDuration).toBeGreaterThanOrEqual(1400);
   await expect(gate).toHaveClass(/is-opened/, { timeout:6000 });
   await expect(page.locator("#gateGreeting")).toBeVisible();
+  await expect(page.locator(".moonlight-gate__reveal-names")).toContainText("Nga");
   await expect(page.locator("#gateGuestName")).toHaveText("ReloadGuest");
   await expect(page.locator(".fairy-artboard")).toHaveCSS("opacity", "0");
   const approach = await page.locator(".fairy-artboard").evaluate(node => getComputedStyle(node).transform);

@@ -204,7 +204,7 @@
   const GATE_UNLOCK_MS = 1400;
   const GATE_AWAKEN_MS = 180;
   const GATE_DOOR_MS = 2400;
-  const GATE_REVEAL_BEAT_MS = 2000;
+  const GATE_REVEAL_BEAT_MS = 2800;
   const GATE_HANDOFF_MS = 1100;
   // CSS and the fallback timers share one clock.
   for (const [name, time] of [["unlock", GATE_UNLOCK_MS], ["door", GATE_DOOR_MS], ["handoff", GATE_HANDOFF_MS]]) {
@@ -375,7 +375,7 @@
     lastGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.hidden = true;
     moonlightGate.classList.remove(
-      "is-unlocking", "is-awakening", "is-opening", "is-opened", "is-handoff", "is-leaving"
+      "is-unlocking", "is-awakening", "is-opening", "is-opened", "is-inviting", "is-handoff", "is-leaving"
     );
     document.documentElement.classList.remove("wax-pending", "gate-hero-revealing");
     setContentBrowserTheme();
@@ -422,7 +422,8 @@
     doorSettled = true;
     lastGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.classList.add("is-opened");
-    // Let the invitation stand alone after the gate dissolves.
+    // Read the wedding introduction first, then leave the guest invitation alone.
+    scheduleGate(() => moonlightGate.classList.add("is-inviting"), 800);
     scheduleGate(finishMoonlightGate, GATE_REVEAL_BEAT_MS);
   };
   function onDoorAnimationEnd(event) {
@@ -439,7 +440,7 @@
     spawnGateSparkles();
     if (reducedGateMotion) {
       // Keep the invitation readable even when decorative motion is disabled.
-      moonlightGate.classList.add("is-opened");
+      moonlightGate.classList.add("is-opened", "is-inviting");
       scheduleGate(finishMoonlightGate, 2200);
       return;
     }
