@@ -1451,3 +1451,32 @@ test("shared viewport keeps fixed surfaces inside a reduced visible area @smoke 
   await expect.poll(()=>overflow('#settingsHub')).toBeLessThanOrEqual(2);
   await expect(page.locator('#musicBubble')).toHaveAttribute('data-music-state','playing');
 });
+
+
+test("hero lettering never resets downward after the gate starts revealing @smoke @core", async ({page}) => {
+  test.setTimeout(30000);
+  await mockWeddingAudio(page);
+  await page.goto(base+'/index.html?party=groom',{waitUntil:'domcontentloaded'});
+  await page.evaluate(()=>{
+    window.__heroFrames=[];
+    const label=document.getElementById('heroCeremonyLabel');
+    let endedAt=0;
+    const sample=time=>{
+      const root=document.documentElement;
+      if(root.classList.contains('gate-hero-revealing')||endedAt){
+        const transform=getComputedStyle(label).transform;
+        window.__heroFrames.push({entered:root.classList.contains('cinematic-entered'),y:transform==='none'?0:new DOMMatrixReadOnly(transform).m42});
+        if(!root.classList.contains('wax-pending')&&!endedAt) endedAt=time;
+      }
+      if(!endedAt||time-endedAt<500) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+  await page.locator('#waxOpenButton').click();
+  await expect(page.locator('#moonlightGate')).toBeHidden({timeout:16000});
+  await expect.poll(()=>page.evaluate(()=>window.__heroFrames.length)).toBeGreaterThan(2);
+  const frames=await page.evaluate(()=>window.__heroFrames);
+  expect(frames.every(frame=>frame.entered)).toBe(true);
+  for(let i=1;i<frames.length;i++) expect(frames[i].y-frames[i-1].y).toBeLessThanOrEqual(.5);
+  await expect(page.locator('#musicBubble')).toHaveAttribute('data-music-state','playing');
+});

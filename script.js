@@ -428,6 +428,9 @@
     // The open sky stays visible and animated throughout this short wait.
     await Promise.race([heroPreparation, new Promise(resolve => scheduleGate(resolve, 450))]);
     if (moonlightGate.hidden) return;
+    // Set the lettering's starting pose before exposing the hero. Adding
+    // its backwards-filled animation later would visibly jump down by 16px.
+    if (!reducedGateMotion) document.documentElement.classList.add("cinematic-entered");
     document.documentElement.classList.add("gate-hero-revealing");
     if (reducedGateMotion) {
       completeMoonlightGate();
@@ -436,9 +439,6 @@
     // Animate the cover itself, the sky/title and the underlying hero in one
     // uninterrupted handoff. Keep the cover until the final animation frame.
     moonlightGate.classList.add("is-handoff");
-    // Bring the lettering in once the gate has begun to dissolve, instead
-    // of spending its entire entrance animation behind the opaque scenery.
-    scheduleGate(() => document.documentElement.classList.add("cinematic-entered"), 280);
     scheduleGate(completeMoonlightGate, GATE_HANDOFF_MS);
   };
   const settleOpenDoor = () => {

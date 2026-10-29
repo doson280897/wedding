@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      PRIORITY_TESTS: "shared viewport keeps|active backgrounds and shared popup shells|responsive typography fits|adaptive layout survives|story last row centres|reduced-motion album|album recovers|Moonlight Gate opens|gate ornaments|music bubble waits|closing names stay whole|couple names stay whole"
+      PRIORITY_TESTS: "shared viewport keeps|active backgrounds and shared popup shells|responsive typography fits|adaptive layout survives|story last row centres|reduced-motion album|album recovers|Moonlight Gate opens|gate ornaments|music bubble waits|closing names stay whole|couple names stay whole|hero lettering never"
     steps:
       - name: Checkout website
         uses: actions/checkout@v4
@@ -107,6 +107,11 @@ jobs:
           done
           cat /tmp/wedding-http.log
           exit 1
+
+      - name: Verify smooth gate-to-hero lettering
+        run: npx playwright test tests/compatibility.spec.cjs --grep "hero lettering never" --reporter=line --workers=2
+        env:
+          CI: "true"
 
       - name: Verify shared layout primitives
         run: npx playwright test tests/compatibility.spec.cjs --grep "shared viewport keeps" --reporter=line --workers=2
