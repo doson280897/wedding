@@ -105,6 +105,11 @@ jobs:
           cat /tmp/wedding-http.log
           exit 1
 
+      - name: Verify celebration backgrounds and shared popup layout
+        run: npx playwright test tests/compatibility.spec.cjs --grep "active backgrounds and shared popup shells" --reporter=line --workers=2
+        env:
+          CI: "true"
+
       - name: Verify adaptive typography and viewport changes first
         run: npx playwright test tests/compatibility.spec.cjs --grep "responsive typography fits|adaptive layout survives|story last row centres" --reporter=line --workers=2
         env:

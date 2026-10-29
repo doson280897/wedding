@@ -350,7 +350,7 @@ test("editing only wedding-info.js updates names, initials, dates, venue and gif
     "NGUYỄN THỊ MAI AN",
   );
   const computed = await page.evaluate(() => ({
-    hero: document.documentElement.style.getPropertyValue("--hero-bride-image"),
+    hero: document.documentElement.style.getPropertyValue("--hero-image"),
     music: decodeURI(new URL(document.getElementById("weddingMusic").src).pathname).split("/").pop(),
     configuredMusic: window.WEDDING_INFO.parties.bride.music.src,
     calendarFilename: window.WeddingI18n.t("calendar.brideFile"),
@@ -1374,4 +1374,43 @@ test("story last row centres and hero shade follows the photo after rotation @sm
     }
   }
   expect(twoColumnChecks).toBeGreaterThan(0);
+});
+
+test("active backgrounds and shared popup shells fit each celebration @smoke @core", async ({page}) => {
+  test.setTimeout(90000);
+  await page.emulateMedia({reducedMotion:"reduce"});
+  for(const party of ['bride','groom','single']) {
+    if(party==='single') await page.route('**/wedding-info.js*',async route=>{
+      const response=await route.fetch();const sandbox={window:{}};
+      require('node:vm').runInNewContext(await response.text(),sandbox);
+      sandbox.window.WEDDING_INFO.wedding.mode='single';
+      await route.fulfill({response,body:'window.WEDDING_INFO = '+JSON.stringify(sandbox.window.WEDDING_INFO)+';'});
+    });
+    await page.setViewportSize({width:393,height:850});
+    await page.goto(base+'/index.html?party='+party,{waitUntil:'domcontentloaded'});
+    await page.locator('#waxOpenButton').click();
+    await expect(page.locator('#moonlightGate')).toBeHidden();
+    const expected=await page.evaluate(party=>window.WEDDING_INFO.parties[party].images,party);
+    await expect(page.locator('.hero-photo')).toHaveCSS('background-image',new RegExp(expected.hero.split('/').pop().replace(/[.]/g,'\\.')));
+    await expect(page.locator('.closing')).toHaveCSS('background-image',new RegExp(expected.ending.split('/').pop().replace(/[.]/g,'\\.')));
+    const images=await page.evaluate(()=>({hero:document.documentElement.style.getPropertyValue('--hero-image'),ending:document.documentElement.style.getPropertyValue('--ending-image')}));
+    await page.locator('#settingsTrigger').click();
+    await page.locator('#controlTabSettings').click();
+    await page.locator('[data-lang="en"]').click();
+    expect(await page.evaluate(()=>({hero:document.documentElement.style.getPropertyValue('--hero-image'),ending:document.documentElement.style.getPropertyValue('--ending-image')}))).toEqual(images);
+    await page.locator('#settingsClose').click();
+    for(const viewport of [{width:393,height:850},{width:844,height:390}]) {
+      await page.setViewportSize(viewport);
+      for(const [destination,modal,dialog,close] of [['locations','#wmModal','.wm-dialog','#wmClose'],['wedding-gift','#wgModal','.wg-dialog','#wgClose']]) {
+        await page.locator('#settingsTrigger').click();
+        await page.locator('#wqPanel a[href="#'+destination+'"]').click();
+        await expect(page.locator(modal)).toBeVisible();
+        await expect.poll(()=>page.locator(dialog).evaluate(node=>{
+          const r=node.getBoundingClientRect();return Math.max(0,-r.left,r.right-innerWidth,-r.top,r.bottom-innerHeight);
+        })).toBeLessThanOrEqual(2);
+        await expect(page.locator(close)).toBeVisible();
+        await page.locator(close).click();
+      }
+    }
+  }
 });

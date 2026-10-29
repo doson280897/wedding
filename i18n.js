@@ -150,11 +150,12 @@
     document.querySelectorAll("[data-party-weekday]").forEach(node => {
       node.textContent = formatDate(node.dataset.partyWeekday, "weekday", locale);
     });
-    for (const side of ["bride", "groom", "single"]) {
-      const img = getInfo("parties." + side + ".images.hero");
-      const ending = getInfo("parties." + side + ".images.ending");
-      if (img) document.documentElement.style.setProperty("--hero-" + side + "-image", safeCssUrl(img));
-      if (ending) document.documentElement.style.setProperty("--ending-" + side + "-image", safeCssUrl(ending));
+    const activeParty = document.documentElement.dataset.party;
+    for (const [property,field] of [["--hero-image","hero"],["--ending-image","ending"]]) {
+      const source = activeParty && getInfo("parties." + activeParty + ".images." + field);
+      const value = source ? safeCssUrl(source) : "none";
+      if (document.documentElement.style.getPropertyValue(property) !== value)
+        document.documentElement.style.setProperty(property,value);
     }
     const descMeta = document.querySelector('meta[name="description"]');
     if (descMeta) descMeta.content = getInfo("site.description");

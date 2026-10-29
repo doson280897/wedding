@@ -54,7 +54,6 @@
   z-index:2;
   left:0;
   top:calc(100% + 10px);
-  width:min(315px, calc(100vw - 20px));
   max-height:calc(100vh - 20px);
   max-height:calc(100dvh - 20px);
   overflow-x:hidden;
@@ -152,7 +151,6 @@ html.link-tool-active .settings-music-row {display:none!important}
     padding:0;
     gap:0;
   }
-  .settings-hub .settings-panel { padding:16px; }
   .settings-hub .settings-options .language-option {
     min-height:40px;
   }
