@@ -610,6 +610,7 @@
 
   function failLightboxStep() {
     lightboxTransitioning = false;
+    lightboxImage.style.transform = "";
     const queued = lightboxQueuedDelta;
     lightboxQueuedDelta = 0;
     const caption = document.getElementById("albumLightboxCaption");
@@ -620,7 +621,7 @@
     if (queued) animateLightboxStep(queued);
   }
 
-  async function animateLightboxStep(delta) {
+  async function animateLightboxStep(delta, draggedX = 0) {
     if (!photos.length || !lightboxImage) return;
 
     if (lightboxTransitioning) {
@@ -633,6 +634,7 @@
     const nextIndex = wrap(lightboxIndex + delta);
     lightboxTransitioning = true;
     lightboxQueuedDelta = 0;
+    lightboxImage.getAnimations?.().forEach(animation => animation.cancel());
 
     if (reducedMotion || !lightboxImage.animate) {
       const decoded = await decodeLightboxLayer(nextIndex);
@@ -663,8 +665,8 @@
     lightboxStage.append(incoming);
 
     const outgoingAnimation = lightboxImage.animate([
-      { transform:"translate(-50%,-50%) translate3d(0,0,0) scale(1)", opacity:1 },
-      { transform:"translate(-50%,-50%) translate3d(" + (-direction * 3.2) + "vw,0,0) scale(.992)", opacity:0 }
+      { transform:lightboxImage.style.transform || "translate(-50%,-50%) translate3d(0,0,0) scale(1)", opacity:1 },
+      { transform:"translate(-50%,-50%) translate3d(" + (draggedX - direction * lightboxStage.clientWidth * .1) + "px,0,0) scale(.992)", opacity:0 }
     ], {
       duration:360,
       easing:"cubic-bezier(.22,.72,.18,1)",
@@ -745,7 +747,7 @@
     lightbox.hidden = true;
     lightbox.setAttribute("aria-hidden", "true");
     document.body.classList.remove("album-lightbox-open");
-    lightboxPointer = null;
+    resetLightboxPointer();
     lightboxTransitioning = false;
     lightboxQueuedDelta = 0;
 
@@ -765,77 +767,73 @@
     lightboxReturnFocus = null;
   }
 
-  function stepLightbox(delta) {
-    animateLightboxStep(delta);
+  lightboxClose?.addEventListener("click", closeLightbox);
+  lightboxPrev?.addEventListener("click", () => animateLightboxStep(-1));
+  lightboxNext?.addEventListener("click", () => animateLightboxStep(1));
+
+  function resetLightboxPointer() {
+    const pointer = lightboxPointer;
+    lightboxPointer = null;
+    if (pointer && lightboxStage.hasPointerCapture?.(pointer.id)) {
+      lightboxStage.releasePointerCapture(pointer.id);
+    }
+    return pointer;
   }
 
-  lightboxClose?.addEventListener("click", closeLightbox);
-  lightboxPrev?.addEventListener("click", () => stepLightbox(-1));
-  lightboxNext?.addEventListener("click", () => stepLightbox(1));
-
   lightboxStage?.addEventListener("pointerdown", event => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (lightbox.hidden || lightboxTransitioning || event.isPrimary === false ||
+        (event.pointerType === "mouse" && event.button !== 0)) return;
+    // Entrance/snap-back animations must not override the finger's transform.
+    lightboxImage.getAnimations?.().forEach(animation => animation.cancel());
     lightboxPointer = {
-      id:event.pointerId,
-      x:event.clientX,
-      y:event.clientY,
-      dx:0,
-      horizontal:false
+      id:event.pointerId, x:event.clientX, y:event.clientY,
+      dx:0, dy:0, horizontal:false,
+      threshold:Math.max(16, Math.min(48, lightboxStage.clientWidth * .12))
     };
     lightboxStage.setPointerCapture?.(event.pointerId);
   });
 
   lightboxStage?.addEventListener("pointermove", event => {
-    if (!lightboxPointer || event.pointerId !== lightboxPointer.id || lightboxTransitioning) return;
-
-    const dx = event.clientX - lightboxPointer.x;
-    const dy = event.clientY - lightboxPointer.y;
-
-    if (!lightboxPointer.horizontal && Math.abs(dx) > 8) {
-      if (Math.abs(dy) > Math.abs(dx) * 1.15) return;
-      lightboxPointer.horizontal = true;
-    }
-
-    if (!lightboxPointer.horizontal) return;
+    const pointer = lightboxPointer;
+    if (!pointer || event.pointerId !== pointer.id) return;
+    pointer.dx = event.clientX - pointer.x;
+    pointer.dy = event.clientY - pointer.y;
+    if (!pointer.horizontal && Math.abs(pointer.dx) > 8 &&
+        Math.abs(pointer.dx) > Math.abs(pointer.dy)) pointer.horizontal = true;
+    if (!pointer.horizontal) return;
     event.preventDefault();
-
-    lightboxPointer.dx = dx;
-    const visualX = dx * .22;
-    const scale = Math.max(.99, 1 - Math.min(Math.abs(dx), 180) / 18000);
-
     lightboxImage.style.transform =
-      "translate(-50%,-50%) translate3d(" + visualX.toFixed(2) + "px,0,0) scale(" + scale.toFixed(4) + ")";
+      "translate(-50%,-50%) translate3d(" + pointer.dx.toFixed(2) + "px,0,0)";
   }, { passive:false });
+
+  function cancelLightboxPointer(event) {
+    if (!lightboxPointer || event.pointerId !== lightboxPointer.id) return;
+    resetLightboxPointer();
+    lightboxImage.style.transform = "";
+  }
 
   lightboxStage?.addEventListener("pointerup", event => {
     if (!lightboxPointer || event.pointerId !== lightboxPointer.id) return;
-
-    const dx = lightboxPointer.dx || (event.clientX - lightboxPointer.x);
-    const dy = event.clientY - lightboxPointer.y;
-    const horizontal = lightboxPointer.horizontal;
-    lightboxPointer = null;
-
-    lightboxImage.style.transform = "";
-
-    if (horizontal && Math.abs(dx) >= 48 && Math.abs(dx) >= Math.abs(dy) * 1.1) {
-      stepLightbox(dx < 0 ? 1 : -1);
+    const pointer = resetLightboxPointer();
+    const dx = event.clientX - pointer.x;
+    const dy = event.clientY - pointer.y;
+    if (pointer.horizontal && Math.abs(dx) >= pointer.threshold && Math.abs(dx) > Math.abs(dy)) {
+      // Keep the dragged pose while decoding; animate from there without
+      // snapping to centre between the gesture and the photo transition.
+      animateLightboxStep(dx < 0 ? 1 : -1, pointer.dx);
       return;
     }
-
-    if (!reducedMotion && horizontal && lightboxImage.animate) {
+    const from = lightboxImage.style.transform;
+    lightboxImage.style.transform = "";
+    if (!reducedMotion && pointer.horizontal && lightboxImage.animate) {
       lightboxImage.animate([
-        { transform:"translate(-50%,-50%) translate3d(" + (dx * .22).toFixed(2) + "px,0,0) scale(.994)" },
-        { transform:"translate(-50%,-50%) translate3d(0,0,0) scale(1)" }
-      ], { duration:210, easing:"cubic-bezier(.2,.75,.2,1)" });
+        { transform:from }, { transform:"translate(-50%,-50%)" }
+      ], { duration:180, easing:"cubic-bezier(.2,.75,.2,1)" });
     }
   });
 
-  lightboxStage?.addEventListener("pointercancel", () => {
-    lightboxPointer = null;
-    if (!lightboxImage) return;
-    lightboxImage.style.transform = "";
-    lightboxImage.style.opacity = "";
-  });
+  lightboxStage?.addEventListener("pointercancel", cancelLightboxPointer);
+  lightboxStage?.addEventListener("lostpointercapture", cancelLightboxPointer);
 
   document.addEventListener("keydown", event => {
     if (!lightbox || lightbox.hidden) return;
@@ -847,12 +845,12 @@
     }
     if (event.key === "ArrowLeft") {
       event.preventDefault();
-      stepLightbox(-1);
+      animateLightboxStep(-1);
       return;
     }
     if (event.key === "ArrowRight") {
       event.preventDefault();
-      stepLightbox(1);
+      animateLightboxStep(1);
       return;
     }
     if (event.key !== "Tab") return;

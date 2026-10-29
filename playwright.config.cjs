@@ -2,12 +2,12 @@ const { defineConfig, devices } = require("@playwright/test");
 
 module.exports = defineConfig({
   testDir: "./tests",
+  testMatch: "**/*.spec.cjs",
   timeout: 30000,
   expect: { timeout: 10000 },
   use: { trace: "retain-on-failure", screenshot: "only-on-failure" },
-  // On ordinary pushes, run every functional test once on Chromium and a
-  // compact smoke subset on Android, iOS and Firefox. Run the 8-device full
-  // matrix only when the workflow is manually dispatched in extended mode.
+  // Main journeys run once on desktop, with a small iPhone subset and a
+  // native Android swipe regression. The full matrix is manual-only.
   projects: process.env.WEDDING_EXTENDED_TESTS === "true"
     ? [
         {name:"Desktop Chromium",use:{browserName:"chromium",viewport:{width:1440,height:900}}},
@@ -20,9 +20,8 @@ module.exports = defineConfig({
         {name:"Landscape WebKit",use:{browserName:"webkit",viewport:{width:667,height:375},isMobile:true,hasTouch:true,deviceScaleFactor:2}},
       ]
     : [
-        {name:"Desktop Chromium - full functionality",use:{browserName:"chromium",viewport:{width:1440,height:900}}},
-        {name:"Android Pixel - smoke",grep:/@smoke/,use:{...devices["Pixel 5"],browserName:"chromium"}},
-        {name:"iPhone WebKit - smoke",grep:/@smoke/,use:{...devices["iPhone 13"],browserName:"webkit"}},
-        {name:"Desktop Firefox - core",grep:/@core/,use:{browserName:"firefox",viewport:{width:1366,height:768}}},
+        {name:"Desktop Chromium",use:{browserName:"chromium",viewport:{width:1440,height:900}}},
+        {name:"iPhone WebKit",grep:/@mobile/,use:{...devices["iPhone 13"],browserName:"webkit"}},
+        {name:"Android gesture",grep:/@gesture/,use:{...devices["Pixel 5"],browserName:"chromium"}},
       ],
 });

@@ -179,7 +179,7 @@ Lưu ý: `node build-wedding.cjs` sinh ra các file build trong thư mục hiệ
 
 - **Unit/config:** `node --test tests/*.test.cjs`
 - **Browser:** `npm install --no-save --no-package-lock @playwright/test`, `npx playwright install --with-deps chromium webkit firefox`, chạy `python3 -m http.server 8000` và `npx playwright test tests/compatibility.spec.cjs`.
-- **CI:** workflow `Cross-device browser compatibility` chạy unit + trình duyệt Chromium, Android, iPhone WebKit và Firefox khi sửa nguồn; bản 8 thiết bị có thể bật bằng `workflow_dispatch` với tùy chọn `extended=true`. Workflow `Deploy Wedding` phải thành công riêng để website được phát hành.
+- **CI:** workflow `Cross-device browser compatibility` chạy unit + các luồng chính trên Chromium, một nhóm nhỏ trên iPhone WebKit và thao tác vuốt Android khi sửa nguồn; bản 8 thiết bị có thể bật bằng `workflow_dispatch` với tùy chọn `extended=true`. Workflow `Deploy Wedding` phải thành công riêng để website được phát hành.
 
 Album chỉ tải ảnh ở gần vùng hiển thị; animation mở cổng dùng `transform/opacity`, giữ tính năng giảm chuyển động của thiết bị.
 
@@ -199,7 +199,7 @@ Album chỉ tải ảnh ở gần vùng hiển thị; animation mở cổng dùn
 
 Dự án dùng Playwright **1.64.1** cố định trong `package.json` và workflow CI (không dùng `latest`).
 Dành cho máy local: chạy `npm install`, `npx playwright install chromium webkit firefox`, sau đó `npm run test:unit` và `npm run test:browser` (cần mở HTTP server cổng 8000 tại thư mục repo trước khi chạy browser test).
-CI tự chạy smoke trên desktop Chromium, Android Chromium, iPhone WebKit và Firefox; full 8-device matrix có thể chạy từ **Actions → Cross-device browser compatibility → Run workflow → extended**.
+CI chạy 14 kịch bản chính trên desktop Chromium, 5 luồng thiết yếu trên iPhone WebKit và 1 test vuốt thật trên Android (20 lượt thay vì 122). Các test lịch sử trùng luồng đã được bỏ; unit test vẫn giữ vì chạy dưới một giây. Full 8-device matrix có thể chạy từ **Actions → Cross-device browser compatibility → Run workflow → extended**.
 
 ### Chọn ứng dụng lịch
 
