@@ -5,9 +5,12 @@
   const links = [...document.querySelectorAll("#wqPanel .wq-link, [data-guest-action]")];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const settingsTrigger = document.getElementById("settingsTrigger");
-  const settingsFocusable = () => [settingsTrigger, ...document.querySelectorAll(
-    '.settings-hub .settings-panel:not([hidden]) button:not([hidden])'
-  )];
+  const settingsFocusable = () => [
+    settingsTrigger,
+    ...document.querySelectorAll(
+      ".settings-hub .settings-panel:not([hidden]) button:not([hidden])",
+    ),
+  ];
   const mapModal = document.getElementById("wmModal");
   const mapBackdrop = document.getElementById("wmBackdrop");
   const mapClose = document.getElementById("wmClose");
@@ -21,7 +24,9 @@
   let giftPreviousFocus = null;
 
   const trapFocus = (event, focusable) => {
-    const items = focusable.filter(node => node && !node.disabled && !node.hidden && node.getClientRects().length);
+    const items = focusable.filter(
+      (node) => node && !node.disabled && !node.hidden && node.getClientRects().length,
+    );
     if (!items.length) return;
     const first = items[0];
     const last = items.at(-1);
@@ -34,14 +39,14 @@
     }
   };
 
-  const ensureMapsLoaded = targetId => {
+  const ensureMapsLoaded = (targetId) => {
     if (!mapModal) return;
     const target = targetId && document.getElementById(targetId);
     const frames = target
       ? [target.querySelector("iframe[data-src]")].filter(Boolean)
       : [...mapModal.querySelectorAll("iframe[data-src]")];
-    frames.forEach(frame => {
-      if (frame.src !== frame.dataset.src) frame.src = frame.dataset.src;
+    frames.forEach((frame) => {
+      if (frame.dataset.src && frame.src !== frame.dataset.src) frame.src = frame.dataset.src;
       frame.removeAttribute("data-src");
     });
   };
@@ -49,7 +54,10 @@
   const setMapOpen = (value, targetId = null) => {
     if (!mapModal || !mapBackdrop || !mapClose) return;
     if (value) {
-      if (!mapOpen) mapPreviousFocus = document.activeElement;
+      if (!mapOpen)
+        mapPreviousFocus = panel.contains(document.activeElement)
+          ? settingsTrigger
+          : document.activeElement;
       ensureMapsLoaded(targetId);
       mapOpen = true;
       mapModal.hidden = false;
@@ -57,86 +65,130 @@
       mapModal.setAttribute("aria-hidden", "false");
       document.body.classList.add("wm-open");
       const target = targetId && document.getElementById(targetId);
-      mapModal.querySelectorAll(".location-card").forEach(card => card.classList.toggle("wm-highlight", !!target && card === target));
+      mapModal
+        .querySelectorAll(".location-card")
+        .forEach((card) => card.classList.toggle("wm-highlight", !!target && card === target));
       mapModal.querySelector(".wm-dialog").scrollTop = 0;
-      mapClose.focus({preventScroll:true});
-      if (target) requestAnimationFrame(() => target.scrollIntoView({block:"nearest",behavior:"auto"}));
+      mapClose.focus({ preventScroll: true });
+      if (target)
+        requestAnimationFrame(() => target.scrollIntoView({ block: "nearest", behavior: "auto" }));
     } else {
       mapOpen = false;
       mapModal.hidden = true;
       mapBackdrop.hidden = true;
       mapModal.setAttribute("aria-hidden", "true");
       document.body.classList.remove("wm-open");
-      if (mapPreviousFocus && document.contains(mapPreviousFocus)) mapPreviousFocus.focus({preventScroll:true});
+      if (mapPreviousFocus && document.contains(mapPreviousFocus))
+        mapPreviousFocus.focus({ preventScroll: true });
     }
   };
   mapClose?.addEventListener("click", () => setMapOpen(false));
   mapBackdrop?.addEventListener("click", () => setMapOpen(false));
-  document.querySelectorAll('a[href="#map-bride"],a[href="#map-groom"],a[href="#map-single"]').forEach(link => {
-    link.addEventListener("click", event => {
-      event.preventDefault();
-      setMapOpen(true, link.getAttribute("href").slice(1));
+  document
+    .querySelectorAll('a[href="#map-bride"],a[href="#map-groom"],a[href="#map-single"]')
+    .forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        setMapOpen(true, link.getAttribute("href").slice(1));
+      });
     });
-  });
 
-  const setGiftOpen = value => {
+  const setGiftOpen = (value) => {
     if (!giftModal || !giftBackdrop || !giftClose) return;
     if (value) {
-      giftPreviousFocus = panel.contains(document.activeElement) ? settingsTrigger : document.activeElement;
+      giftPreviousFocus = panel.contains(document.activeElement)
+        ? settingsTrigger
+        : document.activeElement;
       // Loading only the active celebration's QR avoids hidden bank-image traffic.
-      giftModal.querySelectorAll(".gift-card[data-party-scope] .gift-qr[data-src]").forEach(image => {
-        if (image.closest("[data-party-scope]")?.dataset.partyScope !==
-            document.documentElement.dataset.party) return;
-        image.src = image.dataset.src;
-        image.removeAttribute("data-src");
-      });
+      giftModal
+        .querySelectorAll(".gift-card[data-party-scope] .gift-qr[data-src]")
+        .forEach((image) => {
+          if (
+            image.closest("[data-party-scope]")?.dataset.partyScope !==
+            document.documentElement.dataset.party
+          )
+            return;
+          image.src = image.dataset.src;
+          image.removeAttribute("data-src");
+        });
       giftOpen = true;
       giftModal.hidden = false;
       giftBackdrop.hidden = false;
       giftModal.setAttribute("aria-hidden", "false");
       document.body.classList.add("wg-open");
-      giftClose.focus({preventScroll:true});
+      giftClose.focus({ preventScroll: true });
     } else {
       giftOpen = false;
       giftModal.hidden = true;
       giftBackdrop.hidden = true;
       giftModal.setAttribute("aria-hidden", "true");
       document.body.classList.remove("wg-open");
-      if (giftPreviousFocus && document.contains(giftPreviousFocus)) giftPreviousFocus.focus({preventScroll:true});
-      else settingsTrigger?.focus({preventScroll:true});
+      if (giftPreviousFocus && document.contains(giftPreviousFocus))
+        giftPreviousFocus.focus({ preventScroll: true });
+      else settingsTrigger?.focus({ preventScroll: true });
     }
   };
   giftClose?.addEventListener("click", () => setGiftOpen(false));
   giftBackdrop?.addEventListener("click", () => setGiftOpen(false));
 
   // The unified hub owns opening, closing, and tab state.
-  document.addEventListener("keydown", event => {
+  document.addEventListener("keydown", (event) => {
     if (giftOpen) {
-      if (event.key === "Escape") {event.preventDefault();setGiftOpen(false);return;}
-      if (event.key === "Tab") trapFocus(event, [giftClose, ...giftModal.querySelectorAll('a[href]'), ...settingsFocusable()]);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setGiftOpen(false);
+        return;
+      }
+      if (event.key === "Tab")
+        trapFocus(event, [
+          giftClose,
+          ...giftModal.querySelectorAll("a[href]"),
+          ...settingsFocusable(),
+        ]);
       return;
     }
     if (mapOpen) {
-      if (event.key === "Escape") {event.preventDefault();setMapOpen(false);return;}
-      if (event.key === "Tab") trapFocus(event, [mapClose, ...mapModal.querySelectorAll('a[href]'), ...settingsFocusable()]);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMapOpen(false);
+        return;
+      }
+      if (event.key === "Tab")
+        trapFocus(event, [
+          mapClose,
+          ...mapModal.querySelectorAll("a[href]"),
+          ...settingsFocusable(),
+        ]);
     }
   });
-  links.forEach(link => link.addEventListener("click", event => {
-    const id = link.getAttribute("href")?.slice(1);
-    const target = id && document.getElementById(id);
-    if (!target) return;
-    event.preventDefault();
-    window.WeddingControlHub?.close(false);
-    if (id === "locations") {
-      const activeParty = document.documentElement.dataset.party;
-      setMapOpen(true, ["bride", "groom", "single"].includes(activeParty) ? "map-" + activeParty : null);
-      return;
-    }
-    if (id === "wedding-gift") { setGiftOpen(true); return; }
-    history.replaceState(history.state,"",location.pathname+location.search+"#"+encodeURIComponent(id));
-    target.scrollIntoView({behavior:reduced.matches?"auto":"smooth",block:"start"});
-    links.forEach(item => item.setAttribute("aria-current", String(item===link)));
-  }));
+  links.forEach((link) =>
+    link.addEventListener("click", (event) => {
+      const id = link.getAttribute("href")?.slice(1);
+      const target = id && document.getElementById(id);
+      if (!target) return;
+      event.preventDefault();
+      window.WeddingControlHub?.close(false);
+      if (id === "locations") {
+        const activeParty = document.documentElement.dataset.party;
+        setMapOpen(
+          true,
+          ["bride", "groom", "single"].includes(activeParty) ? "map-" + activeParty : null,
+        );
+        return;
+      }
+      if (id === "wedding-gift") {
+        setGiftOpen(true);
+        return;
+      }
+      history.replaceState(
+        history.state,
+        "",
+        location.pathname + location.search + "#" + encodeURIComponent(id),
+      );
+      target.scrollIntoView({ behavior: reduced.matches ? "auto" : "smooth", block: "start" });
+      links.forEach((item) => item.setAttribute("aria-current", String(item === link)));
+    }),
+  );
 
   // Both visible orbs share one compositor-friendly drag/snap controller.
   // The main hub starts bottom-right; music stays bottom-left until moved.
@@ -151,26 +203,34 @@
   const layout = window.WeddingLayout;
   const visualBounds = () => layout.viewport();
   let safeArea = layout.viewport().safe;
-  layout.subscribe(view => {safeArea=view.safe;});
-  const visualCenter = () => {const view=visualBounds();return view.left+view.width/2;};
+  layout.subscribe((view) => {
+    safeArea = view.safe;
+  });
+  const visualCenter = () => {
+    const view = visualBounds();
+    return view.left + view.width / 2;
+  };
 
   const minLeft = () => FLOAT_EDGE + safeArea.left;
   const minTop = () => FLOAT_EDGE + safeArea.top;
   const clamp = (value, min, max) => Math.max(min, Math.min(Math.max(min, max), value));
-  const bounds = rect => {
+  const bounds = (rect) => {
     const viewport = visualBounds();
     const left = viewport.left + minLeft();
     const top = viewport.top + minTop();
     const bottom = viewport.top + viewport.height;
     return {
       left,
-      right:Math.max(left, viewport.left + viewport.width - rect.width - FLOAT_EDGE - safeArea.right),
+      right: Math.max(
+        left,
+        viewport.left + viewport.width - rect.width - FLOAT_EDGE - safeArea.right,
+      ),
       top,
-      bottom:Math.max(top, bottom - rect.height - FLOAT_EDGE - safeArea.bottom)
+      bottom: Math.max(top, bottom - rect.height - FLOAT_EDGE - safeArea.bottom),
     };
   };
-  const visible = node => node?.isConnected && !node.hidden &&
-    getComputedStyle(node).display !== "none";
+  const visible = (node) =>
+    node?.isConnected && !node.hidden && getComputedStyle(node).display !== "none";
 
   // Keep snapped controls anchored to the actual screen edge so a compact
   // Settings icon grows INWARD when its label expands.
@@ -180,7 +240,7 @@
     const limits = bounds(rect);
     node.dataset.floatEdge = edge;
     node.style.transform = "none";
-    node.style.top = clamp(top,limits.top,limits.bottom) + "px";
+    node.style.top = clamp(top, limits.top, limits.bottom) + "px";
     node.style.bottom = "auto";
     if (edge === "left") {
       node.style.left = limits.left + "px";
@@ -191,7 +251,7 @@
     }
   };
 
-  const initialPosition = node => {
+  const initialPosition = (node) => {
     if (!visible(node)) return;
     // Let the browser compositor keep the default docks at the viewport
     // bottom during momentum scrolling and Safari toolbar expansion.
@@ -201,13 +261,18 @@
     node.style.transform = "none";
     node.style.top = "auto";
     const view = visualBounds();
-    node.style.bottom = Math.max(FLOAT_EDGE + safeArea.bottom,
-      innerHeight - view.top - view.height + FLOAT_EDGE + safeArea.bottom) + "px";
-    node.style.left = edge === "left" ? (view.left + minLeft()) + "px" : "auto";
-    node.style.right = edge === "right"
-      ? Math.max(0, innerWidth - view.left - view.width + FLOAT_EDGE + safeArea.right) + "px" : "auto";
+    node.style.bottom =
+      Math.max(
+        FLOAT_EDGE + safeArea.bottom,
+        innerHeight - view.top - view.height + FLOAT_EDGE + safeArea.bottom,
+      ) + "px";
+    node.style.left = edge === "left" ? view.left + minLeft() + "px" : "auto";
+    node.style.right =
+      edge === "right"
+        ? Math.max(0, innerWidth - view.left - view.width + FLOAT_EDGE + safeArea.right) + "px"
+        : "auto";
   };
-  const setupFloating = (node,handle) => {
+  const setupFloating = (node, handle) => {
     if (!handle) return;
     node.classList.add("floating-control");
     if (node === hub) initialPosition(node);
@@ -243,25 +308,34 @@
       if (node.dataset.userMoved !== "true") initialPosition(node);
     };
     const settleIdle = () => {
-      if (drag || node.classList.contains("is-snapping") ||
-          (node === hub && node.classList.contains("is-open"))) return;
+      if (
+        drag ||
+        node.classList.contains("is-snapping") ||
+        (node === hub && node.classList.contains("is-open"))
+      )
+        return;
       if (node === hub) node.classList.add("is-idle");
       if (node.dataset.userMoved === "true") {
-        anchor(node,node.dataset.floatEdge || "right",node.getBoundingClientRect().top);
+        anchor(node, node.dataset.floatEdge || "right", node.getBoundingClientRect().top);
       } else initialPosition(node);
     };
     const scheduleIdle = (delay = FLOAT_IDLE_DELAY) => {
       clearTimeout(idleTimer);
-      if (node === hub) idleTimer = setTimeout(settleIdle,delay);
+      if (node === hub) idleTimer = setTimeout(settleIdle, delay);
     };
     const avoidOverlap = (edge, proposedTop, rect) => {
       const other = node === hub ? musicDock : hub;
       if (!visible(other)) return proposedTop;
       const their = other.getBoundingClientRect();
-      const theirEdge = other.dataset.floatEdge ||
+      const theirEdge =
+        other.dataset.floatEdge ||
         (their.left + their.width / 2 < visualCenter() ? "left" : "right");
-      if (theirEdge !== edge || proposedTop + rect.height + FLOAT_GAP <= their.top ||
-          their.bottom + FLOAT_GAP <= proposedTop) return proposedTop;
+      if (
+        theirEdge !== edge ||
+        proposedTop + rect.height + FLOAT_GAP <= their.top ||
+        their.bottom + FLOAT_GAP <= proposedTop
+      )
+        return proposedTop;
       const limits = bounds(rect);
       const above = their.top - rect.height - FLOAT_GAP;
       const below = their.bottom + FLOAT_GAP;
@@ -274,7 +348,7 @@
       const rect = node.getBoundingClientRect();
       const edge = rect.left + rect.width / 2 < visualCenter() ? "left" : "right";
       const limits = bounds(rect);
-      const top = clamp(avoidOverlap(edge,rect.top,rect),limits.top,limits.bottom);
+      const top = clamp(avoidOverlap(edge, rect.top, rect), limits.top, limits.bottom);
       const targetLeft = edge === "left" ? limits.left : limits.right;
       node.dataset.floatEdge = edge;
       node.style.transform = "none";
@@ -289,7 +363,7 @@
       const finish = () => {
         if (!node.classList.contains("is-snapping")) return;
         node.classList.remove("is-snapping");
-        anchor(node,edge,top);
+        anchor(node, edge, top);
         scheduleIdle(900);
       };
       if (reducedMotion.matches) {
@@ -301,23 +375,23 @@
           node.style.left = targetLeft + "px";
           node.style.top = top + "px";
         });
-        glideTimer = setTimeout(finish,SNAP_MS + 55);
+        glideTimer = setTimeout(finish, SNAP_MS + 55);
       }
     };
     const paintDrag = () => {
       frame = 0;
       if (!drag?.moved) return;
       const limits = drag.bounds;
-      const left = clamp(drag.left + drag.dx,limits.left,limits.right);
-      const top = clamp(drag.top + drag.dy,limits.top,limits.bottom);
+      const left = clamp(drag.left + drag.dx, limits.left, limits.right);
+      const top = clamp(drag.top + drag.dy, limits.top, limits.bottom);
       node.style.transform =
         "translate3d(" + (left - drag.left) + "px," + (top - drag.top) + "px,0)";
     };
-    const move = event => {
+    const move = (event) => {
       if (!drag || event.pointerId !== drag.id) return;
       drag.dx = event.clientX - drag.startX;
       drag.dy = event.clientY - drag.startY;
-      if (!drag.moved && Math.hypot(drag.dx,drag.dy) > 6) {
+      if (!drag.moved && Math.hypot(drag.dx, drag.dy) > 6) {
         drag.moved = true;
         tapStartedIdle = false;
         const rect = node.getBoundingClientRect();
@@ -336,17 +410,20 @@
       if (event.cancelable) event.preventDefault();
       if (!frame) frame = requestAnimationFrame(paintDrag);
     };
-    const end = event => {
+    const end = (event) => {
       if (!drag || (event.pointerId != null && event.pointerId !== drag.id)) return;
       const moved = drag.moved;
       // Resolve the final pointer coordinates before the glide. No trailing
       // animation frame is allowed to overwrite the release position.
-      if (frame) {cancelAnimationFrame(frame);frame=0;}
+      if (frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
       if (moved) paintDrag();
       drag = null;
-      window.removeEventListener("pointermove",move,true);
-      window.removeEventListener("pointerup",end,true);
-      window.removeEventListener("pointercancel",end,true);
+      window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointerup", end, true);
+      window.removeEventListener("pointercancel", end, true);
       if (moved) {
         node.dataset.userMoved = "true";
         suppressDragClick = true;
@@ -355,38 +432,55 @@
         scheduleIdle();
       }
     };
-    handle.addEventListener("pointerdown", event => {
-      if (event.button != null && event.button !== 0) return;
-      if (!visible(node) || drag) return;
-      cancelGlide();
-      // A new gesture is not the trailing click from the previous drag.
-      suppressDragClick = false;
-      tapStartedIdle = node.classList.contains("is-idle");
-      // Do not expand a collapsed hit target underneath the pointer.
-      if (!tapStartedIdle && node === hub) wake();
-      const rect = node.getBoundingClientRect();
-      drag = {
-        id:event.pointerId,startX:event.clientX,startY:event.clientY,
-        left:rect.left,top:rect.top,dx:0,dy:0,moved:false,
-        bounds:bounds(rect)
-      };
-      window.addEventListener("pointermove",move,{capture:true,passive:false});
-      window.addEventListener("pointerup",end,true);
-      window.addEventListener("pointercancel",end,true);
-    },{passive:true});
+    handle.addEventListener(
+      "pointerdown",
+      (event) => {
+        if (event.button != null && event.button !== 0) return;
+        if (!visible(node) || drag) return;
+        cancelGlide();
+        // A new gesture is not the trailing click from the previous drag.
+        suppressDragClick = false;
+        tapStartedIdle = node.classList.contains("is-idle");
+        // Do not expand a collapsed hit target underneath the pointer.
+        if (!tapStartedIdle && node === hub) wake();
+        const rect = node.getBoundingClientRect();
+        drag = {
+          id: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          left: rect.left,
+          top: rect.top,
+          dx: 0,
+          dy: 0,
+          moved: false,
+          bounds: bounds(rect),
+        };
+        window.addEventListener("pointermove", move, { capture: true, passive: false });
+        window.addEventListener("pointerup", end, true);
+        window.addEventListener("pointercancel", end, true);
+      },
+      { passive: true },
+    );
     // Capture prevents the post-drag synthetic click from opening Settings
     // or the music action menu, without interfering with normal taps.
-    node.addEventListener("click",event => {
-      if (event.target.closest(".settings-panel,.music-float-actions")) return;
-      if (suppressDragClick) {
-        suppressDragClick = false;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        return;
-      }
-      tapStartedIdle = false;
-      if (node === hub) {wake();scheduleIdle();}
-    },true);
+    node.addEventListener(
+      "click",
+      (event) => {
+        if (event.target.closest(".settings-panel,.music-float-actions")) return;
+        if (suppressDragClick) {
+          suppressDragClick = false;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          return;
+        }
+        tapStartedIdle = false;
+        if (node === hub) {
+          wake();
+          scheduleIdle();
+        }
+      },
+      true,
+    );
     handle.addEventListener("pointerenter", () => {
       if (!coarsePointer.matches && node === hub) wake();
     });
@@ -397,14 +491,14 @@
       if (!tapStartedIdle && node === hub) wake();
     });
     if (node === hub) {
-      node.addEventListener("focusout",() => scheduleIdle());
-      document.addEventListener("wedding:settingsclosed",() => scheduleIdle(1100));
+      node.addEventListener("focusout", () => scheduleIdle());
+      document.addEventListener("wedding:settingsclosed", () => scheduleIdle(1100));
     }
     const reset = () => {
       cancelGlide();
       if (drag) return;
       if (node.dataset.userMoved === "true") {
-        anchor(node,node.dataset.floatEdge || "right",node.getBoundingClientRect().top);
+        anchor(node, node.dataset.floatEdge || "right", node.getBoundingClientRect().top);
       } else initialPosition(node);
     };
     let viewportFrame = 0;
@@ -422,13 +516,12 @@
       new MutationObserver(() => {
         if (!visible(node)) return;
         if (node.dataset.userMoved !== "true") initialPosition(node);
-        else anchor(node,node.dataset.floatEdge || "left",node.getBoundingClientRect().top);
-      }).observe(node,{attributes:true,attributeFilter:["hidden"]});
+        else anchor(node, node.dataset.floatEdge || "left", node.getBoundingClientRect().top);
+      }).observe(node, { attributes: true, attributeFilter: ["hidden"] });
     }
     scheduleIdle(1500);
   };
 
-  setupFloating(hub,document.getElementById("settingsTrigger"));
-  setupFloating(musicDock,document.getElementById("musicBubbleTrigger"));
-
+  setupFloating(hub, document.getElementById("settingsTrigger"));
+  setupFloating(musicDock, document.getElementById("musicBubbleTrigger"));
 })();

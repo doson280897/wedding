@@ -25,3 +25,6 @@ Thumbs.db
 # images/optimized/assets/
 # images/optimized/album/
 # images/manifest.json
+
+/dist/
+/wedding-deploy-info.json

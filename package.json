@@ -5,10 +5,17 @@
   "description": "Static wedding invitation site, GitHub Pages",
   "scripts": {
     "test:unit": "node --test tests/*.test.cjs",
-    "test:browser": "playwright test tests/compatibility.spec.cjs --reporter=line --workers=2",
-    "test:browser:extended": "WEDDING_EXTENDED_TESTS=true playwright test tests/compatibility.spec.cjs --reporter=line --workers=2"
+    "test:browser": "playwright test --reporter=line --workers=2",
+    "test:browser:extended": "WEDDING_EXTENDED_TESTS=true playwright test --reporter=line --workers=2",
+    "build": "node scripts/build-site.cjs",
+    "serve": "python3 -m http.server 8000 --bind 127.0.0.1 --directory dist",
+    "check": "node scripts/check-source.cjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run check && npm run test:unit"
   },
   "devDependencies": {
-    "@playwright/test": "1.64.1"
+    "@playwright/test": "1.64.1",
+    "prettier": "3.6.2"
   }
 }

@@ -11,10 +11,21 @@
   const menuContent = document.getElementById("wqPanel");
   const settingsContent = document.getElementById("settingsTabContent");
   const panelTitle = document.getElementById("controlPanelTitle");
-  if (!hub || !trigger || !panel || !closeButton || !menuTab || !settingsTab ||
-      !tabs || !menuContent || !settingsContent) return;
-  const tr = key => window.WeddingI18n?.t(key) || key;
-  const hasMenu = () => Boolean(document.documentElement.dataset.party) &&
+  if (
+    !hub ||
+    !trigger ||
+    !panel ||
+    !closeButton ||
+    !menuTab ||
+    !settingsTab ||
+    !tabs ||
+    !menuContent ||
+    !settingsContent
+  )
+    return;
+  const tr = (key) => window.WeddingI18n?.t(key) || key;
+  const hasMenu = () =>
+    Boolean(document.documentElement.dataset.party) &&
     !document.documentElement.classList.contains("party-pending") &&
     !document.documentElement.classList.contains("link-tool-active");
 
@@ -38,20 +49,27 @@
     const height = panelRect.height;
     // Clamp in viewport coordinates, then convert to the hub's local
     // position. This also works when the hub is dragged to the screen center.
-    const left = Math.max(viewportLeft + edge, Math.min(viewportRight - width - edge, triggerRect.right - width));
+    const left = Math.max(
+      viewportLeft + edge,
+      Math.min(viewportRight - width - edge, triggerRect.right - width),
+    );
     const roomBelow = viewportBottom - triggerRect.bottom;
     const roomAbove = triggerRect.top - viewportTop;
-    const preferredTop = roomBelow >= height + edge || roomBelow >= roomAbove
-      ? triggerRect.bottom + edge
-      : triggerRect.top - height - edge;
-    const top = Math.max(viewportTop + edge, Math.min(viewportBottom - height - edge, preferredTop));
+    const preferredTop =
+      roomBelow >= height + edge || roomBelow >= roomAbove
+        ? triggerRect.bottom + edge
+        : triggerRect.top - height - edge;
+    const top = Math.max(
+      viewportTop + edge,
+      Math.min(viewportBottom - height - edge, preferredTop),
+    );
     panel.style.left = Math.round(left - hubRect.left) + "px";
     panel.style.top = Math.round(top - hubRect.top) + "px";
     panel.style.right = "auto";
     panel.style.bottom = "auto";
   };
 
-  const setTab = name => {
+  const setTab = (name) => {
     const showMenu = name === "menu" && hasMenu();
     tabs.hidden = !hasMenu();
     menuTab.hidden = !hasMenu();
@@ -64,7 +82,10 @@
     settingsTab.setAttribute("aria-selected", String(!showMenu));
     settingsTab.tabIndex = showMenu ? -1 : 0;
     if (panelTitle) panelTitle.textContent = tr(showMenu ? "menu.toggle" : "settings.title");
-    if (!panel.hidden) {panel.scrollTop = 0;positionPanel();}
+    if (!panel.hidden) {
+      panel.scrollTop = 0;
+      positionPanel();
+    }
   };
   const setOpen = (open, restoreFocus = false) => {
     if (open) {
@@ -90,35 +111,54 @@
   closeButton.addEventListener("click", () => setOpen(false, true));
   menuTab.addEventListener("click", () => setTab("menu"));
   settingsTab.addEventListener("click", () => setTab("settings"));
-  for (const [tab,peer,next] of [[menuTab,settingsTab,"settings"],[settingsTab,menuTab,"menu"]]) {
-    tab.addEventListener("keydown", event => {
-      if (!hasMenu() || !["ArrowLeft","ArrowRight"].includes(event.key)) return;
-      event.preventDefault();setTab(next);peer.focus({preventScroll:true});
+  for (const [tab, peer, next] of [
+    [menuTab, settingsTab, "settings"],
+    [settingsTab, menuTab, "menu"],
+  ]) {
+    tab.addEventListener("keydown", (event) => {
+      if (!hasMenu() || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      event.preventDefault();
+      setTab(next);
+      peer.focus({ preventScroll: true });
     });
   }
   window.WeddingControlHub = {
-    close: restoreFocus => setOpen(false, restoreFocus !== false),
-    showMenu: () => {if (panel.hidden) setOpen(true);setTab("menu");},
-    showSettings: () => {if (panel.hidden) setOpen(true);setTab("settings");}
+    close: (restoreFocus) => setOpen(false, restoreFocus !== false),
+    showMenu: () => {
+      if (panel.hidden) setOpen(true);
+      setTab("menu");
+    },
+    showSettings: () => {
+      if (panel.hidden) setOpen(true);
+      setTab("settings");
+    },
   };
   document.addEventListener("wedding:languagechange", () => {
-    if (!panel.hidden && panelTitle) panelTitle.textContent =
-      tr(menuContent.hidden ? "settings.title" : "menu.toggle");
+    if (!panel.hidden && panelTitle)
+      panelTitle.textContent = tr(menuContent.hidden ? "settings.title" : "menu.toggle");
   });
 
   // Keep language and music in a single compact panel, but let the
   // existing language and audio handlers control their own behavior.
-  document.addEventListener("pointerdown", event => {
-    if (!panel.hidden && !hub.contains(event.target)) setOpen(false);
-  }, true);
+  document.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (!panel.hidden && !hub.contains(event.target)) setOpen(false);
+    },
+    true,
+  );
 
-  document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && !panel.hidden) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      setOpen(false, true);
-    }
-  }, true);
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.key === "Escape" && !panel.hidden) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        setOpen(false, true);
+      }
+    },
+    true,
+  );
 
   document.querySelector(".party-admin-link")?.addEventListener("click", () => setOpen(false));
   window.addEventListener("popstate", () => setOpen(false));
@@ -134,5 +174,4 @@
   };
   window.WeddingLayout.subscribe(schedulePanelPosition);
   hub.addEventListener("pointerup", schedulePanelPosition);
-
 })();

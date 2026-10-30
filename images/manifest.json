@@ -6,20 +6,8 @@
     "quality": 80
   },
   "captions": {
-    "vi": [
-      "CHÚNG MÌNH",
-      "BÊN NHAU",
-      "NHỮNG NGÀY YÊU",
-      "MỘT LỜI HẸN ƯỚC",
-      "MÃI VỀ SAU"
-    ],
-    "en": [
-      "US",
-      "TOGETHER",
-      "OUR LOVE",
-      "A PROMISE",
-      "FOREVER"
-    ]
+    "vi": ["CHÚNG MÌNH", "BÊN NHAU", "NHỮNG NGÀY YÊU", "MỘT LỜI HẸN ƯỚC", "MÃI VỀ SAU"],
+    "en": ["US", "TOGETHER", "OUR LOVE", "A PROMISE", "FOREVER"]
   },
   "total": 30,
   "photos": [

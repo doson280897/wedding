@@ -11,9 +11,9 @@
   gap: 0;
   overflow: visible;
   border-radius: 999px;
-  background: rgba(19, 27, 22, .94);
-  border: 1px solid rgba(216, 182, 123, .60);
-  box-shadow: 0 8px 30px rgba(0,0,0,.32);
+  background: rgba(19, 27, 22, 0.94);
+  border: 1px solid rgba(216, 182, 123, 0.6);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.32);
   backdrop-filter: none;
   opacity: 1;
   touch-action: none;
@@ -36,127 +36,221 @@
   user-select: none;
   -webkit-user-select: none;
   white-space: nowrap;
-  font: 600 10px Montserrat, sans-serif;
-  letter-spacing: .12em;
+  font:
+    600 10px Montserrat,
+    sans-serif;
+  letter-spacing: 0.12em;
 }
-.settings-hub .settings-trigger:active { cursor: grabbing; }
-.settings-hub .settings-trigger svg { display:block;flex:0 0 20px;width:20px;height:20px }
-.settings-hub .settings-trigger-label { max-width:110px;overflow:hidden;opacity:1;transition:max-width .25s,opacity .15s }
-.settings-hub.floating-control.is-idle .settings-trigger { width:42px;padding:0 }
-.settings-hub.floating-control.is-idle .settings-trigger-label { max-width:0;opacity:0 }
+.settings-hub .settings-trigger:active {
+  cursor: grabbing;
+}
+.settings-hub .settings-trigger svg {
+  display: block;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
+.settings-hub .settings-trigger-label {
+  max-width: 110px;
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    max-width 0.25s,
+    opacity 0.15s;
+}
+.settings-hub.floating-control.is-idle .settings-trigger {
+  width: 42px;
+  padding: 0;
+}
+.settings-hub.floating-control.is-idle .settings-trigger-label {
+  max-width: 0;
+  opacity: 0;
+}
 .settings-hub.is-open .settings-trigger,
-.settings-hub.floating-control.is-idle.is-open .settings-trigger { width:auto;padding:0 13px }
+.settings-hub.floating-control.is-idle.is-open .settings-trigger {
+  width: auto;
+  padding: 0 13px;
+}
 .settings-hub.is-open .settings-trigger-label,
-.settings-hub.floating-control.is-idle.is-open .settings-trigger-label { max-width:110px;opacity:1 }
+.settings-hub.floating-control.is-idle.is-open .settings-trigger-label {
+  max-width: 110px;
+  opacity: 1;
+}
 
 .settings-hub .settings-panel {
-  position:absolute;
-  z-index:2;
-  left:0;
-  top:calc(100% + 10px);
-  max-height:calc(100vh - 20px);
-  max-height:calc(100dvh - 20px);
-  overflow-x:hidden;
-  overflow-y:auto;
-  overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
-  padding:18px;
-  border:1px solid rgba(219,190,136,.56);
-  border-radius:18px;
-  background:linear-gradient(145deg,#252a24,#101611);
-  color:#f0e5d5;
-  box-shadow:0 24px 66px rgba(0,0,0,.58);
-  font-family:Montserrat,system-ui,sans-serif;
-  letter-spacing:normal;
-  touch-action:pan-y;
-  user-select:text;
-  -webkit-user-select:text;
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  top: calc(100% + 10px);
+  max-height: calc(100vh - 20px);
+  max-height: calc(100dvh - 20px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 18px;
+  border: 1px solid rgba(219, 190, 136, 0.56);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #252a24, #101611);
+  color: #f0e5d5;
+  box-shadow: 0 24px 66px rgba(0, 0, 0, 0.58);
+  font-family: Montserrat, system-ui, sans-serif;
+  letter-spacing: normal;
+  touch-action: pan-y;
+  user-select: text;
+  -webkit-user-select: text;
 }
-.settings-hub .settings-panel[hidden] { display:none!important }
-.settings-panel-heading { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px;color:#d4b88a;font:600 11px Montserrat,sans-serif;letter-spacing:.12em }
-.settings-close { display:grid;place-items:center;width:34px;height:34px;border:0;background:transparent;color:#f1dfc3;font-size:25px;line-height:1;cursor:pointer;border-radius:50% }
-.settings-row { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid rgba(210,181,132,.19) }
-.settings-row-label { flex:1 1 auto;min-width:76px;color:#e1d9c9;font-size:12px;font-weight:500;letter-spacing:0 }
-.settings-options { flex:0 0 auto;display:flex;align-items:center;gap:3px;padding:3px;border:1px solid rgba(199,167,114,.30);border-radius:999px;background:rgba(0,0,0,.16) }
+.settings-hub .settings-panel[hidden] {
+  display: none !important;
+}
+.settings-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 13px;
+  color: #d4b88a;
+  font:
+    600 11px Montserrat,
+    sans-serif;
+  letter-spacing: 0.12em;
+}
+.settings-close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  color: #f1dfc3;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(210, 181, 132, 0.19);
+}
+.settings-row-label {
+  flex: 1 1 auto;
+  min-width: 76px;
+  color: #e1d9c9;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.settings-options {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid rgba(199, 167, 114, 0.3);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.16);
+}
 .settings-hub .settings-options .language-option {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  max-width:none;
-  min-height:36px;
-  min-width:45px;
-  padding:7px 10px;
-  border:0;
-  border-radius:999px;
-  background:transparent;
-  color:#baa98b;
-  opacity:1;
-  font:600 11px Montserrat,system-ui,sans-serif;
-  letter-spacing:.02em;
-  cursor:pointer;
-  white-space:nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: none;
+  min-height: 36px;
+  min-width: 45px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #baa98b;
+  opacity: 1;
+  font:
+    600 11px Montserrat,
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .settings-hub .settings-options .language-option.is-active {
-  background:#c9a86e;
-  color:#151c16;
-  box-shadow:0 2px 10px rgba(0,0,0,.22);
+  background: #c9a86e;
+  color: #151c16;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
 }
 .settings-hub .settings-panel :is(button):focus-visible,
 .settings-hub .settings-trigger:focus-visible {
-  outline:2px solid #eed19d;
-  outline-offset:2px;
+  outline: 2px solid #eed19d;
+  outline-offset: 2px;
 }
 .settings-hub .settings-music-row .music-toggle {
-  position:static;
-  left:auto;
-  right:auto;
-  top:auto;
-  bottom:auto;
-  z-index:auto;
-  flex:0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:auto;
-  min-width:105px;
-  min-height:40px;
-  gap:7px;
-  padding:7px 10px;
-  border-radius:999px;
-  border:1px solid rgba(203,169,114,.46);
-  background:#171e19;
-  color:#f0d7ac;
-  box-shadow:none;
-  font-size:10px;
-  letter-spacing:.01em;
-  backdrop-filter:none;
-  cursor:pointer;
-  touch-action:manipulation;
-  user-select:none;
+  position: static;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+  z-index: auto;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 105px;
+  min-height: 40px;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(203, 169, 114, 0.46);
+  background: #171e19;
+  color: #f0d7ac;
+  box-shadow: none;
+  font-size: 10px;
+  letter-spacing: 0.01em;
+  backdrop-filter: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
 }
-.settings-music-row .music-icon { width:18px;height:18px;flex-basis:18px }
-.settings-music-row .music-icon svg { width:18px;height:18px }
-.settings-music-row .music-label {display:inline;max-width:none;white-space:nowrap}
+.settings-music-row .music-icon {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+}
+.settings-music-row .music-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.settings-music-row .music-label {
+  display: inline;
+  max-width: none;
+  white-space: nowrap;
+}
 html.party-pending .settings-music-row,
-html.link-tool-active .settings-music-row {display:none!important}
+html.link-tool-active .settings-music-row {
+  display: none !important;
+}
 
-@media(max-width:650px) {
+@media (max-width: 650px) {
   .language-switch.settings-hub,
   .language-switch.settings-hub.floating-control,
   .language-switch.settings-hub.floating-control.is-idle {
-    min-width:44px;
-    min-height:44px;
-    height:44px;
-    padding:0;
-    gap:0;
+    min-width: 44px;
+    min-height: 44px;
+    height: 44px;
+    padding: 0;
+    gap: 0;
   }
   .settings-hub .settings-options .language-option {
-    min-height:40px;
+    min-height: 40px;
   }
 }
-@media(prefers-reduced-motion:reduce) {
-  .settings-hub .settings-trigger-label { transition:none; }
+@media (prefers-reduced-motion: reduce) {
+  .settings-hub .settings-trigger-label {
+    transition: none;
+  }
 }
 /* Landing page and invitation generator: both participate in the theme. */
 
@@ -164,225 +258,369 @@ html.link-tool-active .settings-music-row {display:none!important}
 
 /* The only permanent control docks at the bottom RIGHT by default. */
 .language-switch.settings-hub {
-  top:auto;
-  right:max(8px,env(safe-area-inset-right,0px));
-  bottom:max(8px,env(safe-area-inset-bottom,0px));
-  left:auto;
+  top: auto;
+  right: max(8px, env(safe-area-inset-right, 0px));
+  bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  left: auto;
 }
 
 /* In a collapsed dock, remove the *layout gap* as well as the text.
    Otherwise the 9px flex gap leaves the settings icon off-center. */
 .settings-hub.floating-control.is-idle:not(.is-open) .settings-trigger {
-  display:grid;
-  place-items:center;
-  width:42px;
-  height:42px;
-  padding:0;
-  gap:0;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  gap: 0;
 }
 .settings-hub.floating-control.is-idle:not(.is-open) .settings-trigger-label {
-  display:none;
+  display: none;
 }
 .settings-hub.floating-control.is-idle:not(.is-open) .settings-trigger svg {
-  display:block;
-  margin:0 auto;
-  flex:none;
+  display: block;
+  margin: 0 auto;
+  flex: none;
 }
 
 /* Contextual music orb: only visible after confirmed PLAYING.
    Pause keeps its position; Stop hides it until re-enabled in Settings. */
 .music-float {
-  position:fixed;
-  left:max(12px, env(safe-area-inset-left, 0px));
-  bottom:max(15px, env(safe-area-inset-bottom, 0px));
-  z-index:1004;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:50px;
-  height:50px;
-  font-family:Montserrat,system-ui,sans-serif;
-  -webkit-tap-highlight-color:transparent;
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left, 0px));
+  bottom: max(15px, env(safe-area-inset-bottom, 0px));
+  z-index: 1004;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  font-family: Montserrat, system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 .music-float[hidden],
-.music-float-actions[hidden] { display:none!important; }
+.music-float-actions[hidden] {
+  display: none !important;
+}
 .music-float-trigger {
-  position:relative;
-  display:grid;
-  place-items:center;
-  flex:0 0 auto;
-  width:48px;
-  height:48px;
-  padding:0;
-  border:1px solid rgba(219,186,124,.76);
-  border-radius:50%;
-  background:radial-gradient(circle at 30% 25%, #42432d, #17251c 70%);
-  color:#f2d393;
-  box-shadow:0 6px 25px rgba(0,0,0,.35), inset 0 0 0 3px rgba(250,210,130,.06);
-  cursor:grab;
-  touch-action:none;
-  -webkit-user-select:none;
-  user-select:none;
-  transition:background .24s, color .24s, border-color .24s, box-shadow .24s;
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid rgba(219, 186, 124, 0.76);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #42432d, #17251c 70%);
+  color: #f2d393;
+  box-shadow:
+    0 6px 25px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 3px rgba(250, 210, 130, 0.06);
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition:
+    background 0.24s,
+    color 0.24s,
+    border-color 0.24s,
+    box-shadow 0.24s;
 }
 .music-float-trigger::before {
-  content:"";
-  position:absolute;
-  inset:-5px;
-  border:1px solid rgba(230,184,97,.44);
-  border-radius:50%;
-  opacity:.75;
-  pointer-events:none;
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 1px solid rgba(230, 184, 97, 0.44);
+  border-radius: 50%;
+  opacity: 0.75;
+  pointer-events: none;
 }
-.music-float-note { display:grid;place-items:center;width:26px;height:26px; }
-.music-float-note svg { display:block;width:25px;height:25px;transform-origin:center }
+.music-float-note {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+}
+.music-float-note svg {
+  display: block;
+  width: 25px;
+  height: 25px;
+  transform-origin: center;
+}
 .music-float[data-music-state="playing"] .music-float-note svg {
-  animation:musicFloatSway 1.8s ease-in-out infinite;
-  filter:drop-shadow(0 0 4px rgba(245,206,120,.56));
+  animation: musicFloatSway 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px rgba(245, 206, 120, 0.56));
 }
 .music-float[data-music-state="playing"] .music-float-trigger::before {
-  animation:musicFloatHalo 2.8s ease-in-out infinite;
+  animation: musicFloatHalo 2.8s ease-in-out infinite;
 }
 .music-float[data-music-state="paused"] .music-float-trigger {
-  background:linear-gradient(145deg,#47545a,#222c35);
-  color:#a8c2d2;
-  border-color:rgba(165,193,208,.7);
-  box-shadow:0 6px 22px rgba(0,0,0,.28);
+  background: linear-gradient(145deg, #47545a, #222c35);
+  color: #a8c2d2;
+  border-color: rgba(165, 193, 208, 0.7);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
 }
 .music-float[data-music-state="paused"] .music-float-trigger::before {
-  border-color:rgba(155,184,204,.35);
-  opacity:.55;
+  border-color: rgba(155, 184, 204, 0.35);
+  opacity: 0.55;
 }
 .music-float[data-music-state="starting"] .music-float-trigger {
-  background:#26342b;
-  color:#bbad83;
+  background: #26342b;
+  color: #bbad83;
 }
 .music-float[data-music-state="starting"] .music-float-trigger::before {
-  animation:none;
-  opacity:.42;
+  animation: none;
+  opacity: 0.42;
 }
 .music-float-actions {
-  position:absolute;
-  left:calc(100% + 9px);
-  bottom:2px;
-  display:flex;
-  align-items:center;
-  gap:7px;
-  min-height:46px;
-  padding:5px 7px;
-  border:1px solid rgba(207,171,115,.5);
-  border-radius:999px;
-  background:rgba(22,30,25,.97);
-  box-shadow:0 12px 32px rgba(0,0,0,.34);
-  backdrop-filter:blur(7px);
+  position: absolute;
+  left: calc(100% + 9px);
+  bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 46px;
+  padding: 5px 7px;
+  border: 1px solid rgba(207, 171, 115, 0.5);
+  border-radius: 999px;
+  background: rgba(22, 30, 25, 0.97);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(7px);
 }
 .music-float-action {
-  display:grid;
-  place-items:center;
-  min-width:37px;
-  min-height:37px;
-  width:37px;
-  height:37px;
-  padding:7px;
-  border:0;
-  border-radius:50%;
-  background:rgba(223,194,144,.10);
-  color:#efcf9b;
-  cursor:pointer;
-  touch-action:manipulation;
+  display: grid;
+  place-items: center;
+  min-width: 37px;
+  min-height: 37px;
+  width: 37px;
+  height: 37px;
+  padding: 7px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(223, 194, 144, 0.1);
+  color: #efcf9b;
+  cursor: pointer;
+  touch-action: manipulation;
 }
-.music-float-action svg {width:20px;height:20px;display:block}
+.music-float-action svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
 .music-float-action:hover,
-.music-float-action:focus-visible {background:rgba(229,198,143,.24);outline:2px solid rgba(234,202,147,.7);outline-offset:2px}
-.music-float-stop {color:#e4ad9b}
-.music-float-stop:hover {background:rgba(194,89,67,.22)}
-.music-float:is([data-music-state="playing"],[data-music-state="starting"]) .music-float-play-icon,
-.music-float[data-music-state="paused"] .music-float-pause-icon {display:none}
-.music-float-action:disabled {opacity:.5;cursor:progress}
-.music-float-trigger:focus-visible {outline:2px solid #f1d49f;outline-offset:4px}
+.music-float-action:focus-visible {
+  background: rgba(229, 198, 143, 0.24);
+  outline: 2px solid rgba(234, 202, 147, 0.7);
+  outline-offset: 2px;
+}
+.music-float-stop {
+  color: #e4ad9b;
+}
+.music-float-stop:hover {
+  background: rgba(194, 89, 67, 0.22);
+}
+.music-float:is([data-music-state="playing"], [data-music-state="starting"]) .music-float-play-icon,
+.music-float[data-music-state="paused"] .music-float-pause-icon {
+  display: none;
+}
+.music-float-action:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+.music-float-trigger:focus-visible {
+  outline: 2px solid #f1d49f;
+  outline-offset: 4px;
+}
 
 @keyframes musicFloatSway {
-  0%,100% {transform:rotate(-10deg) translateY(1px)}
-  50% {transform:rotate(10deg) translateY(-2px)}
+  0%,
+  100% {
+    transform: rotate(-10deg) translateY(1px);
+  }
+  50% {
+    transform: rotate(10deg) translateY(-2px);
+  }
 }
 @keyframes musicFloatHalo {
-  0%,100% {transform:scale(.98);opacity:.40}
-  50% {transform:scale(1.13);opacity:.86}
+  0%,
+  100% {
+    transform: scale(0.98);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.13);
+    opacity: 0.86;
+  }
 }
-@media (max-width:650px) {
-  .music-float {width:46px;height:46px}
-  .music-float-trigger {width:44px;height:44px}
-  .music-float-actions {left:calc(100% + 7px);bottom:0}
-  .music-float-action {min-height:40px;min-width:40px;width:40px;height:40px}
+@media (max-width: 650px) {
+  .music-float {
+    width: 46px;
+    height: 46px;
+  }
+  .music-float-trigger {
+    width: 44px;
+    height: 44px;
+  }
+  .music-float-actions {
+    left: calc(100% + 7px);
+    bottom: 0;
+  }
+  .music-float-action {
+    min-height: 40px;
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .music-float .music-float-note svg,
-  .music-float .music-float-trigger::before {animation:none!important}
-  .music-float-trigger {transition:none}
+  .music-float .music-float-trigger::before {
+    animation: none !important;
+  }
+  .music-float-trigger {
+    transition: none;
+  }
 }
 
 /* The gate is a single uninterrupted scene. Controls are unavailable until
    the hero has completed its reveal. Keep layout dimensions for edge snapping.
    The party chooser and personalized-link generator remain interactive. */
-html.wax-pending:not(.party-pending):not(.link-tool-active)
-:is(#settingsHub,#musicBubble){
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
+html.wax-pending:not(.party-pending):not(.link-tool-active) :is(#settingsHub, #musicBubble) {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* Shared menu and settings panel */
-.settings-hub .settings-panel{width:min(385px,calc(100vw - 20px))}
-.settings-hub .control-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:0 0 12px;border:1px solid rgba(199,167,114,.3);border-radius:12px;background:rgba(0,0,0,.18)}
-.settings-hub .control-tabs[hidden],.settings-hub [role="tabpanel"][hidden]{display:none!important}
-.settings-hub .control-tab{border:0;border-radius:9px;min-height:39px;padding:8px 6px;color:#c8b998;background:transparent;cursor:pointer;font:600 10px Montserrat,system-ui,sans-serif;letter-spacing:.08em}
-.settings-hub .control-tab[aria-selected="true"]{background:#c9a86e;color:#182019}
-.settings-hub .control-tab:focus-visible{outline:2px solid #e9c68f;outline-offset:2px}
-.settings-hub .wq-panel,.settings-hub .wq-panel.is-open{position:static;display:block;width:100%;max-height:none;overflow:visible;padding:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:inherit;opacity:1;visibility:visible;transform:none;transition:none}
-.settings-hub .wq-heading{font-size:clamp(27px,5vw,34px);margin:12px 0 2px}
-.settings-hub .wq-description{margin-bottom:14px}
-.settings-hub .wq-link{padding:12px 2px;font-size:12px;gap:10px}
-.settings-hub .wq-footnote{margin-top:16px}
+.settings-hub .settings-panel {
+  width: min(385px, calc(100vw - 20px));
+}
+.settings-hub .control-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  margin: 0 0 12px;
+  border: 1px solid rgba(199, 167, 114, 0.3);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+}
+.settings-hub .control-tabs[hidden],
+.settings-hub [role="tabpanel"][hidden] {
+  display: none !important;
+}
+.settings-hub .control-tab {
+  border: 0;
+  border-radius: 9px;
+  min-height: 39px;
+  padding: 8px 6px;
+  color: #c8b998;
+  background: transparent;
+  cursor: pointer;
+  font:
+    600 10px Montserrat,
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.08em;
+}
+.settings-hub .control-tab[aria-selected="true"] {
+  background: #c9a86e;
+  color: #182019;
+}
+.settings-hub .control-tab:focus-visible {
+  outline: 2px solid #e9c68f;
+  outline-offset: 2px;
+}
+.settings-hub .wq-panel,
+.settings-hub .wq-panel.is-open {
+  position: static;
+  display: block;
+  width: 100%;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: none;
+}
+.settings-hub .wq-heading {
+  font-size: clamp(27px, 5vw, 34px);
+  margin: 12px 0 2px;
+}
+.settings-hub .wq-description {
+  margin-bottom: 14px;
+}
+.settings-hub .wq-link {
+  padding: 12px 2px;
+  font-size: 12px;
+  gap: 10px;
+}
+.settings-hub .wq-footnote {
+  margin-top: 16px;
+}
 
-@media(max-width:650px){.settings-hub .settings-panel{padding:16px}}
+@media (max-width: 650px) {
+  .settings-hub .settings-panel {
+    padding: 16px;
+  }
+}
 
 /* The shared dock controller animates ONLY the release, never pointer moves.
    Translate3d keeps dragging on the compositor, avoiding layout thrash. */
 .settings-hub.floating-control,
 .music-float.floating-control {
-  position:fixed;
+  position: fixed;
   /* Two persistent compositor layers keep fixed controls attached during
      asynchronous iOS momentum scrolling. Animate coordinates only on release. */
-  will-change:transform;
-  transition:background .22s ease,border-color .22s ease,box-shadow .22s ease;
-  touch-action:none;
+  will-change: transform;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+  touch-action: none;
 }
 .settings-hub.floating-control.is-dragging,
 .music-float.floating-control.is-dragging {
-  transition:none!important;
-  will-change:transform;
-  cursor:grabbing;
+  transition: none !important;
+  will-change: transform;
+  cursor: grabbing;
 }
 .settings-hub.floating-control.is-snapping,
 .music-float.floating-control.is-snapping {
-  transition:left .34s cubic-bezier(.22,.82,.21,1),
-             top .34s cubic-bezier(.22,.82,.21,1)!important;
-  will-change:left,top;
+  transition:
+    left 0.34s cubic-bezier(0.22, 0.82, 0.21, 1),
+    top 0.34s cubic-bezier(0.22, 0.82, 0.21, 1) !important;
+  will-change: left, top;
 }
 .music-float.floating-control {
-  right:auto;
-  top:auto;
-  left:max(8px,env(safe-area-inset-left,0px));
-  bottom:max(8px,env(safe-area-inset-bottom,0px));
+  right: auto;
+  top: auto;
+  left: max(8px, env(safe-area-inset-left, 0px));
+  bottom: max(8px, env(safe-area-inset-bottom, 0px));
 }
-.music-float.floating-control .music-float-trigger:active{cursor:grabbing}
-.music-float[data-float-edge="right"] .music-float-actions{
-  left:auto;right:calc(100% + 9px);
+.music-float.floating-control .music-float-trigger:active {
+  cursor: grabbing;
 }
-@media(max-width:650px){
-  .music-float[data-float-edge="right"] .music-float-actions{right:calc(100% + 7px)}
+.music-float[data-float-edge="right"] .music-float-actions {
+  left: auto;
+  right: calc(100% + 9px);
 }
-@media(prefers-reduced-motion:reduce){
+@media (max-width: 650px) {
+  .music-float[data-float-edge="right"] .music-float-actions {
+    right: calc(100% + 7px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
   .settings-hub.floating-control.is-snapping,
-  .music-float.floating-control.is-snapping{transition:none!important}
+  .music-float.floating-control.is-snapping {
+    transition: none !important;
+  }
 }

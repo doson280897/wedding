@@ -1,58 +1,19 @@
-name: Format source code
+name: Check source formatting
 
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
-
-      - name: Install formatters
-        run: |
-          npm install --no-save --no-package-lock prettier@3.6.2
-          python -m pip install black==25.9.0
-
-      - name: Format web source, config and documentation
-        run: |
-          ./node_modules/.bin/prettier --write \
-            index.html link-tool.html \
-            style.css quick-nav.css link-tool.css settings.css calendar.css fairy-gate.css responsive.css \
-            script.js calendar.js quick-nav.js gallery.js i18n.js link-tool.js settings.js preferences.js wedding-info.js typography.js layout.js \
-            build-wedding.cjs playwright.config.cjs tests/*.cjs \
-            .github/workflows/deploy.yml \
-            .github/workflows/format-source.yml \
-            .github/workflows/browser-compatibility.yml \
-            .prettierrc.json package.json README.md images/manifest.json
-          black generate_gallery.py
-
-      - name: Validate JavaScript and Python syntax
-        run: |
-          node --check script.js
-          node --check quick-nav.js
-          node --check gallery.js
-          node --check i18n.js
-          node --check preferences.js
-          node --check settings.js
-          node --check wedding-info.js
-          node --check link-tool.js
-          node --check build-wedding.cjs
-          node --test tests/data-source.test.cjs
-          python -m py_compile generate_gallery.py
-          python -m json.tool images/manifest.json > /dev/null
-
-      - name: Formatting completed
-        run: |
-          echo 'Formatting and syntax checks completed in the runner. No push attempted.'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run format:check

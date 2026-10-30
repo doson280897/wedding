@@ -1,24 +1,26 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <noscript><meta http-equiv="refresh" content="0;url=index.html?tool=links"></noscript>
-  <title>Tạo thiệp mời riêng | Wedding Template</title>
-  <script>
-    (() => {
-      // Legacy link: redirect to the ONE page that owns the language control.
-      // Existing shared links and ?lang=en continue to work.
-      const destination = new URL("index.html", location.href);
-      destination.searchParams.set("tool", "links");
-      const lang = new URLSearchParams(location.search).get("lang");
-      if (lang === "vi" || lang === "en") destination.searchParams.set("lang", lang);
-      location.replace(destination.href);
-    })();
-  </script>
-</head>
-<body>
-  <p><a href="index.html?tool=links">Mở công cụ tạo link thiệp / Open invitation link generator</a></p>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <noscript><meta http-equiv="refresh" content="0;url=index.html?tool=links" /></noscript>
+    <title>Tạo thiệp mời riêng | Wedding Template</title>
+    <script>
+      (() => {
+        // Legacy link: redirect to the ONE page that owns the language control.
+        // Existing shared links and ?lang=en continue to work.
+        const destination = new URL("index.html", location.href);
+        destination.searchParams.set("tool", "links");
+        const lang = new URLSearchParams(location.search).get("lang");
+        if (lang === "vi" || lang === "en") destination.searchParams.set("lang", lang);
+        location.replace(destination.href);
+      })();
+    </script>
+  </head>
+  <body>
+    <p>
+      <a href="index.html?tool=links">Mở công cụ tạo link thiệp / Open invitation link generator</a>
+    </p>
+  </body>
 </html>

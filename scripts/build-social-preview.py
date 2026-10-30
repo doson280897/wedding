@@ -1,0 +1,118 @@
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+import json
+import sys
+import os
+
+os.chdir(Path(sys.argv[1]).resolve())
+
+wedding = json.loads(Path("wedding-deploy-info.json").read_text(encoding="utf-8"))
+couple = wedding["couple"]
+parties = wedding["parties"]
+
+# A custom socialImage points to an existing file (or public HTTPS URL).
+# Only the default og-preview.jpg needs the generated hero-based card.
+social_image = wedding["site"].get("socialImage", "og-preview.jpg")
+if social_image != "og-preview.jpg":
+    from urllib.parse import urlparse, unquote
+
+    parsed = urlparse(social_image)
+    if parsed.scheme in ("https", "http"):
+        print("Using configured external social image:", social_image)
+        raise SystemExit(0)
+    social_path = Path(unquote(parsed.path))
+    if (
+        social_path.is_absolute()
+        or ".." in social_path.parts
+        or not social_path.is_file()
+    ):
+        raise SystemExit(f"Configured socialImage not found or unsafe: {social_image}")
+    print("Using configured local social image:", social_path)
+    raise SystemExit(0)
+
+selected = "single" if wedding.get("wedding", {}).get("mode") == "single" else "bride"
+source = Path(parties[selected]["images"]["hero"])
+if not source.exists():
+    raise SystemExit(f"Missing configured hero image: {source}")
+
+image = Image.open(source).convert("RGB")
+image = ImageOps.fit(
+    image, (1200, 630), Image.Resampling.LANCZOS, centering=(0.5, 0.42)
+).convert("RGBA")
+
+overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
+overlay_draw = ImageDraw.Draw(overlay)
+for x in range(1200):
+    strength = max(20, int(20 + 185 * (x / 1199) ** 1.65))
+    overlay_draw.line((x, 0, x, 630), fill=(5, 8, 7, strength))
+overlay_draw.rectangle((0, 0, 1200, 630), fill=(6, 9, 8, 28))
+image = Image.alpha_composite(image, overlay)
+
+draw = ImageDraw.Draw(image)
+import subprocess
+
+
+def load_font(pattern, size):
+    try:
+        path = subprocess.check_output(
+            ["fc-match", "-f", "%{file}", pattern], text=True
+        ).strip()
+        if path:
+            return ImageFont.truetype(path, size)
+    except Exception:
+        pass
+    return ImageFont.load_default(size=size)
+
+
+small = load_font("sans", 24)
+names = load_font("serif:style=Bold", 58)
+amp = load_font("serif", 42)
+date = load_font("sans", 25)
+gold = (238, 210, 164, 255)
+cream = (245, 236, 221, 255)
+muted = (211, 191, 158, 255)
+
+
+def fitted_font(pattern, text, size, available=460):
+    while size > 20:
+        font = load_font(pattern, size)
+        if draw.textbbox((0, 0), text, font=font)[2] <= available:
+            return font
+        size -= 2
+    return load_font(pattern, size)
+
+
+left = 690
+title = "WEDDING INVITATION"
+groom_name = couple["groom"]["short"].upper()
+bride_name = "&  " + couple["bride"]["short"].upper()
+
+
+def date_dots(side):
+    year, month, day = parties[side]["date"].split("-")
+    return f"{day}.{month}.{year}"
+
+
+draw.text((left, 170), title, font=small, fill=muted)
+draw.line((left, 210, 1115, 210), fill=(209, 174, 117, 150), width=1)
+draw.text(
+    (left, 236),
+    groom_name,
+    font=fitted_font("serif:style=Bold", groom_name, 58),
+    fill=cream,
+)
+draw.text((left, 311), bride_name, font=fitted_font("serif", bride_name, 42), fill=gold)
+date_label = (
+    date_dots("single")
+    if selected == "single"
+    else date_dots("bride") + "  —  " + date_dots("groom")
+)
+draw.text((left, 390), date_label, font=fitted_font("sans", date_label, 25), fill=muted)
+draw.text(
+    (left, 442), wedding["text"]["vi"]["guest.recipientLabel"], font=small, fill=cream
+)
+
+image.convert("RGB").save(
+    "og-preview.jpg", "JPEG", quality=88, optimize=True, progressive=True
+)
+print("Created og-preview.jpg", Path("og-preview.jpg").stat().st_size, "bytes")
