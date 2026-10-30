@@ -3,7 +3,7 @@
 import hashlib
 import json
 from pathlib import Path
-from urllib.parse import unquote
+from urllib.parse import unquote, urlsplit
 import warnings
 
 MODEL = Path(__file__).parent / "models/face_detection_yunet_2023mar.onnx"
@@ -12,6 +12,7 @@ MODEL_SHA256 = "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4
 
 def generate_focus(optimized, info):
     import cv2
+    import numpy as np
 
     if hashlib.sha256(MODEL.read_bytes()).hexdigest() != MODEL_SHA256:
         raise ValueError("YuNet model checksum mismatch")
@@ -26,9 +27,22 @@ def generate_focus(optimized, info):
     result = {"version": 1, "images": {}}
     detector = cv2.FaceDetectorYN.create(str(MODEL), "", (320, 320), 0.85, 0.3, 5000)
     for src in paths:
-        relative = unquote(src).removeprefix("images/optimized/")
-        path = Path(optimized) / relative
-        image = cv2.imread(str(path))
+        parsed = urlsplit(src)
+        if parsed.scheme in ("http", "https"):
+            warnings.warn("External portrait; using portraitPosition fallback: " + src)
+            continue
+        relative = Path(unquote(parsed.path))
+        if (
+            parsed.scheme
+            or parsed.netloc
+            or relative.is_absolute()
+            or ".." in relative.parts
+            or relative.parts[:2] != ("images", "optimized")
+        ):
+            raise ValueError("Unsafe portrait path: " + src)
+        path = Path(optimized) / relative.relative_to("images/optimized")
+        # imread's filename handling is unreliable for Unicode paths on Windows.
+        image = cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_COLOR)
         if image is None:
             raise ValueError("Cannot read portrait: " + src)
         height, width = image.shape[:2]

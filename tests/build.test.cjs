@@ -22,6 +22,8 @@ test("repeated public builds preserve templates and media bytes, exclude private
     const context = { window: {} };
     vm.runInNewContext(fs.readFileSync(infoPath, "utf8"), context);
     const info = context.window.WEDDING_INFO;
+    info.site.description.vi = "Literal $& and $` and $' <preview>";
+    info.couple.bride.initial = "$&";
     info.site.introSound = info.parties.bride.music.src;
     info.site.socialImage = info.parties.bride.images.hero;
     fs.writeFileSync(infoPath, "window.WEDDING_INFO = " + JSON.stringify(info) + ";");
@@ -35,6 +37,10 @@ test("repeated public builds preserve templates and media bytes, exclude private
       assert.ok(html.includes(sha));
       assert.ok(!html.includes("__BUILD_ID__"));
       assert.ok(!html.includes("__WEDDING_"));
+      assert.ok(html.includes("Literal $&amp; and $` and $&#39; &lt;preview&gt;"));
+      assert.ok(
+        fs.readFileSync(path.join(temp, "dist/favicon-bride.svg"), "utf8").includes("$&amp;"),
+      );
       for (const file of [info.site.introSound, info.site.socialImage]) {
         assert.deepEqual(
           fs.readFileSync(path.join(temp, "dist", file)),

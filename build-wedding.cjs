@@ -58,7 +58,7 @@ for (const filename of ["index.html", "link-tool.html", "style.css"]) {
     html = html.replace(/\s*<meta\s+property="og:image:(?:width|height)"[^>]*>/g, "");
   }
   for (const [placeholder, value] of Object.entries(meta)) {
-    html = html.replaceAll(placeholder, escapeXml(value));
+    html = html.replaceAll(placeholder, () => escapeXml(value));
   }
   fs.writeFileSync(target, html);
 }
@@ -68,8 +68,8 @@ for (const side of ["bride", "groom"]) {
   const target = path.join(root, "favicon-" + side + ".svg");
   const content = fs
     .readFileSync(target, "utf8")
-    .replaceAll("__FIRST_INITIAL__", escapeXml(first))
-    .replaceAll("__SECOND_INITIAL__", escapeXml(second));
+    .replaceAll("__FIRST_INITIAL__", () => escapeXml(first))
+    .replaceAll("__SECOND_INITIAL__", () => escapeXml(second));
   fs.writeFileSync(target, content);
 }
 fs.writeFileSync(path.join(root, "wedding-deploy-info.json"), JSON.stringify(wedding));
