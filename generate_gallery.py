@@ -101,8 +101,11 @@ def asset_plan(info: dict) -> dict:
             ("portraitSecondary", 900),
         ):
             add(party["images"][key], max_side=size)
-        # QR pixels and SVG vectors must not be resized or recompressed.
-        add(party["gift"]["qrImage"], copy=True)
+        # Gift QR images are shipped as-is, alongside the entrance artwork.
+        value = party["gift"]["qrImage"]
+        relative = local_path(value)
+        if relative is not None and relative.parts[:2] != ("images", "static"):
+            raise ValueError("Ảnh QR phải nằm trong images/static/: " + value)
     entrance = info["site"]["entrance"]
     # Entrance artwork is shipped as-is, outside the generated directory.
     for key in ("image", "lock"):

@@ -122,7 +122,7 @@ window.WEDDING_INFO = {
         "bank": "MB",
         "accountHolder": "{{couple.bride.fullUpper}}",
         "accountNumber": "8789 3224 6384 9",
-        "qrImage": "images/optimized/assets/gift-qr-bride.svg",
+        "qrImage": "images/static/gift-qr-bride.png",
         "qrAlt": {
           "vi": "Mã QR {{parties.bride.gift.bank}} mừng cưới {{couple.bride.short}}",
           "en": "{{parties.bride.gift.bank}} wedding gift QR for {{couple.bride.short}}"
@@ -188,7 +188,7 @@ window.WEDDING_INFO = {
         "bank": "TPBank",
         "accountHolder": "{{couple.groom.fullUpper}}",
         "accountNumber": "0266 8421 401",
-        "qrImage": "images/optimized/assets/gift-qr-groom.png",
+        "qrImage": "images/static/gift-qr-groom.png",
         "qrAlt": {
           "vi": "Mã QR {{parties.groom.gift.bank}} mừng cưới {{couple.groom.short}}",
           "en": "{{parties.groom.gift.bank}} wedding gift QR for {{couple.groom.short}}"
@@ -247,7 +247,7 @@ window.WEDDING_INFO = {
         "bank": "MB",
         "accountHolder": "{{couple.bride.fullUpper}}",
         "accountNumber": "8789 3224 6384 9",
-        "qrImage": "images/optimized/assets/gift-qr-bride.svg",
+        "qrImage": "images/static/gift-qr-bride.png",
         "qrAlt": {
           "vi": "Mã QR mừng cưới {{couple.groom.short}} & {{couple.bride.short}}",
           "en": "Wedding gift QR for {{couple.groom.short}} & {{couple.bride.short}}"

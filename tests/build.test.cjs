@@ -46,6 +46,7 @@ test("repeated public builds preserve templates and media bytes, exclude private
         info.site.socialImage,
         info.site.entrance.image,
         info.site.entrance.lock,
+        ...Object.values(info.parties).map((party) => party.gift.qrImage),
       ]) {
         assert.deepEqual(
           fs.readFileSync(path.join(temp, "dist", file)),

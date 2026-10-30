@@ -38,7 +38,10 @@ fs.cpSync(path.join(root, "images/optimized"), path.join(output, "images/optimiz
 });
 copyLocalAsset(info.site.entrance.image);
 copyLocalAsset(info.site.entrance.lock);
-for (const party of Object.values(info.parties)) copyLocalAsset(party.music.src);
+for (const party of Object.values(info.parties)) {
+  copyLocalAsset(party.music.src);
+  copyLocalAsset(party.gift.qrImage);
+}
 copyLocalAsset(info.site.introSound);
 if (info.site.socialImage !== "og-preview.jpg") copyLocalAsset(info.site.socialImage);
 fs.copyFileSync(path.join(root, "build-wedding.cjs"), path.join(output, "build-wedding.cjs"));

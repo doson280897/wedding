@@ -112,22 +112,23 @@ Chỉ thay chữ trong config không thể biến ảnh cưới cũ thành ảnh
 - Album bắt buộc có ít nhất một ảnh. Ảnh hỏng/định dạng không hỗ trợ cũng làm lệnh thất bại.
 - `mode` phải là `"replace"`; `optimization` hiện là `{"maxSide": 1440, "quality": 84}`. Đây là cạnh dài tối đa; ảnh nhỏ không được phóng giả lên. Đổi thông số rồi chạy lại sẽ tái tạo mọi ảnh, dù mtime không đổi.
 - `shuffle`, chú thích chung và `caption` của ảnh vẫn còn trong nguồn được giữ. Danh sách ảnh được dựng lại theo tên file; khi `shuffle: false`, dùng tiền tố số nếu cần thứ tự cụ thể.
-- Ảnh gốc và audio **không bị xóa**. QR được sao chép nguyên byte, không resize/nén. Cổng/khóa nằm trong `images/static/`, dùng trực tiếp và không tham gia tối ưu hóa; rebuild không sửa hoặc xóa các file này.
+- Ảnh gốc và audio **không bị xóa**. QR và cổng/khóa nằm trong `images/static/`, dùng trực tiếp và không tham gia tối ưu hóa; rebuild không sửa hoặc xóa các file này.
 
 **Ảnh bắt buộc:** đặt trong `images/original/assets/`, đúng chữ hoa/thường. Tên được suy ra từ `wedding-info.js`; bảng dưới là cấu hình hiện tại. Với tên có `.*`, chọn **đúng một** file có đuôi JPG/JPEG/PNG/WebP/AVIF/GIF/BMP/TIF/TIFF; phần tên trước đuôi phải khớp. Với tên có đuôi cụ thể, phải khớp cả tên và đuôi.
 
-| Loại             | Tên file gốc bắt buộc                                           |
-| ---------------- | --------------------------------------------------------------- |
-| Hero             | `hero_bride.*`, `hero_groom.*`                                  |
-| Ảnh kết          | `ending_bride.*`, `ending_groom.*`                              |
-| Chân dung cô dâu | `nga-1.*`, `nga-2.*`                                            |
-| Chân dung chú rể | `son-1.*`, `son-2.*`                                            |
-| QR               | `gift-qr-bride.svg`, `gift-qr-groom.png` — sao chép nguyên byte |
-| Câu chuyện       | `story-together.*`, `story-love.*`, `story-home.*`              |
+| Loại             | Tên file gốc bắt buộc                              |
+| ---------------- | -------------------------------------------------- |
+| Hero             | `hero_bride.*`, `hero_groom.*`                     |
+| Ảnh kết          | `ending_bride.*`, `ending_groom.*`                 |
+| Chân dung cô dâu | `nga-1.*`, `nga-2.*`                               |
+| Chân dung chú rể | `son-1.*`, `son-2.*`                               |
+| Câu chuyện       | `story-together.*`, `story-love.*`, `story-home.*` |
 
 Ba tên ảnh câu chuyện lấy từ `story.images.*.sourceName` (`story-together`, `story-love`, `story-home`, không kèm đuôi); script nhận đúng một định dạng được hỗ trợ rồi sinh toàn bộ bản responsive trong `variants`. Có thể khai báo cả đuôi nếu muốn yêu cầu một file cụ thể. `story-together.*` cần rộng ít nhất 2000 px; hai ảnh còn lại ít nhất 1333 px sau xoay EXIF để srcset không khai báo kích thước giả. Hero/ảnh kết/chân dung được tạo lại theo giới hạn riêng của từng loại. Tất cả đường dẫn ảnh tối ưu trong config đều được kiểm tra, kể cả mẫu `parties.single`; những đường dẫn trùng nhau chỉ cần một ảnh gốc. Favicon ở thư mục gốc là template bắt buộc được build riêng.
 
 **Cổng và khóa dùng sẵn:** `images/static/secret-garden-gate.webp` và `images/static/secret-garden-lock.webp`. Hai file được commit trực tiếp, không cần bản tương ứng trong `images/original/`. Generator chỉ kiểm tra chúng tồn tại và đọc được; build website sao chép nguyên byte. Nếu thay ảnh, đặt file mới trong `images/static/` rồi cập nhật `site.entrance.image`/`lock`; nên giữ PNG/WebP trong suốt cho khóa.
+
+**QR mừng cưới dùng sẵn:** `images/static/gift-qr-bride.png` và `images/static/gift-qr-groom.png`. Config `parties.*.gift.qrImage` trỏ trực tiếp tới hai file PNG này (kể cả mẫu `single`). Không cần QR trong `images/original/`; generator không resize/nén hoặc xóa QR, build website sao chép nguyên byte.
 
 ```powershell
 # Cài dependency (lần đầu)

@@ -38,7 +38,7 @@ class RebuildTests(unittest.TestCase):
                 "portraitSecondary": "images/optimized/assets/person-secondary.webp",
                 "favicon": "favicon.svg",
             },
-            "gift": {"qrImage": "images/optimized/assets/qr.png"},
+            "gift": {"qrImage": "images/static/qr.png"},
         }
         self.info = {
             "parties": {
@@ -76,7 +76,7 @@ class RebuildTests(unittest.TestCase):
         self.static.mkdir()
         Image.new("RGB", (400, 300), "red").save(self.static / "gate.webp")
         Image.new("RGBA", (80, 100), (230, 200, 100, 0)).save(self.static / "lock.webp")
-        Image.new("RGB", (30, 30), "white").save(self.assets / "qr.png")
+        Image.new("RGB", (30, 30), "white").save(self.static / "qr.png")
         self.photo = self.album / "Ảnh 01.jpg"
         Image.new("RGB", (1800, 1200), "green").save(self.photo)
         (self.root / "favicon.svg").write_text(
@@ -152,18 +152,10 @@ class RebuildTests(unittest.TestCase):
         )
 
     def test_preserves_qr_bytes_alpha_and_responsive_widths(self):
-        self.info["parties"]["groom"]["gift"][
-            "qrImage"
-        ] = "images/optimized/assets/qr-vector.svg"
-        svg = b'<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>'
-        (self.assets / "qr-vector.svg").write_bytes(svg)
-        self.write_info()
+        qr = (self.static / "qr.png").read_bytes()
         gallery.rebuild(self.root)
-        self.assertEqual((self.output / "assets/qr-vector.svg").read_bytes(), svg)
-        self.assertEqual(
-            (self.output / "assets/qr.png").read_bytes(),
-            (self.assets / "qr.png").read_bytes(),
-        )
+        self.assertEqual((self.static / "qr.png").read_bytes(), qr)
+        self.assertFalse((self.output / "assets/qr.png").exists())
         with Image.open(self.static / "lock.webp") as image:
             self.assertEqual(image.mode, "RGBA")
             self.assertEqual(image.getpixel((0, 0))[3], 0)
@@ -180,10 +172,15 @@ class RebuildTests(unittest.TestCase):
         required = "\n".join(gallery.required_sources(gallery.asset_plan(self.info)))
         self.assertNotIn("gate", required)
         self.assertNotIn("lock", required)
+        self.assertNotIn("qr", required)
 
     def test_missing_static_artwork_fails_before_publishing(self):
         (self.static / "lock.webp").unlink()
         self.assert_fails_unchanged("Thiếu ảnh tĩnh: images/static/lock.webp")
+
+    def test_missing_static_qr_fails_before_publishing(self):
+        (self.static / "qr.png").unlink()
+        self.assert_fails_unchanged("Thiếu ảnh tĩnh: images/static/qr.png")
 
     def test_story_source_stem_accepts_other_formats_and_rejects_duplicates(self):
         source = self.assets / "story-together.JPG"
