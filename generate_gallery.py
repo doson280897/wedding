@@ -51,14 +51,14 @@ def local_path(value: str) -> Path | None:
     return path
 
 
-def image_references(node):
+def image_references(node, prefix="images/optimized/"):
     if isinstance(node, dict):
         for value in node.values():
-            yield from image_references(value)
+            yield from image_references(value, prefix)
     elif isinstance(node, list):
         for value in node:
-            yield from image_references(value)
-    elif isinstance(node, str) and node.startswith("images/optimized/"):
+            yield from image_references(value, prefix)
+    elif isinstance(node, str) and node.startswith(prefix):
         yield node
 
 
@@ -78,7 +78,7 @@ def asset_plan(info: dict) -> dict:
         source = Path(source_name) if source_name else output.relative_to("assets")
         if source.is_absolute() or ".." in source.parts:
             raise ValueError("Tên ảnh gốc không an toàn: " + str(source))
-        exact = copy or source_name is not None
+        exact = copy or (source_name is not None and bool(source.suffix))
         if not exact:
             source = source.with_suffix("")
         rule = {
@@ -104,8 +104,12 @@ def asset_plan(info: dict) -> dict:
         # QR pixels and SVG vectors must not be resized or recompressed.
         add(party["gift"]["qrImage"], copy=True)
     entrance = info["site"]["entrance"]
-    add(entrance["image"], max_side=2400)
-    add(entrance["lock"], max_side=1200)
+    # Entrance artwork is shipped as-is, outside the generated directory.
+    for key in ("image", "lock"):
+        value = entrance[key]
+        relative = local_path(value)
+        if relative is not None and relative.parts[:2] != ("images", "static"):
+            raise ValueError("Ảnh cổng/khóa phải nằm trong images/static/: " + value)
     for image in info.get("story", {}).get("images", {}).values():
         source_name = image.get("sourceName")
         if not source_name:
@@ -205,6 +209,20 @@ def preflight(root, info, manifest, plan):
             if not rule["copy"] and output.suffix.lower() != ".webp":
                 raise ValueError("Ảnh tối ưu phải có đuôi .webp: " + str(output))
             resolved[output] = source
+        except (OSError, ValueError, SyntaxError) as error:
+            errors.append(str(error))
+    # Validate static artwork, but never encode, copy, or publish it here.
+    for value in set(image_references(info, "images/static/")):
+        try:
+            relative = local_path(value)
+            path = root / relative
+            if not path.is_file():
+                raise ValueError("Thiếu ảnh tĩnh: " + relative.as_posix())
+            if path.is_symlink() or not path.resolve().is_relative_to(
+                (root / "images/static").resolve()
+            ):
+                raise ValueError("Không dùng symlink cho ảnh tĩnh: " + str(path))
+            inspect_image(path)
         except (OSError, ValueError, SyntaxError) as error:
             errors.append(str(error))
     # Favicons are built separately; require their configured templates to exist.

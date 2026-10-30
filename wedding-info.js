@@ -27,8 +27,8 @@ window.WEDDING_INFO = {
     "socialImage": "og-preview.jpg",
     "introSound": "",
     "entrance": {
-      "image": "images/optimized/assets/secret-garden-gate.webp",
-      "lock": "images/optimized/assets/secret-garden-lock.webp"
+      "image": "images/static/secret-garden-gate.webp",
+      "lock": "images/static/secret-garden-lock.webp"
     },
     "titlePrefix": {
       "vi": "Thiệp cưới",
@@ -849,8 +849,8 @@ window.WEDDING_INFO = {
   "story": {
     "images": {
       "together": {
-        "src": "images/optimized/assets/promise-5982.webp",
-        "sourceName": "NAK_5982.JPG",
+        "src": "images/optimized/assets/story-together.webp",
+        "sourceName": "story-together",
         "alt": {
           "vi": "Sơn và Nga đứng bên nhau trên cầu trước cung điện",
           "en": "Sơn and Nga together on the bridge in front of the palace"
@@ -859,15 +859,15 @@ window.WEDDING_INFO = {
         "height": 1333,
         "variants": [
           {
-            "src": "images/optimized/assets/promise-5982-1200.webp",
+            "src": "images/optimized/assets/story-together-1200.webp",
             "width": 1200
           },
           {
-            "src": "images/optimized/assets/promise-5982-1600.webp",
+            "src": "images/optimized/assets/story-together-1600.webp",
             "width": 1600
           },
           {
-            "src": "images/optimized/assets/promise-5982.webp",
+            "src": "images/optimized/assets/story-together.webp",
             "width": 2000
           }
         ],
@@ -875,8 +875,8 @@ window.WEDDING_INFO = {
           "(max-width: 414px) calc(180vw - 62px), (max-width: 650px) 684px, (max-width: 1000px) 60vw, 690px"
       },
       "love": {
-        "src": "images/optimized/assets/promise-6143.webp",
-        "sourceName": "NAK_6143.JPG",
+        "src": "images/optimized/assets/story-love.webp",
+        "sourceName": "story-love",
         "alt": {
           "vi": "Sơn và Nga bên hàng cột đỏ trong cung điện",
           "en": "Sơn and Nga beside the red palace columns"
@@ -885,15 +885,15 @@ window.WEDDING_INFO = {
         "height": 2000,
         "variants": [
           {
-            "src": "images/optimized/assets/promise-6143-640.webp",
+            "src": "images/optimized/assets/story-love-640.webp",
             "width": 640
           },
           {
-            "src": "images/optimized/assets/promise-6143-1000.webp",
+            "src": "images/optimized/assets/story-love-1000.webp",
             "width": 1000
           },
           {
-            "src": "images/optimized/assets/promise-6143.webp",
+            "src": "images/optimized/assets/story-love.webp",
             "width": 1333
           }
         ],
@@ -901,8 +901,8 @@ window.WEDDING_INFO = {
           "(max-width: 414px) calc(100vw - 34px), (max-width: 650px) 380px, (max-width: 1000px) 31vw, 365px"
       },
       "home": {
-        "src": "images/optimized/assets/promise-6511.webp",
-        "sourceName": "NAK_6511.JPG",
+        "src": "images/optimized/assets/story-home.webp",
+        "sourceName": "story-home",
         "alt": {
           "vi": "Sơn và Nga ngồi bên nhau trên bậc thềm cung điện",
           "en": "Sơn and Nga sitting together on the palace steps"
@@ -911,15 +911,15 @@ window.WEDDING_INFO = {
         "height": 2000,
         "variants": [
           {
-            "src": "images/optimized/assets/promise-6511-640.webp",
+            "src": "images/optimized/assets/story-home-640.webp",
             "width": 640
           },
           {
-            "src": "images/optimized/assets/promise-6511-1000.webp",
+            "src": "images/optimized/assets/story-home-1000.webp",
             "width": 1000
           },
           {
-            "src": "images/optimized/assets/promise-6511.webp",
+            "src": "images/optimized/assets/story-home.webp",
             "width": 1333
           }
         ],

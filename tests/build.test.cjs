@@ -41,7 +41,12 @@ test("repeated public builds preserve templates and media bytes, exclude private
       assert.ok(
         fs.readFileSync(path.join(temp, "dist/favicon-bride.svg"), "utf8").includes("$&amp;"),
       );
-      for (const file of [info.site.introSound, info.site.socialImage]) {
+      for (const file of [
+        info.site.introSound,
+        info.site.socialImage,
+        info.site.entrance.image,
+        info.site.entrance.lock,
+      ]) {
         assert.deepEqual(
           fs.readFileSync(path.join(temp, "dist", file)),
           fs.readFileSync(path.join(temp, file)),

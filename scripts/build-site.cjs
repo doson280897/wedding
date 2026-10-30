@@ -36,6 +36,8 @@ copyLocalAsset("images/manifest.json");
 fs.cpSync(path.join(root, "images/optimized"), path.join(output, "images/optimized"), {
   recursive: true,
 });
+copyLocalAsset(info.site.entrance.image);
+copyLocalAsset(info.site.entrance.lock);
 for (const party of Object.values(info.parties)) copyLocalAsset(party.music.src);
 copyLocalAsset(info.site.introSound);
 if (info.site.socialImage !== "og-preview.jpg") copyLocalAsset(info.site.socialImage);

@@ -48,15 +48,15 @@ class RebuildTests(unittest.TestCase):
             },
             "site": {
                 "entrance": {
-                    "image": "images/optimized/assets/gate.webp",
-                    "lock": "images/optimized/assets/lock.webp",
+                    "image": "images/static/gate.webp",
+                    "lock": "images/static/lock.webp",
                 }
             },
             "story": {
                 "images": {
                     "together": {
                         "src": "images/optimized/assets/story.webp",
-                        "sourceName": "STORY.JPG",
+                        "sourceName": "story-together",
                         "width": 320,
                         "variants": [
                             {
@@ -69,10 +69,13 @@ class RebuildTests(unittest.TestCase):
                 }
             },
         }
-        for name in ("hero", "ending", "person", "person-secondary", "gate"):
+        for name in ("hero", "ending", "person", "person-secondary"):
             Image.new("RGB", (400, 300), "red").save(self.assets / (name + ".jpg"))
-        Image.new("RGB", (400, 300), "blue").save(self.assets / "STORY.JPG")
-        Image.new("RGBA", (80, 100), (230, 200, 100, 0)).save(self.assets / "lock.png")
+        Image.new("RGB", (400, 300), "blue").save(self.assets / "story-together.JPG")
+        self.static = self.root / "images/static"
+        self.static.mkdir()
+        Image.new("RGB", (400, 300), "red").save(self.static / "gate.webp")
+        Image.new("RGBA", (80, 100), (230, 200, 100, 0)).save(self.static / "lock.webp")
         Image.new("RGB", (30, 30), "white").save(self.assets / "qr.png")
         self.photo = self.album / "Ảnh 01.jpg"
         Image.new("RGB", (1800, 1200), "green").save(self.photo)
@@ -161,12 +164,34 @@ class RebuildTests(unittest.TestCase):
             (self.output / "assets/qr.png").read_bytes(),
             (self.assets / "qr.png").read_bytes(),
         )
-        with Image.open(self.output / "assets/lock.webp") as image:
+        with Image.open(self.static / "lock.webp") as image:
             self.assertEqual(image.mode, "RGBA")
             self.assertEqual(image.getpixel((0, 0))[3], 0)
         for name, width in (("story", 320), ("story-small", 160)):
             with Image.open(self.output / ("assets/" + name + ".webp")) as image:
                 self.assertEqual(image.width, width)
+
+    def test_static_artwork_survives_rebuild_byte_for_byte_without_originals(self):
+        before = {p.name: p.read_bytes() for p in self.static.iterdir()}
+        gallery.rebuild(self.root)
+        gallery.rebuild(self.root)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.static.iterdir()})
+        self.assertFalse((self.output / "assets/gate.webp").exists())
+        required = "\n".join(gallery.required_sources(gallery.asset_plan(self.info)))
+        self.assertNotIn("gate", required)
+        self.assertNotIn("lock", required)
+
+    def test_missing_static_artwork_fails_before_publishing(self):
+        (self.static / "lock.webp").unlink()
+        self.assert_fails_unchanged("Thiếu ảnh tĩnh: images/static/lock.webp")
+
+    def test_story_source_stem_accepts_other_formats_and_rejects_duplicates(self):
+        source = self.assets / "story-together.JPG"
+        source.unlink()
+        Image.new("RGB", (400, 300), "blue").save(self.assets / "story-together.png")
+        gallery.rebuild(self.root)
+        Image.new("RGB", (400, 300), "blue").save(source)
+        self.assert_fails_unchanged("Trùng tên.*story-together")
 
     def test_missing_required_file_fails_even_with_existing_optimized_assets(self):
         (self.assets / "hero.jpg").unlink()
@@ -196,7 +221,7 @@ class RebuildTests(unittest.TestCase):
         before = self.snapshot()
         gallery.rebuild(self.root, check=True)
         self.assertEqual(before, self.snapshot())
-        Image.new("RGB", (100, 80)).save(self.assets / "STORY.JPG")
+        Image.new("RGB", (100, 80)).save(self.assets / "story-together.JPG")
         self.assert_fails_unchanged("chiều rộng ít nhất")
 
     def test_encoding_failure_keeps_old_batch(self):
