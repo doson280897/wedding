@@ -142,8 +142,9 @@ python generate_gallery.py --check
 
 # Tạo lại toàn bộ bộ ảnh tối ưu
 python generate_gallery.py
-npx prettier --write images/manifest.json
 ```
+
+`images/manifest.json` là dữ liệu do Python sinh tự động và không cần chạy Prettier sau mỗi lần tạo ảnh. CI vẫn kiểm tra dữ liệu, build và chạy kiểm thử trình duyệt.
 
 **Theo dõi tiến độ:** Khi chạy generator (kể cả `--check`), terminal hiển thị ngay từng giai đoạn, tên ảnh đang kiểm tra/xử lý, số ảnh đã xong/tổng số, phần trăm của từng nhóm ảnh và thời gian đã chạy. Mỗi ảnh tối ưu có thời gian xử lý riêng. Log được đẩy ra ngay qua stderr để xem được cả trong PowerShell và khi chuyển hướng log, không cần thêm `python -u`. Chỉ hiện `HOÀN TẤT` sau khi cập nhật đầu ra thành công; `--list-required` vẫn chỉ in danh sách tên file.
 
