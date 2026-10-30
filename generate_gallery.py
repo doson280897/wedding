@@ -342,6 +342,9 @@ def rebuild(root=ROOT, *, check=False):
                         max_side=rule["max_side"],
                         width=rule["width"],
                     )
+            from scripts.portrait_focus import generate_focus
+
+            generate_focus(stage / "optimized", info)
             previous = {
                 item.get("src"): item
                 for item in manifest["photos"]

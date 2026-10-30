@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "images": {
+    "images/optimized/assets/nga-1.webp": {
+      "width": 667,
+      "height": 1000,
+      "faces": [
+        [
+          0.488397,
+          0.242034,
+          0.147439,
+          0.137182
+        ]
+      ]
+    },
+    "images/optimized/assets/nga-2.webp": {
+      "width": 600,
+      "height": 900,
+      "faces": [
+        [
+          0.437092,
+          0.31523,
+          0.120178,
+          0.100898
+        ]
+      ]
+    },
+    "images/optimized/assets/son-1.webp": {
+      "width": 667,
+      "height": 1000,
+      "faces": [
+        [
+          0.458354,
+          0.265561,
+          0.087856,
+          0.073817
+        ]
+      ]
+    },
+    "images/optimized/assets/son-2.webp": {
+      "width": 600,
+      "height": 900,
+      "faces": [
+        [
+          0.456157,
+          0.166515,
+          0.148949,
+          0.131102
+        ]
+      ]
+    }
+  }
+}
