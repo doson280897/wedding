@@ -11,7 +11,6 @@ Có hai giao diện tiệc `bride` (nhà gái) / `groom` (nhà trai), album 3D, 
 - Thiệp chỉ dùng **Dark Luxury** trên mọi thiết bị. Không tự đổi theo giao diện hệ điều hành và không có lựa chọn Sáng/Tối. F5 giữ ngôn ngữ trong tab đang xem; tab mới mặc định VN (trừ link có `lang=en`).
 - Trong cảnh sao rơi **Ngày chung đôi** khi mở cửa, hiển thị **Trân trọng kính mời**; với link có `?to=Tên+khách`, **tên người nhận** nằm ngay dưới bằng font serif đậm, màu vàng sáng. Hero không lặp lại lời mời. Có thể sửa nhãn trong `wedding-info.js` → `text.vi["guest.recipientLabel"]` / `text.en["guest.recipientLabel"]`. Link không có tên chỉ hiện lời mời, không để dòng tên trống.
 
-
 ## Một tiệc hay hai tiệc — chỉ đổi trong file thông tin
 
 Trong **[wedding-info.js](wedding-info.js)**, trường `wedding.mode` chọn kiểu tổ chức:
@@ -59,19 +58,19 @@ Trong **[wedding-info.js](wedding-info.js)**, trường `wedding.mode` chọn ki
 
 **[images/manifest.json](images/manifest.json)** là **nơi duy nhất quản lý album ảnh**: danh sách ảnh, chế độ thêm/thay thế, thứ tự, chú thích và cấu hình tối ưu WebP. Không còn cấu hình album trùng trong `wedding-info.js` hoặc `gallery.js`.
 
-| Mục trong `wedding-info.js` | Nội dung bạn đổi |
-| --- | --- |
-| `site` | URL website, mô tả khi chia sẻ, múi giờ, ảnh chia sẻ |
-| `couple.bride`, `couple.groom` | Tên hiển thị, họ tên đầy đủ, chữ viết tắt (`initial` như **N**, **S**) |
-| `families.bride`, `families.groom` | Họ tên cha mẹ, địa chỉ hai gia đình (VI/EN) |
-| `wedding.mode` | `"double"` (hai tiệc) hoặc `"single"` (một tiệc) |
-| `parties.single` | Ngày, giờ, nhà hàng, bản đồ, ảnh, nhạc và QR của một tiệc chung |
-| `parties.bride`, `parties.groom` | Ngày (YYYY-MM-DD), giờ lễ/tiệc, ngày âm lịch và địa điểm |
-| `parties.*.venue` | Tên sảnh/nhà hàng, địa chỉ, URL Google Maps, URL bản đồ nhúng |
-| `parties.*.music.src` | Đường dẫn file MP3 cho từng lễ |
-| `parties.*.images` | Ảnh hero, ảnh kết, chân dung, favicon |
-| `parties.*.gift` | Tên ngân hàng, chủ tài khoản, số tài khoản, mã QR |
-| `text.vi` và `text.en` | **Toàn bộ lời mời, câu chữ, thông báo, tiêu đề** của cả hai ngôn ngữ |
+| Mục trong `wedding-info.js`        | Nội dung bạn đổi                                                       |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| `site`                             | URL website, mô tả khi chia sẻ, múi giờ, ảnh chia sẻ                   |
+| `couple.bride`, `couple.groom`     | Tên hiển thị, họ tên đầy đủ, chữ viết tắt (`initial` như **N**, **S**) |
+| `families.bride`, `families.groom` | Họ tên cha mẹ, địa chỉ hai gia đình (VI/EN)                            |
+| `wedding.mode`                     | `"double"` (hai tiệc) hoặc `"single"` (một tiệc)                       |
+| `parties.single`                   | Ngày, giờ, nhà hàng, bản đồ, ảnh, nhạc và QR của một tiệc chung        |
+| `parties.bride`, `parties.groom`   | Ngày (YYYY-MM-DD), giờ lễ/tiệc, ngày âm lịch và địa điểm               |
+| `parties.*.venue`                  | Tên sảnh/nhà hàng, địa chỉ, URL Google Maps, URL bản đồ nhúng          |
+| `parties.*.music.src`              | Đường dẫn file MP3 cho từng lễ                                         |
+| `parties.*.images`                 | Ảnh hero, ảnh kết, chân dung, favicon                                  |
+| `parties.*.gift`                   | Tên ngân hàng, chủ tài khoản, số tài khoản, mã QR                      |
+| `text.vi` và `text.en`             | **Toàn bộ lời mời, câu chữ, thông báo, tiêu đề** của cả hai ngôn ngữ   |
 
 ### Ví dụ đổi tên và chữ viết tắt
 
@@ -170,16 +169,16 @@ node --check preferences.js
 node --check settings.js
 node --check script.js
 node --check link-tool.js
-node build-wedding.cjs
+npm run build
 ```
 
-Lưu ý: `node build-wedding.cjs` sinh ra các file build trong thư mục hiện tại, thường chạy trên runner GitHub Actions thay vì sửa source đã commit.
+`npm run build` tạo website trong `dist/`, giữ nguyên source. Chạy `npm run serve` để xem tại http://127.0.0.1:8000. Cần Node.js 22+, Python 3.12+ và `python3 -m pip install -r requirements.txt`. `build-wedding.cjs` là adapter nội bộ được gọi trên bản sao trong `dist/`, không chạy trực tiếp tại thư mục source.
 
 ### Kiểm tra tự động
 
 - **Unit/config:** `node --test tests/*.test.cjs`
-- **Browser:** `npm install --no-save --no-package-lock @playwright/test`, `npx playwright install --with-deps chromium webkit firefox`, chạy `python3 -m http.server 8000` và `npx playwright test tests/compatibility.spec.cjs`.
-- **CI:** workflow `Cross-device browser compatibility` chạy unit + các luồng chính trên Chromium, một nhóm nhỏ trên iPhone WebKit và thao tác vuốt Android khi sửa nguồn; bản 8 thiết bị có thể bật bằng `workflow_dispatch` với tùy chọn `extended=true`. Workflow `Deploy Wedding` phải thành công riêng để website được phát hành.
+- **Browser:** `npm ci`, `npx playwright install --with-deps chromium webkit`, `npm run build`, rồi `npm run test:browser`. Playwright tự mở HTTP server phục vụ `dist/`.
+- **CI:** workflow `Cross-device browser compatibility` chạy unit + các luồng chính trên Chromium, một nhóm nhỏ trên iPhone WebKit và thao tác vuốt Android khi sửa nguồn; bản 8 thiết bị có thể bật bằng `workflow_dispatch` với tùy chọn `extended=true`. Workflow `Deploy Wedding` gọi lại bộ kiểm tra này và chỉ phát hành khi job kiểm tra thành công. Pull request cũng chạy kiểm tra.
 
 Album chỉ tải ảnh ở gần vùng hiển thị; animation mở cổng dùng `transform/opacity`, giữ tính năng giảm chuyển động của thiết bị.
 
@@ -194,12 +193,11 @@ Album chỉ tải ảnh ở gần vùng hiển thị; animation mở cổng dùn
 
 **Nguyên tắc bảo trì:** Cập nhật thông tin khách hàng **chỉ trong `wedding-info.js`**. Sửa các file còn lại **chỉ khi muốn nâng cấp giao diện hoặc tính năng**.
 
-
 ### Kiểm thử và dependency
 
 Dự án dùng Playwright **1.64.1** cố định trong `package.json` và workflow CI (không dùng `latest`).
-Dành cho máy local: chạy `npm install`, `npx playwright install chromium webkit firefox`, sau đó `npm run test:unit` và `npm run test:browser` (cần mở HTTP server cổng 8000 tại thư mục repo trước khi chạy browser test).
-CI chạy 14 kịch bản chính trên desktop Chromium, 5 luồng thiết yếu trên iPhone WebKit và 1 test vuốt thật trên Android (20 lượt thay vì 122). Các test lịch sử trùng luồng đã được bỏ; unit test vẫn giữ vì chạy dưới một giây. Full 8-device matrix có thể chạy từ **Actions → Cross-device browser compatibility → Run workflow → extended**.
+Dành cho máy local: chạy `npm ci`, `python3 -m pip install -r requirements.txt`, `npx playwright install chromium webkit firefox`, sau đó `npm test`, `npm run build` và `npm run test:browser`.
+CI chạy toàn bộ kịch bản trên desktop Chromium, các test `@mobile` trên iPhone WebKit và test `@gesture` trên Android. Full 8-device matrix có thể chạy từ **Actions → Cross-device browser compatibility → Run workflow → extended**.
 
 ### Chọn ứng dụng lịch
 
@@ -215,12 +213,11 @@ Mặt trời có quầng sáng nhịp chậm, tia nghiêng nhẹ và sáng lên 
 
 ### Kiểm tra hồi quy và tiết kiệm tài nguyên
 
-Animation của cổng được tạm dừng khi tab ẩn và khôi phục khi quay lại. Nhạc có watchdog 10 giây cho cả lần phát đầu lẫn khi buffering lại: nếu không phát tiếp được, giao diện cho thử lại và giữ vị trí phát gần nhất. CI kiểm tra riêng cổng/nhạc trước bộ kiểm tra đầy đủ; chuyển cảnh được kiểm tra theo thời lượng chung và trạng thái hiển thị thực tế.
+Animation của cổng được tạm dừng khi tab ẩn và khôi phục khi quay lại. Nhạc có watchdog 15 giây cho cả lần phát đầu lẫn khi buffering lại: nếu không phát tiếp được, giao diện cho thử lại và giữ vị trí phát gần nhất. CI kiểm tra cổng/nhạc cùng các luồng tương tác; chuyển cảnh được kiểm tra theo thời lượng chung và trạng thái hiển thị thực tế.
 
 ### Secret garden entrance
 
 The approved gate artwork is layered in `fairy-gate.css`: two masked leaves rotate around the inner jambs while the floral arch stays fixed. The lock is a separate transparent image and uses a gentle light highlight instead of visible instruction text. The closed gate has no captions; three small butterflies drift around the flowers and stop after entry. As the leaves open, the camera approaches and the entire gate dissolves, revealing the wedding day, couple names and tagline. These introduction lines then fade, leaving only the invitation greeting and optional guest name before the hero appears. Change the artwork paths in `wedding-info.js` → `site.entrance`. Both WebP assets together are about 220 KB.
-
 
 ### Bố cục thích ứng
 
@@ -228,10 +225,27 @@ Tiêu đề và nhãn ngắn được đo theo khung chứa thực tế trong `t
 
 Lưới dùng kích thước nội dung để tự đổi số cột. Album nội suy kích thước, khoảng cách và độ sâu từ chiều rộng khung, đồng thời hủy tọa độ kéo cũ khi xoay máy. Nút nổi và bảng tùy chỉnh bám vùng `visualViewport`, có tính lại khoảng tránh tai thỏ sau khi đổi chiều. Các hằng số khoảng cách và cỡ tối thiểu là giới hạn thiết kế, không phải danh sách mẫu điện thoại.
 
-
 ### Quy tắc phát triển giao diện chung
 
 - `layout.js` là nguồn duy nhất đọc vùng hiển thị và safe-area, gom sự kiện vào một animation frame. Các nút và panel dùng `WeddingLayout.viewport()` / `subscribe()`; CSS dùng `--viewport-width/height/left/top` và có fallback khi JavaScript chưa tải.
 - `responsive.css` quản lý reflow, lưới, viewport và quy tắc chữ. CSS của từng thành phần chỉ quản lý hình thức riêng; không thêm nhánh theo tên điện thoại hoặc hệ điều hành.
 - Tiêu đề/câu ngắn có `data-text-fit="heading"` hoặc `"label"`; đoạn dài có `data-text-flow="prose"`. CSS xử lý bố cục trước, `typography.js` chỉ bổ sung phép đo khi cần giữ câu ngắn trong một dòng, có giới hạn cỡ dễ đọc.
 - Kiểm tra bằng tình huống khung hẹp/rộng, xoay chiều, giảm vùng nhìn thấy và tăng lại kích thước. Các trình duyệt chạy cùng bộ hành vi để phát hiện khác biệt; không duy trì giao diện riêng cho từng nền tảng.
+
+## Cấu trúc và quy trình bảo trì
+
+| Vị trí                            | Trách nhiệm                                              |
+| --------------------------------- | -------------------------------------------------------- |
+| `wedding-info.js`                 | Thông tin cặp đôi, tiệc, tài nguyên và VN/EN             |
+| `images/manifest.json`            | Cấu hình và danh sách album                              |
+| `index.html`, các file JS/CSS gốc | Các thành phần giao diện; giữ thứ tự script/CSS hiện tại |
+| `scripts/`                        | Build website, sinh ảnh chia sẻ, kiểm tra cú pháp        |
+| `tests/`                          | Unit/config/build và kiểm thử trình duyệt                |
+| `docs/`                           | Kiến trúc, kết quả review và giới hạn kiểm chứng         |
+| `dist/`                           | Website sinh tự động, không commit                       |
+
+Chạy `npm run format` trước khi commit; `npm run format:check` kiểm tra cùng phiên bản Prettier đã khóa trong lockfile. Python dùng `python3 -m black generate_gallery.py scripts/build-social-preview.py` (Black 25.9.0). EditorConfig thống nhất UTF-8, LF và thụt dòng.
+
+Nhạc MP3 chỉ được gán source khi khách mở thiệp/bật nhạc; `play()` vẫn chạy trực tiếp trong click để giữ user activation trên iOS. Album chỉ duyệt các thẻ gần camera cộng các thẻ vừa rời vùng nhìn ở mỗi frame. Không giảm kích thước, chất lượng hay số lượng ảnh; nguồn fullscreen giữ nguyên.
+
+Xem [review kỹ thuật](docs/source-review.md) để biết phạm vi, bằng chứng và các bước tiếp theo.

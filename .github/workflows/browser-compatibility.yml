@@ -1,56 +1,44 @@
 name: Cross-device browser compatibility
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "index.html"
-      - "link-tool.html"
-      - "*.js"
-      - "*.cjs"
-      - "package.json"
-      - "package-lock.json"
-      - "*.svg"
-      - "*.css"
-      - "generate_gallery.py"
-      - "requirements.txt"
-      - "images/manifest.json"
-      - "images/optimized/**"
-      - "tests/**"
-      - "playwright.config.cjs"
-      - ".github/workflows/browser-compatibility.yml"
-      - ".github/workflows/deploy.yml"
+  pull_request:
+  workflow_call:
   workflow_dispatch:
     inputs:
       extended:
-        description: "Run the full 8-device browser matrix instead of optimized smoke tests"
+        description: Run the full eight-device browser matrix
         type: boolean
         default: false
 
 permissions:
   contents: read
 
-# Keep only the newest test run for this branch; new pushes cancel older jobs.
-concurrency:
-  group: browser-compatibility-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   browser-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
-      - name: Checkout website
-        uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
-
-      - name: Install Playwright
-        run: npm ci --ignore-scripts --no-audit --no-fund
-
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          python3 -m pip install -r requirements.txt
+      - name: Check source and configuration
+        run: |
+          npm run format:check
+          npm test
+          python3 -m py_compile generate_gallery.py scripts/build-social-preview.py
+      - name: Build the actual public artifact
+        run: npm run build
+        env:
+          BUILD_SHA: ${{ github.sha }}
       - name: Install browser engines
         run: |
           if [ "$WEDDING_EXTENDED_TESTS" = "true" ]; then
@@ -59,62 +47,13 @@ jobs:
             npx playwright install --with-deps chromium webkit
           fi
         env:
-          WEDDING_EXTENDED_TESTS: ${{ github.event.inputs.extended || 'false' }}
-
-      - name: Verify data-only customization rules
-        run: |
-          node --test tests/*.test.cjs
-          python3 -m py_compile generate_gallery.py
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          source = Path("wedding-info.js").read_text(encoding="utf-8")
-          info, _ = json.JSONDecoder().raw_decode(source.split("window.WEDDING_INFO = ", 1)[1].lstrip())
-          assert all(key in info["parties"] for key in ("bride", "groom", "single"))
-          assert info["wedding"]["mode"] in ("single", "double")
-          print("Python image optimizer can read the single wedding info file.")
-          PY
-
-      - name: Validate single-file configuration and build templates
-        env:
-          BUILD_SHA: ${{ github.sha }}
-        run: |
-          node --check wedding-info.js
-          node --check i18n.js
-          node --check preferences.js
-          node --check settings.js
-          node --check script.js
-          node --check typography.js
-          node --check layout.js
-          node --check calendar.js
-          node --check gallery.js
-          node --check link-tool.js
-          node --check quick-nav.js
-          node build-wedding.cjs
-          ! grep -q '"fileId"' wedding-info.js
-          grep -q 'name="description"' index.html
-          ! grep -q '__WEDDING_TITLE__' index.html
-          ! grep -q '__WEDDING_IMAGE_MIME__' index.html
-
-      - name: Start local website
-        run: |
-          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/wedding-http.log 2>&1 &
-          for attempt in 1 2 3 4 5 6 7 8 9 10; do
-            if curl --fail --silent --output /dev/null http://127.0.0.1:8000/index.html; then
-              exit 0
-            fi
-            sleep 1
-          done
-          cat /tmp/wedding-http.log
-          exit 1
-
-      - name: Test main invitation features
+          WEDDING_EXTENDED_TESTS: ${{ inputs.extended || 'false' }}
+      - name: Test the built site
         run: npm run test:browser
         env:
           CI: "true"
-          WEDDING_EXTENDED_TESTS: ${{ github.event.inputs.extended || 'false' }}
-
-      - name: Upload browser test diagnostics
+          WEDDING_EXTENDED_TESTS: ${{ inputs.extended || 'false' }}
+      - name: Upload browser diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:

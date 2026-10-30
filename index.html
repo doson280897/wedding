@@ -1,490 +1,1497 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi" data-theme="dark">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="wedding-build" content="__BUILD_ID__">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta name="theme-color" id="themeColor" content="#0b161e">
-<meta name="color-scheme" content="dark">
-<link rel="icon" id="siteFavicon" href="favicon.svg?v=__BUILD_ID__" type="image/svg+xml">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="vi_VN">
-<meta property="og:site_name" content="__WEDDING_SITE_NAME__">
-<meta property="og:title" content="__WEDDING_TITLE__">
-<meta property="og:description" content="__WEDDING_DESCRIPTION__">
-<meta property="og:url" content="__WEDDING_URL__">
-<meta property="og:image" content="__WEDDING_IMAGE_URL__">
-<meta property="og:image:secure_url" content="__WEDDING_IMAGE_URL__">
-<meta property="og:image:type" content="__WEDDING_IMAGE_MIME__">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="__WEDDING_IMAGE_ALT__">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="__WEDDING_TITLE__">
-<meta name="twitter:description" content="__WEDDING_DESCRIPTION__">
-<meta name="twitter:image" content="__WEDDING_IMAGE_URL__">
-<meta name="description" content="__WEDDING_DESCRIPTION__">
-<title>__WEDDING_TITLE__</title>
-<script src="wedding-info.js?v=__BUILD_ID__"></script>
-<script>
-(() => {
-  // Keep shared guest links clean, including links copied from an older build.
-  const url = new URL(location.href);
-  if (url.searchParams.has("_v")) {
-    url.searchParams.delete("_v");
-    try { history.replaceState(history.state, "", url.href); } catch (_) {}
-  }
-  const current = document.querySelector('meta[name="wedding-build"]')?.content || "";
-  fetch("./version.json?t=" + Date.now(), { cache: "no-store" })
-    .then(response => response.ok ? response.json() : null)
-    .then(data => {
-      const latest = data?.build || "";
-      if (!latest || latest === current || latest === "__BUILD_ID__") return;
-      // A reload guard belongs to this history entry, not the invitation URL.
-      if (history.state?.weddingRefreshBuild === latest) return;
-      try {
-        history.replaceState({ ...(history.state || {}), weddingRefreshBuild: latest }, "");
-        location.reload();
-      } catch (_) {
-        // If history is unavailable, skip the automatic reload to avoid a loop.
-      }
-    })
-    .catch(() => {});
-})();
-</script>
-<script>
-(() => {
-  const params = new URLSearchParams(location.search);
-  const settings = window.WEDDING_INFO;
-  const singleMode = settings?.wedding?.mode === "single";
-  const party = singleMode ? "single" : params.get("party");
-  document.documentElement.dataset.weddingMode = singleMode ? "single" : "double";
-  const favicon = document.getElementById("siteFavicon");
-  if (party === "bride" || party === "groom" || party === "single") {
-    if (favicon && settings?.parties?.[party]?.images?.favicon) favicon.href = settings.parties[party].images.favicon + "?v=__BUILD_ID__";
-    document.documentElement.dataset.party = party;
-    if (params.get("tool") !== "links") {
-      document.documentElement.classList.add("wax-pending");
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <meta name="wedding-build" content="__BUILD_ID__" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="theme-color" id="themeColor" content="#0b161e" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" id="siteFavicon" href="favicon.svg?v=__BUILD_ID__" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="__WEDDING_SITE_NAME__" />
+    <meta property="og:title" content="__WEDDING_TITLE__" />
+    <meta property="og:description" content="__WEDDING_DESCRIPTION__" />
+    <meta property="og:url" content="__WEDDING_URL__" />
+    <meta property="og:image" content="__WEDDING_IMAGE_URL__" />
+    <meta property="og:image:secure_url" content="__WEDDING_IMAGE_URL__" />
+    <meta property="og:image:type" content="__WEDDING_IMAGE_MIME__" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="__WEDDING_IMAGE_ALT__" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="__WEDDING_TITLE__" />
+    <meta name="twitter:description" content="__WEDDING_DESCRIPTION__" />
+    <meta name="twitter:image" content="__WEDDING_IMAGE_URL__" />
+    <meta name="description" content="__WEDDING_DESCRIPTION__" />
+    <title>__WEDDING_TITLE__</title>
+    <script src="wedding-info.js?v=__BUILD_ID__"></script>
+    <script>
+      (() => {
+        // Keep shared guest links clean, including links copied from an older build.
+        const url = new URL(location.href);
+        if (url.searchParams.has("_v")) {
+          url.searchParams.delete("_v");
+          try {
+            history.replaceState(history.state, "", url.href);
+          } catch (_) {}
+        }
+        const current = document.querySelector('meta[name="wedding-build"]')?.content || "";
+        fetch("./version.json?t=" + Date.now(), { cache: "no-store" })
+          .then((response) => (response.ok ? response.json() : null))
+          .then((data) => {
+            const latest = data?.build || "";
+            if (!latest || latest === current || latest === "__BUILD_ID__") return;
+            // A reload guard belongs to this history entry, not the invitation URL.
+            if (history.state?.weddingRefreshBuild === latest) return;
+            try {
+              history.replaceState({ ...(history.state || {}), weddingRefreshBuild: latest }, "");
+              location.reload();
+            } catch (_) {
+              // If history is unavailable, skip the automatic reload to avoid a loop.
+            }
+          })
+          .catch(() => {});
+      })();
+    </script>
+    <script>
+      (() => {
+        const params = new URLSearchParams(location.search);
+        const settings = window.WEDDING_INFO;
+        const singleMode = settings?.wedding?.mode === "single";
+        const party = singleMode ? "single" : params.get("party");
+        document.documentElement.dataset.weddingMode = singleMode ? "single" : "double";
+        const favicon = document.getElementById("siteFavicon");
+        if (party === "bride" || party === "groom" || party === "single") {
+          if (favicon && settings?.parties?.[party]?.images?.favicon)
+            favicon.href = settings.parties[party].images.favicon + "?v=__BUILD_ID__";
+          document.documentElement.dataset.party = party;
+          if (params.get("tool") !== "links") {
+            document.documentElement.classList.add("wax-pending");
+          }
 
-    if (params.get("tool") !== "links" && settings?.site?.entrance) {
-      for (const source of [settings.site.entrance.image, settings.site.entrance.lock]) {
-        const preload = document.createElement("link");
-        preload.rel = "preload"; preload.as = "image"; preload.type = "image/webp";
-        preload.href = source + "?v=__BUILD_ID__";
-        document.head.appendChild(preload);
-      }
-    }
+          if (params.get("tool") !== "links" && settings?.site?.entrance) {
+            for (const source of [settings.site.entrance.image, settings.site.entrance.lock]) {
+              const preload = document.createElement("link");
+              preload.rel = "preload";
+              preload.as = "image";
+              preload.type = "image/webp";
+              preload.href = source + "?v=__BUILD_ID__";
+              document.head.appendChild(preload);
+            }
+          }
 
-    const heroPreload = document.createElement("link");
-    heroPreload.rel = "preload";
-    heroPreload.as = "image";
-    heroPreload.type = "image/webp";
-    heroPreload.fetchPriority = "high";
-    heroPreload.href = (settings?.parties?.[party]?.images?.hero || "") + "?v=__BUILD_ID__";
-    document.head.appendChild(heroPreload);
-  } else {
-    document.documentElement.classList.add("party-pending");
-  }
-})();
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="preferences.js?v=__BUILD_ID__"></script>
-<link rel="stylesheet" href="style.css?v=__BUILD_ID__">
-<link rel="stylesheet" href="quick-nav.css?v=__BUILD_ID__">
-<link rel="stylesheet" href="link-tool.css?v=__BUILD_ID__">
-<link rel="stylesheet" href="settings.css?v=__BUILD_ID__">
-<link rel="stylesheet" href="calendar.css?v=__BUILD_ID__">
-<link rel="stylesheet" href="fairy-gate.css?v=__BUILD_ID__">
-<link rel="stylesheet" href="responsive.css?v=__BUILD_ID__">
-</head>
-<body>
-<div class="reading-progress" id="progress"></div>
-<div class="language-switch settings-hub" id="settingsHub" role="group" aria-label="Tùy chỉnh thiệp" data-i18n-aria="settings.title">
-  <button type="button" class="settings-trigger" id="settingsTrigger" aria-controls="settingsPanel" aria-expanded="false" data-i18n-aria="settings.open" aria-label="Tùy chỉnh hiển thị">
-    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"/><circle cx="9" cy="7" r="2" fill="currentColor" stroke="none"/><circle cx="15" cy="17" r="2" fill="currentColor" stroke="none"/></svg>
-    <span class="settings-trigger-label" data-i18n="settings.short">TÙY CHỈNH</span>
-  </button>
-  <div class="settings-panel" id="settingsPanel" role="group" aria-label="Tùy chọn hiển thị" data-i18n-aria="settings.title" hidden>
-    <div class="settings-panel-heading">
-      <span id="controlPanelTitle" data-i18n="settings.title">TÙY CHỈNH THIỆP</span>
-      <button type="button" class="settings-close" id="settingsClose" data-i18n-aria="settings.close" aria-label="Đóng bảng điều khiển">×</button>
-    </div>
-    <div class="control-tabs" id="controlTabs" role="tablist" aria-label="Điều hướng thiệp" hidden>
-      <button type="button" class="control-tab" id="controlTabMenu" role="tab" aria-controls="wqPanel" aria-selected="false" data-i18n="menu.toggle">MỤC LỤC</button>
-      <button type="button" class="control-tab" id="controlTabSettings" role="tab" aria-controls="settingsTabContent" aria-selected="true" data-i18n="settings.short">TÙY CHỈNH</button>
-    </div>
-    <div id="settingsTabContent" role="tabpanel" aria-labelledby="controlTabSettings">
-    <div class="settings-row">
-      <span class="settings-row-label" data-i18n="settings.language">Ngôn ngữ</span>
-      <div class="settings-options" role="group" aria-label="Chọn ngôn ngữ" data-i18n-aria="language.label">
-        <button type="button" class="language-option is-active" data-lang="vi" aria-pressed="true">VN</button>
-        <button type="button" class="language-option" data-lang="en" aria-pressed="false">EN</button>
-      </div>
-    </div>
-    <div class="settings-row settings-music-row">
-      <span class="settings-row-label" data-i18n="settings.music">Âm nhạc</span>
-      <button class="music-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="Bật nhạc nền dịu nhẹ" title="Bật/tắt nhạc nền"><span class="music-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5.7L20 3v12.3"/><ellipse cx="6" cy="18" rx="3" ry="2.1" transform="rotate(-18 6 18)"/><ellipse cx="17" cy="15.3" rx="3" ry="2.1" transform="rotate(-18 17 15.3)"/><path d="M9 9.2 20 6.5"/></svg></span><span class="music-label">NHẠC: TẮT</span></button>
-    </div>
-    </div>
-    <nav class="wq-panel" id="wqPanel" role="tabpanel" aria-labelledby="controlTabMenu" aria-hidden="true" inert hidden>
-  <div class="wq-panel-top"><span class="wq-kicker" data-i18n="menu.kicker">THIỆP MỜI LỄ THÀNH HÔN</span></div>
-  <div class="wq-heading" data-i18n-html="menu.heading" data-text-fit="label">Khám phá <em>thiệp cưới</em></div>
-  <p class="wq-description" data-i18n="menu.description">Chọn phần bạn muốn xem</p>
-  <div class="wq-menu-group">
-    <div class="wq-group-label" data-i18n="menu.groupInvitation">THIỆP</div>
-    <div class="wq-links">
-      <a href="#home" class="wq-link"><span class="wq-no">01</span><span data-i18n="menu.home">Trang đầu thiệp</span><span class="wq-arrow">↗</span></a>
-      <a href="#couple" class="wq-link"><span class="wq-no">02</span><span id="menuCoupleLabel" data-i18n="menu.couple">Cô dâu &amp; chú rể</span><span class="wq-arrow">↗</span></a>
-      <a href="#family" class="wq-link"><span class="wq-no">03</span><span data-i18n="menu.family">Thông tin hai gia đình</span><span class="wq-arrow">↗</span></a>
-      <a href="#events" class="wq-link"><span class="wq-no">04</span><span data-i18n="menu.events">Lịch lễ &amp; tiệc cưới</span><span class="wq-arrow">↗</span></a>
-      <a href="#album" class="wq-link"><span class="wq-no">05</span><span data-i18n="menu.album">Ảnh cưới</span><span class="wq-arrow">↗</span></a>
-    </div>
-  </div>
-  <div class="wq-menu-group wq-menu-group-popup">
-    <div class="wq-group-label" data-i18n="menu.groupPopup">POPUP</div>
-    <div class="wq-links">
-      <a href="#locations" class="wq-link"><span class="wq-no">06</span><span data-i18n="menu.map">Bản đồ chỉ đường</span><span class="wq-arrow">↗</span></a>
-      <a href="#wedding-gift" class="wq-link"><span class="wq-no">07</span><span data-i18n="menu.gift">Mừng cưới</span><span class="wq-arrow">↗</span></a>
-    </div>
-  </div>
-  <div class="wq-footnote" id="menuNames" data-party-name-pair="menu"></div>
-</nav>
-  </div>
-</div>
-<div class="party-selector" id="partySelector" role="dialog" aria-modal="true" aria-labelledby="partySelectorTitle" aria-describedby="partySelectorLead">
-  <div class="party-selector-backdrop" aria-hidden="true"></div>
-  <div class="party-selector-card">
-    <p class="party-selector-kicker" data-i18n="party.eyebrow">CHỌN TIỆC CƯỚI</p>
-    <h2 id="partySelectorTitle" data-i18n="party.title" data-text-fit="heading">Bạn tham dự tiệc nào?</h2>
-    <p id="partySelectorLead" data-i18n="party.lead">Chọn đúng tiệc để xem thời gian và địa điểm dành cho bạn.</p>
-    <div class="party-selector-options">
-      <button type="button" class="party-selector-option" data-party-select="bride">
-        <span class="party-selector-role" data-i18n="party.brideRole">NHÀ GÁI · LỄ VU QUY</span>
-        <strong data-i18n="party.brideDate"></strong>
-        <small data-i18n="party.bridePlace"></small>
-        <span class="party-selector-action" data-i18n="party.choose">XEM THIỆP →</span>
+          const heroPreload = document.createElement("link");
+          heroPreload.rel = "preload";
+          heroPreload.as = "image";
+          heroPreload.type = "image/webp";
+          heroPreload.fetchPriority = "high";
+          heroPreload.href = (settings?.parties?.[party]?.images?.hero || "") + "?v=__BUILD_ID__";
+          document.head.appendChild(heroPreload);
+        } else {
+          document.documentElement.classList.add("party-pending");
+        }
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="preferences.js?v=__BUILD_ID__"></script>
+    <link rel="stylesheet" href="style.css?v=__BUILD_ID__" />
+    <link rel="stylesheet" href="quick-nav.css?v=__BUILD_ID__" />
+    <link rel="stylesheet" href="link-tool.css?v=__BUILD_ID__" />
+    <link rel="stylesheet" href="settings.css?v=__BUILD_ID__" />
+    <link rel="stylesheet" href="calendar.css?v=__BUILD_ID__" />
+    <link rel="stylesheet" href="fairy-gate.css?v=__BUILD_ID__" />
+    <link rel="stylesheet" href="responsive.css?v=__BUILD_ID__" />
+  </head>
+  <body>
+    <div class="reading-progress" id="progress"></div>
+    <div
+      class="language-switch settings-hub"
+      id="settingsHub"
+      role="group"
+      aria-label="Tùy chỉnh thiệp"
+      data-i18n-aria="settings.title"
+    >
+      <button
+        type="button"
+        class="settings-trigger"
+        id="settingsTrigger"
+        aria-controls="settingsPanel"
+        aria-expanded="false"
+        data-i18n-aria="settings.open"
+        aria-label="Tùy chỉnh hiển thị"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 7h16M4 17h16M9 4v6M15 14v6" />
+          <circle cx="9" cy="7" r="2" fill="currentColor" stroke="none" />
+          <circle cx="15" cy="17" r="2" fill="currentColor" stroke="none" />
+        </svg>
+        <span class="settings-trigger-label" data-i18n="settings.short">TÙY CHỈNH</span>
       </button>
-      <button type="button" class="party-selector-option" data-party-select="groom">
-        <span class="party-selector-role" data-i18n="party.groomRole">NHÀ TRAI · LỄ TÂN HÔN</span>
-        <strong data-i18n="party.groomDate"></strong>
-        <small data-i18n="party.groomPlace"></small>
-        <span class="party-selector-action" data-i18n="party.choose">XEM THIỆP →</span>
-      </button>
-    </div>
-    <a href="?tool=links" class="party-admin-link" data-i18n="party.adminTool" data-i18n-aria="party.adminToolAria">✦ TẠO LINK THIỆP CÁ NHÂN HÓA</a>
-  </div>
-</div>
-<section class="link-tool-screen" id="linkToolScreen" role="dialog" aria-modal="true" aria-labelledby="linkToolTitle" aria-hidden="true" hidden>
-  <div class="link-tool-card">
-    <button type="button" class="link-tool-back" id="linkToolBack" data-i18n="link.back" data-i18n-aria="link.backAria">← Quay lại chọn tiệc</button>
-    <p class="link-tool-eyebrow" data-i18n="link.brand"></p>
-    <h2 id="linkToolTitle" data-i18n="link.title" data-text-fit="heading">Tạo thiệp mời riêng</h2>
-    <p class="link-tool-description" data-i18n="link.description">Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho người nhận.</p>
-    <form id="linkToolForm">
-      <label for="linkToolGuest" data-i18n="link.guest">Tên khách mời</label>
-      <input id="linkToolGuest" name="guest" type="text" maxlength="100" autocomplete="off" data-i18n-placeholder="link.placeholder" placeholder="Ví dụ: Anh Minh và chị Lan" required>
-      <div class="link-tool-party-field" id="linkToolPartyField">
-      <label for="linkToolParty" data-i18n="link.party">Khách tham dự</label>
-      <select id="linkToolParty" name="party" required>
-        <option value="bride" data-i18n="link.bride">Nhà gái · Lễ Vu Quy ·  · Đắk Lắk</option>
-        <option value="groom" data-i18n="link.groom">Nhà trai · Lễ Tân Hôn ·  · Đồng Nai</option>
-        <option value="single" data-i18n="link.single">Một tiệc cưới</option>
-      </select>
-      </div>
-      <div class="link-tool-actions"><button type="submit" class="link-tool-action" data-i18n="link.create">Tạo link thiệp</button></div>
-    </form>
-    <div class="link-tool-result" id="linkToolResult" hidden aria-live="polite">
-      <small data-i18n="link.result">Link dành cho khách</small>
-      <div id="linkToolGenerated"></div>
-      <div class="link-tool-actions">
-        <button type="button" class="link-tool-action" id="linkToolCopy" data-i18n="link.copy">Sao chép link</button>
-        <button type="button" class="link-tool-action secondary" id="linkToolShare" data-i18n="link.share">Chia sẻ</button>
-        <a class="link-tool-action secondary" id="linkToolPreview" href="#" target="_blank" rel="noopener noreferrer" data-i18n="link.preview">Xem thử thiệp</a>
-      </div>
-      <p class="link-tool-feedback" id="linkToolFeedback" role="status"></p>
-    </div>
-    <p class="link-tool-note" data-i18n="link.note">Công cụ tạo link ngay trên thiết bị, không lưu danh sách khách. Tên khách xuất hiện trong URL, nên chỉ chia sẻ với đúng người nhận.</p>
-  </div>
-</section>
-<section class="moonlight-gate" id="moonlightGate" data-i18n-aria="gate.label" aria-label="Cổng mở thiệp cưới">
-  <div class="moonlight-gate__scene">
-  <div class="moonlight-gate__backdrop" aria-hidden="true">
-    <span class="moonlight-gate__stars"></span>
-    <span class="moonlight-gate__land"></span>
-  </div>
-  <div class="moonlight-gate__magic" id="gateMagic" aria-hidden="true">
-    <span class="moonlight-gate__dust"></span>
-    <canvas class="moonlight-gate__meteor-canvas" aria-hidden="true"></canvas>
-    <span class="moonlight-gate__butterfly moonlight-gate__butterfly--one">
-      <svg viewBox="0 0 64 52" focusable="false" aria-hidden="true">
-        <path class="moonlight-gate__wing moonlight-gate__wing--left" d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"/>
-        <path class="moonlight-gate__wing moonlight-gate__wing--right" d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"/>
-        <path class="moonlight-gate__butterfly-body" d="M32 21v16m0-16-4-5m4 5 4-5"/>
-      </svg>
-    </span>
-    <span class="moonlight-gate__butterfly moonlight-gate__butterfly--two">
-      <svg viewBox="0 0 64 52" focusable="false" aria-hidden="true">
-        <path class="moonlight-gate__wing moonlight-gate__wing--left" d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"/>
-        <path class="moonlight-gate__wing moonlight-gate__wing--right" d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"/>
-        <path class="moonlight-gate__butterfly-body" d="M32 21v16m0-16-4-5m4 5 4-5"/>
-      </svg>
-    </span>
-    <span class="moonlight-gate__butterfly moonlight-gate__butterfly--three">
-      <svg viewBox="0 0 64 52" focusable="false" aria-hidden="true">
-        <path class="moonlight-gate__wing moonlight-gate__wing--left" d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"/>
-        <path class="moonlight-gate__wing moonlight-gate__wing--right" d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"/>
-        <path class="moonlight-gate__butterfly-body" d="M32 21v16m0-16-4-5m4 5 4-5"/>
-      </svg>
-    </span>
-  </div>
-  <div class="moonlight-gate__reveal">
-    <div class="moonlight-gate__reveal-heading">
-      <span class="moonlight-gate__reveal-overline" data-i18n="gate.overline">NGÀY CHUNG ĐÔI</span>
-      <span class="moonlight-gate__reveal-names" data-party-name-pair="gate"></span>
-      <span class="moonlight-gate__reveal-rule"></span>
-      <span class="moonlight-gate__reveal-subtitle" data-i18n="gate.subtitle" data-text-fit="label">CHUNG ĐÔI · TRỌN ĐỜI</span>
-    </div>
-    <div class="moonlight-gate__greeting" id="gateGreeting">
-      <span class="moonlight-gate__recipient-label" id="gateGuestLabel" data-i18n="guest.recipientLabel" data-text-fit="label"></span>
-      <strong class="moonlight-gate__recipient-name" id="gateGuestName" hidden></strong>
-    </div>
-  </div>
-    <div class="fairy-artboard">
-      <span class="moonlight-gate__portal" aria-hidden="true"></span>
-      <div class="moonlight-gate__door moonlight-gate__door--left" aria-hidden="true">
-        <div class="moonlight-gate__door-face">
-          <img class="fairy-panel" data-info-src="site.entrance.image" alt="" decoding="async">
-          <span class="moonlight-gate__orbit moonlight-gate__orbit--sun">
-          </span>
+      <div
+        class="settings-panel"
+        id="settingsPanel"
+        role="group"
+        aria-label="Tùy chọn hiển thị"
+        data-i18n-aria="settings.title"
+        hidden
+      >
+        <div class="settings-panel-heading">
+          <span id="controlPanelTitle" data-i18n="settings.title">TÙY CHỈNH THIỆP</span>
+          <button
+            type="button"
+            class="settings-close"
+            id="settingsClose"
+            data-i18n-aria="settings.close"
+            aria-label="Đóng bảng điều khiển"
+          >
+            ×
+          </button>
         </div>
-      </div>
-      <div class="moonlight-gate__door moonlight-gate__door--right" aria-hidden="true">
-        <div class="moonlight-gate__door-face">
-          <img class="fairy-panel" data-info-src="site.entrance.image" alt="" decoding="async">
-          <span class="moonlight-gate__orbit moonlight-gate__orbit--moon">
-            <span class="fairy-star fairy-star--one"></span><span class="fairy-star fairy-star--two"></span>
-            <span class="fairy-star fairy-star--three"></span><span class="fairy-star fairy-star--four"></span>
-          </span>
+        <div
+          class="control-tabs"
+          id="controlTabs"
+          role="tablist"
+          aria-label="Điều hướng thiệp"
+          hidden
+        >
+          <button
+            type="button"
+            class="control-tab"
+            id="controlTabMenu"
+            role="tab"
+            aria-controls="wqPanel"
+            aria-selected="false"
+            data-i18n="menu.toggle"
+          >
+            MỤC LỤC
+          </button>
+          <button
+            type="button"
+            class="control-tab"
+            id="controlTabSettings"
+            role="tab"
+            aria-controls="settingsTabContent"
+            aria-selected="true"
+            data-i18n="settings.short"
+          >
+            TÙY CHỈNH
+          </button>
         </div>
-      </div>
-      <img class="fairy-frame" data-info-src="site.entrance.image" alt="" aria-hidden="true" decoding="async">
-      <div class="fairy-butterflies" aria-hidden="true"><span class="fairy-butterfly fairy-butterfly--one"><svg viewBox="0 0 64 52" focusable="false" aria-hidden="true"><path class="fairy-butterfly__wing fairy-butterfly__wing--left" d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"/><path class="fairy-butterfly__wing fairy-butterfly__wing--right" d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"/><path class="fairy-butterfly__body" d="M32 21v16m0-16-4-5m4 5 4-5"/></svg></span><span class="fairy-butterfly fairy-butterfly--two"><svg viewBox="0 0 64 52" focusable="false" aria-hidden="true"><path class="fairy-butterfly__wing fairy-butterfly__wing--left" d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"/><path class="fairy-butterfly__wing fairy-butterfly__wing--right" d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"/><path class="fairy-butterfly__body" d="M32 21v16m0-16-4-5m4 5 4-5"/></svg></span><span class="fairy-butterfly fairy-butterfly--three"><svg viewBox="0 0 64 52" focusable="false" aria-hidden="true"><path class="fairy-butterfly__wing fairy-butterfly__wing--left" d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"/><path class="fairy-butterfly__wing fairy-butterfly__wing--right" d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"/><path class="fairy-butterfly__body" d="M32 21v16m0-16-4-5m4 5 4-5"/></svg></span></div>
-      <span class="moonlight-gate__seam" aria-hidden="true"></span>
-      <button type="button" class="wax-open-button" id="waxOpenButton" data-i18n-aria="gate.openAria" aria-label="Chạm ổ khóa để mở cổng">
-        <span class="wax-monogram" id="waxMonogram" aria-hidden="true"><img class="fairy-lock" data-info-src="site.entrance.lock" alt="" decoding="async"></span>
-      </button>
-    </div>
-  </div>
-</section>
-<header class="hero" id="home">
-  <div class="hero-media"><img class="hero-photo" alt="" width="1280" height="1920" decoding="async" fetchpriority="high"><div class="hero-shade"></div></div>
-  <div class="hero-arrival-light" aria-hidden="true"></div>
-  <div class="topbar"><a class="monogram" id="heroMonogram" href="#home"></a></div>
-  <div class="hero-layout">
-    <div class="hero-spacer"></div>
-    <div class="hero-copy">
-      <div class="overline" id="heroCeremonyLabel" data-i18n="hero.overline" data-text-fit="label">— LỄ THÀNH HÔN —</div>
-      <h1 id="heroNames" data-party-name-pair="hero"></h1>
-      <div class="fine-flourish">✧</div>
-      <p class="handwriting" data-i18n="hero.handwriting" data-text-flow="prose">Cùng nhau viết tiếp những ngày hạnh phúc...</p>
-      <p class="invitation-promise" id="invitationPromise" data-text-flow="prose"></p>
-      <div class="hero-date"><span data-party-date="bride"></span><span class="party-date-separator">—</span><span data-party-date="groom"></span><span data-party-date="single"></span></div>
-      <div class="hero-count-title" id="countdownTitle" data-text-fit="label">ĐẾM NGƯỢC ĐẾN LỄ VU QUY</div>
-      <div class="countdown" id="timer" aria-label="Đếm ngược đến lễ Vu Quy">
-        <div><strong id="days">00</strong><small>NGÀY</small></div>
-        <div><strong id="hours">00</strong><small>GIỜ</small></div>
-        <div><strong id="minutes">00</strong><small>PHÚT</small></div>
-        <div><strong id="seconds">00</strong><small>GIÂY</small></div>
-      </div>
-    </div>
-  </div>
-
-  <a class="scroll-cue" href="#couple" data-i18n="hero.scroll">CUỘN ĐỂ KHÁM PHÁ ↓</a>
-</header>
-  <nav class="invitation-actions" aria-label="Thông tin thiệp" data-i18n-aria="invitation.details"><a href="#events" data-i18n="invitation.details">Thời gian &amp; địa điểm</a><a href="#locations" data-guest-action data-i18n="invitation.directions">Chỉ đường</a></nav>
-<main>
-<section class="couple-section" id="couple">
-  <p class="overline gold center" data-i18n="couple.eyebrow" data-text-fit="label">HAI TRÁI TIM · MỘT HÀNH TRÌNH</p>
-  <h2 class="section-title" id="coupleHeading" data-i18n-html="couple.heading" data-text-fit="heading">Cô dâu <em>&amp;</em> Chú rể</h2>
-  <p class="section-lead" data-i18n="couple.lead" data-text-flow="prose">Hai con người, một hành trình, một lời hẹn ước.</p>
-  <div class="couple-editorial">
-    <article class="person person-groom reveal">
-      <div class="portrait-set">
-        <div class="portrait large groom-main"><img data-info-src="parties.groom.images.portraitMain" alt="" data-i18n-alt="couple.son1Alt" loading="lazy"></div>
-        <div class="portrait small groom-secondary"><img data-info-src="parties.groom.images.portraitSecondary" alt="" data-i18n-alt="couple.son2Alt" loading="lazy"></div>
-      </div>
-      <div class="person-copy"><span class="script" data-i18n="couple.groomRole">Chú rể</span><h3 data-info="couple.groom.fullUpper" data-text-fit="heading"></h3><p data-i18n="couple.groomQuote" data-text-flow="prose">Cảm ơn em đã xuất hiện, để những ngày bình thường cũng trở nên đặc biệt.</p><div class="ornament">♡</div></div>
-    </article>
-    <div class="couple-divider"><span>✧</span></div>
-    <article class="person person-bride reveal">
-      <div class="person-copy"><span class="script" data-i18n="couple.brideRole">Cô dâu</span><h3 data-info="couple.bride.fullUpper" data-text-fit="heading"></h3><p data-i18n="couple.brideQuote" data-text-flow="prose">Cảm ơn anh đã luôn ở đây, cùng em đi qua những khoảnh khắc đẹp nhất của cuộc đời.</p><div class="ornament">♡</div></div>
-      <div class="portrait-set">
-        <div class="portrait large bride-main"><img data-info-src="parties.bride.images.portraitMain" alt="" data-i18n-alt="couple.nga1Alt" loading="lazy"></div>
-        <div class="portrait small bride-secondary"><img data-info-src="parties.bride.images.portraitSecondary" alt="" data-i18n-alt="couple.nga2Alt" loading="lazy"></div>
-      </div>
-    </article>
-  </div>
-  <div class="promise-story" aria-labelledby="promiseTitle"><div class="section-head"><p class="overline gold" data-i18n="story.eyebrow" data-text-fit="label"></p><h2 class="section-title" id="promiseTitle" data-i18n-html="story.title" data-text-fit="heading"></h2></div><div class="promise-grid"><article class="promise-card reveal"><div class="promise-photo"><img data-info-src="story.images.together.src" data-info-responsive="story.images.together" data-info-alt="story.images.together.alt" alt="" loading="lazy" decoding="async"></div><div class="promise-copy"><span class="promise-number" aria-hidden="true">01</span><h3 data-i18n="story.1.title" data-text-fit="heading"></h3><p data-i18n="story.1.text" data-text-flow="prose"></p></div></article><article class="promise-card reveal"><div class="promise-photo"><img data-info-src="story.images.love.src" data-info-responsive="story.images.love" data-info-alt="story.images.love.alt" alt="" loading="lazy" decoding="async"></div><div class="promise-copy"><span class="promise-number" aria-hidden="true">02</span><h3 data-i18n="story.2.title" data-text-fit="heading"></h3><p data-i18n="story.2.text" data-text-flow="prose"></p></div></article><article class="promise-card reveal"><div class="promise-photo"><img data-info-src="story.images.home.src" data-info-responsive="story.images.home" data-info-alt="story.images.home.alt" alt="" loading="lazy" decoding="async"></div><div class="promise-copy"><span class="promise-number" aria-hidden="true">03</span><h3 data-i18n="story.3.title" data-text-fit="heading"></h3><p data-i18n="story.3.text" data-text-flow="prose"></p></div></article></div></div>
-</section>
-<section class="family-section" id="family">
-  <div class="section-head"><p class="overline gold" data-i18n="family.eyebrow" data-text-fit="label">CÙNG HAI GIA ĐÌNH</p><h2 class="section-title" data-i18n="family.title" data-text-fit="heading">Trân trọng báo tin vui</h2><p class="section-lead" data-i18n="family.lead" data-text-flow="prose">Sự hiện diện của bạn là niềm hạnh phúc của hai gia đình</p></div>
-  <div class="family-grid">
-    <div class="family-card family-groom reveal"><span data-i18n="family.groomSide">NHÀ TRAI</span><h3 data-i18n="family.groomTitle" data-text-fit="heading">Gia đình chú rể</h3><p data-i18n-html="family.groomFather">Ông <strong></strong></p><p data-i18n-html="family.groomMother">Bà <strong></strong></p><p class="family-address" data-i18n="family.groomAddress" data-text-flow="prose"></p><div class="mini-line"></div><small data-i18n="family.groomRole">TRƯỞNG NAM</small><h4 data-info="couple.groom.full" data-text-fit="heading"></h4></div>
-    <div class="family-card family-bride reveal"><span data-i18n="family.brideSide">NHÀ GÁI</span><h3 data-i18n="family.brideTitle" data-text-fit="heading">Gia đình cô dâu</h3><p data-i18n-html="family.brideFather">Ông <strong></strong></p><p data-i18n-html="family.brideMother">Bà <strong></strong></p><p class="family-address" data-i18n="family.brideAddress" data-text-flow="prose"></p><div class="mini-line"></div><small data-i18n="family.brideRole">ÚT NỮ</small><h4 data-info="couple.bride.full" data-text-fit="heading"></h4></div>
-  </div>
-</section>
-<section class="events-section" id="events">
-  <div class="section-head"><p class="overline gold" data-i18n="events.eyebrow" data-text-fit="label">LƯU NGÀY HẠNH PHÚC</p><h2 class="section-title" data-i18n="events.title" data-text-fit="heading">Thông tin lễ cưới</h2><p class="section-lead" data-i18n="events.lead" data-text-flow="prose">Hân hạnh đón tiếp bạn trong ngày vui trọng đại</p></div>
-  <div class="event-grid">
-    <article class="event-card reveal" data-party-scope="bride"><div class="event-label" data-i18n="events.brideLabel" data-text-fit="label">LỄ VU QUY · NHÀ GÁI</div><div class="date-block"><div><small data-party-weekday="bride"></small><strong data-party-event-date="bride"></strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.brideCeremony"><span></span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.brideReception"><span></span> Tiệc mừng tại </div><p class="event-address" data-i18n="events.brideAddress" data-text-flow="prose">Địa điểm tiệc: </p><p class="lunar" data-i18n="events.brideLunar" data-text-flow="prose"></p><div class="event-actions"><a href="#map-bride" class="map-button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-i18n="events.map" data-text-fit="label">XEM ĐỊA ĐIỂM</span></a><button class="calendar-button" type="button" data-calendar="bride" aria-label="Lưu lễ Vu Quy vào lịch" data-i18n-aria="events.brideCalendarAria"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18M12 14v4M10 16h4"/></svg><span data-i18n="events.calendar" data-text-fit="label">LƯU VÀO LỊCH</span></button></div></article>
-    <article class="event-card reveal" data-party-scope="groom"><div class="event-label" data-i18n="events.groomLabel" data-text-fit="label">LỄ TÂN HÔN · NHÀ TRAI</div><div class="date-block"><div><small data-party-weekday="groom"></small><strong data-party-event-date="groom"></strong></div></div><div class="event-rule"></div><div class="event-detail" data-i18n-html="events.groomCeremony"><span></span> Hôn lễ tại tư gia</div><div class="event-detail" data-i18n-html="events.groomReception"><span></span> Tiệc mừng tại </div><p class="event-address" data-i18n="events.groomAddress" data-text-flow="prose"></p><p class="lunar" data-i18n="events.groomLunar" data-text-flow="prose"></p><div class="event-actions"><a href="#map-groom" class="map-button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-i18n="events.map" data-text-fit="label">XEM ĐỊA ĐIỂM</span></a><button class="calendar-button" type="button" data-calendar="groom" aria-label="Lưu lễ Tân Hôn vào lịch" data-i18n-aria="events.groomCalendarAria"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18M12 14v4M10 16h4"/></svg><span data-i18n="events.calendar" data-text-fit="label">LƯU VÀO LỊCH</span></button></div></article>
-    <article class="event-card reveal" data-party-scope="single">
-      <div class="event-label" data-i18n="events.singleLabel" data-text-fit="label">TIỆC CƯỚI · CHUNG VUI CÙNG HAI GIA ĐÌNH</div>
-      <div class="date-block"><div><small data-party-weekday="single"></small><strong data-party-event-date="single"></strong></div></div>
-      <div class="event-rule"></div>
-      <div class="event-detail" data-i18n-html="events.singleReception"><span></span> Tiệc cưới</div>
-      <p class="event-address" data-i18n="events.singleAddress" data-text-flow="prose"></p>
-      <p class="lunar" data-i18n="events.singleLunar" data-text-flow="prose"></p>
-      <div class="event-actions"><a href="#map-single" class="map-button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-i18n="events.map" data-text-fit="label">XEM ĐỊA ĐIỂM</span></a><button class="calendar-button" type="button" data-calendar="single" data-i18n-aria="events.singleCalendarAria"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18M12 14v4M10 16h4"/></svg><span data-i18n="events.calendar" data-text-fit="label">LƯU VÀO LỊCH</span></button></div>
-    </article>
-  </div>
-</section>
-<section class="album-section" id="album" aria-label="Bộ ảnh cưới 3D" data-i18n-aria="album.sectionAria">
-  <div class="album-ambient"></div>
-  <div class="album-header"><p class="album-eyebrow" data-i18n="album.eyebrow" data-text-fit="label">BỘ ẢNH CƯỚI</p><h2 data-i18n-html="album.heading" data-text-fit="heading">Khoảnh khắc <em>yêu thương</em></h2><p data-i18n="album.lead" data-text-flow="prose">Những thước phim đẹp nhất của chúng mình</p></div>
-  <div class="album-viewport" id="albumViewport" tabindex="0" aria-label="Bộ ảnh 3D: vuốt hoặc kéo trái phải để chuyển ảnh" data-i18n-aria="album.viewportAria"><div class="album-space" id="albumSpace"></div><div class="album-floor"></div></div>
-  <div class="album-editorial-caption" id="albumEditorialCaption" aria-live="polite">
-    <span class="album-caption-rule" aria-hidden="true"></span>
-    <span class="album-caption-text" id="albumCaptionText"></span>
-  </div>
-  <div class="album-status" id="albumStatus" role="status" data-status-key="album.lazy">Cuộn đến bộ ảnh để xem những khoảnh khắc của chúng mình…</div>
-  <button class="album-retry" id="albumRetry" type="button" data-i18n="album.retry" hidden>Thử tải lại ảnh</button>
-  <div class="album-bottom"><span class="album-hint" data-i18n="album.hint">← VUỐT TRÁI HOẶC PHẢI ĐỂ XEM ẢNH →</span><span class="album-count" id="albumCount" aria-live="polite">00 / 00</span></div>
-  <div class="album-progress"><span id="albumProgress"></span></div>
-</section>
-
-<div class="album-lightbox" id="albumLightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Xem ảnh cưới toàn màn hình" data-i18n-aria="album.fullscreenAria">
-  <button type="button" class="album-lightbox-close" id="albumLightboxClose" aria-label="Đóng ảnh toàn màn hình" data-i18n-aria="album.closeAria">×</button>
-  <button type="button" class="album-lightbox-nav album-lightbox-prev" id="albumLightboxPrev" aria-label="Ảnh trước" data-i18n-aria="album.prevAria">‹</button>
-  <div class="album-lightbox-stage" id="albumLightboxStage">
-    <img id="albumLightboxImage" alt="" draggable="false" decoding="async">
-  </div>
-  <button type="button" class="album-lightbox-nav album-lightbox-next" id="albumLightboxNext" aria-label="Ảnh tiếp theo" data-i18n-aria="album.nextAria">›</button>
-  <p class="album-lightbox-caption" id="albumLightboxCaption" aria-label="Lời tựa của bức ảnh" data-i18n-aria="album.captionLabel"></p>
-  <div class="album-lightbox-counter" id="albumLightboxCounter" aria-live="polite">01 / 01</div>
-</div>
-
-<section class="closing"><div class="closing-overlay"></div><div class="closing-content"><div class="wedding-crest closing-crest" data-wedding-crest aria-hidden="true"></div><p class="overline gold" data-i18n="closing.eyebrow" data-text-fit="label">CẢM ƠN BẠN ĐÃ ĐẾN</p><h2 data-i18n-html="closing.title" data-text-fit="heading">Hẹn gặp bạn<br>trong ngày hạnh phúc</h2><p class="closing-note" data-i18n="closing.note" data-text-flow="prose"></p><p class="closing-names" id="closingNames" data-party-name-pair="closing"></p></div></section>
-</main>
-<footer><span id="footerNames" data-party-name-pair="footer"></span><span data-i18n="footer.love">GỬI TRỌN YÊU THƯƠNG ♡</span></footer>
-<script src="layout.js?v=__BUILD_ID__" defer></script><script src="i18n.js?v=__BUILD_ID__" defer></script><script src="script.js?v=__BUILD_ID__" defer></script><script src="gallery.js?v=__BUILD_ID__" defer></script>
-
-<div class="wm-backdrop" id="wmBackdrop" hidden></div>
-<div class="wm-modal" id="wmModal" role="dialog" aria-modal="true" aria-labelledby="wmTitle" aria-hidden="true" hidden>
-<div class="wm-dialog"><div class="wm-header"><span class="wq-kicker" data-i18n="map.eyebrow">CHỈ ĐƯỜNG</span><button type="button" class="wm-close" id="wmClose" aria-label="Đóng bản đồ" data-i18n-aria="map.closeAria">×</button></div>
-<section class="locations-section" id="locations">
-  <div class="section-head"><p class="overline gold" data-i18n="map.eyebrow" data-text-fit="label">CHỈ ĐƯỜNG</p><h2 class="section-title" id="wmTitle" data-i18n="map.title" data-text-fit="heading">Hẹn gặp bạn tại đây</h2></div>
-  <div class="location-grid">
-    <article id="map-bride" class="location-card" data-party-scope="bride"><div class="location-info"><small data-i18n="map.brideLabel">NHÀ GÁI · </small><h3 data-i18n="map.brideTitle" data-text-fit="heading"></h3><p data-i18n="map.brideAddress" data-text-flow="prose"></p><a data-info-href="parties.bride.venue.mapUrl" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div><iframe title="Bản đồ nhà gái" tabindex="-1" data-i18n-title="map.brideFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-info-embed="parties.bride.venue.embedUrl"></iframe></article>
-    <article id="map-groom" class="location-card" data-party-scope="groom"><div class="location-info"><small data-i18n="map.groomLabel">NHÀ TRAI · </small><h3 data-i18n="map.groomTitle" data-text-fit="heading"></h3><p data-i18n="map.groomAddress" data-text-flow="prose"></p><a data-info-href="parties.groom.venue.mapUrl" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div><iframe title="Bản đồ nhà trai" tabindex="-1" data-i18n-title="map.groomFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-info-embed="parties.groom.venue.embedUrl"></iframe></article>
-    <article id="map-single" class="location-card" data-party-scope="single">
-      <div class="location-info"><small data-i18n="map.singleLabel"></small><h3 data-i18n="map.singleTitle" data-text-fit="heading"></h3><p data-i18n="map.singleAddress" data-text-flow="prose"></p>
-      <a data-info-href="parties.single.venue.mapUrl" target="_blank" rel="noopener noreferrer" class="map-button" data-i18n="map.openMap">MỞ BẢN ĐỒ ↗</a></div>
-      <iframe title="Bản đồ tiệc cưới" tabindex="-1" data-i18n-title="map.singleFrameTitle" loading="lazy" referrerpolicy="no-referrer-when-downgrade" data-info-embed="parties.single.venue.embedUrl"></iframe>
-    </article>
-  </div>
-</section>
-</div></div>
-<div class="wg-backdrop" id="wgBackdrop" hidden></div>
-<div class="wg-modal" id="wgModal" role="dialog" aria-modal="true" aria-labelledby="wgTitle" aria-hidden="true" hidden>
-  <div class="wg-dialog">
-    <div class="wg-header">
-      <span class="wq-kicker" data-i18n="gift.eyebrow">MỪNG CƯỚI</span>
-      <button type="button" class="wg-close" id="wgClose" aria-label="Đóng mừng cưới" data-i18n-aria="gift.closeAria">×</button>
-    </div>
-    <section class="gift-section" id="wedding-gift">
-      <div class="section-head">
-        <p class="overline gold" data-i18n="gift.eyebrow" data-text-fit="label">MỪNG CƯỚI</p>
-        <h2 class="section-title" id="wgTitle" data-i18n="gift.title" data-text-fit="heading">Gửi lời chúc đến chúng mình</h2>
-        <p class="section-lead" data-i18n="gift.lead" data-text-flow="prose">Cảm ơn tình cảm của bạn dành cho chúng mình ♡</p>
-      </div>
-      <div class="gift-grid">
-        <article class="gift-card" data-party-scope="bride">
-          <div class="gift-bank" data-info="parties.bride.gift.bank"></div>
-          <h3 data-info="parties.bride.gift.accountHolder" data-text-fit="heading"></h3>
-          <div class="gift-account-number" data-info="parties.bride.gift.accountNumber"></div>
-          <div class="gift-qr-shell">
-            <img class="gift-qr" data-info-src="parties.bride.gift.qrImage" width="685" height="685" decoding="async" data-info-alt="parties.bride.gift.qrAlt" alt="">
+        <div id="settingsTabContent" role="tabpanel" aria-labelledby="controlTabSettings">
+          <div class="settings-row">
+            <span class="settings-row-label" data-i18n="settings.language">Ngôn ngữ</span>
+            <div
+              class="settings-options"
+              role="group"
+              aria-label="Chọn ngôn ngữ"
+              data-i18n-aria="language.label"
+            >
+              <button
+                type="button"
+                class="language-option is-active"
+                data-lang="vi"
+                aria-pressed="true"
+              >
+                VN
+              </button>
+              <button type="button" class="language-option" data-lang="en" aria-pressed="false">
+                EN
+              </button>
+            </div>
           </div>
-          <p class="gift-hint" data-i18n="gift.hint">Quét mã bằng ứng dụng ngân hàng</p>
-        </article>
-        <article class="gift-card" data-party-scope="groom">
-          <div class="gift-bank" data-info="parties.groom.gift.bank"></div>
-          <h3 data-info="parties.groom.gift.accountHolder" data-text-fit="heading"></h3>
-          <div class="gift-account-number" data-info="parties.groom.gift.accountNumber"></div>
-          <div class="gift-qr-shell">
-            <img class="gift-qr" data-info-src="parties.groom.gift.qrImage" width="570" height="570" decoding="async" data-info-alt="parties.groom.gift.qrAlt" alt="">
+          <div class="settings-row settings-music-row">
+            <span class="settings-row-label" data-i18n="settings.music">Âm nhạc</span>
+            <button
+              class="music-toggle"
+              id="musicToggle"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bật nhạc nền dịu nhẹ"
+              title="Bật/tắt nhạc nền"
+            >
+              <span class="music-icon" aria-hidden="true"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.65"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 18V5.7L20 3v12.3" />
+                  <ellipse cx="6" cy="18" rx="3" ry="2.1" transform="rotate(-18 6 18)" />
+                  <ellipse cx="17" cy="15.3" rx="3" ry="2.1" transform="rotate(-18 17 15.3)" />
+                  <path d="M9 9.2 20 6.5" /></svg></span
+              ><span class="music-label">NHẠC: TẮT</span>
+            </button>
           </div>
-          <p class="gift-hint" data-i18n="gift.hint">Quét mã bằng ứng dụng ngân hàng</p>
-        </article>
-        <article class="gift-card" data-party-scope="single">
-          <div class="gift-bank" data-info="parties.single.gift.bank"></div>
-          <h3 data-info="parties.single.gift.accountHolder" data-text-fit="heading"></h3>
-          <div class="gift-account-number" data-info="parties.single.gift.accountNumber"></div>
-          <div class="gift-qr-shell"><img class="gift-qr" data-info-src="parties.single.gift.qrImage" width="685" height="685" decoding="async" data-info-alt="parties.single.gift.qrAlt" alt=""></div>
-          <p class="gift-hint" data-i18n="gift.hint">Quét mã bằng ứng dụng ngân hàng</p>
-        </article>
+        </div>
+        <nav
+          class="wq-panel"
+          id="wqPanel"
+          role="tabpanel"
+          aria-labelledby="controlTabMenu"
+          aria-hidden="true"
+          inert
+          hidden
+        >
+          <div class="wq-panel-top">
+            <span class="wq-kicker" data-i18n="menu.kicker">THIỆP MỜI LỄ THÀNH HÔN</span>
+          </div>
+          <div class="wq-heading" data-i18n-html="menu.heading" data-text-fit="label">
+            Khám phá <em>thiệp cưới</em>
+          </div>
+          <p class="wq-description" data-i18n="menu.description">Chọn phần bạn muốn xem</p>
+          <div class="wq-menu-group">
+            <div class="wq-group-label" data-i18n="menu.groupInvitation">THIỆP</div>
+            <div class="wq-links">
+              <a href="#home" class="wq-link"
+                ><span class="wq-no">01</span><span data-i18n="menu.home">Trang đầu thiệp</span
+                ><span class="wq-arrow">↗</span></a
+              >
+              <a href="#couple" class="wq-link"
+                ><span class="wq-no">02</span
+                ><span id="menuCoupleLabel" data-i18n="menu.couple">Cô dâu &amp; chú rể</span
+                ><span class="wq-arrow">↗</span></a
+              >
+              <a href="#family" class="wq-link"
+                ><span class="wq-no">03</span
+                ><span data-i18n="menu.family">Thông tin hai gia đình</span
+                ><span class="wq-arrow">↗</span></a
+              >
+              <a href="#events" class="wq-link"
+                ><span class="wq-no">04</span
+                ><span data-i18n="menu.events">Lịch lễ &amp; tiệc cưới</span
+                ><span class="wq-arrow">↗</span></a
+              >
+              <a href="#album" class="wq-link"
+                ><span class="wq-no">05</span><span data-i18n="menu.album">Ảnh cưới</span
+                ><span class="wq-arrow">↗</span></a
+              >
+            </div>
+          </div>
+          <div class="wq-menu-group wq-menu-group-popup">
+            <div class="wq-group-label" data-i18n="menu.groupPopup">POPUP</div>
+            <div class="wq-links">
+              <a href="#locations" class="wq-link"
+                ><span class="wq-no">06</span><span data-i18n="menu.map">Bản đồ chỉ đường</span
+                ><span class="wq-arrow">↗</span></a
+              >
+              <a href="#wedding-gift" class="wq-link"
+                ><span class="wq-no">07</span><span data-i18n="menu.gift">Mừng cưới</span
+                ><span class="wq-arrow">↗</span></a
+              >
+            </div>
+          </div>
+          <div class="wq-footnote" id="menuNames" data-party-name-pair="menu"></div>
+        </nav>
+      </div>
+    </div>
+    <div
+      class="party-selector"
+      id="partySelector"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="partySelectorTitle"
+      aria-describedby="partySelectorLead"
+    >
+      <div class="party-selector-backdrop" aria-hidden="true"></div>
+      <div class="party-selector-card">
+        <p class="party-selector-kicker" data-i18n="party.eyebrow">CHỌN TIỆC CƯỚI</p>
+        <h2 id="partySelectorTitle" data-i18n="party.title" data-text-fit="heading">
+          Bạn tham dự tiệc nào?
+        </h2>
+        <p id="partySelectorLead" data-i18n="party.lead">
+          Chọn đúng tiệc để xem thời gian và địa điểm dành cho bạn.
+        </p>
+        <div class="party-selector-options">
+          <button type="button" class="party-selector-option" data-party-select="bride">
+            <span class="party-selector-role" data-i18n="party.brideRole">NHÀ GÁI · LỄ VU QUY</span>
+            <strong data-i18n="party.brideDate"></strong>
+            <small data-i18n="party.bridePlace"></small>
+            <span class="party-selector-action" data-i18n="party.choose">XEM THIỆP →</span>
+          </button>
+          <button type="button" class="party-selector-option" data-party-select="groom">
+            <span class="party-selector-role" data-i18n="party.groomRole"
+              >NHÀ TRAI · LỄ TÂN HÔN</span
+            >
+            <strong data-i18n="party.groomDate"></strong>
+            <small data-i18n="party.groomPlace"></small>
+            <span class="party-selector-action" data-i18n="party.choose">XEM THIỆP →</span>
+          </button>
+        </div>
+        <a
+          href="?tool=links"
+          class="party-admin-link"
+          data-i18n="party.adminTool"
+          data-i18n-aria="party.adminToolAria"
+          >✦ TẠO LINK THIỆP CÁ NHÂN HÓA</a
+        >
+      </div>
+    </div>
+    <section
+      class="link-tool-screen"
+      id="linkToolScreen"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="linkToolTitle"
+      aria-hidden="true"
+      hidden
+    >
+      <div class="link-tool-card">
+        <button
+          type="button"
+          class="link-tool-back"
+          id="linkToolBack"
+          data-i18n="link.back"
+          data-i18n-aria="link.backAria"
+        >
+          ← Quay lại chọn tiệc
+        </button>
+        <p class="link-tool-eyebrow" data-i18n="link.brand"></p>
+        <h2 id="linkToolTitle" data-i18n="link.title" data-text-fit="heading">
+          Tạo thiệp mời riêng
+        </h2>
+        <p class="link-tool-description" data-i18n="link.description">
+          Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho
+          người nhận.
+        </p>
+        <form id="linkToolForm">
+          <label for="linkToolGuest" data-i18n="link.guest">Tên khách mời</label>
+          <input
+            id="linkToolGuest"
+            name="guest"
+            type="text"
+            maxlength="100"
+            autocomplete="off"
+            data-i18n-placeholder="link.placeholder"
+            placeholder="Ví dụ: Anh Minh và chị Lan"
+            required
+          />
+          <div class="link-tool-party-field" id="linkToolPartyField">
+            <label for="linkToolParty" data-i18n="link.party">Khách tham dự</label>
+            <select id="linkToolParty" name="party" required>
+              <option value="bride" data-i18n="link.bride">Nhà gái · Lễ Vu Quy · · Đắk Lắk</option>
+              <option value="groom" data-i18n="link.groom">
+                Nhà trai · Lễ Tân Hôn · · Đồng Nai
+              </option>
+              <option value="single" data-i18n="link.single">Một tiệc cưới</option>
+            </select>
+          </div>
+          <div class="link-tool-actions">
+            <button type="submit" class="link-tool-action" data-i18n="link.create">
+              Tạo link thiệp
+            </button>
+          </div>
+        </form>
+        <div class="link-tool-result" id="linkToolResult" hidden aria-live="polite">
+          <small data-i18n="link.result">Link dành cho khách</small>
+          <div id="linkToolGenerated"></div>
+          <div class="link-tool-actions">
+            <button type="button" class="link-tool-action" id="linkToolCopy" data-i18n="link.copy">
+              Sao chép link
+            </button>
+            <button
+              type="button"
+              class="link-tool-action secondary"
+              id="linkToolShare"
+              data-i18n="link.share"
+            >
+              Chia sẻ
+            </button>
+            <a
+              class="link-tool-action secondary"
+              id="linkToolPreview"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-i18n="link.preview"
+              >Xem thử thiệp</a
+            >
+          </div>
+          <p class="link-tool-feedback" id="linkToolFeedback" role="status"></p>
+        </div>
+        <p class="link-tool-note" data-i18n="link.note">
+          Công cụ tạo link ngay trên thiết bị, không lưu danh sách khách. Tên khách xuất hiện trong
+          URL, nên chỉ chia sẻ với đúng người nhận.
+        </p>
       </div>
     </section>
-  </div>
-</div>
+    <section
+      class="moonlight-gate"
+      id="moonlightGate"
+      data-i18n-aria="gate.label"
+      aria-label="Cổng mở thiệp cưới"
+    >
+      <div class="moonlight-gate__scene">
+        <div class="moonlight-gate__backdrop" aria-hidden="true">
+          <span class="moonlight-gate__stars"></span>
+          <span class="moonlight-gate__land"></span>
+        </div>
+        <div class="moonlight-gate__magic" id="gateMagic" aria-hidden="true">
+          <span class="moonlight-gate__dust"></span>
+          <canvas class="moonlight-gate__meteor-canvas" aria-hidden="true"></canvas>
+          <span class="moonlight-gate__butterfly moonlight-gate__butterfly--one">
+            <svg viewBox="0 0 64 52" focusable="false" aria-hidden="true">
+              <path
+                class="moonlight-gate__wing moonlight-gate__wing--left"
+                d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"
+              />
+              <path
+                class="moonlight-gate__wing moonlight-gate__wing--right"
+                d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"
+              />
+              <path class="moonlight-gate__butterfly-body" d="M32 21v16m0-16-4-5m4 5 4-5" />
+            </svg>
+          </span>
+          <span class="moonlight-gate__butterfly moonlight-gate__butterfly--two">
+            <svg viewBox="0 0 64 52" focusable="false" aria-hidden="true">
+              <path
+                class="moonlight-gate__wing moonlight-gate__wing--left"
+                d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"
+              />
+              <path
+                class="moonlight-gate__wing moonlight-gate__wing--right"
+                d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"
+              />
+              <path class="moonlight-gate__butterfly-body" d="M32 21v16m0-16-4-5m4 5 4-5" />
+            </svg>
+          </span>
+          <span class="moonlight-gate__butterfly moonlight-gate__butterfly--three">
+            <svg viewBox="0 0 64 52" focusable="false" aria-hidden="true">
+              <path
+                class="moonlight-gate__wing moonlight-gate__wing--left"
+                d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"
+              />
+              <path
+                class="moonlight-gate__wing moonlight-gate__wing--right"
+                d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"
+              />
+              <path class="moonlight-gate__butterfly-body" d="M32 21v16m0-16-4-5m4 5 4-5" />
+            </svg>
+          </span>
+        </div>
+        <div class="moonlight-gate__reveal">
+          <div class="moonlight-gate__reveal-heading">
+            <span class="moonlight-gate__reveal-overline" data-i18n="gate.overline"
+              >NGÀY CHUNG ĐÔI</span
+            >
+            <span class="moonlight-gate__reveal-names" data-party-name-pair="gate"></span>
+            <span class="moonlight-gate__reveal-rule"></span>
+            <span
+              class="moonlight-gate__reveal-subtitle"
+              data-i18n="gate.subtitle"
+              data-text-fit="label"
+              >CHUNG ĐÔI · TRỌN ĐỜI</span
+            >
+          </div>
+          <div class="moonlight-gate__greeting" id="gateGreeting">
+            <span
+              class="moonlight-gate__recipient-label"
+              id="gateGuestLabel"
+              data-i18n="guest.recipientLabel"
+              data-text-fit="label"
+            ></span>
+            <strong class="moonlight-gate__recipient-name" id="gateGuestName" hidden></strong>
+          </div>
+        </div>
+        <div class="fairy-artboard">
+          <span class="moonlight-gate__portal" aria-hidden="true"></span>
+          <div class="moonlight-gate__door moonlight-gate__door--left" aria-hidden="true">
+            <div class="moonlight-gate__door-face">
+              <img
+                class="fairy-panel"
+                data-info-src="site.entrance.image"
+                alt=""
+                decoding="async"
+              />
+              <span class="moonlight-gate__orbit moonlight-gate__orbit--sun"> </span>
+            </div>
+          </div>
+          <div class="moonlight-gate__door moonlight-gate__door--right" aria-hidden="true">
+            <div class="moonlight-gate__door-face">
+              <img
+                class="fairy-panel"
+                data-info-src="site.entrance.image"
+                alt=""
+                decoding="async"
+              />
+              <span class="moonlight-gate__orbit moonlight-gate__orbit--moon">
+                <span class="fairy-star fairy-star--one"></span
+                ><span class="fairy-star fairy-star--two"></span>
+                <span class="fairy-star fairy-star--three"></span
+                ><span class="fairy-star fairy-star--four"></span>
+              </span>
+            </div>
+          </div>
+          <img
+            class="fairy-frame"
+            data-info-src="site.entrance.image"
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+          />
+          <div class="fairy-butterflies" aria-hidden="true">
+            <span class="fairy-butterfly fairy-butterfly--one"
+              ><svg viewBox="0 0 64 52" focusable="false" aria-hidden="true">
+                <path
+                  class="fairy-butterfly__wing fairy-butterfly__wing--left"
+                  d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"
+                />
+                <path
+                  class="fairy-butterfly__wing fairy-butterfly__wing--right"
+                  d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"
+                />
+                <path class="fairy-butterfly__body" d="M32 21v16m0-16-4-5m4 5 4-5" /></svg></span
+            ><span class="fairy-butterfly fairy-butterfly--two"
+              ><svg viewBox="0 0 64 52" focusable="false" aria-hidden="true">
+                <path
+                  class="fairy-butterfly__wing fairy-butterfly__wing--left"
+                  d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"
+                />
+                <path
+                  class="fairy-butterfly__wing fairy-butterfly__wing--right"
+                  d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"
+                />
+                <path class="fairy-butterfly__body" d="M32 21v16m0-16-4-5m4 5 4-5" /></svg></span
+            ><span class="fairy-butterfly fairy-butterfly--three"
+              ><svg viewBox="0 0 64 52" focusable="false" aria-hidden="true">
+                <path
+                  class="fairy-butterfly__wing fairy-butterfly__wing--left"
+                  d="M31 26C19 4 3 5 5 19c1 9 11 12 22 10-12 1-18 13-9 16 8 3 12-8 13-19Z"
+                />
+                <path
+                  class="fairy-butterfly__wing fairy-butterfly__wing--right"
+                  d="M33 26C45 4 61 5 59 19c-1 9-11 12-22 10 12 1 18 13 9 16-8 3-12-8-13-19Z"
+                />
+                <path class="fairy-butterfly__body" d="M32 21v16m0-16-4-5m4 5 4-5" /></svg
+            ></span>
+          </div>
+          <span class="moonlight-gate__seam" aria-hidden="true"></span>
+          <button
+            type="button"
+            class="wax-open-button"
+            id="waxOpenButton"
+            data-i18n-aria="gate.openAria"
+            aria-label="Chạm ổ khóa để mở cổng"
+          >
+            <span class="wax-monogram" id="waxMonogram" aria-hidden="true"
+              ><img class="fairy-lock" data-info-src="site.entrance.lock" alt="" decoding="async"
+            /></span>
+          </button>
+        </div>
+      </div>
+    </section>
+    <header class="hero" id="home">
+      <div class="hero-media">
+        <img
+          class="hero-photo"
+          alt=""
+          width="1280"
+          height="1920"
+          decoding="async"
+          fetchpriority="high"
+        />
+        <div class="hero-shade"></div>
+      </div>
+      <div class="hero-arrival-light" aria-hidden="true"></div>
+      <div class="topbar"><a class="monogram" id="heroMonogram" href="#home"></a></div>
+      <div class="hero-layout">
+        <div class="hero-spacer"></div>
+        <div class="hero-copy">
+          <div
+            class="overline"
+            id="heroCeremonyLabel"
+            data-i18n="hero.overline"
+            data-text-fit="label"
+          >
+            — LỄ THÀNH HÔN —
+          </div>
+          <h1 id="heroNames" data-party-name-pair="hero"></h1>
+          <div class="fine-flourish">✧</div>
+          <p class="handwriting" data-i18n="hero.handwriting" data-text-flow="prose">
+            Cùng nhau viết tiếp những ngày hạnh phúc...
+          </p>
+          <p class="invitation-promise" id="invitationPromise" data-text-flow="prose"></p>
+          <div class="hero-date">
+            <span data-party-date="bride"></span><span class="party-date-separator">—</span
+            ><span data-party-date="groom"></span><span data-party-date="single"></span>
+          </div>
+          <div class="hero-count-title" id="countdownTitle" data-text-fit="label">
+            ĐẾM NGƯỢC ĐẾN LỄ VU QUY
+          </div>
+          <div class="countdown" id="timer" aria-label="Đếm ngược đến lễ Vu Quy">
+            <div><strong id="days">00</strong><small>NGÀY</small></div>
+            <div><strong id="hours">00</strong><small>GIỜ</small></div>
+            <div><strong id="minutes">00</strong><small>PHÚT</small></div>
+            <div><strong id="seconds">00</strong><small>GIÂY</small></div>
+          </div>
+        </div>
+      </div>
 
-<!-- Only present after music has actually started. Pause keeps it visible;
-     Stop dismisses it until the guest starts music again in Settings. -->
-<div class="music-float" id="musicBubble" data-music-state="playing" hidden>
-  <div class="music-float-actions" id="musicBubbleActions" role="group" aria-label="Điều khiển nhạc" data-i18n-aria="music.controlsAria" hidden>
-    <button type="button" id="musicBubblePause" class="music-float-action" aria-label="Tạm dừng nhạc" title="Tạm dừng nhạc">
-      <svg class="music-float-pause-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
-      <svg class="music-float-play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5a1 1 0 0 1 1.5-.86l10 6.5a1 1 0 0 1 0 1.72l-10 6.5A1 1 0 0 1 8 18.5z"/></svg>
-    </button>
-    <button type="button" id="musicBubbleStop" class="music-float-action music-float-stop" aria-label="Dừng hẳn và ẩn nút nhạc" title="Dừng hẳn và ẩn nút nhạc">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-    </button>
-  </div>
-  <button type="button" id="musicBubbleTrigger" class="music-float-trigger" aria-controls="musicBubbleActions" aria-expanded="false" aria-label="Mở điều khiển nhạc" title="Điều khiển nhạc">
-    <span class="music-float-note" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5.7L20 3v12.3"/><ellipse cx="6" cy="18" rx="3" ry="2.1" transform="rotate(-18 6 18)"/><ellipse cx="17" cy="15.3" rx="3" ry="2.1" transform="rotate(-18 17 15.3)"/><path d="M9 9.2 20 6.5"/></svg></span>
-  </button>
-</div>
-<dialog class="calendar-dialog" id="calendarDialog" aria-labelledby="calendarTitle" aria-describedby="calendarDescription">
-  <div class="calendar-top"><span id="calendarSummary"></span><button type="button" class="calendar-close" id="calendarClose" data-i18n-aria="calendar.close" aria-label="Đóng chọn ứng dụng lịch">×</button></div>
-  <h2 id="calendarTitle" data-i18n="calendar.title">Thêm vào lịch</h2>
-  <p class="calendar-description" id="calendarDescription" data-i18n="calendar.description">Chọn sự kiện và nơi bạn muốn lưu lịch hẹn.</p>
-  <div class="calendar-event-field" id="calendarEventField"><label for="calendarEvent" data-i18n="calendar.event">Sự kiện muốn lưu</label><select id="calendarEvent"></select></div>
-  <p class="calendar-place" id="calendarEventPlace"></p>
-  <p class="calendar-suggestion" data-i18n="calendar.suggested">Phù hợp với thiết bị</p>
-  <div class="calendar-options" id="calendarSuggested"></div>
-  <details class="calendar-other" id="calendarOther">
-    <summary data-i18n="calendar.other">Ứng dụng khác</summary>
-    <div class="calendar-options" id="calendarOtherOptions">
-    <a class="calendar-option" id="calendarGoogle" data-calendar-app="google" target="_blank" rel="noopener noreferrer"><span class="calendar-icon" aria-hidden="true">G</span><span class="calendar-option-copy"><strong data-i18n="calendar.google">Google Calendar</strong><small data-i18n="calendar.googleHint">Mở trang tạo sự kiện Google</small></span></a>
-    <a class="calendar-option" id="calendarOutlook" data-calendar-app="outlook" target="_blank" rel="noopener noreferrer"><span class="calendar-icon" aria-hidden="true">O</span><span class="calendar-option-copy"><strong data-i18n="calendar.outlook">Outlook.com</strong><small data-i18n="calendar.outlookHint">Mở lịch Microsoft cá nhân trên web</small></span></a>
-    <button type="button" class="calendar-option" id="calendarNative" data-calendar-app="native"><span class="calendar-icon" aria-hidden="true">＋</span><span class="calendar-option-copy"><strong id="calendarNativeLabel"></strong><small data-i18n="calendar.nativeHint">Tải tệp lịch để mở bằng ứng dụng của bạn</small></span></button>
+      <a class="scroll-cue" href="#couple" data-i18n="hero.scroll">CUỘN ĐỂ KHÁM PHÁ ↓</a>
+    </header>
+    <nav
+      class="invitation-actions"
+      aria-label="Thông tin thiệp"
+      data-i18n-aria="invitation.details"
+    >
+      <a href="#events" data-i18n="invitation.details">Thời gian &amp; địa điểm</a
+      ><a href="#locations" data-guest-action data-i18n="invitation.directions">Chỉ đường</a>
+    </nav>
+    <main>
+      <section class="couple-section" id="couple">
+        <p class="overline gold center" data-i18n="couple.eyebrow" data-text-fit="label">
+          HAI TRÁI TIM · MỘT HÀNH TRÌNH
+        </p>
+        <h2
+          class="section-title"
+          id="coupleHeading"
+          data-i18n-html="couple.heading"
+          data-text-fit="heading"
+        >
+          Cô dâu <em>&amp;</em> Chú rể
+        </h2>
+        <p class="section-lead" data-i18n="couple.lead" data-text-flow="prose">
+          Hai con người, một hành trình, một lời hẹn ước.
+        </p>
+        <div class="couple-editorial">
+          <article class="person person-groom reveal">
+            <div class="portrait-set">
+              <div class="portrait large groom-main">
+                <img
+                  data-info-src="parties.groom.images.portraitMain"
+                  alt=""
+                  data-i18n-alt="couple.son1Alt"
+                  loading="lazy"
+                />
+              </div>
+              <div class="portrait small groom-secondary">
+                <img
+                  data-info-src="parties.groom.images.portraitSecondary"
+                  alt=""
+                  data-i18n-alt="couple.son2Alt"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+            <div class="person-copy">
+              <span class="script" data-i18n="couple.groomRole">Chú rể</span>
+              <h3 data-info="couple.groom.fullUpper" data-text-fit="heading"></h3>
+              <p data-i18n="couple.groomQuote" data-text-flow="prose">
+                Cảm ơn em đã xuất hiện, để những ngày bình thường cũng trở nên đặc biệt.
+              </p>
+              <div class="ornament">♡</div>
+            </div>
+          </article>
+          <div class="couple-divider"><span>✧</span></div>
+          <article class="person person-bride reveal">
+            <div class="person-copy">
+              <span class="script" data-i18n="couple.brideRole">Cô dâu</span>
+              <h3 data-info="couple.bride.fullUpper" data-text-fit="heading"></h3>
+              <p data-i18n="couple.brideQuote" data-text-flow="prose">
+                Cảm ơn anh đã luôn ở đây, cùng em đi qua những khoảnh khắc đẹp nhất của cuộc đời.
+              </p>
+              <div class="ornament">♡</div>
+            </div>
+            <div class="portrait-set">
+              <div class="portrait large bride-main">
+                <img
+                  data-info-src="parties.bride.images.portraitMain"
+                  alt=""
+                  data-i18n-alt="couple.nga1Alt"
+                  loading="lazy"
+                />
+              </div>
+              <div class="portrait small bride-secondary">
+                <img
+                  data-info-src="parties.bride.images.portraitSecondary"
+                  alt=""
+                  data-i18n-alt="couple.nga2Alt"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="promise-story" aria-labelledby="promiseTitle">
+          <div class="section-head">
+            <p class="overline gold" data-i18n="story.eyebrow" data-text-fit="label"></p>
+            <h2
+              class="section-title"
+              id="promiseTitle"
+              data-i18n-html="story.title"
+              data-text-fit="heading"
+            ></h2>
+          </div>
+          <div class="promise-grid">
+            <article class="promise-card reveal">
+              <div class="promise-photo">
+                <img
+                  data-info-src="story.images.together.src"
+                  data-info-responsive="story.images.together"
+                  data-info-alt="story.images.together.alt"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div class="promise-copy">
+                <span class="promise-number" aria-hidden="true">01</span>
+                <h3 data-i18n="story.1.title" data-text-fit="heading"></h3>
+                <p data-i18n="story.1.text" data-text-flow="prose"></p>
+              </div>
+            </article>
+            <article class="promise-card reveal">
+              <div class="promise-photo">
+                <img
+                  data-info-src="story.images.love.src"
+                  data-info-responsive="story.images.love"
+                  data-info-alt="story.images.love.alt"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div class="promise-copy">
+                <span class="promise-number" aria-hidden="true">02</span>
+                <h3 data-i18n="story.2.title" data-text-fit="heading"></h3>
+                <p data-i18n="story.2.text" data-text-flow="prose"></p>
+              </div>
+            </article>
+            <article class="promise-card reveal">
+              <div class="promise-photo">
+                <img
+                  data-info-src="story.images.home.src"
+                  data-info-responsive="story.images.home"
+                  data-info-alt="story.images.home.alt"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div class="promise-copy">
+                <span class="promise-number" aria-hidden="true">03</span>
+                <h3 data-i18n="story.3.title" data-text-fit="heading"></h3>
+                <p data-i18n="story.3.text" data-text-flow="prose"></p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="family-section" id="family">
+        <div class="section-head">
+          <p class="overline gold" data-i18n="family.eyebrow" data-text-fit="label">
+            CÙNG HAI GIA ĐÌNH
+          </p>
+          <h2 class="section-title" data-i18n="family.title" data-text-fit="heading">
+            Trân trọng báo tin vui
+          </h2>
+          <p class="section-lead" data-i18n="family.lead" data-text-flow="prose">
+            Sự hiện diện của bạn là niềm hạnh phúc của hai gia đình
+          </p>
+        </div>
+        <div class="family-grid">
+          <div class="family-card family-groom reveal">
+            <span data-i18n="family.groomSide">NHÀ TRAI</span>
+            <h3 data-i18n="family.groomTitle" data-text-fit="heading">Gia đình chú rể</h3>
+            <p data-i18n-html="family.groomFather">Ông <strong></strong></p>
+            <p data-i18n-html="family.groomMother">Bà <strong></strong></p>
+            <p class="family-address" data-i18n="family.groomAddress" data-text-flow="prose"></p>
+            <div class="mini-line"></div>
+            <small data-i18n="family.groomRole">TRƯỞNG NAM</small>
+            <h4 data-info="couple.groom.full" data-text-fit="heading"></h4>
+          </div>
+          <div class="family-card family-bride reveal">
+            <span data-i18n="family.brideSide">NHÀ GÁI</span>
+            <h3 data-i18n="family.brideTitle" data-text-fit="heading">Gia đình cô dâu</h3>
+            <p data-i18n-html="family.brideFather">Ông <strong></strong></p>
+            <p data-i18n-html="family.brideMother">Bà <strong></strong></p>
+            <p class="family-address" data-i18n="family.brideAddress" data-text-flow="prose"></p>
+            <div class="mini-line"></div>
+            <small data-i18n="family.brideRole">ÚT NỮ</small>
+            <h4 data-info="couple.bride.full" data-text-fit="heading"></h4>
+          </div>
+        </div>
+      </section>
+      <section class="events-section" id="events">
+        <div class="section-head">
+          <p class="overline gold" data-i18n="events.eyebrow" data-text-fit="label">
+            LƯU NGÀY HẠNH PHÚC
+          </p>
+          <h2 class="section-title" data-i18n="events.title" data-text-fit="heading">
+            Thông tin lễ cưới
+          </h2>
+          <p class="section-lead" data-i18n="events.lead" data-text-flow="prose">
+            Hân hạnh đón tiếp bạn trong ngày vui trọng đại
+          </p>
+        </div>
+        <div class="event-grid">
+          <article class="event-card reveal" data-party-scope="bride">
+            <div class="event-label" data-i18n="events.brideLabel" data-text-fit="label">
+              LỄ VU QUY · NHÀ GÁI
+            </div>
+            <div class="date-block">
+              <div>
+                <small data-party-weekday="bride"></small
+                ><strong data-party-event-date="bride"></strong>
+              </div>
+            </div>
+            <div class="event-rule"></div>
+            <div class="event-detail" data-i18n-html="events.brideCeremony">
+              <span></span> Hôn lễ tại tư gia
+            </div>
+            <div class="event-detail" data-i18n-html="events.brideReception">
+              <span></span> Tiệc mừng tại
+            </div>
+            <p class="event-address" data-i18n="events.brideAddress" data-text-flow="prose">
+              Địa điểm tiệc:
+            </p>
+            <p class="lunar" data-i18n="events.brideLunar" data-text-flow="prose"></p>
+            <div class="event-actions">
+              <a href="#map-bride" class="map-button"
+                ><svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z" />
+                  <circle cx="12" cy="10" r="2.5" /></svg
+                ><span data-i18n="events.map" data-text-fit="label">XEM ĐỊA ĐIỂM</span></a
+              ><button
+                class="calendar-button"
+                type="button"
+                data-calendar="bride"
+                aria-label="Lưu lễ Vu Quy vào lịch"
+                data-i18n-aria="events.brideCalendarAria"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="5" width="18" height="16" rx="3" />
+                  <path d="M7 3v4M17 3v4M3 11h18M12 14v4M10 16h4" /></svg
+                ><span data-i18n="events.calendar" data-text-fit="label">LƯU VÀO LỊCH</span>
+              </button>
+            </div>
+          </article>
+          <article class="event-card reveal" data-party-scope="groom">
+            <div class="event-label" data-i18n="events.groomLabel" data-text-fit="label">
+              LỄ TÂN HÔN · NHÀ TRAI
+            </div>
+            <div class="date-block">
+              <div>
+                <small data-party-weekday="groom"></small
+                ><strong data-party-event-date="groom"></strong>
+              </div>
+            </div>
+            <div class="event-rule"></div>
+            <div class="event-detail" data-i18n-html="events.groomCeremony">
+              <span></span> Hôn lễ tại tư gia
+            </div>
+            <div class="event-detail" data-i18n-html="events.groomReception">
+              <span></span> Tiệc mừng tại
+            </div>
+            <p class="event-address" data-i18n="events.groomAddress" data-text-flow="prose"></p>
+            <p class="lunar" data-i18n="events.groomLunar" data-text-flow="prose"></p>
+            <div class="event-actions">
+              <a href="#map-groom" class="map-button"
+                ><svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z" />
+                  <circle cx="12" cy="10" r="2.5" /></svg
+                ><span data-i18n="events.map" data-text-fit="label">XEM ĐỊA ĐIỂM</span></a
+              ><button
+                class="calendar-button"
+                type="button"
+                data-calendar="groom"
+                aria-label="Lưu lễ Tân Hôn vào lịch"
+                data-i18n-aria="events.groomCalendarAria"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="5" width="18" height="16" rx="3" />
+                  <path d="M7 3v4M17 3v4M3 11h18M12 14v4M10 16h4" /></svg
+                ><span data-i18n="events.calendar" data-text-fit="label">LƯU VÀO LỊCH</span>
+              </button>
+            </div>
+          </article>
+          <article class="event-card reveal" data-party-scope="single">
+            <div class="event-label" data-i18n="events.singleLabel" data-text-fit="label">
+              TIỆC CƯỚI · CHUNG VUI CÙNG HAI GIA ĐÌNH
+            </div>
+            <div class="date-block">
+              <div>
+                <small data-party-weekday="single"></small
+                ><strong data-party-event-date="single"></strong>
+              </div>
+            </div>
+            <div class="event-rule"></div>
+            <div class="event-detail" data-i18n-html="events.singleReception">
+              <span></span> Tiệc cưới
+            </div>
+            <p class="event-address" data-i18n="events.singleAddress" data-text-flow="prose"></p>
+            <p class="lunar" data-i18n="events.singleLunar" data-text-flow="prose"></p>
+            <div class="event-actions">
+              <a href="#map-single" class="map-button"
+                ><svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z" />
+                  <circle cx="12" cy="10" r="2.5" /></svg
+                ><span data-i18n="events.map" data-text-fit="label">XEM ĐỊA ĐIỂM</span></a
+              ><button
+                class="calendar-button"
+                type="button"
+                data-calendar="single"
+                data-i18n-aria="events.singleCalendarAria"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="5" width="18" height="16" rx="3" />
+                  <path d="M7 3v4M17 3v4M3 11h18M12 14v4M10 16h4" /></svg
+                ><span data-i18n="events.calendar" data-text-fit="label">LƯU VÀO LỊCH</span>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section
+        class="album-section"
+        id="album"
+        aria-label="Bộ ảnh cưới 3D"
+        data-i18n-aria="album.sectionAria"
+      >
+        <div class="album-ambient"></div>
+        <div class="album-header">
+          <p class="album-eyebrow" data-i18n="album.eyebrow" data-text-fit="label">BỘ ẢNH CƯỚI</p>
+          <h2 data-i18n-html="album.heading" data-text-fit="heading">
+            Khoảnh khắc <em>yêu thương</em>
+          </h2>
+          <p data-i18n="album.lead" data-text-flow="prose">
+            Những thước phim đẹp nhất của chúng mình
+          </p>
+        </div>
+        <div
+          class="album-viewport"
+          id="albumViewport"
+          tabindex="0"
+          aria-label="Bộ ảnh 3D: vuốt hoặc kéo trái phải để chuyển ảnh"
+          data-i18n-aria="album.viewportAria"
+        >
+          <div class="album-space" id="albumSpace"></div>
+          <div class="album-floor"></div>
+        </div>
+        <div class="album-editorial-caption" id="albumEditorialCaption" aria-live="polite">
+          <span class="album-caption-rule" aria-hidden="true"></span>
+          <span class="album-caption-text" id="albumCaptionText"></span>
+        </div>
+        <div class="album-status" id="albumStatus" role="status" data-status-key="album.lazy">
+          Cuộn đến bộ ảnh để xem những khoảnh khắc của chúng mình…
+        </div>
+        <button class="album-retry" id="albumRetry" type="button" data-i18n="album.retry" hidden>
+          Thử tải lại ảnh
+        </button>
+        <div class="album-bottom">
+          <span class="album-hint" data-i18n="album.hint">← VUỐT TRÁI HOẶC PHẢI ĐỂ XEM ẢNH →</span
+          ><span class="album-count" id="albumCount" aria-live="polite">00 / 00</span>
+        </div>
+        <div class="album-progress"><span id="albumProgress"></span></div>
+      </section>
+
+      <div
+        class="album-lightbox"
+        id="albumLightbox"
+        hidden
+        aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Xem ảnh cưới toàn màn hình"
+        data-i18n-aria="album.fullscreenAria"
+      >
+        <button
+          type="button"
+          class="album-lightbox-close"
+          id="albumLightboxClose"
+          aria-label="Đóng ảnh toàn màn hình"
+          data-i18n-aria="album.closeAria"
+        >
+          ×
+        </button>
+        <button
+          type="button"
+          class="album-lightbox-nav album-lightbox-prev"
+          id="albumLightboxPrev"
+          aria-label="Ảnh trước"
+          data-i18n-aria="album.prevAria"
+        >
+          ‹
+        </button>
+        <div class="album-lightbox-stage" id="albumLightboxStage">
+          <img id="albumLightboxImage" alt="" draggable="false" decoding="async" />
+        </div>
+        <button
+          type="button"
+          class="album-lightbox-nav album-lightbox-next"
+          id="albumLightboxNext"
+          aria-label="Ảnh tiếp theo"
+          data-i18n-aria="album.nextAria"
+        >
+          ›
+        </button>
+        <p
+          class="album-lightbox-caption"
+          id="albumLightboxCaption"
+          aria-label="Lời tựa của bức ảnh"
+          data-i18n-aria="album.captionLabel"
+        ></p>
+        <div class="album-lightbox-counter" id="albumLightboxCounter" aria-live="polite">
+          01 / 01
+        </div>
+      </div>
+
+      <section class="closing">
+        <div class="closing-overlay"></div>
+        <div class="closing-content">
+          <div class="wedding-crest closing-crest" data-wedding-crest aria-hidden="true"></div>
+          <p class="overline gold" data-i18n="closing.eyebrow" data-text-fit="label">
+            CẢM ƠN BẠN ĐÃ ĐẾN
+          </p>
+          <h2 data-i18n-html="closing.title" data-text-fit="heading">
+            Hẹn gặp bạn<br />trong ngày hạnh phúc
+          </h2>
+          <p class="closing-note" data-i18n="closing.note" data-text-flow="prose"></p>
+          <p class="closing-names" id="closingNames" data-party-name-pair="closing"></p>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <span id="footerNames" data-party-name-pair="footer"></span
+      ><span data-i18n="footer.love">GỬI TRỌN YÊU THƯƠNG ♡</span>
+    </footer>
+    <script src="layout.js?v=__BUILD_ID__" defer></script>
+    <script src="i18n.js?v=__BUILD_ID__" defer></script>
+    <script src="script.js?v=__BUILD_ID__" defer></script>
+    <script src="gallery.js?v=__BUILD_ID__" defer></script>
+
+    <div class="wm-backdrop" id="wmBackdrop" hidden></div>
+    <div
+      class="wm-modal"
+      id="wmModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="wmTitle"
+      aria-hidden="true"
+      hidden
+    >
+      <div class="wm-dialog">
+        <div class="wm-header">
+          <span class="wq-kicker" data-i18n="map.eyebrow">CHỈ ĐƯỜNG</span
+          ><button
+            type="button"
+            class="wm-close"
+            id="wmClose"
+            aria-label="Đóng bản đồ"
+            data-i18n-aria="map.closeAria"
+          >
+            ×
+          </button>
+        </div>
+        <section class="locations-section" id="locations">
+          <div class="section-head">
+            <p class="overline gold" data-i18n="map.eyebrow" data-text-fit="label">CHỈ ĐƯỜNG</p>
+            <h2 class="section-title" id="wmTitle" data-i18n="map.title" data-text-fit="heading">
+              Hẹn gặp bạn tại đây
+            </h2>
+          </div>
+          <div class="location-grid">
+            <article id="map-bride" class="location-card" data-party-scope="bride">
+              <div class="location-info">
+                <small data-i18n="map.brideLabel">NHÀ GÁI · </small>
+                <h3 data-i18n="map.brideTitle" data-text-fit="heading"></h3>
+                <p data-i18n="map.brideAddress" data-text-flow="prose"></p>
+                <a
+                  data-info-href="parties.bride.venue.mapUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="map-button"
+                  data-i18n="map.openMap"
+                  >MỞ BẢN ĐỒ ↗</a
+                >
+              </div>
+              <iframe
+                title="Bản đồ nhà gái"
+                tabindex="-1"
+                data-i18n-title="map.brideFrameTitle"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                data-info-embed="parties.bride.venue.embedUrl"
+              ></iframe>
+            </article>
+            <article id="map-groom" class="location-card" data-party-scope="groom">
+              <div class="location-info">
+                <small data-i18n="map.groomLabel">NHÀ TRAI · </small>
+                <h3 data-i18n="map.groomTitle" data-text-fit="heading"></h3>
+                <p data-i18n="map.groomAddress" data-text-flow="prose"></p>
+                <a
+                  data-info-href="parties.groom.venue.mapUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="map-button"
+                  data-i18n="map.openMap"
+                  >MỞ BẢN ĐỒ ↗</a
+                >
+              </div>
+              <iframe
+                title="Bản đồ nhà trai"
+                tabindex="-1"
+                data-i18n-title="map.groomFrameTitle"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                data-info-embed="parties.groom.venue.embedUrl"
+              ></iframe>
+            </article>
+            <article id="map-single" class="location-card" data-party-scope="single">
+              <div class="location-info">
+                <small data-i18n="map.singleLabel"></small>
+                <h3 data-i18n="map.singleTitle" data-text-fit="heading"></h3>
+                <p data-i18n="map.singleAddress" data-text-flow="prose"></p>
+                <a
+                  data-info-href="parties.single.venue.mapUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="map-button"
+                  data-i18n="map.openMap"
+                  >MỞ BẢN ĐỒ ↗</a
+                >
+              </div>
+              <iframe
+                title="Bản đồ tiệc cưới"
+                tabindex="-1"
+                data-i18n-title="map.singleFrameTitle"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                data-info-embed="parties.single.venue.embedUrl"
+              ></iframe>
+            </article>
+          </div>
+        </section>
+      </div>
     </div>
-    <button type="button" class="calendar-share" id="calendarShare" data-i18n="calendar.share" hidden>Chọn ứng dụng trên thiết bị</button>
-  </details>
-  <button type="button" class="calendar-all" id="calendarAll" data-i18n="calendar.all" hidden>Tải cả lễ và tiệc (.ics)</button>
-  <p class="calendar-hint" data-i18n="calendar.hint">Bạn sẽ xem và xác nhận trước khi lưu. Ứng dụng mở được tùy thuộc thiết bị và trình duyệt.</p>
-  <p class="calendar-status" id="calendarStatus" role="status" aria-live="polite"></p>
-</dialog>
-<script src="calendar.js?v=__BUILD_ID__" defer></script>
-<script src="quick-nav.js?v=__BUILD_ID__" defer></script>
-<script src="settings.js?v=__BUILD_ID__" defer></script>
-<script src="link-tool.js?v=__BUILD_ID__" defer></script>
-<script src="typography.js?v=__BUILD_ID__" defer></script>
-</body>
-</html>
+    <div class="wg-backdrop" id="wgBackdrop" hidden></div>
+    <div
+      class="wg-modal"
+      id="wgModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="wgTitle"
+      aria-hidden="true"
+      hidden
+    >
+      <div class="wg-dialog">
+        <div class="wg-header">
+          <span class="wq-kicker" data-i18n="gift.eyebrow">MỪNG CƯỚI</span>
+          <button
+            type="button"
+            class="wg-close"
+            id="wgClose"
+            aria-label="Đóng mừng cưới"
+            data-i18n-aria="gift.closeAria"
+          >
+            ×
+          </button>
+        </div>
+        <section class="gift-section" id="wedding-gift">
+          <div class="section-head">
+            <p class="overline gold" data-i18n="gift.eyebrow" data-text-fit="label">MỪNG CƯỚI</p>
+            <h2 class="section-title" id="wgTitle" data-i18n="gift.title" data-text-fit="heading">
+              Gửi lời chúc đến chúng mình
+            </h2>
+            <p class="section-lead" data-i18n="gift.lead" data-text-flow="prose">
+              Cảm ơn tình cảm của bạn dành cho chúng mình ♡
+            </p>
+          </div>
+          <div class="gift-grid">
+            <article class="gift-card" data-party-scope="bride">
+              <div class="gift-bank" data-info="parties.bride.gift.bank"></div>
+              <h3 data-info="parties.bride.gift.accountHolder" data-text-fit="heading"></h3>
+              <div class="gift-account-number" data-info="parties.bride.gift.accountNumber"></div>
+              <div class="gift-qr-shell">
+                <img
+                  class="gift-qr"
+                  data-info-src="parties.bride.gift.qrImage"
+                  width="685"
+                  height="685"
+                  decoding="async"
+                  data-info-alt="parties.bride.gift.qrAlt"
+                  alt=""
+                />
+              </div>
+              <p class="gift-hint" data-i18n="gift.hint">Quét mã bằng ứng dụng ngân hàng</p>
+            </article>
+            <article class="gift-card" data-party-scope="groom">
+              <div class="gift-bank" data-info="parties.groom.gift.bank"></div>
+              <h3 data-info="parties.groom.gift.accountHolder" data-text-fit="heading"></h3>
+              <div class="gift-account-number" data-info="parties.groom.gift.accountNumber"></div>
+              <div class="gift-qr-shell">
+                <img
+                  class="gift-qr"
+                  data-info-src="parties.groom.gift.qrImage"
+                  width="570"
+                  height="570"
+                  decoding="async"
+                  data-info-alt="parties.groom.gift.qrAlt"
+                  alt=""
+                />
+              </div>
+              <p class="gift-hint" data-i18n="gift.hint">Quét mã bằng ứng dụng ngân hàng</p>
+            </article>
+            <article class="gift-card" data-party-scope="single">
+              <div class="gift-bank" data-info="parties.single.gift.bank"></div>
+              <h3 data-info="parties.single.gift.accountHolder" data-text-fit="heading"></h3>
+              <div class="gift-account-number" data-info="parties.single.gift.accountNumber"></div>
+              <div class="gift-qr-shell">
+                <img
+                  class="gift-qr"
+                  data-info-src="parties.single.gift.qrImage"
+                  width="685"
+                  height="685"
+                  decoding="async"
+                  data-info-alt="parties.single.gift.qrAlt"
+                  alt=""
+                />
+              </div>
+              <p class="gift-hint" data-i18n="gift.hint">Quét mã bằng ứng dụng ngân hàng</p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </div>
 
+    <!-- Only present after music has actually started. Pause keeps it visible;
+     Stop dismisses it until the guest starts music again in Settings. -->
+    <div class="music-float" id="musicBubble" data-music-state="playing" hidden>
+      <div
+        class="music-float-actions"
+        id="musicBubbleActions"
+        role="group"
+        aria-label="Điều khiển nhạc"
+        data-i18n-aria="music.controlsAria"
+        hidden
+      >
+        <button
+          type="button"
+          id="musicBubblePause"
+          class="music-float-action"
+          aria-label="Tạm dừng nhạc"
+          title="Tạm dừng nhạc"
+        >
+          <svg
+            class="music-float-pause-icon"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <rect x="6" y="5" width="4" height="14" rx="1" />
+            <rect x="14" y="5" width="4" height="14" rx="1" />
+          </svg>
+          <svg
+            class="music-float-play-icon"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M8 5.5a1 1 0 0 1 1.5-.86l10 6.5a1 1 0 0 1 0 1.72l-10 6.5A1 1 0 0 1 8 18.5z" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          id="musicBubbleStop"
+          class="music-float-action music-float-stop"
+          aria-label="Dừng hẳn và ẩn nút nhạc"
+          title="Dừng hẳn và ẩn nút nhạc"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <rect x="6" y="6" width="12" height="12" rx="2" />
+          </svg>
+        </button>
+      </div>
+      <button
+        type="button"
+        id="musicBubbleTrigger"
+        class="music-float-trigger"
+        aria-controls="musicBubbleActions"
+        aria-expanded="false"
+        aria-label="Mở điều khiển nhạc"
+        title="Điều khiển nhạc"
+      >
+        <span class="music-float-note" aria-hidden="true"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 18V5.7L20 3v12.3" />
+            <ellipse cx="6" cy="18" rx="3" ry="2.1" transform="rotate(-18 6 18)" />
+            <ellipse cx="17" cy="15.3" rx="3" ry="2.1" transform="rotate(-18 17 15.3)" />
+            <path d="M9 9.2 20 6.5" /></svg
+        ></span>
+      </button>
+    </div>
+    <dialog
+      class="calendar-dialog"
+      id="calendarDialog"
+      aria-labelledby="calendarTitle"
+      aria-describedby="calendarDescription"
+    >
+      <div class="calendar-top">
+        <span id="calendarSummary"></span
+        ><button
+          type="button"
+          class="calendar-close"
+          id="calendarClose"
+          data-i18n-aria="calendar.close"
+          aria-label="Đóng chọn ứng dụng lịch"
+        >
+          ×
+        </button>
+      </div>
+      <h2 id="calendarTitle" data-i18n="calendar.title">Thêm vào lịch</h2>
+      <p class="calendar-description" id="calendarDescription" data-i18n="calendar.description">
+        Chọn sự kiện và nơi bạn muốn lưu lịch hẹn.
+      </p>
+      <div class="calendar-event-field" id="calendarEventField">
+        <label for="calendarEvent" data-i18n="calendar.event">Sự kiện muốn lưu</label
+        ><select id="calendarEvent"></select>
+      </div>
+      <p class="calendar-place" id="calendarEventPlace"></p>
+      <p class="calendar-suggestion" data-i18n="calendar.suggested">Phù hợp với thiết bị</p>
+      <div class="calendar-options" id="calendarSuggested"></div>
+      <details class="calendar-other" id="calendarOther">
+        <summary data-i18n="calendar.other">Ứng dụng khác</summary>
+        <div class="calendar-options" id="calendarOtherOptions">
+          <a
+            class="calendar-option"
+            id="calendarGoogle"
+            data-calendar-app="google"
+            target="_blank"
+            rel="noopener noreferrer"
+            ><span class="calendar-icon" aria-hidden="true">G</span
+            ><span class="calendar-option-copy"
+              ><strong data-i18n="calendar.google">Google Calendar</strong
+              ><small data-i18n="calendar.googleHint">Mở trang tạo sự kiện Google</small></span
+            ></a
+          >
+          <a
+            class="calendar-option"
+            id="calendarOutlook"
+            data-calendar-app="outlook"
+            target="_blank"
+            rel="noopener noreferrer"
+            ><span class="calendar-icon" aria-hidden="true">O</span
+            ><span class="calendar-option-copy"
+              ><strong data-i18n="calendar.outlook">Outlook.com</strong
+              ><small data-i18n="calendar.outlookHint"
+                >Mở lịch Microsoft cá nhân trên web</small
+              ></span
+            ></a
+          >
+          <button
+            type="button"
+            class="calendar-option"
+            id="calendarNative"
+            data-calendar-app="native"
+          >
+            <span class="calendar-icon" aria-hidden="true">＋</span
+            ><span class="calendar-option-copy"
+              ><strong id="calendarNativeLabel"></strong
+              ><small data-i18n="calendar.nativeHint"
+                >Tải tệp lịch để mở bằng ứng dụng của bạn</small
+              ></span
+            >
+          </button>
+        </div>
+        <button
+          type="button"
+          class="calendar-share"
+          id="calendarShare"
+          data-i18n="calendar.share"
+          hidden
+        >
+          Chọn ứng dụng trên thiết bị
+        </button>
+      </details>
+      <button type="button" class="calendar-all" id="calendarAll" data-i18n="calendar.all" hidden>
+        Tải cả lễ và tiệc (.ics)
+      </button>
+      <p class="calendar-hint" data-i18n="calendar.hint">
+        Bạn sẽ xem và xác nhận trước khi lưu. Ứng dụng mở được tùy thuộc thiết bị và trình duyệt.
+      </p>
+      <p class="calendar-status" id="calendarStatus" role="status" aria-live="polite"></p>
+    </dialog>
+    <script src="calendar.js?v=__BUILD_ID__" defer></script>
+    <script src="quick-nav.js?v=__BUILD_ID__" defer></script>
+    <script src="settings.js?v=__BUILD_ID__" defer></script>
+    <script src="link-tool.js?v=__BUILD_ID__" defer></script>
+    <script src="typography.js?v=__BUILD_ID__" defer></script>
+  </body>
+</html>

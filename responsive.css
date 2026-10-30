@@ -1,78 +1,199 @@
 /* Shared layout primitives. Component styles own appearance; this file owns
    reflow, readable text and visible-viewport bounds. No platform branches. */
-:root{
-  --viewport-width:100vw;--viewport-height:100vh;
-  --viewport-left:0px;--viewport-top:0px;
-  --text-min-heading:18px;--text-min-label:8px;
+:root {
+  --viewport-width: 100vw;
+  --viewport-height: 100vh;
+  --viewport-left: 0px;
+  --viewport-top: 0px;
+  --text-min-heading: 18px;
+  --text-min-label: 8px;
 }
-@supports(height:100dvh){:root{--viewport-height:100dvh}}
-[data-text-fit]{max-width:100%;min-width:0;text-wrap:balance}
-[data-text-fit="heading"]{--text-fit-min:var(--text-min-heading)}
-[data-text-fit="label"]{--text-fit-min:var(--text-min-label)}
+@supports (height: 100dvh) {
+  :root {
+    --viewport-height: 100dvh;
+  }
+}
+[data-text-fit] {
+  max-width: 100%;
+  min-width: 0;
+  text-wrap: balance;
+}
+[data-text-fit="heading"] {
+  --text-fit-min: var(--text-min-heading);
+}
+[data-text-fit="label"] {
+  --text-fit-min: var(--text-min-label);
+}
 /* Keep each person's name together, including narrow in-app browsers. */
-.closing-names{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:0 .2em;font-size:clamp(28px,7.5vw,44px);line-height:1.4}
-.closing-names .closing-name{white-space:nowrap;color:inherit}
-.closing-names .closing-join{flex:none}
+.closing-names {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0 0.2em;
+  font-size: clamp(28px, 7.5vw, 44px);
+  line-height: 1.4;
+}
+.closing-names .closing-name {
+  white-space: nowrap;
+  color: inherit;
+}
+.closing-names .closing-join {
+  flex: none;
+}
 
 /* Names may move to a new line as a unit; a lone final word must not drop. */
-[data-party-name-pair],.person-copy h3,.family-card h4,.gift-card h3{text-wrap:balance;word-break:normal;overflow-wrap:normal}
+[data-party-name-pair],
+.person-copy h3,
+.family-card h4,
+.gift-card h3 {
+  text-wrap: balance;
+  word-break: normal;
+  overflow-wrap: normal;
+}
 
 /* Short display copy fits its container; authored <br> remains a line break. */
-.responsive-line{white-space:nowrap;max-width:100%;min-width:0}
-.responsive-line[data-type-mode="wrap"]{white-space:normal;text-wrap:balance}
-[data-text-flow="prose"]{text-wrap:pretty;overflow-wrap:break-word}
-.event-actions :is(a,button) span{white-space:nowrap;font-size:clamp(8px,2.5vw,10px);letter-spacing:.08em}
+.responsive-line {
+  white-space: nowrap;
+  max-width: 100%;
+  min-width: 0;
+}
+.responsive-line[data-type-mode="wrap"] {
+  white-space: normal;
+  text-wrap: balance;
+}
+[data-text-flow="prose"] {
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+.event-actions :is(a, button) span {
+  white-space: nowrap;
+  font-size: clamp(8px, 2.5vw, 10px);
+  letter-spacing: 0.08em;
+}
 
 /* Content-sized tracks respond to the available container, including split view. */
-.family-grid,.event-grid,.location-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr))}
-.couple-editorial{container:couple-layout / inline-size}
-.person,.person-bride{grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr))}
-.promise-story{container:story-layout / inline-size}
-.promise-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))}
-@container couple-layout (width < 34rem){.person-bride .person-copy{order:2}}
-@container story-layout (width < 50rem){.promise-card:nth-child(2){padding-top:0}}
+.family-grid,
+.event-grid,
+.location-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+.couple-editorial {
+  container: couple-layout / inline-size;
+}
+.person,
+.person-bride {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+.promise-story {
+  container: story-layout / inline-size;
+}
+.promise-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+@container couple-layout (width < 34rem) {
+  .person-bride .person-copy {
+    order: 2;
+  }
+}
+@container story-layout (width < 50rem) {
+  .promise-card:nth-child(2) {
+    padding-top: 0;
+  }
+}
 
 /* Keep native scrolling while disabling touch zoom and double-tap zoom. */
-html,body{touch-action:pan-x pan-y}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,
+body {
+  touch-action: pan-x pan-y;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
 /* The image determines the stacked hero height; the shade follows it. */
-.hero-media{position:absolute;inset:0;overflow:hidden}
-.hero-media .hero-shade{inset:0;height:100%}
-@media(max-width:900px),(max-height:36rem){
-  .hero-media{position:relative;inset:auto;isolation:isolate}
+.hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.hero-media .hero-shade {
+  inset: 0;
+  height: 100%;
+}
+@media (max-width: 900px), (max-height: 36rem) {
+  .hero-media {
+    position: relative;
+    inset: auto;
+    isolation: isolate;
+  }
   /* Visible beside the image only when its natural height exceeds the screen. */
-  .hero-media:before{
-    content:"";position:absolute;inset:-16px;z-index:-1;
-    background:var(--hero-image) center / cover no-repeat;
-    filter:blur(12px) brightness(.65);pointer-events:none;
+  .hero-media:before {
+    content: "";
+    position: absolute;
+    inset: -16px;
+    z-index: -1;
+    background: var(--hero-image) center / cover no-repeat;
+    filter: blur(12px) brightness(0.65);
+    pointer-events: none;
   }
 }
 
 /* Centre incomplete story rows using tracks derived from card space. */
-@supports(container-type:inline-size){
-  .promise-grid{grid-template-columns:repeat(12,minmax(0,1fr));max-width:none}
-  .promise-card{grid-column:1 / -1}
-  @container story-layout (min-width:31.75rem){
-    .promise-card{grid-column:span 6}
-    .promise-card:last-child:nth-child(odd){grid-column:4 / span 6}
+@supports (container-type: inline-size) {
+  .promise-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    max-width: none;
   }
-  @container story-layout (min-width:48.5rem){
-    .promise-card,.promise-card:last-child:nth-child(odd){grid-column:span 4}
+  .promise-card {
+    grid-column: 1 / -1;
+  }
+  @container story-layout (min-width:31.75rem) {
+    .promise-card {
+      grid-column: span 6;
+    }
+    .promise-card:last-child:nth-child(odd) {
+      grid-column: 4 / span 6;
+    }
+  }
+  @container story-layout (min-width:48.5rem) {
+    .promise-card,
+    .promise-card:last-child:nth-child(odd) {
+      grid-column: span 4;
+    }
   }
 }
 
 /* Fixed surfaces share the visible viewport, including browser UI/keyboards. */
-.wm-modal,.wg-modal,.link-tool-screen,.party-selector,.album-lightbox{
-  inset:auto;left:var(--viewport-left);top:var(--viewport-top);
-  width:var(--viewport-width);height:var(--viewport-height);
+.wm-modal,
+.wg-modal,
+.link-tool-screen,
+.party-selector,
+.album-lightbox {
+  inset: auto;
+  left: var(--viewport-left);
+  top: var(--viewport-top);
+  width: var(--viewport-width);
+  height: var(--viewport-height);
 }
-.wm-dialog,.wg-dialog{
-  max-height:calc(var(--viewport-height) - max(var(--modal-gap),env(safe-area-inset-top,0px)) - max(var(--modal-gap),env(safe-area-inset-bottom,0px)));
+.wm-dialog,
+.wg-dialog {
+  max-height: calc(
+    var(--viewport-height) - max(var(--modal-gap), env(safe-area-inset-top, 0px)) -
+      max(var(--modal-gap), env(safe-area-inset-bottom, 0px))
+  );
 }
-.album-lightbox-stage{height:100%;min-height:0}
-.calendar-dialog{
-  inset:auto;margin:0;left:calc(var(--viewport-left) + var(--viewport-width)/2);
-  top:calc(var(--viewport-top) + var(--viewport-height)/2);transform:translate(-50%,-50%);
-  width:min(420px,calc(var(--viewport-width) - 28px));max-height:calc(var(--viewport-height) - 32px);
+.album-lightbox-stage {
+  height: 100%;
+  min-height: 0;
+}
+.calendar-dialog {
+  inset: auto;
+  margin: 0;
+  left: calc(var(--viewport-left) + var(--viewport-width) / 2);
+  top: calc(var(--viewport-top) + var(--viewport-height) / 2);
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(var(--viewport-width) - 28px));
+  max-height: calc(var(--viewport-height) - 32px);
 }

@@ -7,16 +7,14 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const os = require("node:os");
 const vm = require("node:vm");
 
 const root = __dirname;
 const context = { window: {} };
-vm.runInNewContext(
-  fs.readFileSync(path.join(root, "wedding-info.js"), "utf8"),
-  context,
-  { filename: "wedding-info.js", timeout: 1500 },
-);
+vm.runInNewContext(fs.readFileSync(path.join(root, "wedding-info.js"), "utf8"), context, {
+  filename: "wedding-info.js",
+  timeout: 1500,
+});
 const wedding = context.window.WEDDING_INFO;
 if (!wedding?.site || !wedding?.couple?.bride || !wedding?.couple?.groom || !wedding?.parties) {
   throw new Error("Missing required fields in wedding-info.js");
@@ -24,13 +22,21 @@ if (!wedding?.site || !wedding?.couple?.bride || !wedding?.couple?.groom || !wed
 
 const build = (process.env.BUILD_SHA || "local-dev").slice(0, 12);
 const names = wedding.couple;
-const escapeXml = value => String(value).replace(/[&<>"']/g, char =>
-  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char],
-);
+const escapeXml = (value) =>
+  String(value).replace(
+    /[&<>"']/g,
+    (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char],
+  );
 const siteUrl = new URL(wedding.site.url);
 const assetUrl = new URL(wedding.site.socialImage, siteUrl).href;
 const imageExt = path.extname(new URL(assetUrl).pathname).toLowerCase();
-const imageMimes = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif" };
+const imageMimes = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+};
 const imageMime = imageMimes[imageExt];
 if (!imageMime) throw new Error("Unsupported socialImage file type: " + wedding.site.socialImage);
 const namePair = names.bride.short + " · " + names.groom.short;
@@ -49,7 +55,7 @@ for (const filename of ["index.html", "link-tool.html", "style.css"]) {
   let html = fs.readFileSync(target, "utf8").replaceAll("__BUILD_ID__", build);
   if (filename === "index.html" && wedding.site.socialImage !== "og-preview.jpg") {
     // Custom images may have a different aspect ratio; avoid false 1200×630 metadata.
-    html = html.replace(/^<meta property="og:image:(?:width|height)"[^>]*>\r?\n/gm, "");
+    html = html.replace(/\s*<meta\s+property="og:image:(?:width|height)"[^>]*>/g, "");
   }
   for (const [placeholder, value] of Object.entries(meta)) {
     html = html.replaceAll(placeholder, escapeXml(value));
@@ -60,14 +66,12 @@ for (const side of ["bride", "groom"]) {
   const first = wedding.couple[side === "bride" ? "bride" : "groom"].initial;
   const second = wedding.couple[side === "bride" ? "groom" : "bride"].initial;
   const target = path.join(root, "favicon-" + side + ".svg");
-  const content = fs.readFileSync(target, "utf8")
+  const content = fs
+    .readFileSync(target, "utf8")
     .replaceAll("__FIRST_INITIAL__", escapeXml(first))
     .replaceAll("__SECOND_INITIAL__", escapeXml(second));
   fs.writeFileSync(target, content);
 }
-fs.writeFileSync(path.join(os.tmpdir(), "wedding-deploy-info.json"), JSON.stringify(wedding));
-fs.writeFileSync(
-  path.join(root, "version.json"),
-  JSON.stringify({ build }),
-);
+fs.writeFileSync(path.join(root, "wedding-deploy-info.json"), JSON.stringify(wedding));
+fs.writeFileSync(path.join(root, "version.json"), JSON.stringify({ build }));
 console.log("Wedding template built from wedding-info.js at", build);

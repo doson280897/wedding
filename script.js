@@ -1,9 +1,9 @@
 (() => {
   "use strict";
   const i18n = window.WeddingI18n;
-  const tr = key => i18n ? i18n.t(key) : key;
+  const tr = (key) => (i18n ? i18n.t(key) : key);
   const info = window.WEDDING_INFO;
-  const partyInfo = side => info.parties[side];
+  const partyInfo = (side) => info.parties[side];
   const params = new URLSearchParams(window.location.search);
   const partyParam = params.get("party");
   const singleMode = info.wedding?.mode === "single";
@@ -12,21 +12,22 @@
   // but always resolve to the only celebration rather than a party selector.
   const selectedParty = singleMode
     ? "single"
-    : (partyParam === "bride" || partyParam === "groom" ? partyParam : null);
+    : partyParam === "bride" || partyParam === "groom"
+      ? partyParam
+      : null;
   document.documentElement.dataset.weddingMode = singleMode ? "single" : "double";
   const partySelector = document.getElementById("partySelector");
   // Language buttons are owned by i18n.js; no duplicate click handlers here.
 
   // Keep the invitation anchored to the top while the entrance gate is active.
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-  const resetInvitationScroll = () => window.scrollTo({ top:0, left:0, behavior:"instant" });
+  const resetInvitationScroll = () => window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   resetInvitationScroll();
   window.addEventListener("pageshow", () => {
     // Slow external resources can delay pageshow until after a reduced-motion
     // entrance has finished. Never pull a guest back from content they opened.
     if (document.documentElement.classList.contains("wax-pending")) resetInvitationScroll();
   });
-
 
   if (selectedParty) {
     document.documentElement.dataset.party = selectedParty;
@@ -36,34 +37,44 @@
     const partyButtons = Array.from(document.querySelectorAll("[data-party-select]"));
     requestAnimationFrame(() => {
       if (!document.documentElement.classList.contains("link-tool-active")) {
-        partyButtons[0]?.focus({preventScroll:true});
+        partyButtons[0]?.focus({ preventScroll: true });
       }
     });
 
-    partyButtons.forEach(button => button.addEventListener("click", () => {
-      const side = button.dataset.partySelect;
-      if (side !== "bride" && side !== "groom") return;
-      const url = new URL(window.location.href);
-      url.searchParams.set("party", side);
-      url.hash = "";
-      // Switch to the selected invitation within the same history entry.
-      // Preserve this tab's language through the page reload.
-      try {
-        history.replaceState(history.state, "", url.href);
-        window.location.reload();
-      } catch (_) {
-        window.location.replace(url.href);
-      }
-    }));
+    partyButtons.forEach((button) =>
+      button.addEventListener("click", () => {
+        const side = button.dataset.partySelect;
+        if (side !== "bride" && side !== "groom") return;
+        const url = new URL(window.location.href);
+        url.searchParams.set("party", side);
+        url.hash = "";
+        // Switch to the selected invitation within the same history entry.
+        // Preserve this tab's language through the page reload.
+        try {
+          history.replaceState(history.state, "", url.href);
+          window.location.reload();
+        } catch (_) {
+          window.location.replace(url.href);
+        }
+      }),
+    );
 
-    document.addEventListener("keydown", event => {
-      if (!document.documentElement.classList.contains("party-pending") || document.documentElement.classList.contains("link-tool-active") || event.key !== "Tab") return;
+    document.addEventListener("keydown", (event) => {
+      if (
+        !document.documentElement.classList.contains("party-pending") ||
+        document.documentElement.classList.contains("link-tool-active") ||
+        event.key !== "Tab"
+      )
+        return;
       const adminLink = document.querySelector(".party-admin-link");
       const settingsTrigger = document.getElementById("settingsTrigger");
       const settingsPanel = document.getElementById("settingsPanel");
-      const settingsButtons = settingsPanel?.hidden ? [] : [...settingsPanel.querySelectorAll("button")];
-      const focusable = [settingsTrigger, ...settingsButtons, ...partyButtons, adminLink]
-        .filter(element => element && !element.disabled && !element.hidden);
+      const settingsButtons = settingsPanel?.hidden
+        ? []
+        : [...settingsPanel.querySelectorAll("button")];
+      const focusable = [settingsTrigger, ...settingsButtons, ...partyButtons, adminLink].filter(
+        (element) => element && !element.disabled && !element.hidden,
+      );
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable.at(-1);
@@ -91,33 +102,40 @@
 
   const makeWeddingDate = (side, targetTime, titleKey, ariaKey) => ({
     time: new Date(
-      partyInfo(side).date + "T" + partyInfo(side)[targetTime] + ":00" + info.site.timezone
+      partyInfo(side).date + "T" + partyInfo(side)[targetTime] + ":00" + info.site.timezone,
     ).getTime(),
     titleKey,
-    ariaKey
+    ariaKey,
   });
   const weddingDates = {
-    bride: makeWeddingDate("bride","ceremonyTime","countdown.brideTitle","countdown.brideAria"),
-    groom: makeWeddingDate("groom","ceremonyTime","countdown.groomTitle","countdown.groomAria"),
-    single: makeWeddingDate("single","receptionTime","countdown.singleTitle","countdown.singleAria")
+    bride: makeWeddingDate("bride", "ceremonyTime", "countdown.brideTitle", "countdown.brideAria"),
+    groom: makeWeddingDate("groom", "ceremonyTime", "countdown.groomTitle", "countdown.groomAria"),
+    single: makeWeddingDate(
+      "single",
+      "receptionTime",
+      "countdown.singleTitle",
+      "countdown.singleAria",
+    ),
   };
   const timer = document.getElementById("timer");
   const countdownTitle = document.getElementById("countdownTitle");
-  const selectedWedding = selectedParty ||
-    (Date.now() < weddingDates.bride.time ? "bride" : "groom");
+  const selectedWedding =
+    selectedParty || (Date.now() < weddingDates.bride.time ? "bride" : "groom");
 
   function ensureTimerBoxes() {
     if (!timer) return;
     const units = [
-      ["days","countdown.days"],
-      ["hours","countdown.hours"],
-      ["minutes","countdown.minutes"],
-      ["seconds","countdown.seconds"]
+      ["days", "countdown.days"],
+      ["hours", "countdown.hours"],
+      ["minutes", "countdown.minutes"],
+      ["seconds", "countdown.seconds"],
     ];
     if (!document.getElementById("days")) {
-      timer.innerHTML = units.map(item => '<div><strong id="' + item[0] + '">00</strong><small></small></div>').join("");
+      timer.innerHTML = units
+        .map((item) => '<div><strong id="' + item[0] + '">00</strong><small></small></div>')
+        .join("");
     }
-    units.forEach(item => {
+    units.forEach((item) => {
       const node = document.querySelector("#" + item[0] + " + small");
       if (node && node.textContent !== tr(item[1])) node.textContent = tr(item[1]);
     });
@@ -143,11 +161,11 @@
       Math.floor(remain / 86400000),
       Math.floor(remain / 3600000) % 24,
       Math.floor(remain / 60000) % 60,
-      Math.floor(remain / 1000) % 60
+      Math.floor(remain / 1000) % 60,
     ];
-    ["days","hours","minutes","seconds"].forEach((id,index) => {
+    ["days", "hours", "minutes", "seconds"].forEach((id, index) => {
       const node = document.getElementById(id);
-      const value = String(values[index]).padStart(2,"0");
+      const value = String(values[index]).padStart(2, "0");
       if (node && node.textContent !== value) node.textContent = value;
     });
   }
@@ -168,7 +186,7 @@
   });
 
   const themeColor = document.getElementById("themeColor");
-  const setBrowserTheme = color => themeColor?.setAttribute("content", color);
+  const setBrowserTheme = (color) => themeColor?.setAttribute("content", color);
   const setContentBrowserTheme = () => {
     const gateVisible = document.documentElement.classList.contains("wax-pending");
     setBrowserTheme(gateVisible ? "#0b161e" : "#0b0e0e");
@@ -185,12 +203,13 @@
   updateGateVisibility();
   // One optional sound clip for the whole lock-to-door sequence. It starts
   // directly on the seal gesture and is independent from the gate animation.
-  const introSoundUrl = typeof info.site?.introSound === "string" ? info.site.introSound.trim() : "";
-  const introSound = selectedParty && !linkToolInitial && introSoundUrl
-    ? new Audio(introSoundUrl) : null;
+  const introSoundUrl =
+    typeof info.site?.introSound === "string" ? info.site.introSound.trim() : "";
+  const introSound =
+    selectedParty && !linkToolInitial && introSoundUrl ? new Audio(introSoundUrl) : null;
   if (introSound) {
     introSound.preload = "auto";
-    introSound.volume = .75;
+    introSound.volume = 0.75;
   }
   const playIntroSound = () => {
     if (!introSound || reducedGateMotion) return;
@@ -207,7 +226,11 @@
   const GATE_REVEAL_BEAT_MS = 2000;
   const GATE_HANDOFF_MS = 1100;
   // CSS and the fallback timers share one clock.
-  for (const [name, time] of [["unlock", GATE_UNLOCK_MS], ["door", GATE_DOOR_MS], ["handoff", GATE_HANDOFF_MS]]) {
+  for (const [name, time] of [
+    ["unlock", GATE_UNLOCK_MS],
+    ["door", GATE_DOOR_MS],
+    ["handoff", GATE_HANDOFF_MS],
+  ]) {
     document.documentElement.style.setProperty("--gate-" + name + "-time", time + "ms");
   }
   let gateOpening = false;
@@ -220,21 +243,38 @@
     const dust = moonlightGate.querySelector(".moonlight-gate__dust");
     if (!dust || dust.childElementCount) return;
     const positions = [
-      [11,19],[21,32],[8,49],[26,69],[15,80],[32,13],
-      [37,40],[12,62],[85,18],[92,36],[78,54],[89,70],
-      [74,81],[67,23],[95,59],[70,11],[39,77],[61,74]
+      [11, 19],
+      [21, 32],
+      [8, 49],
+      [26, 69],
+      [15, 80],
+      [32, 13],
+      [37, 40],
+      [12, 62],
+      [85, 18],
+      [92, 36],
+      [78, 54],
+      [89, 70],
+      [74, 81],
+      [67, 23],
+      [95, 59],
+      [70, 11],
+      [39, 77],
+      [61, 74],
     ];
     const nodes = document.createDocumentFragment();
-    positions.slice(0, matchMedia("(pointer: coarse)").matches ? 8 : 12).forEach(([x,y],index) => {
-      const star = document.createElement("i");
-      star.className = "moonlight-gate__spark";
-      star.style.setProperty("--sx", x + "%");
-      star.style.setProperty("--sy", y + "%");
-      star.style.setProperty("--size", (index % 5 === 0 ? 4.5 : 3) + "px");
-      star.style.setProperty("--duration", (1.45 + index % 4 * .32) + "s");
-      star.style.setProperty("--delay", (-index * .29) + "s");
-      nodes.append(star);
-    });
+    positions
+      .slice(0, matchMedia("(pointer: coarse)").matches ? 8 : 12)
+      .forEach(([x, y], index) => {
+        const star = document.createElement("i");
+        star.className = "moonlight-gate__spark";
+        star.style.setProperty("--sx", x + "%");
+        star.style.setProperty("--sy", y + "%");
+        star.style.setProperty("--size", (index % 5 === 0 ? 4.5 : 3) + "px");
+        star.style.setProperty("--duration", 1.45 + (index % 4) * 0.32 + "s");
+        star.style.setProperty("--delay", -index * 0.29 + "s");
+        nodes.append(star);
+      });
     dust.append(nodes);
   };
 
@@ -265,16 +305,18 @@
   });
   const startGateMeteors = () => {
     if (reducedGateMotion || !meteorCanvas) return;
-    const ctx = meteorCanvas.getContext("2d", { alpha:true });
+    const ctx = meteorCanvas.getContext("2d", { alpha: true });
     if (!ctx) return;
     stopGateMeteors();
     const tracks = [
-      { from:[1.03,-.23], to:[-.31,1.27], delay:180, duration:2650, strength:1 },
-      { from:[1.13,-.25], to:[-.22,1.28], delay:780, duration:2750, strength:.82 }
+      { from: [1.03, -0.23], to: [-0.31, 1.27], delay: 180, duration: 2650, strength: 1 },
+      { from: [1.13, -0.25], to: [-0.22, 1.28], delay: 780, duration: 2750, strength: 0.82 },
     ];
     const start = performance.now();
     let lastPaint = -Infinity;
-    let width = 0, height = 0, density = 0;
+    let width = 0,
+      height = 0,
+      density = 0;
     const fit = () => {
       const rect = meteorCanvas.getBoundingClientRect();
       const w = Math.max(1, Math.round(rect.width));
@@ -282,7 +324,9 @@
       // Decorative trails need no high-DPI full-screen backing store.
       const d = Math.min(1, 960 / w, 960 / h);
       if (w === width && h === height && d === density) return;
-      width = w; height = h; density = d;
+      width = w;
+      height = h;
+      density = d;
       meteorCanvas.width = Math.round(width * density);
       meteorCanvas.height = Math.round(height * density);
       ctx.setTransform(density, 0, 0, density, 0, 0);
@@ -293,7 +337,7 @@
       meteorResizeObserver = new ResizeObserver(fit);
       meteorResizeObserver.observe(meteorCanvas);
     }
-    const render = timestamp => {
+    const render = (timestamp) => {
       meteorFrame = 0;
       if (moonlightGate.hidden || document.hidden) return;
       // Cap canvas work at 30fps independently of 60/120Hz door animation.
@@ -312,20 +356,23 @@
         const cycle = (elapsed - track.delay) % (track.duration + 650);
         const t = elapsed < track.delay ? -1 : cycle / track.duration;
         if (t <= 0 || t >= 1) return;
-        const x0 = track.from[0] * width, y0 = track.from[1] * height;
+        const x0 = track.from[0] * width,
+          y0 = track.from[1] * height;
         const dx = (track.to[0] - track.from[0]) * width;
         const dy = (track.to[1] - track.from[1]) * height;
-        const hx = x0 + dx * t, hy = y0 + dy * t;
-        const prev = Math.max(0, t - (mobile ? .19 : .14));
-        const tx = x0 + dx * prev, ty = y0 + dy * prev;
+        const hx = x0 + dx * t,
+          hy = y0 + dy * t;
+        const prev = Math.max(0, t - (mobile ? 0.19 : 0.14));
+        const tx = x0 + dx * prev,
+          ty = y0 + dy * prev;
         const strength = track.strength * Math.min(1, t * 12, (1 - t) * 11);
 
         ctx.save();
         const trail = ctx.createLinearGradient(tx, ty, hx, hy);
         trail.addColorStop(0, "rgba(232,169,103,0)");
-        trail.addColorStop(.24, "rgba(242,187,113,.10)");
-        trail.addColorStop(.60, "rgba(251,216,164,.44)");
-        trail.addColorStop(.88, "rgba(255,238,203,.85)");
+        trail.addColorStop(0.24, "rgba(242,187,113,.10)");
+        trail.addColorStop(0.6, "rgba(251,216,164,.44)");
+        trail.addColorStop(0.88, "rgba(255,238,203,.85)");
         trail.addColorStop(1, "rgba(255,253,235,1)");
         ctx.strokeStyle = trail;
         ctx.lineCap = "round";
@@ -333,33 +380,34 @@
           ctx.globalAlpha = strength * alpha;
           ctx.lineWidth = size;
           ctx.beginPath();
-          ctx.moveTo(tx,ty);
-          ctx.lineTo(hx,hy);
+          ctx.moveTo(tx, ty);
+          ctx.lineTo(hx, hy);
           ctx.stroke();
         };
-        stroke(18,.14);
-        stroke(6,.29);
-        stroke(1.7,.90);
+        stroke(18, 0.14);
+        stroke(6, 0.29);
+        stroke(1.7, 0.9);
 
         // A few subtle fragments remain at places the star passed earlier.
-        const distance = Math.hypot(dx,dy) || 1;
-        const sideX = -dy / distance, sideY = dx / distance;
+        const distance = Math.hypot(dx, dy) || 1;
+        const sideX = -dy / distance,
+          sideY = dx / distance;
         for (let i = 0; i < (mobile ? 3 : 5); i++) {
-          const age = .016 + i * .017;
+          const age = 0.016 + i * 0.017;
           if (t <= age) continue;
-          const offset = Math.sin((i + index * 11) * 8.7) * (1.8 + i * .45);
+          const offset = Math.sin((i + index * 11) * 8.7) * (1.8 + i * 0.45);
           const px = x0 + dx * (t - age) + sideX * offset;
           const py = y0 + dy * (t - age) + sideY * offset;
-          ctx.globalAlpha = strength * Math.max(0, .27 - age * 1.55);
+          ctx.globalAlpha = strength * Math.max(0, 0.27 - age * 1.55);
           ctx.fillStyle = i % 3 === 0 ? "#fff0cd" : "#dcb276";
           ctx.beginPath();
-          ctx.arc(px, py, i % 3 === 0 ? .8 : .48, 0, Math.PI * 2);
+          ctx.arc(px, py, i % 3 === 0 ? 0.8 : 0.48, 0, Math.PI * 2);
           ctx.fill();
         }
         const halo = ctx.createRadialGradient(hx, hy, 0, hx, hy, 19);
         halo.addColorStop(0, "rgba(255,254,237,.94)");
-        halo.addColorStop(.16, "rgba(255,238,198,.63)");
-        halo.addColorStop(.48, "rgba(244,186,106,.16)");
+        halo.addColorStop(0.16, "rgba(255,238,198,.63)");
+        halo.addColorStop(0.48, "rgba(244,186,106,.16)");
         halo.addColorStop(1, "rgba(244,186,106,0)");
         ctx.globalAlpha = strength;
         ctx.fillStyle = halo;
@@ -381,7 +429,7 @@
     return timer;
   };
   const clearGateTimers = () => {
-    gateTimers.forEach(timer => window.clearTimeout(timer));
+    gateTimers.forEach((timer) => window.clearTimeout(timer));
     gateTimers.clear();
   };
 
@@ -391,12 +439,20 @@
     stopGateMeteors();
     if (introSound) {
       introSound.pause();
-      try { introSound.currentTime = 0; } catch (_) {}
+      try {
+        introSound.currentTime = 0;
+      } catch (_) {}
     }
     lastGateDoor?.removeEventListener("animationend", onDoorAnimationEnd);
     moonlightGate.hidden = true;
     moonlightGate.classList.remove(
-      "is-unlocking", "is-awakening", "is-opening", "is-opened", "is-inviting", "is-handoff", "is-leaving"
+      "is-unlocking",
+      "is-awakening",
+      "is-opening",
+      "is-opened",
+      "is-inviting",
+      "is-handoff",
+      "is-leaving",
     );
     document.documentElement.classList.remove("wax-pending", "gate-hero-revealing");
     setContentBrowserTheme();
@@ -424,7 +480,7 @@
     handoffStarted = true;
     // A bounded wait avoids revealing undecoded pixels on slower phones.
     // The open sky stays visible and animated throughout this short wait.
-    await Promise.race([heroPreparation, new Promise(resolve => scheduleGate(resolve, 450))]);
+    await Promise.race([heroPreparation, new Promise((resolve) => scheduleGate(resolve, 450))]);
     if (moonlightGate.hidden) return;
     // Set the lettering's starting pose before exposing the hero. Adding
     // its backwards-filled animation later would visibly jump down by 16px.
@@ -487,9 +543,9 @@
     if (selectedParty && !linkToolInitial) {
       moonlightGate.hidden = false;
       waxOpenButton.disabled = false;
-      waxOpenButton.addEventListener("click", openFromWax, { once:true });
+      waxOpenButton.addEventListener("click", openFromWax, { once: true });
       requestAnimationFrame(() => {
-        waxOpenButton.focus({ preventScroll:true });
+        waxOpenButton.focus({ preventScroll: true });
         // Leave the first gate paint free, then prepare the existing hero asset.
         scheduleGate(prepareHero, 200);
       });
@@ -508,8 +564,9 @@
   const musicAudio = selectedParty && !linkToolInitial ? document.createElement("audio") : null;
   if (musicAudio) {
     musicAudio.id = "weddingMusic";
-    musicAudio.src = new URL(partyInfo(selectedParty).music.src, document.baseURI).href;
-    musicAudio.preload = "auto";
+    // Defer the source itself, so even eager media implementations do not
+    // compete with the gate and hero before the guest interacts.
+    musicAudio.preload = "none";
     musicAudio.loop = true;
     musicAudio.volume = 0.7;
     musicAudio.hidden = true;
@@ -530,7 +587,7 @@
     musicStartTimer = 0;
   };
 
-  const failMusicAttempt = requestId => {
+  const failMusicAttempt = (requestId) => {
     if (!musicEnabled || requestId !== musicRequestId) return;
     ++musicRequestId;
     clearMusicWait();
@@ -542,7 +599,7 @@
     setMusicUI();
   };
 
-  const monitorMusicWait = requestId => {
+  const monitorMusicWait = (requestId) => {
     clearMusicWait();
     musicStartTimer = setTimeout(() => failMusicAttempt(requestId), 15000);
   };
@@ -560,28 +617,48 @@
     setMusicUI();
   };
 
-  const setBubbleActionsOpen = open => {
+  const setBubbleActionsOpen = (open) => {
     bubbleActionsOpen = Boolean(open && musicHasStarted && musicBubble && !musicBubble.hidden);
     if (musicBubbleActions) musicBubbleActions.hidden = !bubbleActionsOpen;
-    if (musicBubbleTrigger) musicBubbleTrigger.setAttribute("aria-expanded", String(bubbleActionsOpen));
+    if (musicBubbleTrigger)
+      musicBubbleTrigger.setAttribute("aria-expanded", String(bubbleActionsOpen));
     musicBubble?.classList.toggle("is-expanded", bubbleActionsOpen);
   };
 
   function setMusicUI() {
-    const state = !musicEnabled ? "off" : musicPlaying ? "playing" : musicStarting ? "starting" : "paused";
+    const state = !musicEnabled
+      ? "off"
+      : musicPlaying
+        ? "playing"
+        : musicStarting
+          ? "starting"
+          : "paused";
     if (musicButton) {
       musicButton.setAttribute("aria-pressed", String(musicEnabled));
-      musicButton.setAttribute("aria-label", tr(
-        !musicEnabled ? "music.enableAria" :
-        musicPlaying ? "music.disableAria" : "music.resumeAria"
-      ));
+      musicButton.setAttribute(
+        "aria-label",
+        tr(
+          !musicEnabled
+            ? "music.enableAria"
+            : musicPlaying
+              ? "music.disableAria"
+              : "music.resumeAria",
+        ),
+      );
       musicButton.setAttribute("title", tr("music.title"));
       const label = musicButton.querySelector(".music-label");
-      if (label) label.textContent = tr(
-        !musicEnabled ? "music.off" : musicPlaying ? "music.on" :
-        musicStarting ? "music.loading" :
-        musicPlaybackFailed ? "music.retry" : "music.paused"
-      );
+      if (label)
+        label.textContent = tr(
+          !musicEnabled
+            ? "music.off"
+            : musicPlaying
+              ? "music.on"
+              : musicStarting
+                ? "music.loading"
+                : musicPlaybackFailed
+                  ? "music.retry"
+                  : "music.paused",
+        );
     }
     if (musicBubble) {
       // Play audio immediately when the seal is tapped. Display its floating
@@ -591,12 +668,18 @@
     }
     if (!musicEnabled) setBubbleActionsOpen(false);
     if (musicBubbleTrigger) {
-      musicBubbleTrigger.setAttribute("aria-label", tr(musicPlaying ? "music.bubblePlayingAria" : "music.bubblePausedAria"));
+      musicBubbleTrigger.setAttribute(
+        "aria-label",
+        tr(musicPlaying ? "music.bubblePlayingAria" : "music.bubblePausedAria"),
+      );
       musicBubbleTrigger.setAttribute("title", tr("music.bubbleTitle"));
     }
     if (musicBubblePause) {
-      const key = musicStarting ? "music.cancelAria" :
-        musicPlaying ? "music.pauseAria" : "music.resumeAria";
+      const key = musicStarting
+        ? "music.cancelAria"
+        : musicPlaying
+          ? "music.pauseAria"
+          : "music.resumeAria";
       musicBubblePause.setAttribute("aria-label", tr(key));
       musicBubblePause.setAttribute("title", tr(key));
       // Never lock Pause while the MP3 is buffering.
@@ -618,7 +701,9 @@
     musicStarting = false;
     musicHasStarted = false;
     musicAudio?.pause();
-    try { if (musicAudio) musicAudio.currentTime = 0; } catch (_) {}
+    try {
+      if (musicAudio) musicAudio.currentTime = 0;
+    } catch (_) {}
     setBubbleActionsOpen(false);
     setMusicUI();
   };
@@ -638,9 +723,13 @@
       // iOS user activation. Pause/resume reuses this element and currentTime.
       // A media error remains sticky until load() selects the source again.
       // Reset only failed sources; normal resume must retain currentTime.
-      if (musicAudio.error) musicAudio.load();
+      if (!musicAudio.hasAttribute("src")) {
+        musicAudio.src = new URL(partyInfo(selectedParty).music.src, document.baseURI).href;
+      } else if (musicAudio.error) musicAudio.load();
       musicAudio.play()?.catch(() => failMusicAttempt(requestId));
-    } catch (_) { failMusicAttempt(requestId); }
+    } catch (_) {
+      failMusicAttempt(requestId);
+    }
   };
 
   const pauseMusic = () => {
@@ -687,20 +776,25 @@
   musicBubbleStop?.addEventListener("click", stopMusic);
   document.addEventListener("wedding:musicdockdrag", () => setBubbleActionsOpen(false));
 
-  document.addEventListener("pointerdown", event => {
-    if (bubbleActionsOpen && musicBubble && !musicBubble.contains(event.target)) setBubbleActionsOpen(false);
-  }, true);
-  document.addEventListener("keydown", event => {
+  document.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (bubbleActionsOpen && musicBubble && !musicBubble.contains(event.target))
+        setBubbleActionsOpen(false);
+    },
+    true,
+  );
+  document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && bubbleActionsOpen) {
       setBubbleActionsOpen(false);
-      musicBubbleTrigger?.focus({ preventScroll:true });
+      musicBubbleTrigger?.focus({ preventScroll: true });
     }
   });
 
-  // Preload only audio; no iframe/API/network dependency on YouTube remains.
+  // Bind playback to the opening gesture; no iframe/API dependency is needed.
   if (musicAudio) {
-    waxOpenButton?.addEventListener("click", requestMusicPlayback, { once:true });
-    document.addEventListener("wedding:waxopen", setMusicUI, { once:true });
+    waxOpenButton?.addEventListener("click", requestMusicPlayback, { once: true });
+    document.addEventListener("wedding:waxopen", setMusicUI, { once: true });
   }
 
   // Settings is the entry point for activating music. The contextual bubble
@@ -741,42 +835,65 @@
     const first = brideFirst ? bride : groom;
     const second = brideFirst ? groom : bride;
 
-    const upper = name => name.toLocaleUpperCase("vi-VN");
-    const escapeHtml = value => String(value).replace(/[&<>"']/g, character =>
-      ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[character])
-    );
+    const upper = (name) => name.toLocaleUpperCase("vi-VN");
+    const escapeHtml = (value) =>
+      String(value).replace(
+        /[&<>"']/g,
+        (character) =>
+          ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character],
+      );
     // A person's display name is one typographic unit in EVERY pair.
     // Keep the separator breakable so narrow screens wrap between people.
-    const wholeName = value => escapeHtml(value).replace(/\s+/g, "&nbsp;");
+    const wholeName = (value) => escapeHtml(value).replace(/\s+/g, "&nbsp;");
     const pair = (left, right, separator) =>
       wholeName(left) + " <span>" + separator + "</span> " + wholeName(right);
 
     const pairs = {
       hero: pair(upper(first.short), upper(second.short), "&amp;"),
       gate: pair(first.short, second.short, "&amp;"),
-      closing: '<span class="closing-name">' + escapeHtml(first.short) +
+      closing:
+        '<span class="closing-name">' +
+        escapeHtml(first.short) +
         '</span><span class="closing-join">&amp;</span><span class="closing-name">' +
-        escapeHtml(second.short) + '</span>',
-      footer: "© " + new Date(partyInfo(selectedParty).date + "T00:00:00Z").getUTCFullYear() +
-        " " + pair(upper(first.short), upper(second.short), "&amp;"),
-      menu: pair(upper(first.short), upper(second.short), "♡")
+        escapeHtml(second.short) +
+        "</span>",
+      footer:
+        "© " +
+        new Date(partyInfo(selectedParty).date + "T00:00:00Z").getUTCFullYear() +
+        " " +
+        pair(upper(first.short), upper(second.short), "&amp;"),
+      menu: pair(upper(first.short), upper(second.short), "♡"),
     };
 
-    document.querySelectorAll("[data-party-name-pair]").forEach(node => {
+    document.querySelectorAll("[data-party-name-pair]").forEach((node) => {
       const key = node.dataset.partyNamePair;
       if (pairs[key]) node.innerHTML = pairs[key];
     });
 
     const monogram = document.getElementById("heroMonogram");
-    const crest = '<span class="crest-first">' + escapeHtml(first.initial) + '</span><span class="crest-join">&amp;</span><span class="crest-second">' + escapeHtml(second.initial) + '</span>';
+    const crest =
+      '<span class="crest-first">' +
+      escapeHtml(first.initial) +
+      '</span><span class="crest-join">&amp;</span><span class="crest-second">' +
+      escapeHtml(second.initial) +
+      "</span>";
     if (monogram) {
       monogram.classList.add("wedding-crest");
       monogram.innerHTML = crest;
       monogram.setAttribute("aria-label", first.short + " & " + second.short);
     }
-    document.querySelectorAll("[data-wedding-crest]").forEach(node => { node.innerHTML = crest; });
+    document.querySelectorAll("[data-wedding-crest]").forEach((node) => {
+      node.innerHTML = crest;
+    });
     const promise = document.getElementById("invitationPromise");
-    if (promise) promise.textContent = tr(selectedParty === "bride" ? "invitation.promiseBride" : selectedParty === "groom" ? "invitation.promiseGroom" : "invitation.promiseSingle");
+    if (promise)
+      promise.textContent = tr(
+        selectedParty === "bride"
+          ? "invitation.promiseBride"
+          : selectedParty === "groom"
+            ? "invitation.promiseGroom"
+            : "invitation.promiseSingle",
+      );
     // The wax seal is a shared antique lock for both ceremonies. The couple's
     // initials remain in the hero and other personalized locations.
   }
@@ -786,27 +903,41 @@
 
     const ceremonyLabel = document.getElementById("heroCeremonyLabel");
     if (ceremonyLabel) {
-      const key = selectedParty === "single" ? "hero.singleOverline" :
-        selectedParty === "bride" ? "hero.brideOverline" : "hero.groomOverline";
+      const key =
+        selectedParty === "single"
+          ? "hero.singleOverline"
+          : selectedParty === "bride"
+            ? "hero.brideOverline"
+            : "hero.groomOverline";
       ceremonyLabel.textContent = tr(key);
     }
 
     const brideFirst = selectedParty === "bride";
     const coupleHeading = document.getElementById("coupleHeading");
     if (coupleHeading) {
-      coupleHeading.innerHTML = tr(singleMode ? "couple.headingSingle" :
-        brideFirst ? "couple.headingBrideFirst" : "couple.headingGroomFirst");
+      coupleHeading.innerHTML = tr(
+        singleMode
+          ? "couple.headingSingle"
+          : brideFirst
+            ? "couple.headingBrideFirst"
+            : "couple.headingGroomFirst",
+      );
     }
 
     const menuCoupleLabel = document.getElementById("menuCoupleLabel");
     if (menuCoupleLabel) {
-      menuCoupleLabel.textContent = tr(singleMode ? "menu.singleCouple" :
-        brideFirst ? "menu.coupleBrideFirst" : "menu.coupleGroomFirst");
+      menuCoupleLabel.textContent = tr(
+        singleMode
+          ? "menu.singleCouple"
+          : brideFirst
+            ? "menu.coupleBrideFirst"
+            : "menu.coupleGroomFirst",
+      );
     }
 
-
-    document.title = tr(singleMode ? "page.titleSingle" :
-      brideFirst ? "page.titleBride" : "page.titleGroom");
+    document.title = tr(
+      singleMode ? "page.titleSingle" : brideFirst ? "page.titleBride" : "page.titleGroom",
+    );
   }
 
   function refreshDynamicLanguage() {
@@ -821,30 +952,39 @@
 
   const progress = document.getElementById("progress");
   let scrollFrame = 0;
-  addEventListener("scroll", () => {
-    if (scrollFrame || !progress) return;
-    scrollFrame = requestAnimationFrame(() => {
-      scrollFrame = 0;
-      const max = document.documentElement.scrollHeight - innerHeight;
-      const ratio = max ? Math.min(1, Math.max(0, scrollY / max)) : 0;
-      progress.style.transform = "scaleX(" + ratio + ")";
-    });
-  }, {passive:true});
+  addEventListener(
+    "scroll",
+    () => {
+      if (scrollFrame || !progress) return;
+      scrollFrame = requestAnimationFrame(() => {
+        scrollFrame = 0;
+        const max = document.documentElement.scrollHeight - innerHeight;
+        const ratio = max ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+        progress.style.transform = "scaleX(" + ratio + ")";
+      });
+    },
+    { passive: true },
+  );
 
   const hero = document.querySelector(".hero");
   const heroPhoto = document.querySelector(".hero-photo");
   if (hero && heroPhoto && "IntersectionObserver" in window) {
     let heroInViewport = false;
     const updateHeroMotion = () => {
-      const visible = heroInViewport && !document.hidden &&
+      const visible =
+        heroInViewport &&
+        !document.hidden &&
         !document.documentElement.classList.contains("wax-pending");
       heroPhoto.style.animationPlayState = visible ? "running" : "paused";
       heroPhoto.style.willChange = visible ? "transform" : "auto";
     };
-    const heroAnimationObserver = new IntersectionObserver(entries => {
-      heroInViewport = entries[0]?.isIntersecting !== false;
-      updateHeroMotion();
-    }, {threshold:0});
+    const heroAnimationObserver = new IntersectionObserver(
+      (entries) => {
+        heroInViewport = entries[0]?.isIntersecting !== false;
+        updateHeroMotion();
+      },
+      { threshold: 0 },
+    );
     heroAnimationObserver.observe(hero);
     document.addEventListener("wedding:waxopen", updateHeroMotion);
     document.addEventListener("visibilitychange", updateHeroMotion);
@@ -853,15 +993,19 @@
 
   const reveal = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver(entries => entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-        observer.unobserve(entry.target);
-      }
-    }), {threshold:.1, rootMargin:"80px 0px"});
-    reveal.forEach(node => observer.observe(node));
+    const observer = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        }),
+      { threshold: 0.1, rootMargin: "80px 0px" },
+    );
+    reveal.forEach((node) => observer.observe(node));
   } else {
-    reveal.forEach(node => node.classList.add("visible"));
+    reveal.forEach((node) => node.classList.add("visible"));
   }
 
   // Cinematic chapter transitions are progressive enhancement. Content stays
@@ -869,16 +1013,19 @@
   const reducedCinematicMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const chapterTargets = document.querySelectorAll(
     ".section-head, .album-header, .couple-section > .overline, " +
-    ".couple-section > .section-title, .couple-section > .section-lead, .closing-content"
+      ".couple-section > .section-title, .couple-section > .section-lead, .closing-content",
   );
   if (!reducedCinematicMotion && "IntersectionObserver" in window) {
-    const chapterObserver = new IntersectionObserver(entries => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        entry.target.classList.add("is-visible");
-        chapterObserver.unobserve(entry.target);
-      }
-    }, {threshold:0.08, rootMargin:"0px 0px -5% 0px"});
+    const chapterObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add("is-visible");
+          chapterObserver.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -5% 0px" },
+    );
     chapterTargets.forEach((node, index) => {
       node.classList.add("cinematic-reveal");
       node.style.setProperty("--cinematic-order", String(index % 3));
@@ -888,7 +1035,6 @@
   }
 
   const enterCinematicHero = () => document.documentElement.classList.add("cinematic-entered");
-  document.addEventListener("wedding:waxopen", enterCinematicHero, { once:true });
+  document.addEventListener("wedding:waxopen", enterCinematicHero, { once: true });
   if (!document.documentElement.classList.contains("wax-pending")) enterCinematicHero();
-
 })();

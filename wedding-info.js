@@ -99,8 +99,10 @@ window.WEDDING_INFO = {
           "vi": "{{parties.bride.venue.name}}, {{parties.bride.venue.address}}",
           "en": "{{parties.bride.venue.name}}, {{parties.bride.venue.address}}"
         },
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Nhà+Hàng+Hương+Lan+24+Hùng+Vương+Krông+Ana+Đắk+Lắk",
-        "embedUrl": "https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"
+        "mapUrl":
+          "https://www.google.com/maps/search/?api=1&query=Nhà+Hàng+Hương+Lan+24+Hùng+Vương+Krông+Ana+Đắk+Lắk",
+        "embedUrl":
+          "https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"
       },
       "music": {
         "src": "audio/bride.mp3"
@@ -160,7 +162,8 @@ window.WEDDING_INFO = {
           "vi": "{{parties.groom.venue.address}}",
           "en": "{{parties.groom.venue.address}}"
         },
-        "mapUrl": "https://www.google.com/maps/place/11%C2%B009'48.2%22N+107%C2%B023'24.5%22E/@11.163395,107.3875511,17z/",
+        "mapUrl":
+          "https://www.google.com/maps/place/11%C2%B009'48.2%22N+107%C2%B023'24.5%22E/@11.163395,107.3875511,17z/",
         "embedUrl": "https://maps.google.com/maps?q=11.163389,107.390139&z=16&output=embed"
       },
       "music": {
@@ -213,8 +216,10 @@ window.WEDDING_INFO = {
           "vi": "{{parties.single.venue.name}}, {{parties.single.venue.address}}",
           "en": "{{parties.single.venue.name}}, {{parties.single.venue.address}}"
         },
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Nhà+Hàng+Hương+Lan+24+Hùng+Vương+Krông+Ana+Đắk+Lắk",
-        "embedUrl": "https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"
+        "mapUrl":
+          "https://www.google.com/maps/search/?api=1&query=Nhà+Hàng+Hương+Lan+24+Hùng+Vương+Krông+Ana+Đắk+Lắk",
+        "embedUrl":
+          "https://maps.google.com/maps?q=24%20Hung%20Vuong%20Krong%20Ana%20Dak%20Lak&t=&z=15&ie=UTF8&iwloc=&output=embed"
       },
       "music": {
         "src": "audio/bride.mp3"
@@ -273,9 +278,11 @@ window.WEDDING_INFO = {
       "couple.headingGroomFirst": "Chú rể <em>&amp;</em> Cô dâu",
       "couple.lead": "Hai con người, một hành trình, một lời hẹn ước.",
       "couple.groomRole": "Chú rể",
-      "couple.groomQuote": "Cảm ơn em đã xuất hiện, để những ngày bình thường cũng trở nên đặc biệt.",
+      "couple.groomQuote":
+        "Cảm ơn em đã xuất hiện, để những ngày bình thường cũng trở nên đặc biệt.",
       "couple.brideRole": "Cô dâu",
-      "couple.brideQuote": "Cảm ơn anh đã luôn ở đây, cùng em đi qua những khoảnh khắc đẹp nhất của cuộc đời.",
+      "couple.brideQuote":
+        "Cảm ơn anh đã luôn ở đây, cùng em đi qua những khoảnh khắc đẹp nhất của cuộc đời.",
       "couple.son1Alt": "Chân dung chú rể {{couple.groom.short}}",
       "couple.son2Alt": "Ảnh chú rể {{couple.groom.short}} thứ hai",
       "couple.nga1Alt": "Chân dung cô dâu {{couple.bride.short}}",
@@ -299,7 +306,8 @@ window.WEDDING_INFO = {
       "album.eyebrow": "BỘ ẢNH CƯỚI",
       "album.heading": "Khoảnh khắc <em>yêu thương</em>",
       "album.lead": "Những thước phim đẹp nhất của chúng mình",
-      "album.viewportAria": "Không gian ảnh cưới 3D: kéo, vuốt hoặc lăn chuột để chuyển ảnh; nhấp ảnh để xem toàn màn hình",
+      "album.viewportAria":
+        "Không gian ảnh cưới 3D: kéo, vuốt hoặc lăn chuột để chuyển ảnh; nhấp ảnh để xem toàn màn hình",
       "album.lazy": "Cuộn đến bộ ảnh để xem những khoảnh khắc của chúng mình…",
       "album.hint": "← KÉO / VUỐT / LĂN CHUỘT ĐỂ KHÁM PHÁ KHÔNG GIAN ẢNH →",
       "album.loading": "Đang tải bộ ảnh cưới…",
@@ -317,13 +325,15 @@ window.WEDDING_INFO = {
       "events.brideLabel": "LỄ VU QUY · NHÀ GÁI",
       "events.saturday": "THỨ BẢY",
       "events.brideCeremony": "<span>{{parties.bride.ceremonyTime}}</span> Hôn lễ tại tư gia",
-      "events.brideReception": "<span>{{parties.bride.receptionTime}}</span> Tiệc mừng tại {{parties.bride.venue.name}}",
+      "events.brideReception":
+        "<span>{{parties.bride.receptionTime}}</span> Tiệc mừng tại {{parties.bride.venue.name}}",
       "events.brideAddress": "Địa điểm tiệc: {{parties.bride.venue.address}}",
       "events.brideLunar": "{{parties.bride.lunar}}",
       "events.groomLabel": "LỄ TÂN HÔN · NHÀ TRAI",
       "events.sunday": "CHỦ NHẬT",
       "events.groomCeremony": "<span>{{parties.groom.ceremonyTime}}</span> Hôn lễ tại tư gia",
-      "events.groomReception": "<span>{{parties.groom.receptionTime}}</span> Tiệc mừng tại {{parties.groom.venue.name}}",
+      "events.groomReception":
+        "<span>{{parties.groom.receptionTime}}</span> Tiệc mừng tại {{parties.groom.venue.name}}",
       "events.groomAddress": "{{parties.groom.venue.address}}",
       "events.groomLunar": "{{parties.groom.lunar}}",
       "events.map": "XEM ĐỊA ĐIỂM",
@@ -411,9 +421,11 @@ window.WEDDING_INFO = {
       "calendar.brideFile": "le-vu-quy-{{couple.bride.slug}}-{{couple.groom.slug}}.ics",
       "calendar.groomFile": "le-tan-hon-{{couple.groom.slug}}-{{couple.bride.slug}}.ics",
       "calendar.brideCeremonyTitle": "Lễ Vu Quy · {{couple.bride.short}} & {{couple.groom.short}}",
-      "calendar.brideReceptionTitle": "Tiệc Vu Quy · {{couple.bride.short}} & {{couple.groom.short}}",
+      "calendar.brideReceptionTitle":
+        "Tiệc Vu Quy · {{couple.bride.short}} & {{couple.groom.short}}",
       "calendar.groomCeremonyTitle": "Lễ Tân Hôn · {{couple.groom.short}} & {{couple.bride.short}}",
-      "calendar.groomReceptionTitle": "Tiệc Tân Hôn · {{couple.groom.short}} & {{couple.bride.short}}",
+      "calendar.groomReceptionTitle":
+        "Tiệc Tân Hôn · {{couple.groom.short}} & {{couple.bride.short}}",
       "calendar.brideCeremonyPlace": "{{parties.bride.home.address}}",
       "calendar.brideReceptionPlace": "{{parties.bride.venue.calendarAddress}}",
       "calendar.groomPlace": "{{parties.groom.venue.calendarAddress}}",
@@ -424,19 +436,24 @@ window.WEDDING_INFO = {
       "link.back": "← Quay lại chọn tiệc",
       "link.backAria": "Quay lại màn hình chọn Nhà trai hoặc Nhà gái",
       "link.title": "Tạo thiệp mời riêng",
-      "link.brand": "{{couple.bride.short}} & {{couple.groom.short}} · WEDDING {{parties.bride.dateYear}}",
-      "link.description": "Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho người nhận.",
+      "link.brand":
+        "{{couple.bride.short}} & {{couple.groom.short}} · WEDDING {{parties.bride.dateYear}}",
+      "link.description":
+        "Nhập tên khách và chọn đúng tiệc. Link tạo ra sẽ mở thiệp với lời chào dành riêng cho người nhận.",
       "link.guest": "Tên khách mời",
       "link.placeholder": "Ví dụ: Anh Minh và chị Lan",
       "link.party": "Khách tham dự",
-      "link.bride": "Nhà gái · Lễ Vu Quy · {{parties.bride.dateSlashes}} · {{parties.bride.region}}",
-      "link.groom": "Nhà trai · Lễ Tân Hôn · {{parties.groom.dateSlashes}} · {{parties.groom.region}}",
+      "link.bride":
+        "Nhà gái · Lễ Vu Quy · {{parties.bride.dateSlashes}} · {{parties.bride.region}}",
+      "link.groom":
+        "Nhà trai · Lễ Tân Hôn · {{parties.groom.dateSlashes}} · {{parties.groom.region}}",
       "link.create": "Tạo link thiệp",
       "link.result": "Link dành cho khách",
       "link.copy": "Sao chép link",
       "link.share": "Chia sẻ",
       "link.preview": "Xem thử thiệp",
-      "link.note": "Công cụ này tạo link ngay trên thiết bị; không lưu danh sách khách. Link có tên khách trong URL, nên chỉ chia sẻ với đúng người nhận.",
+      "link.note":
+        "Công cụ này tạo link ngay trên thiết bị; không lưu danh sách khách. Link có tên khách trong URL, nên chỉ chia sẻ với đúng người nhận.",
       "link.invalid": "Vui lòng nhập tên khách và chọn tiệc.",
       "link.copied": "Đã sao chép link!",
       "link.copyFail": "Không thể sao chép tự động. Hãy chọn và sao chép link phía trên.",
@@ -472,7 +489,8 @@ window.WEDDING_INFO = {
       "guest.heroSingle": "Trân trọng kính mời {guest} tham dự tiệc cưới",
       "couple.headingSingle": "Chuyện tình của chúng mình",
       "events.singleLabel": "TIỆC CƯỚI · CHUNG VUI CÙNG HAI GIA ĐÌNH",
-      "events.singleReception": "<span>{{parties.single.receptionTime}}</span> Đón khách và khai tiệc tại {{parties.single.venue.name}}",
+      "events.singleReception":
+        "<span>{{parties.single.receptionTime}}</span> Đón khách và khai tiệc tại {{parties.single.venue.name}}",
       "events.singleAddress": "{{parties.single.venue.address}}",
       "events.singleLunar": "{{parties.single.lunar}}",
       "events.singleCalendarAria": "Lưu tiệc cưới vào lịch",
@@ -483,29 +501,37 @@ window.WEDDING_INFO = {
       "countdown.singleTitle": "ĐẾM NGƯỢC ĐẾN TIỆC CƯỚI",
       "countdown.singleAria": "Đếm ngược đến ngày tổ chức tiệc cưới",
       "calendar.singleFile": "tiec-cuoi-{{couple.groom.slug}}-{{couple.bride.slug}}.ics",
-      "calendar.singleReceptionTitle": "Tiệc cưới · {{couple.groom.short}} & {{couple.bride.short}}",
+      "calendar.singleReceptionTitle":
+        "Tiệc cưới · {{couple.groom.short}} & {{couple.bride.short}}",
       "calendar.singleReceptionPlace": "{{parties.single.venue.calendarAddress}}",
-      "calendar.singleReceptionNote": "{{parties.single.receptionTime}} · Tiệc cưới tại {{parties.single.venue.name}}",
+      "calendar.singleReceptionNote":
+        "{{parties.single.receptionTime}} · Tiệc cưới tại {{parties.single.venue.name}}",
       "link.single": "Một tiệc cưới · {{parties.single.dateSlashes}} · {{parties.single.city}}",
-      "link.singleDescription": "Nhập tên khách để tạo thiệp cho một tiệc cưới chung. Không cần chọn nhà gái hoặc nhà trai.",
+      "link.singleDescription":
+        "Nhập tên khách để tạo thiệp cho một tiệc cưới chung. Không cần chọn nhà gái hoặc nhà trai.",
       "link.singleBack": "← Quay lại thiệp cưới",
       "link.singleBackAria": "Trở về thiệp cưới",
       "menu.singleCouple": "Cô dâu & chú rể",
-      "link.brandSingle": "{{couple.groom.short}} & {{couple.bride.short}} · WEDDING {{parties.single.dateYear}}",
+      "link.brandSingle":
+        "{{couple.groom.short}} & {{couple.bride.short}} · WEDDING {{parties.single.dateYear}}",
       "story.eyebrow": "NHỮNG LỜI HẸN CỦA CHÚNG MÌNH",
       "story.title": "Một lời hẹn, <em>một đời thương</em>",
       "story.1.title": "Chọn bên nhau",
-      "story.1.text": "Giữa bao điều rộng lớn, chúng mình chọn một người để cùng chia sẻ những ngày bình thường.",
+      "story.1.text":
+        "Giữa bao điều rộng lớn, chúng mình chọn một người để cùng chia sẻ những ngày bình thường.",
       "story.2.title": "Chọn yêu thương",
-      "story.2.text": "Mong những năm tháng phía trước, mỗi lần nhìn lại, vẫn thấy người mình thương ở bên.",
+      "story.2.text":
+        "Mong những năm tháng phía trước, mỗi lần nhìn lại, vẫn thấy người mình thương ở bên.",
       "story.3.title": "Chọn chung một nhà",
-      "story.3.text": "Từ hôm nay, những ước mơ có thêm một người cùng vun đắp. Hành trình mới của chúng mình bắt đầu.",
+      "story.3.text":
+        "Từ hôm nay, những ước mơ có thêm một người cùng vun đắp. Hành trình mới của chúng mình bắt đầu.",
       "invitation.details": "Thời gian & địa điểm",
       "invitation.directions": "Chỉ đường",
       "invitation.promiseBride": "Từ mái nhà em, mình cùng viết tiếp câu chuyện.",
       "invitation.promiseGroom": "Về chung một nhà, thương nhau một đời.",
       "invitation.promiseSingle": "Hai lời hẹn, một ngày chung đôi.",
-      "closing.note": "Cảm ơn bạn đã dành một chỗ cho chúng mình trong những yêu thương của bạn. Hẹn cùng nhau lưu lại một ngày thật đẹp.",
+      "closing.note":
+        "Cảm ơn bạn đã dành một chỗ cho chúng mình trong những yêu thương của bạn. Hẹn cùng nhau lưu lại một ngày thật đẹp.",
       "album.captionLabel": "Lời tựa của bức ảnh",
       "album.photoRetry": "Ảnh tiếp theo chưa tải được. Bạn thử chuyển ảnh lại nhé."
     },
@@ -539,16 +565,19 @@ window.WEDDING_INFO = {
       "couple.headingGroomFirst": "The Groom <em>&amp;</em> Bride",
       "couple.lead": "Two people, one journey, one promise for a lifetime.",
       "couple.groomRole": "Groom",
-      "couple.groomQuote": "Thank you for coming into my life and making ordinary days feel extraordinary.",
+      "couple.groomQuote":
+        "Thank you for coming into my life and making ordinary days feel extraordinary.",
       "couple.brideRole": "Bride",
-      "couple.brideQuote": "Thank you for always being here and walking with me through life's most beautiful moments.",
+      "couple.brideQuote":
+        "Thank you for always being here and walking with me through life's most beautiful moments.",
       "couple.son1Alt": "Portrait of groom {{couple.groom.short}}",
       "couple.son2Alt": "Second portrait of groom {{couple.groom.short}}",
       "couple.nga1Alt": "Portrait of bride {{couple.bride.short}}",
       "couple.nga2Alt": "Second portrait of bride {{couple.bride.short}}",
       "family.eyebrow": "WITH OUR FAMILIES",
       "family.title": "With joy, our families announce",
-      "family.lead": "Your presence will make this celebration even more meaningful to both families",
+      "family.lead":
+        "Your presence will make this celebration even more meaningful to both families",
       "family.groomSide": "GROOM'S FAMILY",
       "family.groomTitle": "Groom's Family",
       "family.groomFather": "Mr. <strong>{{families.groom.father}}</strong>",
@@ -565,7 +594,8 @@ window.WEDDING_INFO = {
       "album.eyebrow": "OUR WEDDING GALLERY",
       "album.heading": "Moments of <em>love</em>",
       "album.lead": "A collection of our most beautiful memories",
-      "album.viewportAria": "3D wedding photo space: drag, swipe, or use the mouse wheel to browse; click a photo for fullscreen",
+      "album.viewportAria":
+        "3D wedding photo space: drag, swipe, or use the mouse wheel to browse; click a photo for fullscreen",
       "album.lazy": "Scroll closer to discover our wedding gallery…",
       "album.hint": "← DRAG / SWIPE / WHEEL TO EXPLORE THE PHOTO SPACE →",
       "album.loading": "Loading our wedding gallery…",
@@ -582,14 +612,18 @@ window.WEDDING_INFO = {
       "events.lead": "We would be honored to celebrate this special day with you",
       "events.brideLabel": "BRIDE'S CEREMONY · BRIDE'S FAMILY",
       "events.saturday": "SATURDAY",
-      "events.brideCeremony": "<span>{{parties.bride.ceremonyTime}}</span> Wedding ceremony at the family home",
-      "events.brideReception": "<span>{{parties.bride.receptionTime}}</span> Reception at {{parties.bride.venue.name}}",
+      "events.brideCeremony":
+        "<span>{{parties.bride.ceremonyTime}}</span> Wedding ceremony at the family home",
+      "events.brideReception":
+        "<span>{{parties.bride.receptionTime}}</span> Reception at {{parties.bride.venue.name}}",
       "events.brideAddress": "Reception venue: {{parties.bride.venue.address}}",
       "events.brideLunar": "{{parties.bride.lunar}}",
       "events.groomLabel": "GROOM'S CEREMONY · GROOM'S FAMILY",
       "events.sunday": "SUNDAY",
-      "events.groomCeremony": "<span>{{parties.groom.ceremonyTime}}</span> Wedding ceremony at the family home",
-      "events.groomReception": "<span>{{parties.groom.receptionTime}}</span> Reception at the {{parties.groom.venue.name}}",
+      "events.groomCeremony":
+        "<span>{{parties.groom.ceremonyTime}}</span> Wedding ceremony at the family home",
+      "events.groomReception":
+        "<span>{{parties.groom.receptionTime}}</span> Reception at the {{parties.groom.venue.name}}",
       "events.groomAddress": "{{parties.groom.venue.address}}",
       "events.groomLunar": "{{parties.groom.lunar}}",
       "events.map": "VIEW LOCATION",
@@ -671,27 +705,38 @@ window.WEDDING_INFO = {
       "calendar.share": "Choose an app on this device",
       "calendar.all": "Download ceremony & reception (.ics)",
       "calendar.hint": "Review and confirm in your calendar app.",
-      "calendar.fileHint": "Calendar file created. Open it in your calendar app to review and save.",
-      "calendar.shareFail": "The app chooser could not open. You can download the calendar file above.",
+      "calendar.fileHint":
+        "Calendar file created. Open it in your calendar app to review and save.",
+      "calendar.shareFail":
+        "The app chooser could not open. You can download the calendar file above.",
       "calendar.timezone": "Local time GMT{{site.timezone}}",
       "calendar.brideFile": "brides-wedding-{{couple.bride.slug}}-{{couple.groom.slug}}.ics",
       "calendar.groomFile": "grooms-wedding-{{couple.groom.slug}}-{{couple.bride.slug}}.ics",
-      "calendar.brideCeremonyTitle": "Bride's Wedding Ceremony · {{couple.bride.short}} & {{couple.groom.short}}",
-      "calendar.brideReceptionTitle": "Bride's Wedding Reception · {{couple.bride.short}} & {{couple.groom.short}}",
-      "calendar.groomCeremonyTitle": "Groom's Wedding Ceremony · {{couple.groom.short}} & {{couple.bride.short}}",
-      "calendar.groomReceptionTitle": "Groom's Wedding Reception · {{couple.groom.short}} & {{couple.bride.short}}",
+      "calendar.brideCeremonyTitle":
+        "Bride's Wedding Ceremony · {{couple.bride.short}} & {{couple.groom.short}}",
+      "calendar.brideReceptionTitle":
+        "Bride's Wedding Reception · {{couple.bride.short}} & {{couple.groom.short}}",
+      "calendar.groomCeremonyTitle":
+        "Groom's Wedding Ceremony · {{couple.groom.short}} & {{couple.bride.short}}",
+      "calendar.groomReceptionTitle":
+        "Groom's Wedding Reception · {{couple.groom.short}} & {{couple.bride.short}}",
       "calendar.brideCeremonyPlace": "{{parties.bride.home.address}}",
       "calendar.brideReceptionPlace": "{{parties.bride.venue.calendarAddress}}",
       "calendar.groomPlace": "{{parties.groom.venue.calendarAddress}}",
-      "calendar.brideCeremonyNote": "{{parties.bride.ceremonyTime}} · Wedding ceremony at the bride's family home",
+      "calendar.brideCeremonyNote":
+        "{{parties.bride.ceremonyTime}} · Wedding ceremony at the bride's family home",
       "calendar.brideReceptionNote": "{{parties.bride.receptionTime}} · Wedding reception",
-      "calendar.groomCeremonyNote": "{{parties.groom.ceremonyTime}} · Wedding ceremony at the groom's family home",
-      "calendar.groomReceptionNote": "{{parties.groom.receptionTime}} · Wedding reception at the family home",
+      "calendar.groomCeremonyNote":
+        "{{parties.groom.ceremonyTime}} · Wedding ceremony at the groom's family home",
+      "calendar.groomReceptionNote":
+        "{{parties.groom.receptionTime}} · Wedding reception at the family home",
       "link.back": "← Back to celebrations",
       "link.backAria": "Return to bride or groom celebration selection",
       "link.title": "Create a personalized invitation",
-      "link.brand": "{{couple.bride.short}} & {{couple.groom.short}} · WEDDING {{parties.bride.dateYear}}",
-      "link.description": "Enter your guest's name and select the celebration. Their invitation link will display a personal greeting.",
+      "link.brand":
+        "{{couple.bride.short}} & {{couple.groom.short}} · WEDDING {{parties.bride.dateYear}}",
+      "link.description":
+        "Enter your guest's name and select the celebration. Their invitation link will display a personal greeting.",
       "link.guest": "Guest name",
       "link.placeholder": "e.g. Minh and Lan",
       "link.party": "Celebration",
@@ -702,7 +747,8 @@ window.WEDDING_INFO = {
       "link.copy": "Copy link",
       "link.share": "Share",
       "link.preview": "Preview invitation",
-      "link.note": "This tool generates links on your device without storing a guest list. Guest names appear in the URL, so share links only with their intended recipients.",
+      "link.note":
+        "This tool generates links on your device without storing a guest list. Guest names appear in the URL, so share links only with their intended recipients.",
       "link.invalid": "Please enter a guest name and select a celebration.",
       "link.copied": "Link copied!",
       "link.copyFail": "Automatic copying failed. Please select and copy the link above.",
@@ -738,7 +784,8 @@ window.WEDDING_INFO = {
       "guest.heroSingle": "You are cordially invited to our wedding reception, {guest}",
       "couple.headingSingle": "Our love story",
       "events.singleLabel": "WEDDING RECEPTION · BOTH FAMILIES",
-      "events.singleReception": "<span>{{parties.single.receptionTime}}</span> Reception at {{parties.single.venue.name}}",
+      "events.singleReception":
+        "<span>{{parties.single.receptionTime}}</span> Reception at {{parties.single.venue.name}}",
       "events.singleAddress": "{{parties.single.venue.address}}",
       "events.singleLunar": "{{parties.single.lunar}}",
       "events.singleCalendarAria": "Save our wedding reception to your calendar",
@@ -749,29 +796,37 @@ window.WEDDING_INFO = {
       "countdown.singleTitle": "COUNTDOWN TO OUR WEDDING",
       "countdown.singleAria": "Countdown to our wedding reception",
       "calendar.singleFile": "wedding-{{couple.groom.slug}}-{{couple.bride.slug}}.ics",
-      "calendar.singleReceptionTitle": "Wedding Reception · {{couple.groom.short}} & {{couple.bride.short}}",
+      "calendar.singleReceptionTitle":
+        "Wedding Reception · {{couple.groom.short}} & {{couple.bride.short}}",
       "calendar.singleReceptionPlace": "{{parties.single.venue.calendarAddress}}",
-      "calendar.singleReceptionNote": "{{parties.single.receptionTime}} · Wedding reception at {{parties.single.venue.name}}",
+      "calendar.singleReceptionNote":
+        "{{parties.single.receptionTime}} · Wedding reception at {{parties.single.venue.name}}",
       "link.single": "Wedding reception · {{parties.single.dateEnglish}} · {{parties.single.city}}",
-      "link.singleDescription": "Enter your guest's name to create an invitation for one shared wedding reception.",
+      "link.singleDescription":
+        "Enter your guest's name to create an invitation for one shared wedding reception.",
       "link.singleBack": "← Back to the wedding invitation",
       "link.singleBackAria": "Return to the wedding invitation",
       "menu.singleCouple": "Bride & groom",
-      "link.brandSingle": "{{couple.groom.short}} & {{couple.bride.short}} · WEDDING {{parties.single.dateYear}}",
+      "link.brandSingle":
+        "{{couple.groom.short}} & {{couple.bride.short}} · WEDDING {{parties.single.dateYear}}",
       "story.eyebrow": "THE PROMISES WE SHARE",
       "story.title": "One promise, <em>a lifetime of love</em>",
       "story.1.title": "Choosing each other",
-      "story.1.text": "In a world full of possibilities, we choose one person to share the beauty of ordinary days.",
+      "story.1.text":
+        "In a world full of possibilities, we choose one person to share the beauty of ordinary days.",
       "story.2.title": "Choosing love",
-      "story.2.text": "May the years ahead always find us looking back with the person we love beside us.",
+      "story.2.text":
+        "May the years ahead always find us looking back with the person we love beside us.",
       "story.3.title": "Choosing a home together",
-      "story.3.text": "From this day on, every dream has someone to help it grow. Our next chapter begins.",
+      "story.3.text":
+        "From this day on, every dream has someone to help it grow. Our next chapter begins.",
       "invitation.details": "Time & venue",
       "invitation.directions": "Directions",
       "invitation.promiseBride": "From her family home, our next chapter begins.",
       "invitation.promiseGroom": "One home, a lifetime of love.",
       "invitation.promiseSingle": "Two promises, one celebration.",
-      "closing.note": "Thank you for keeping a place for us in your heart. We look forward to sharing a beautiful day with you.",
+      "closing.note":
+        "Thank you for keeping a place for us in your heart. We look forward to sharing a beautiful day with you.",
       "album.captionLabel": "Photo caption",
       "album.photoRetry": "The next photo could not load. Please try switching photos again."
     }
@@ -804,7 +859,8 @@ window.WEDDING_INFO = {
             "width": 2000
           }
         ],
-        "sizes": "(max-width: 414px) calc(180vw - 62px), (max-width: 650px) 684px, (max-width: 1000px) 60vw, 690px"
+        "sizes":
+          "(max-width: 414px) calc(180vw - 62px), (max-width: 650px) 684px, (max-width: 1000px) 60vw, 690px"
       },
       "love": {
         "src": "images/optimized/assets/promise-6143.webp",
@@ -829,7 +885,8 @@ window.WEDDING_INFO = {
             "width": 1333
           }
         ],
-        "sizes": "(max-width: 414px) calc(100vw - 34px), (max-width: 650px) 380px, (max-width: 1000px) 31vw, 365px"
+        "sizes":
+          "(max-width: 414px) calc(100vw - 34px), (max-width: 650px) 380px, (max-width: 1000px) 31vw, 365px"
       },
       "home": {
         "src": "images/optimized/assets/promise-6511.webp",
@@ -854,7 +911,8 @@ window.WEDDING_INFO = {
             "width": 1333
           }
         ],
-        "sizes": "(max-width: 414px) calc(100vw - 34px), (max-width: 650px) 380px, (max-width: 1000px) 31vw, 365px"
+        "sizes":
+          "(max-width: 414px) calc(100vw - 34px), (max-width: 650px) 380px, (max-width: 1000px) 31vw, 365px"
       }
     }
   }

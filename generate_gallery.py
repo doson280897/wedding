@@ -20,6 +20,7 @@ OPTIMIZED_ROOT = IMAGE_ROOT / "optimized"
 OPTIMIZED_ASSETS = OPTIMIZED_ROOT / "assets"
 OPTIMIZED_ALBUM = OPTIMIZED_ROOT / "album"
 
+
 def read_wedding_info() -> dict:
     """Read the JSON object stored inside the one editable wedding-info.js file."""
     source = (ROOT / "wedding-info.js").read_text(encoding="utf-8")
@@ -65,7 +66,15 @@ if type(ALBUM_QUALITY) is not int or not 1 <= ALBUM_QUALITY <= 100:
 
 
 SUPPORTED_EXTENSIONS = {
-    ".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif", ".bmp", ".tif", ".tiff"
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".avif",
+    ".gif",
+    ".bmp",
+    ".tif",
+    ".tiff",
 }
 
 # Read portrait / hero / ending filenames from wedding-info.js.
@@ -86,7 +95,10 @@ BACKGROUND = (16, 20, 25)
 
 
 def natural_key(value: str):
-    return [int(part) if part.isdigit() else part.casefold() for part in re.split(r"(\d+)", value)]
+    return [
+        int(part) if part.isdigit() else part.casefold()
+        for part in re.split(r"(\d+)", value)
+    ]
 
 
 def safe_display_name(path: Path) -> str:
@@ -112,7 +124,9 @@ def prepare_rgb(original: Image.Image, max_side: int) -> Image.Image:
     image = ImageOps.exif_transpose(original)
     image.thumbnail((max_side, max_side), Image.Resampling.LANCZOS)
 
-    if image.mode in ("RGBA", "LA") or (image.mode == "P" and "transparency" in image.info):
+    if image.mode in ("RGBA", "LA") or (
+        image.mode == "P" and "transparency" in image.info
+    ):
         rgba = image.convert("RGBA")
         background = Image.new("RGBA", rgba.size, BACKGROUND + (255,))
         background.alpha_composite(rgba)
@@ -134,7 +148,9 @@ def discover_album_images() -> list[Path]:
         for path in ORIGINAL_ALBUM.rglob("*")
         if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS
     ]
-    images.sort(key=lambda path: natural_key(path.relative_to(ORIGINAL_ALBUM).as_posix()))
+    images.sort(
+        key=lambda path: natural_key(path.relative_to(ORIGINAL_ALBUM).as_posix())
+    )
     return images
 
 
@@ -161,7 +177,9 @@ def optimize_assets():
         target = OPTIMIZED_ASSETS / f"{name}.webp"
 
         if source is None:
-            state = "giữ file tối ưu hiện có" if target.exists() else "chưa có file tối ưu"
+            state = (
+                "giữ file tối ưu hiện có" if target.exists() else "chưa có file tối ưu"
+            )
             print(f"Thiếu ảnh gốc images/original/assets/{name}.* — {state}.")
             continue
 
@@ -193,9 +211,9 @@ def generate_manifest():
     # their existing optimized photos must remain in the published manifest.
     manifest = dict(ALBUM_MANIFEST)
     previous = [
-        dict(item) for item in manifest["photos"]
-        if isinstance(item, dict) and isinstance(item.get("src"), str)
-        and item["src"]
+        dict(item)
+        for item in manifest["photos"]
+        if isinstance(item, dict) and isinstance(item.get("src"), str) and item["src"]
     ]
     photos = list(previous) if ALBUM_MODE == "append" else []
     indexes = {photo["src"]: index for index, photo in enumerate(photos)}
@@ -203,7 +221,10 @@ def generate_manifest():
     for source in found:
         target = optimized_album_target(source)
         try:
-            if not target.exists() or source.stat().st_mtime_ns > target.stat().st_mtime_ns:
+            if (
+                not target.exists()
+                or source.stat().st_mtime_ns > target.stat().st_mtime_ns
+            ):
                 build_album_image(source, target)
                 print(f"Optimized: {source.relative_to(ROOT).as_posix()}")
             digest = hashlib.sha1(target.read_bytes()).hexdigest()[:10]

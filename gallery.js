@@ -22,7 +22,7 @@
 
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const buildId = document.querySelector('meta[name="wedding-build"]')?.content || "dev";
-  const tr = key => window.WeddingI18n ? window.WeddingI18n.t(key) : key;
+  const tr = (key) => (window.WeddingI18n ? window.WeddingI18n.t(key) : key);
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
   let statusKey = status?.dataset.statusKey || "album.lazy";
@@ -31,7 +31,8 @@
   let items = [];
   const itemBySlide = new WeakMap();
   let cachedMetrics = null;
-  let loadedImageCount = 0;
+  const retainedItems = new Set();
+  let visibleItems = new Set();
 
   // Camera state; nearby images stay warm while transforms move.
   let position = 0;
@@ -44,7 +45,7 @@
   let wheelAccumulator = 0;
   let wheelLocked = false;
   let wheelUnlockTimer = 0;
-  let lastTouchTap = { time:0, photoIndex:-1 };
+  let lastTouchTap = { time: 0, photoIndex: -1 };
 
   let lightboxIndex = 0;
   let lightboxReturnFocus = null;
@@ -57,15 +58,17 @@
   const decodeQueue = [];
   let activeDecodes = 0;
   // Limit simultaneous image decodes on phones to avoid GPU/memory spikes.
-  const MAX_DECODE_CONCURRENCY = matchMedia("(max-width: 700px), (pointer: coarse)").matches ? 2 : 4;
+  const MAX_DECODE_CONCURRENCY = matchMedia("(max-width: 700px), (pointer: coarse)").matches
+    ? 2
+    : 4;
   const SAVE_DATA = Boolean(navigator.connection?.saveData);
   // Bound retained decoded photos on long albums; versioned image URLs remain cacheable.
   const MAX_RETAINED_IMAGES = SAVE_DATA ? 12 : MAX_DECODE_CONCURRENCY === 2 ? 20 : 32;
   const lightboxPreloaders = [new Image(), new Image()];
 
-  const wrap = index => ((index % photos.length) + photos.length) % photos.length;
+  const wrap = (index) => ((index % photos.length) + photos.length) % photos.length;
 
-  const setStatus = key => {
+  const setStatus = (key) => {
     statusKey = key;
     if (!status) return;
     status.dataset.statusKey = key;
@@ -83,10 +86,13 @@
       const img = decodeQueue.shift();
       if (!img?.decode || !img.isConnected || !img.hasAttribute("src")) continue;
       activeDecodes++;
-      img.decode().catch(() => {}).finally(() => {
-        activeDecodes--;
-        pumpDecodeQueue();
-      });
+      img
+        .decode()
+        .catch(() => {})
+        .finally(() => {
+          activeDecodes--;
+          pumpDecodeQueue();
+        });
     }
   }
 
@@ -97,19 +103,19 @@
   }
 
   function applyCardSize(item, ratio) {
-    const safeRatio = clamp(Number(ratio) || .78, .50, 2.05);
+    const safeRatio = clamp(Number(ratio) || 0.78, 0.5, 2.05);
     item.ratio = safeRatio;
 
     const metrics = sceneMetrics();
     const blend = metrics.blend;
-    const sceneHeight = metrics.height || blend(680,520);
-    let height = Math.min(sceneHeight * blend(.66,.61), blend(475,340));
+    const sceneHeight = metrics.height || blend(680, 520);
+    let height = Math.min(sceneHeight * blend(0.66, 0.61), blend(475, 340));
 
-    if (safeRatio >= 1.35) height *= blend(.64,.61);
-    else if (safeRatio >= .92) height *= .80;
+    if (safeRatio >= 1.35) height *= blend(0.64, 0.61);
+    else if (safeRatio >= 0.92) height *= 0.8;
 
     let width = height * safeRatio;
-    const maxWidth = Math.min(metrics.width * blend(.36,.74), blend(540,320));
+    const maxWidth = Math.min(metrics.width * blend(0.36, 0.74), blend(540, 320));
 
     if (width > maxWidth) {
       const factor = maxWidth / width;
@@ -117,7 +123,7 @@
       height *= factor;
     }
 
-    const minWidth = Math.min(metrics.width * .6, blend(150,118));
+    const minWidth = Math.min(metrics.width * 0.6, blend(150, 118));
     if (width < minWidth) {
       const factor = minWidth / width;
       width *= factor;
@@ -153,12 +159,12 @@
       card,
       img,
       photoIndex,
-      floatY:Math.sin((photoIndex + 1) * 1.73),
-      floatTilt:Math.sin((photoIndex + 1) * 2.31) * 5.2,
-      ratio:photo.ratio || .78,
-      isMain:false,
-      hidden:true,
-      interactive:false
+      floatY: Math.sin((photoIndex + 1) * 1.73),
+      floatTilt: Math.sin((photoIndex + 1) * 2.31) * 5.2,
+      ratio: photo.ratio || 0.78,
+      isMain: false,
+      hidden: true,
+      interactive: false,
     };
 
     applyCardSize(item, item.ratio);
@@ -167,7 +173,7 @@
       if (!img.naturalWidth || !img.naturalHeight) return;
       const ratio = img.naturalWidth / img.naturalHeight;
       photo.ratio = ratio;
-      if (Math.abs(item.ratio - ratio) > .0001) applyCardSize(item, ratio);
+      if (Math.abs(item.ratio - ratio) > 0.0001) applyCardSize(item, ratio);
       warmDecode(img);
       requestSceneFrame();
     });
@@ -183,7 +189,7 @@
     if (item.img.hasAttribute("src")) return;
     item.img.fetchPriority = relativeDistance < 1.7 ? "high" : "low";
     item.img.src = versionedAsset(photos[item.photoIndex]);
-    loadedImageCount++;
+    retainedItems.add(item);
   }
 
   function shortestRelative(photoIndex, cameraPosition) {
@@ -197,8 +203,7 @@
     if (!captionText || photoIndex < 0) return;
     const photoCaption = photos[photoIndex]?.caption;
     const language = document.documentElement.lang === "en" ? "en" : "vi";
-    const custom = typeof photoCaption === "string"
-      ? photoCaption : photoCaption?.[language];
+    const custom = typeof photoCaption === "string" ? photoCaption : photoCaption?.[language];
     const cycle = captions[language] || captions.vi || [];
     captionText.textContent = custom || (cycle.length ? cycle[photoIndex % cycle.length] : "");
 
@@ -214,12 +219,10 @@
 
     if (counter) {
       counter.textContent =
-        String(photoIndex + 1).padStart(2, "0") +
-        " / " +
-        String(photos.length).padStart(2, "0");
+        String(photoIndex + 1).padStart(2, "0") + " / " + String(photos.length).padStart(2, "0");
     }
 
-    if (progress) progress.style.width = (100 * (photoIndex + 1) / photos.length) + "%";
+    if (progress) progress.style.width = (100 * (photoIndex + 1)) / photos.length + "%";
     updateEditorialCaption(photoIndex, animateCaption);
   }
 
@@ -232,25 +235,28 @@
     const narrow = clamp((840 - width) / 280, 0, 1);
     const blend = (wide, small) => wide + (small - wide) * narrow;
     return (cachedMetrics = {
-      width, height, blend,
-      spacing:width * blend(.285, .34),
-      activeRange:blend(4.10, 3.25),
-      centerZ:blend(325, 235), depthStep:blend(164, 132),
-      gestureStep:Math.max(blend(220,145), width * blend(.22,.43)),
-      maxJump:blend(3,2)
+      width,
+      height,
+      blend,
+      spacing: width * blend(0.285, 0.34),
+      activeRange: blend(4.1, 3.25),
+      centerZ: blend(325, 235),
+      depthStep: blend(164, 132),
+      gestureStep: Math.max(blend(220, 145), width * blend(0.22, 0.43)),
+      maxJump: blend(3, 2),
     });
   }
 
   function trimPhotoCache(metrics) {
-    if (loadedImageCount <= MAX_RETAINED_IMAGES) return;
+    if (retainedItems.size <= MAX_RETAINED_IMAGES) return;
     const keepDistance = metrics.activeRange + (SAVE_DATA ? 1.5 : 3.5);
-    for (const item of items) {
-      if (loadedImageCount <= MAX_RETAINED_IMAGES) break;
+    for (const item of retainedItems) {
+      if (retainedItems.size <= MAX_RETAINED_IMAGES) break;
       if (!item.hidden || !item.img.hasAttribute("src")) continue;
       if (Math.abs(shortestRelative(item.photoIndex, position)) <= keepDistance) continue;
       // Keep nearby full-resolution cards decoded for inertia and seamless wrapping.
       item.img.removeAttribute("src");
-      loadedImageCount--;
+      retainedItems.delete(item);
     }
   }
 
@@ -259,12 +265,21 @@
 
     const metrics = sceneMetrics();
 
-    for (const item of items) {
+    // Visit only the nearby ring plus last frame's visible cards (to hide exits).
+    // Per-frame work stays bounded even when the manifest has hundreds of photos.
+    const candidates = new Set(visibleItems);
+    const nextVisible = new Set();
+    const radius = Math.ceil(metrics.activeRange + (SAVE_DATA ? 0.25 : 1.5));
+    const center = Math.round(position);
+    for (let offset = -radius; offset <= radius; offset++) {
+      candidates.add(items[wrap(center + offset)]);
+    }
+    for (const item of candidates) {
       const relative = shortestRelative(item.photoIndex, position);
       const abs = Math.abs(relative);
 
       // Prefetch nearby cards, not the entire album at once.
-      if (abs <= metrics.activeRange + (SAVE_DATA ? .25 : 1.5)) {
+      if (abs <= metrics.activeRange + (SAVE_DATA ? 0.25 : 1.5)) {
         ensureItemLoaded(item, abs);
       }
 
@@ -287,6 +302,7 @@
         continue;
       }
 
+      nextVisible.add(item);
       if (item.hidden) {
         item.hidden = false;
         item.slide.style.willChange = "transform, opacity";
@@ -294,45 +310,57 @@
 
       // Stable per-photo offsets. They never jump when the camera crosses
       // half/integer boundaries; only the continuous relative value changes.
-      const floatY = item.floatY * (metrics.blend(104,62));
+      const floatY = item.floatY * metrics.blend(104, 62);
       const floatTilt = item.floatTilt;
-      const floatMix = Math.min(1, abs * .90);
+      const floatMix = Math.min(1, abs * 0.9);
 
       // Continuous spatial curve: neighbors stay closer to each other and
       // accelerate outward gradually instead of jumping between discrete poses.
-      const spacingCurve = 1 + Math.min(abs, 3.5) * .085;
+      const spacingCurve = 1 + Math.min(abs, 3.5) * 0.085;
       let x = relative * metrics.spacing * spacingCurve;
       let y = floatY * floatMix;
-      let z = metrics.centerZ - abs * metrics.depthStep - abs * abs * (metrics.blend(17,12));
-      let rotateY = clamp(-relative * (metrics.blend(11.5,12.5)), -42, 42);
+      let z = metrics.centerZ - abs * metrics.depthStep - abs * abs * metrics.blend(17, 12);
+      let rotateY = clamp(-relative * metrics.blend(11.5, 12.5), -42, 42);
       let rotateZ = floatTilt * floatMix;
 
       // Demo-3 hierarchy: the current photo owns the light.
       // Neighbors become much smaller/darker as they fall back in depth.
-      let scale = Math.max(metrics.blend(.42,.46), 1.04 - abs * (metrics.blend(.19,.17)));
-      let opacity = Math.max(.10, Math.pow(.58, abs));
+      let scale = Math.max(metrics.blend(0.42, 0.46), 1.04 - abs * metrics.blend(0.19, 0.17));
+      let opacity = Math.max(0.1, Math.pow(0.58, abs));
 
       // Ease the focused photo into dead center without a threshold snap.
-      const focusBlend = Math.max(0, 1 - abs / .62);
+      const focusBlend = Math.max(0, 1 - abs / 0.62);
       const focusEase = focusBlend * focusBlend * (3 - 2 * focusBlend);
       x *= 1 - focusEase;
       y *= 1 - focusEase;
       rotateY *= 1 - focusEase;
       rotateZ *= 1 - focusEase;
-      z += focusEase * (metrics.blend(88,62));
-      scale += focusEase * (metrics.blend(.105,.085));
+      z += focusEase * metrics.blend(88, 62);
+      scale += focusEase * metrics.blend(0.105, 0.085);
       opacity += (1 - opacity) * focusEase;
 
-      const isMain = abs < .46;
+      const isMain = abs < 0.46;
 
       item.slide.style.opacity = String(opacity);
       item.slide.style.zIndex = String(1000 - Math.round(abs * 80));
       item.slide.style.transform =
         "translate(-50%,-50%) " +
-        "translate3d(" + x.toFixed(2) + "px," + y.toFixed(2) + "px," + z.toFixed(2) + "px) " +
-        "rotateY(" + rotateY.toFixed(2) + "deg) " +
-        "rotateZ(" + rotateZ.toFixed(2) + "deg) " +
-        "scale(" + scale.toFixed(4) + ")";
+        "translate3d(" +
+        x.toFixed(2) +
+        "px," +
+        y.toFixed(2) +
+        "px," +
+        z.toFixed(2) +
+        "px) " +
+        "rotateY(" +
+        rotateY.toFixed(2) +
+        "deg) " +
+        "rotateZ(" +
+        rotateZ.toFixed(2) +
+        "deg) " +
+        "scale(" +
+        scale.toFixed(4) +
+        ")";
 
       if (item.isMain !== isMain) {
         item.isMain = isMain;
@@ -347,6 +375,7 @@
       }
     }
 
+    visibleItems = nextVisible;
     const currentPhoto = wrap(Math.round(position));
     if (currentPhoto !== focusedPhotoIndex) {
       focusedPhotoIndex = currentPhoto;
@@ -362,7 +391,7 @@
   function tickScene(time) {
     sceneFrame = 0;
 
-    const dt = Math.min(2.4, Math.max(.35, (time - (lastFrameTime || time - 16.7)) / 16.7));
+    const dt = Math.min(2.4, Math.max(0.35, (time - (lastFrameTime || time - 16.7)) / 16.7));
     lastFrameTime = time;
 
     if (!drag) {
@@ -370,17 +399,17 @@
         position = targetPosition;
       } else {
         const distance = targetPosition - position;
-        const alpha = 1 - Math.pow(.895, dt);
+        const alpha = 1 - Math.pow(0.895, dt);
         position += distance * alpha;
 
-        if (Math.abs(distance) < .0015) position = targetPosition;
+        if (Math.abs(distance) < 0.0015) position = targetPosition;
       }
     }
 
     renderScene();
 
     // Pointer events request frames while dragging; a stationary finger needs none.
-    if (!drag && Math.abs(targetPosition - position) > .0015) {
+    if (!drag && Math.abs(targetPosition - position) > 0.0015) {
       requestSceneFrame();
     }
   }
@@ -402,23 +431,24 @@
     return slide ? itemBySlide.get(slide) || null : null;
   }
 
-  viewport.addEventListener("pointerdown", event => {
+  viewport.addEventListener("pointerdown", (event) => {
     if (lightbox && !lightbox.hidden) return;
-    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (event.isPrimary === false || drag || (event.pointerType === "mouse" && event.button !== 0))
+      return;
 
     drag = {
-      id:event.pointerId,
-      pointerType:event.pointerType,
-      item:itemFromTarget(event.target),
-      startX:event.clientX,
-      startY:event.clientY,
-      lastX:event.clientX,
-      lastTime:performance.now(),
-      velocityX:0,
-      startPosition:position,
-      step:sceneMetrics().gestureStep,
-      moved:false,
-      cancelled:false
+      id: event.pointerId,
+      pointerType: event.pointerType,
+      item: itemFromTarget(event.target),
+      startX: event.clientX,
+      startY: event.clientY,
+      lastX: event.clientX,
+      lastTime: performance.now(),
+      velocityX: 0,
+      startPosition: position,
+      step: sceneMetrics().gestureStep,
+      moved: false,
+      cancelled: false,
     };
 
     targetPosition = position;
@@ -427,33 +457,37 @@
     viewport.setPointerCapture?.(event.pointerId);
   });
 
-  viewport.addEventListener("pointermove", event => {
-    if (!drag || event.pointerId !== drag.id || drag.cancelled) return;
+  viewport.addEventListener(
+    "pointermove",
+    (event) => {
+      if (!drag || event.pointerId !== drag.id || drag.cancelled) return;
 
-    const dx = event.clientX - drag.startX;
-    const dy = event.clientY - drag.startY;
+      const dx = event.clientX - drag.startX;
+      const dy = event.clientY - drag.startY;
 
-    if (!drag.moved && Math.hypot(dx, dy) > 6) {
-      if (Math.abs(dy) > Math.abs(dx) * 1.15) {
-        drag.cancelled = true;
-        return;
+      if (!drag.moved && Math.hypot(dx, dy) > 6) {
+        if (Math.abs(dy) > Math.abs(dx) * 1.15) {
+          drag.cancelled = true;
+          return;
+        }
+        drag.moved = true;
       }
-      drag.moved = true;
-    }
 
-    if (!drag.moved) return;
-    event.preventDefault();
+      if (!drag.moved) return;
+      event.preventDefault();
 
-    const now = performance.now();
-    const elapsed = Math.max(8, now - drag.lastTime);
-    drag.velocityX = (event.clientX - drag.lastX) / elapsed;
-    drag.lastX = event.clientX;
-    drag.lastTime = now;
+      const now = performance.now();
+      const elapsed = Math.max(8, now - drag.lastTime);
+      drag.velocityX = (event.clientX - drag.lastX) / elapsed;
+      drag.lastX = event.clientX;
+      drag.lastTime = now;
 
-    position = drag.startPosition - dx / drag.step;
-    targetPosition = position;
-    requestSceneFrame();
-  }, { passive:false });
+      position = drag.startPosition - dx / drag.step;
+      targetPosition = position;
+      requestSceneFrame();
+    },
+    { passive: false },
+  );
 
   function finishDrag(event) {
     if (!drag || (event.pointerId != null && event.pointerId !== drag.id)) return;
@@ -470,7 +504,7 @@
     if (state.moved) {
       const step = sceneMetrics().gestureStep;
 
-      const projected = position - state.velocityX * 125 / step;
+      const projected = position - (state.velocityX * 125) / step;
       const maxJump = sceneMetrics().maxJump;
       moveTo(Math.round(clamp(projected, position - maxJump, position + maxJump)));
       return;
@@ -487,53 +521,56 @@
     }
 
     const now = performance.now();
-    if (
-      lastTouchTap.photoIndex === state.item.photoIndex &&
-      now - lastTouchTap.time < 330
-    ) {
-      lastTouchTap = { time:0, photoIndex:-1 };
+    if (lastTouchTap.photoIndex === state.item.photoIndex && now - lastTouchTap.time < 330) {
+      lastTouchTap = { time: 0, photoIndex: -1 };
       openLightbox(state.item.photoIndex, state.item.slide);
       return;
     }
 
-    lastTouchTap = { time:now, photoIndex:state.item.photoIndex };
+    lastTouchTap = { time: now, photoIndex: state.item.photoIndex };
     const relative = shortestRelative(state.item.photoIndex, position);
     moveTo(Math.round(position + relative));
   }
 
   viewport.addEventListener("pointerup", finishDrag);
-  viewport.addEventListener("pointercancel", event => {
+  viewport.addEventListener("pointercancel", (event) => {
     if (!drag || event.pointerId !== drag.id) return;
     drag = null;
     viewport.classList.remove("is-dragging");
     moveTo(Math.round(position));
   });
 
-  viewport.addEventListener("wheel", event => {
-    if (!photos.length || (lightbox && !lightbox.hidden) || event.ctrlKey) return;
+  viewport.addEventListener(
+    "wheel",
+    (event) => {
+      if (!photos.length || (lightbox && !lightbox.hidden) || event.ctrlKey) return;
 
-    const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-    if (!delta) return;
+      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      if (!delta) return;
 
-    event.preventDefault();
-    if (wheelLocked) return;
+      event.preventDefault();
+      if (wheelLocked) return;
 
-    wheelAccumulator += delta;
-    if (Math.abs(wheelAccumulator) < 18) return;
+      // Wheel deltas can be pixels, lines (Firefox), or pages.
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? viewport.clientHeight : 1;
+      wheelAccumulator += delta * unit;
+      if (Math.abs(wheelAccumulator) < 18) return;
 
-    const direction = wheelAccumulator > 0 ? 1 : -1;
-    wheelAccumulator = 0;
-    wheelLocked = true;
-    moveTo(Math.round(targetPosition) + direction);
-
-    clearTimeout(wheelUnlockTimer);
-    wheelUnlockTimer = setTimeout(() => {
-      wheelLocked = false;
+      const direction = wheelAccumulator > 0 ? 1 : -1;
       wheelAccumulator = 0;
-    }, 110);
-  }, { passive:false });
+      wheelLocked = true;
+      moveTo(Math.round(targetPosition) + direction);
 
-  viewport.addEventListener("keydown", event => {
+      clearTimeout(wheelUnlockTimer);
+      wheelUnlockTimer = setTimeout(() => {
+        wheelLocked = false;
+        wheelAccumulator = 0;
+      }, 110);
+    },
+    { passive: false },
+  );
+
+  viewport.addEventListener("keydown", (event) => {
     if (lightbox && !lightbox.hidden) return;
 
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
@@ -560,13 +597,13 @@
     const language = document.documentElement.lang === "en" ? "en" : "vi";
     const custom = photos[lightboxIndex]?.caption;
     const cycle = captions[language] || captions.vi || [];
-    if (caption) caption.textContent = (typeof custom === "string" ? custom : custom?.[language]) ||
-      (cycle.length ? cycle[lightboxIndex % cycle.length] : "");
+    if (caption)
+      caption.textContent =
+        (typeof custom === "string" ? custom : custom?.[language]) ||
+        (cycle.length ? cycle[lightboxIndex % cycle.length] : "");
     lightboxImage.alt = lightboxAlt(lightboxIndex);
     lightboxCounter.textContent =
-      String(lightboxIndex + 1).padStart(2, "0") +
-      " / " +
-      String(photos.length).padStart(2, "0");
+      String(lightboxIndex + 1).padStart(2, "0") + " / " + String(photos.length).padStart(2, "0");
   }
 
   function preloadLightboxNeighbors() {
@@ -587,9 +624,9 @@
     image.decoding = "async";
     // A failed or stalled request must never replace the visible artwork.
     // Both event handlers and the timeout are released on every completion.
-    const loaded = await new Promise(resolve => {
+    const loaded = await new Promise((resolve) => {
       let finished = false;
-      const settle = value => {
+      const settle = (value) => {
         if (finished) return;
         finished = true;
         clearTimeout(timeout);
@@ -604,8 +641,10 @@
       if (image.complete) settle(image.naturalWidth > 0);
     });
     if (!loaded) return null;
-    try { await image.decode?.(); } catch (_) {}
-    return image.naturalWidth > 0 ? { image, index:nextIndex } : null;
+    try {
+      await image.decode?.();
+    } catch (_) {}
+    return image.naturalWidth > 0 ? { image, index: nextIndex } : null;
   }
 
   function failLightboxStep() {
@@ -634,12 +673,15 @@
     const nextIndex = wrap(lightboxIndex + delta);
     lightboxTransitioning = true;
     lightboxQueuedDelta = 0;
-    lightboxImage.getAnimations?.().forEach(animation => animation.cancel());
+    lightboxImage.getAnimations?.().forEach((animation) => animation.cancel());
 
     if (reducedMotion || !lightboxImage.animate) {
       const decoded = await decodeLightboxLayer(nextIndex);
       if (generation !== lightboxGeneration || lightbox.hidden) return;
-      if (!decoded) { failLightboxStep(); return; }
+      if (!decoded) {
+        failLightboxStep();
+        return;
+      }
       decoded.image.id = "albumLightboxImage";
       decoded.image.classList.remove("album-lightbox-incoming");
       lightboxImage.replaceWith(decoded.image);
@@ -659,28 +701,50 @@
     // Decode first while the current photo remains fully visible.
     const decoded = await decodeLightboxLayer(nextIndex);
     if (generation !== lightboxGeneration || lightbox.hidden) return;
-    if (!decoded) { failLightboxStep(); return; }
+    if (!decoded) {
+      failLightboxStep();
+      return;
+    }
 
     const incoming = decoded.image;
     lightboxStage.append(incoming);
 
-    const outgoingAnimation = lightboxImage.animate([
-      { transform:lightboxImage.style.transform || "translate(-50%,-50%) translate3d(0,0,0) scale(1)", opacity:1 },
-      { transform:"translate(-50%,-50%) translate3d(" + (draggedX - direction * lightboxStage.clientWidth * .1) + "px,0,0) scale(.992)", opacity:0 }
-    ], {
-      duration:360,
-      easing:"cubic-bezier(.22,.72,.18,1)",
-      fill:"forwards"
-    });
+    const outgoingAnimation = lightboxImage.animate(
+      [
+        {
+          transform:
+            lightboxImage.style.transform || "translate(-50%,-50%) translate3d(0,0,0) scale(1)",
+          opacity: 1,
+        },
+        {
+          transform:
+            "translate(-50%,-50%) translate3d(" +
+            (draggedX - direction * lightboxStage.clientWidth * 0.1) +
+            "px,0,0) scale(.992)",
+          opacity: 0,
+        },
+      ],
+      {
+        duration: 360,
+        easing: "cubic-bezier(.22,.72,.18,1)",
+        fill: "forwards",
+      },
+    );
 
-    const incomingAnimation = incoming.animate([
-      { transform:"translate(-50%,-50%) translate3d(" + (direction * 6.2) + "vw,0,0) scale(.992)", opacity:0 },
-      { transform:"translate(-50%,-50%) translate3d(0,0,0) scale(1)", opacity:1 }
-    ], {
-      duration:360,
-      easing:"cubic-bezier(.18,.78,.18,1)",
-      fill:"both"
-    });
+    const incomingAnimation = incoming.animate(
+      [
+        {
+          transform: "translate(-50%,-50%) translate3d(" + direction * 6.2 + "vw,0,0) scale(.992)",
+          opacity: 0,
+        },
+        { transform: "translate(-50%,-50%) translate3d(0,0,0) scale(1)", opacity: 1 },
+      ],
+      {
+        duration: 360,
+        easing: "cubic-bezier(.18,.78,.18,1)",
+        fill: "both",
+      },
+    );
 
     await Promise.allSettled([outgoingAnimation.finished, incomingAnimation.finished]);
     if (generation !== lightboxGeneration || lightbox.hidden) {
@@ -731,13 +795,16 @@
     document.body.classList.add("album-lightbox-open");
 
     if (!reducedMotion && lightboxImage.animate) {
-      lightboxImage.animate([
-        { transform:"translate(-50%,-50%) scale(.975)", opacity:0 },
-        { transform:"translate(-50%,-50%) scale(1)", opacity:1 }
-      ], { duration:280, easing:"cubic-bezier(.2,.75,.2,1)" });
+      lightboxImage.animate(
+        [
+          { transform: "translate(-50%,-50%) scale(.975)", opacity: 0 },
+          { transform: "translate(-50%,-50%) scale(1)", opacity: 1 },
+        ],
+        { duration: 280, easing: "cubic-bezier(.2,.75,.2,1)" },
+      );
     }
 
-    requestAnimationFrame(() => lightboxClose?.focus({ preventScroll:true }));
+    requestAnimationFrame(() => lightboxClose?.focus({ preventScroll: true }));
   }
 
   function closeLightbox() {
@@ -751,19 +818,19 @@
     lightboxTransitioning = false;
     lightboxQueuedDelta = 0;
 
-    lightboxStage?.querySelectorAll("img").forEach(node => {
-      node.getAnimations?.().forEach(animation => animation.cancel());
+    lightboxStage?.querySelectorAll("img").forEach((node) => {
+      node.getAnimations?.().forEach((animation) => animation.cancel());
     });
-    lightboxStage?.querySelectorAll(".album-lightbox-incoming").forEach(node => node.remove());
+    lightboxStage?.querySelectorAll(".album-lightbox-incoming").forEach((node) => node.remove());
     lightboxImage.style.transform = "";
     lightboxImage.style.visibility = "";
     lightboxImage.removeAttribute("src");
 
     // Photo cards are plain divs, so a pointer-opened photo cannot receive
     // focus. Return to the keyboard-operable album instead of a hidden close.
-    lightboxReturnFocus?.focus?.({ preventScroll:true });
-    if (lightbox.contains(document.activeElement) ||
-        document.activeElement === document.body) viewport.focus({ preventScroll:true });
+    lightboxReturnFocus?.focus?.({ preventScroll: true });
+    if (lightbox.contains(document.activeElement) || document.activeElement === document.body)
+      viewport.focus({ preventScroll: true });
     lightboxReturnFocus = null;
   }
 
@@ -780,31 +847,48 @@
     return pointer;
   }
 
-  lightboxStage?.addEventListener("pointerdown", event => {
-    if (lightbox.hidden || lightboxTransitioning || event.isPrimary === false ||
-        (event.pointerType === "mouse" && event.button !== 0)) return;
+  lightboxStage?.addEventListener("pointerdown", (event) => {
+    if (
+      lightbox.hidden ||
+      lightboxTransitioning ||
+      event.isPrimary === false ||
+      (event.pointerType === "mouse" && event.button !== 0)
+    )
+      return;
     // Entrance/snap-back animations must not override the finger's transform.
-    lightboxImage.getAnimations?.().forEach(animation => animation.cancel());
+    lightboxImage.getAnimations?.().forEach((animation) => animation.cancel());
     lightboxPointer = {
-      id:event.pointerId, x:event.clientX, y:event.clientY,
-      dx:0, dy:0, horizontal:false,
-      threshold:Math.max(16, Math.min(48, lightboxStage.clientWidth * .12))
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      dx: 0,
+      dy: 0,
+      horizontal: false,
+      threshold: Math.max(16, Math.min(48, lightboxStage.clientWidth * 0.12)),
     };
     lightboxStage.setPointerCapture?.(event.pointerId);
   });
 
-  lightboxStage?.addEventListener("pointermove", event => {
-    const pointer = lightboxPointer;
-    if (!pointer || event.pointerId !== pointer.id) return;
-    pointer.dx = event.clientX - pointer.x;
-    pointer.dy = event.clientY - pointer.y;
-    if (!pointer.horizontal && Math.abs(pointer.dx) > 8 &&
-        Math.abs(pointer.dx) > Math.abs(pointer.dy)) pointer.horizontal = true;
-    if (!pointer.horizontal) return;
-    event.preventDefault();
-    lightboxImage.style.transform =
-      "translate(-50%,-50%) translate3d(" + pointer.dx.toFixed(2) + "px,0,0)";
-  }, { passive:false });
+  lightboxStage?.addEventListener(
+    "pointermove",
+    (event) => {
+      const pointer = lightboxPointer;
+      if (!pointer || event.pointerId !== pointer.id) return;
+      pointer.dx = event.clientX - pointer.x;
+      pointer.dy = event.clientY - pointer.y;
+      if (
+        !pointer.horizontal &&
+        Math.abs(pointer.dx) > 8 &&
+        Math.abs(pointer.dx) > Math.abs(pointer.dy)
+      )
+        pointer.horizontal = true;
+      if (!pointer.horizontal) return;
+      event.preventDefault();
+      lightboxImage.style.transform =
+        "translate(-50%,-50%) translate3d(" + pointer.dx.toFixed(2) + "px,0,0)";
+    },
+    { passive: false },
+  );
 
   function cancelLightboxPointer(event) {
     if (!lightboxPointer || event.pointerId !== lightboxPointer.id) return;
@@ -812,7 +896,7 @@
     lightboxImage.style.transform = "";
   }
 
-  lightboxStage?.addEventListener("pointerup", event => {
+  lightboxStage?.addEventListener("pointerup", (event) => {
     if (!lightboxPointer || event.pointerId !== lightboxPointer.id) return;
     const pointer = resetLightboxPointer();
     const dx = event.clientX - pointer.x;
@@ -826,16 +910,17 @@
     const from = lightboxImage.style.transform;
     lightboxImage.style.transform = "";
     if (!reducedMotion && pointer.horizontal && lightboxImage.animate) {
-      lightboxImage.animate([
-        { transform:from }, { transform:"translate(-50%,-50%)" }
-      ], { duration:180, easing:"cubic-bezier(.2,.75,.2,1)" });
+      lightboxImage.animate([{ transform: from }, { transform: "translate(-50%,-50%)" }], {
+        duration: 180,
+        easing: "cubic-bezier(.2,.75,.2,1)",
+      });
     }
   });
 
   lightboxStage?.addEventListener("pointercancel", cancelLightboxPointer);
   lightboxStage?.addEventListener("lostpointercapture", cancelLightboxPointer);
 
-  document.addEventListener("keydown", event => {
+  document.addEventListener("keydown", (event) => {
     if (!lightbox || lightbox.hidden) return;
 
     if (event.key === "Escape") {
@@ -902,7 +987,7 @@
   }
 
   async function start() {
-    if (document.activeElement === retry) viewport.focus({ preventScroll:true });
+    if (document.activeElement === retry) viewport.focus({ preventScroll: true });
     if (retry) retry.hidden = true;
     if (status) status.hidden = false;
     setStatus("album.loading");
@@ -913,7 +998,7 @@
       // Album data lives only in images/manifest.json.
       const manifestUrl = new URL("images/manifest.json", document.baseURI);
       manifestUrl.searchParams.set("v", buildId);
-      const response = await fetch(manifestUrl, { cache:"no-cache", signal:controller.signal });
+      const response = await fetch(manifestUrl, { cache: "no-cache", signal: controller.signal });
       if (!response.ok) throw new Error("Album manifest HTTP " + response.status);
       const manifest = await response.json();
       if (!manifest || !Array.isArray(manifest.photos))
@@ -924,13 +1009,13 @@
       captions = manifest.captions || {};
 
       photos = list
-        .filter(photo => photo && typeof photo.src === "string" && photo.src)
-        .map(photo => {
+        .filter((photo) => photo && typeof photo.src === "string" && photo.src)
+        .map((photo) => {
           const width = Number(photo.width);
           const height = Number(photo.height);
           return {
             ...photo,
-            ratio:width > 0 && height > 0 ? width / height : Number(photo.ratio) || 0
+            ratio: width > 0 && height > 0 ? width / height : Number(photo.ratio) || 0,
           };
         });
 
@@ -948,7 +1033,8 @@
       }
 
       space.replaceChildren();
-      loadedImageCount = 0;
+      retainedItems.clear();
+      visibleItems.clear();
       cachedMetrics = null;
       // Construct the full album off-DOM, then attach once. Geometry above
       // is cached before any card writes; full-resolution sources are unchanged.
@@ -979,9 +1065,14 @@
   let lazyObserver = null;
   let visibilityFrame = 0;
   const ensureAlbumStarted = () => {
-    if (albumStarted || albumFailed || document.documentElement.classList.contains("wax-pending") ||
-        document.documentElement.classList.contains("party-pending") ||
-        document.documentElement.classList.contains("link-tool-active")) return;
+    if (
+      albumStarted ||
+      albumFailed ||
+      document.documentElement.classList.contains("wax-pending") ||
+      document.documentElement.classList.contains("party-pending") ||
+      document.documentElement.classList.contains("link-tool-active")
+    )
+      return;
     albumStarted = true;
     lazyObserver?.disconnect();
     window.removeEventListener("scroll", scheduleAlbumVisibility);
@@ -1000,7 +1091,8 @@
   // WebKit (especially iOS emulation and some embedded WebViews) may delay
   // IntersectionObserver after programmatic scrolling. Keep a passive fallback.
   function checkAlbumVisibility() {
-    if (albumStarted || albumFailed || document.documentElement.classList.contains("party-pending")) return;
+    if (albumStarted || albumFailed || document.documentElement.classList.contains("party-pending"))
+      return;
     const rect = albumSection.getBoundingClientRect();
     if (rect.top < innerHeight + 1000 && rect.bottom > -600) ensureAlbumStarted();
   }
@@ -1014,21 +1106,28 @@
   }
 
   if ("IntersectionObserver" in window) {
-    lazyObserver = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) ensureAlbumStarted();
-    }, { rootMargin:"1200px 0px", threshold:0 });
+    lazyObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) ensureAlbumStarted();
+      },
+      { rootMargin: "1200px 0px", threshold: 0 },
+    );
     lazyObserver.observe(albumSection);
   }
   // Keep the same lazy-load and keyboard fallback when IntersectionObserver
   // is missing. Calling start only during wax-pending would never retry it.
-  window.addEventListener("scroll", scheduleAlbumVisibility, { passive:true });
-  window.addEventListener("resize", scheduleAlbumVisibility, { passive:true });
-  viewport.addEventListener("focus", ensureAlbumStarted, { once:true });
-  viewport.addEventListener("pointerdown", ensureAlbumStarted, { once:true });
+  window.addEventListener("scroll", scheduleAlbumVisibility, { passive: true });
+  window.addEventListener("resize", scheduleAlbumVisibility, { passive: true });
+  viewport.addEventListener("focus", ensureAlbumStarted, { once: true });
+  viewport.addEventListener("pointerdown", ensureAlbumStarted, { once: true });
   checkAlbumVisibility();
   if (document.documentElement.dataset.party) {
-    document.addEventListener("wedding:waxopen", () => {
-      window.setTimeout(scheduleAlbumVisibility, 200);
-    }, { once:true });
+    document.addEventListener(
+      "wedding:waxopen",
+      () => {
+        window.setTimeout(scheduleAlbumVisibility, 200);
+      },
+      { once: true },
+    );
   }
 })();

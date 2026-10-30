@@ -1,79 +1,260 @@
 /* Navigation now lives inside the single Settings hub tab.
    Standalone Menu button, backdrop and close affordance were removed. */
-.wq-panel{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-.wq-panel-top{display:flex;justify-content:space-between;align-items:center}
-.wq-kicker{font:500 10px Montserrat,sans-serif;letter-spacing:.2em;color:#c2aa7a}
-.wq-heading{font:500 clamp(30px,5vw,39px) 'Cormorant Garamond',serif;margin:15px 0 2px}
-.wq-heading em{color:#dabf86;font-weight:400}
-.wq-description{font-size:12px;color:#beb8ad;margin:0 0 21px}
-.wq-menu-group+.wq-menu-group{margin-top:19px}
-.wq-group-label{margin:0 0 8px;font:600 9px Montserrat,sans-serif;letter-spacing:.22em;color:#8f846f}
-.wq-menu-group-popup .wq-group-label{color:#c2aa7a}
-.wq-links{display:grid;border-top:1px solid #b9a7823b}
-.wq-link{display:flex;align-items:center;gap:14px;padding:16px 2px;text-decoration:none;color:#eee4cf;border-bottom:1px solid #b9a7823b;font:400 13px Montserrat,sans-serif;transition:color .2s,padding-left .2s}
-.wq-link:hover,.wq-link:focus-visible{color:#e8c888;padding-left:7px}
-.wq-no{color:#ba9f73;font-size:10px;letter-spacing:.12em}
-.wq-arrow{margin-left:auto;color:#bca16c}
-.wq-footnote{text-align:center;font:500 10px Montserrat,sans-serif;letter-spacing:.18em;color:#ad966c;margin-top:25px}
-.wq-footnote span{color:#d4b980;padding:0 8px}
-@media(prefers-reduced-motion:reduce){.wq-link{transition:none!important}}
+.wq-panel {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.wq-panel-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.wq-kicker {
+  font:
+    500 10px Montserrat,
+    sans-serif;
+  letter-spacing: 0.2em;
+  color: #c2aa7a;
+}
+.wq-heading {
+  font:
+    500 clamp(30px, 5vw, 39px) "Cormorant Garamond",
+    serif;
+  margin: 15px 0 2px;
+}
+.wq-heading em {
+  color: #dabf86;
+  font-weight: 400;
+}
+.wq-description {
+  font-size: 12px;
+  color: #beb8ad;
+  margin: 0 0 21px;
+}
+.wq-menu-group + .wq-menu-group {
+  margin-top: 19px;
+}
+.wq-group-label {
+  margin: 0 0 8px;
+  font:
+    600 9px Montserrat,
+    sans-serif;
+  letter-spacing: 0.22em;
+  color: #8f846f;
+}
+.wq-menu-group-popup .wq-group-label {
+  color: #c2aa7a;
+}
+.wq-links {
+  display: grid;
+  border-top: 1px solid #b9a7823b;
+}
+.wq-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 2px;
+  text-decoration: none;
+  color: #eee4cf;
+  border-bottom: 1px solid #b9a7823b;
+  font:
+    400 13px Montserrat,
+    sans-serif;
+  transition:
+    color 0.2s,
+    padding-left 0.2s;
+}
+.wq-link:hover,
+.wq-link:focus-visible {
+  color: #e8c888;
+  padding-left: 7px;
+}
+.wq-no {
+  color: #ba9f73;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+.wq-arrow {
+  margin-left: auto;
+  color: #bca16c;
+}
+.wq-footnote {
+  text-align: center;
+  font:
+    500 10px Montserrat,
+    sans-serif;
+  letter-spacing: 0.18em;
+  color: #ad966c;
+  margin-top: 25px;
+}
+.wq-footnote span {
+  color: #d4b980;
+  padding: 0 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wq-link {
+    transition: none !important;
+  }
+}
 
 /* Map and gift popups share one shell; only their sizes/layers differ. */
-.wm-backdrop,.wg-backdrop{
-  position:fixed;inset:0;backdrop-filter:blur(9px);
-  background:rgba(0,0,0,var(--modal-dim,.82));
+.wm-backdrop,
+.wg-backdrop {
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(9px);
+  background: rgba(0, 0, 0, var(--modal-dim, 0.82));
 }
-.wm-backdrop{z-index:1010;--modal-dim:.81}
-.wg-backdrop{z-index:1020}
-.wm-backdrop[hidden],.wg-backdrop[hidden],.wm-modal[hidden],.wg-modal[hidden]{display:none!important}
-.wm-modal,.wg-modal{
-  --modal-gap:clamp(10px,3vw,32px);
-  position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;
-  padding:max(var(--modal-gap),env(safe-area-inset-top,0px))
-    max(var(--modal-gap),env(safe-area-inset-right,0px))
-    max(var(--modal-gap),env(safe-area-inset-bottom,0px))
-    max(var(--modal-gap),env(safe-area-inset-left,0px));
+.wm-backdrop {
+  z-index: 1010;
+  --modal-dim: 0.81;
 }
-.wm-modal{z-index:1011}
-.wg-modal{z-index:1021}
-.wm-dialog{--modal-width:980px;--modal-radius:15px}
-.wg-dialog{--modal-width:560px;--modal-radius:17px}
-.wm-dialog,.wg-dialog{
-  position:relative;pointer-events:auto;width:min(var(--modal-width),100%);
-  max-height:calc(100vh - max(var(--modal-gap),env(safe-area-inset-top,0px)) - max(var(--modal-gap),env(safe-area-inset-bottom,0px)));
-  max-height:calc(100dvh - max(var(--modal-gap),env(safe-area-inset-top,0px)) - max(var(--modal-gap),env(safe-area-inset-bottom,0px)));
-  overflow:auto;overscroll-behavior:contain;border:1px solid #c5a36f70;
-  border-radius:var(--modal-radius);background:linear-gradient(145deg,#161b17,#070b09);
-  box-shadow:0 35px 110px #000e;
+.wg-backdrop {
+  z-index: 1020;
 }
-.wm-header,.wg-header{
-  position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px;background:#0d120ff0;border-bottom:1px solid #c5a36f45;backdrop-filter:blur(8px);
+.wm-backdrop[hidden],
+.wg-backdrop[hidden],
+.wm-modal[hidden],
+.wg-modal[hidden] {
+  display: none !important;
 }
-.wm-close,.wg-close{
-  border:0;background:transparent;color:#ebd3a9;font-size:31px;line-height:1;cursor:pointer;padding:3px 8px;
+.wm-modal,
+.wg-modal {
+  --modal-gap: clamp(10px, 3vw, 32px);
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  padding: max(var(--modal-gap), env(safe-area-inset-top, 0px))
+    max(var(--modal-gap), env(safe-area-inset-right, 0px))
+    max(var(--modal-gap), env(safe-area-inset-bottom, 0px))
+    max(var(--modal-gap), env(safe-area-inset-left, 0px));
 }
-.wm-close:hover,.wm-close:focus-visible,.wg-close:hover,.wg-close:focus-visible{
-  color:white;outline:2px solid #d6b781;outline-offset:2px;
+.wm-modal {
+  z-index: 1011;
 }
-.wm-dialog .locations-section{padding:20px 24px 32px!important;background:transparent}
-.wm-dialog .section-head{margin-bottom:22px}
-.wm-dialog .section-title{font-size:clamp(32px,5vw,48px)}
-.wm-dialog .location-grid{gap:18px}
-.wm-dialog .location-card{scroll-margin-top:70px}
-.wm-dialog .location-card.wm-highlight{outline:2px solid #d7b47a;outline-offset:-2px}
-body.wm-open,body.wg-open{overflow:hidden}
-@media(max-width:650px){
-  .wm-modal,.wg-modal{--modal-gap:8px}
-  .wm-backdrop,.wg-backdrop,.wm-header,.wg-header{backdrop-filter:none}
-  .wm-dialog .locations-section{padding:16px 12px 24px!important}
-  .wm-dialog .location-card iframe{height:210px}
-  .wm-dialog .location-info{padding:18px 12px}
+.wg-modal {
+  z-index: 1021;
 }
-@media(max-width:700px){
-  .wm-header,.wg-header{gap:12px;padding:10px 12px}
-  .wm-close,.wg-close{
-    width:44px;min-width:44px;min-height:44px;margin-left:auto;
-    display:inline-grid;place-items:center;flex-shrink:0;
+.wm-dialog {
+  --modal-width: 980px;
+  --modal-radius: 15px;
+}
+.wg-dialog {
+  --modal-width: 560px;
+  --modal-radius: 17px;
+}
+.wm-dialog,
+.wg-dialog {
+  position: relative;
+  pointer-events: auto;
+  width: min(var(--modal-width), 100%);
+  max-height: calc(
+    100vh - max(var(--modal-gap), env(safe-area-inset-top, 0px)) -
+      max(var(--modal-gap), env(safe-area-inset-bottom, 0px))
+  );
+  max-height: calc(
+    100dvh - max(var(--modal-gap), env(safe-area-inset-top, 0px)) -
+      max(var(--modal-gap), env(safe-area-inset-bottom, 0px))
+  );
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #c5a36f70;
+  border-radius: var(--modal-radius);
+  background: linear-gradient(145deg, #161b17, #070b09);
+  box-shadow: 0 35px 110px #000e;
+}
+.wm-header,
+.wg-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #0d120ff0;
+  border-bottom: 1px solid #c5a36f45;
+  backdrop-filter: blur(8px);
+}
+.wm-close,
+.wg-close {
+  border: 0;
+  background: transparent;
+  color: #ebd3a9;
+  font-size: 31px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 3px 8px;
+}
+.wm-close:hover,
+.wm-close:focus-visible,
+.wg-close:hover,
+.wg-close:focus-visible {
+  color: white;
+  outline: 2px solid #d6b781;
+  outline-offset: 2px;
+}
+.wm-dialog .locations-section {
+  padding: 20px 24px 32px !important;
+  background: transparent;
+}
+.wm-dialog .section-head {
+  margin-bottom: 22px;
+}
+.wm-dialog .section-title {
+  font-size: clamp(32px, 5vw, 48px);
+}
+.wm-dialog .location-grid {
+  gap: 18px;
+}
+.wm-dialog .location-card {
+  scroll-margin-top: 70px;
+}
+.wm-dialog .location-card.wm-highlight {
+  outline: 2px solid #d7b47a;
+  outline-offset: -2px;
+}
+body.wm-open,
+body.wg-open {
+  overflow: hidden;
+}
+@media (max-width: 650px) {
+  .wm-modal,
+  .wg-modal {
+    --modal-gap: 8px;
+  }
+  .wm-backdrop,
+  .wg-backdrop,
+  .wm-header,
+  .wg-header {
+    backdrop-filter: none;
+  }
+  .wm-dialog .locations-section {
+    padding: 16px 12px 24px !important;
+  }
+  .wm-dialog .location-card iframe {
+    height: 210px;
+  }
+  .wm-dialog .location-info {
+    padding: 18px 12px;
+  }
+}
+@media (max-width: 700px) {
+  .wm-header,
+  .wg-header {
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  .wm-close,
+  .wg-close {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    margin-left: auto;
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
   }
 }

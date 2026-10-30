@@ -10,15 +10,17 @@
   if (!screen || !entry || !back || !form) return;
 
   const i18n = window.WeddingI18n;
-  const t = key => i18n ? i18n.t(key) : key;
-  const coupleLabel = () => window.WEDDING_INFO.couple.bride.short + " & " + window.WEDDING_INFO.couple.groom.short;
+  const t = (key) => (i18n ? i18n.t(key) : key);
+  const coupleLabel = () =>
+    window.WEDDING_INFO.couple.bride.short + " & " + window.WEDDING_INFO.couple.groom.short;
   const guestInput = document.getElementById("linkToolGuest");
   const partySelect = document.getElementById("linkToolParty");
   const singleMode = window.WEDDING_INFO.wedding?.mode === "single";
   // Remove unavailable choices: iOS's native picker can still list an option
   // marked hidden/disabled, so CSS/attributes alone leak the template option.
-  [...partySelect.options].forEach(option => {
-    const available = singleMode ? option.value === "single"
+  [...partySelect.options].forEach((option) => {
+    const available = singleMode
+      ? option.value === "single"
       : option.value === "bride" || option.value === "groom";
     if (!available) option.remove();
   });
@@ -50,8 +52,11 @@
   function buildInvitation() {
     const name = guestInput.value.replace(/\s+/g, " ").trim().slice(0, 100);
     const party = singleMode ? "single" : partySelect.value;
-    if (!name || !["bride", "groom", "single"].includes(party) ||
-        (!singleMode && party === "single")) {
+    if (
+      !name ||
+      !["bride", "groom", "single"].includes(party) ||
+      (!singleMode && party === "single")
+    ) {
       setFeedback("link.invalid");
       return false;
     }
@@ -89,8 +94,15 @@
       requestAnimationFrame(() => guestInput.focus({ preventScroll: true }));
     } else {
       const party = new URLSearchParams(location.search).get("party");
-      document.title = t(singleMode ? "page.titleSingle" :
-        party === "bride" ? "page.titleBride" : party === "groom" ? "page.titleGroom" : "page.title");
+      document.title = t(
+        singleMode
+          ? "page.titleSingle"
+          : party === "bride"
+            ? "page.titleBride"
+            : party === "groom"
+              ? "page.titleGroom"
+              : "page.title",
+      );
       if (previouslyFocused?.isConnected) {
         previouslyFocused.focus({ preventScroll: true });
       } else {
@@ -99,8 +111,16 @@
     }
   }
 
-  entry.addEventListener("click", event => {
-    if (event.defaultPrevented || (event.button != null && event.button !== 0) || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+  entry.addEventListener("click", (event) => {
+    if (
+      event.defaultPrevented ||
+      (event.button != null && event.button !== 0) ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.altKey ||
+      event.shiftKey
+    )
+      return;
     event.preventDefault();
     if (isToolUrl()) return;
     const url = new URL(location.href);
@@ -130,7 +150,7 @@
 
   window.addEventListener("popstate", updateView);
 
-  form.addEventListener("submit", event => {
+  form.addEventListener("submit", (event) => {
     event.preventDefault();
     if (buildInvitation()) setFeedback("");
   });
@@ -148,7 +168,9 @@
       document.body.append(textarea);
       textarea.select();
       let success = false;
-      try { success = document.execCommand("copy"); } catch (_) {}
+      try {
+        success = document.execCommand("copy");
+      } catch (_) {}
       textarea.remove();
       setFeedback(success ? "link.copied" : "link.copyFail");
     }
@@ -194,7 +216,7 @@
 
   // The in-page dialog remains keyboard accessible alongside the ONE
   // floating VN/EN control that belongs to the main document.
-  document.addEventListener("keydown", event => {
+  document.addEventListener("keydown", (event) => {
     if (screen.hidden) return;
     if (event.key === "Escape") {
       event.preventDefault();
@@ -209,7 +231,7 @@
       partySelect,
       form.querySelector('button[type="submit"]'),
       ...(!result.hidden ? [copy, share, preview] : []),
-    ].filter(element => element && !element.disabled && !element.hidden);
+    ].filter((element) => element && !element.disabled && !element.hidden);
     if (!fields.length) return;
     if (event.shiftKey && document.activeElement === fields[0]) {
       event.preventDefault();

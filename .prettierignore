@@ -1,0 +1,11 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+blob-report/
+images/optimized/
+images/original/
+audio/
+og-preview.jpg
+version.json
+wedding-deploy-info.json
