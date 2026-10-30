@@ -52,3 +52,33 @@ class PortraitFocusTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "checksum"):
                 generate_focus(self.output, self.info)
         self.assertFalse((self.output / "portrait-focus.json").exists())
+
+    def test_query_fragment_and_unicode_paths(self):
+        source = self.output / "assets/person.webp"
+        source.rename(self.output / "assets/cô dâu.webp")
+        src = "images/optimized/assets/c%C3%B4%20d%C3%A2u.webp?v=2#portrait"
+        self.info["parties"]["bride"]["images"] = {"portraitMain": src}
+        with self.assertWarnsRegex(UserWarning, "No face detected"):
+            result = generate_focus(self.output, self.info)
+        self.assertEqual(result["images"][src]["width"], 600)
+
+    def test_external_portrait_uses_fallback_without_network_access(self):
+        self.info["parties"]["bride"]["images"] = {
+            "portraitMain": "https://example.com/portrait.webp?v=2"
+        }
+        with self.assertWarnsRegex(UserWarning, "External portrait"):
+            result = generate_focus(self.output, self.info)
+        self.assertEqual(result["images"], {})
+
+    def test_unsafe_paths_are_rejected(self):
+        for src in (
+            "images/optimized/../private.webp",
+            "/tmp/private.webp",
+            "//example.com/a.webp",
+            "file:///tmp/a.webp",
+            "images/optimized/%2e%2e/private.webp",
+        ):
+            with self.subTest(src=src):
+                self.info["parties"]["bride"]["images"] = {"portraitMain": src}
+                with self.assertRaisesRegex(ValueError, "Unsafe portrait path"):
+                    generate_focus(self.output, self.info)

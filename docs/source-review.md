@@ -54,3 +54,17 @@ Luồng dữ liệu: `wedding-info.js` → preferences/i18n → các component. 
 
 - [Media preload](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/preload)
 - [Reusable GitHub Actions workflows](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows)
+
+## Follow-up review — baseline 0562c82
+
+Reviewed the current runtime modules (entrance/audio, gallery/lightbox, i18n/preferences, controls, calendar, typography and portrait framing), templates/styles, configuration, image generation, packaging and Actions workflows. Existing automated coverage supplies functional evidence; this is not a claim that every possible configuration or physical device has been verified.
+
+Fixed findings:
+
+- **Medium:** face detection treated a configured portrait URL as a literal filesystem path. Query strings/fragments and percent-encoded filenames could fail a clean rebuild. Parse the URL path and retain the original URL as the metadata key. External HTTP(S) portraits now explicitly warn and use the existing framing fallback, without fetching remote files. Reject local traversal, absolute paths and unsupported schemes.
+- **Medium:** OpenCV filename-based reads can fail for Unicode paths on Windows. Read bytes through NumPy and decode the image from memory; regression coverage uses a Vietnamese filename.
+- **Low:** JavaScript string replacement interpreted dollar substitution tokens in configured metadata/initials. Use replacement callbacks so escaped configuration text stays literal. Regression coverage checks metadata and SVG output across repeated builds.
+
+Validation: 17 JavaScript tests, 18 Python tests, source syntax/format and production build pass locally. Browser CI runs on the PR. Tests include URL queries/fragments, encoded Vietnamese names, external fallback and rejected paths. No image/audio bytes or compression settings changed. No new runtime dependencies were added (NumPy is already required by OpenCV).
+
+Remaining limitations from the earlier review still apply: historical CSS overrides need visual baselines before broad consolidation; pinch zoom is currently disabled; simulated WebKit does not replace physical iOS/Zalo testing; external fonts/maps require live network access. No FPS or performance percentage is claimed without profiling.
