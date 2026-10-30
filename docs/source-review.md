@@ -8,23 +8,23 @@ Review các engine JavaScript, template HTML, CSS/cascade, cấu hình VN/EN, ma
 
 ## Phát hiện và xử lý
 
-| Mức  | Phát hiện                                                                               | Thay đổi                                                                               |
-| ---- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Cao  | Deploy và browser test chạy độc lập; test thất bại vẫn có thể phát hành                 | Reusable workflow kiểm tra, `deploy.needs: validate`; PR cũng được kiểm tra            |
-| Vừa  | Build thay placeholder ngay trong source; chạy lại dễ giữ metadata/build ID cũ          | Entry point `npm run build` dựng bản sao mới trong `dist/`, test hai build liên tiếp   |
-| Vừa  | MP3 `preload=auto` cạnh tranh mạng với cổng/hero trước tương tác                        | Chỉ gán `src` trong thao tác phát, giữ `play()` đồng bộ với click                      |
-| Vừa  | Album duyệt toàn bộ thẻ ở mọi frame                                                     | Duyệt tập thẻ gần camera và thẻ vừa rời vùng nhìn; cache eviction chỉ duyệt ảnh đã tải |
-| Vừa  | Đóng bản đồ từ menu trả focus về liên kết trong panel đã ẩn                             | Trả focus về nút mở menu; regression test mở lại bản đồ                                |
-| Vừa  | Các thiết bị wheel dùng đơn vị line/page không đạt ngưỡng pixel nhất quán               | Chuẩn hóa deltaMode trước khi tính bước album                                          |
-| Vừa  | File introSound tùy chọn không được đóng gói nếu nằm ngoài các file nhạc chính          | Build sao chép cả âm thanh mở cổng từ config                                           |
-| Thấp | Workflow format sửa file trên runner rồi bỏ kết quả, không phát hiện source chưa format | Prettier được pin, format toàn bộ source, check trong CI; Python format bằng Black     |
-| Thấp | Social preview và đóng gói nằm trong YAML dài, khó chạy ở local                         | Tách `scripts/build-social-preview.py` và `scripts/build-site.cjs`                     |
+| Mức  | Phát hiện                                                                               | Thay đổi                                                                                                     |
+| ---- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Cao  | Deploy và browser test chạy độc lập; test thất bại vẫn có thể phát hành                 | Reusable workflow kiểm tra, `deploy.needs: validate`; phát hành đúng artifact đã test; PR cũng được kiểm tra |
+| Vừa  | Build thay placeholder ngay trong source; chạy lại dễ giữ metadata/build ID cũ          | Entry point `npm run build` dựng bản sao mới trong `dist/`, test hai build liên tiếp                         |
+| Vừa  | MP3 `preload=auto` cạnh tranh mạng với cổng/hero trước tương tác                        | Chỉ gán `src` trong thao tác phát, giữ `play()` đồng bộ với click                                            |
+| Vừa  | Album duyệt toàn bộ thẻ ở mọi frame                                                     | Duyệt tập thẻ gần camera và thẻ vừa rời vùng nhìn; cache eviction chỉ duyệt ảnh đã tải                       |
+| Vừa  | Đóng bản đồ từ menu trả focus về liên kết trong panel đã ẩn                             | Trả focus về nút mở menu; regression test mở lại bản đồ                                                      |
+| Vừa  | Các thiết bị wheel dùng đơn vị line/page không đạt ngưỡng pixel nhất quán               | Chuẩn hóa deltaMode trước khi tính bước album                                                                |
+| Vừa  | File introSound tùy chọn không được đóng gói nếu nằm ngoài các file nhạc chính          | Build sao chép cả âm thanh mở cổng từ config                                                                 |
+| Thấp | Workflow format sửa file trên runner rồi bỏ kết quả, không phát hiện source chưa format | Prettier được pin, format toàn bộ source, check trong CI; Python format bằng Black                           |
+| Thấp | Social preview và đóng gói nằm trong YAML dài, khó chạy ở local                         | Tách `scripts/build-social-preview.py` và `scripts/build-site.cjs`                                           |
 
 ## Bằng chứng hiệu năng và bảo toàn chất lượng
 
 - Hai MP3 hiện tại có dung lượng 6,844,077 và 5,054,464 byte. Trước tương tác, implementation mới không gán source nên không yêu cầu MP3. Đây là tải được hoãn, không phải số byte tiết kiệm cho khách đã phát nhạc; browser có thể chỉ tải một phần ở bản cũ.
 - Với active range hiện tại, mỗi frame album duyệt tối đa 13 thẻ gần camera cộng tập thẻ visible trước đó (thường không quá 9). Chi phí transform không tăng tuyến tính theo toàn bộ album. Việc tạo DOM ban đầu và resize vẫn O(N), chưa phải DOM virtualization hoàn toàn.
-- Giữ nguyên toàn bộ bytes ảnh/nhạc, tham số kích thước, độ sâu, easing và chất lượng fullscreen. Không tái nén tài nguyên.
+- Đã so sánh 53 file ảnh/nhạc giữa source và `dist/`: SHA-256 giống nhau. Giữ nguyên toàn bộ bytes ảnh/nhạc, tham số kích thước, độ sâu, easing và chất lượng fullscreen. Không tái nén tài nguyên.
 - Không đưa số % tăng tốc, FPS, Lighthouse hay Core Web Vitals khi chưa đo trên thiết bị và mạng đại diện. Test 150 ảnh kiểm tra wrap, loading và cache; không thay thế profiling GPU/điện thoại thật.
 
 ## Quyết định kiến trúc

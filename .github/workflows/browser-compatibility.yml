@@ -53,6 +53,12 @@ jobs:
         env:
           CI: "true"
           WEDDING_EXTENDED_TESTS: ${{ inputs.extended || 'false' }}
+      - name: Preserve the tested public artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: validated-wedding-site
+          path: dist/
+          retention-days: 7
       - name: Upload browser diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
