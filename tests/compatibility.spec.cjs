@@ -830,6 +830,9 @@ test("fullscreen album follows swipes in both directions and recovers cancellati
   context,
   browserName,
 }) => {
+  // This journey includes the gate, album loading and several native gestures.
+  // WebKit on shared CI runners needs a separate budget from a single interaction.
+  test.setTimeout(60000);
   await mockWeddingAudio(page);
   await page.goto(base + "/index.html?party=groom", { waitUntil: "domcontentloaded" });
   await page.locator("#waxOpenButton").click();
