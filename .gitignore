@@ -28,3 +28,7 @@ Thumbs.db
 
 /dist/
 /wedding-deploy-info.json
+
+# Temporary transaction files for the image generator.
+/images/.gallery.lock
+/images/.gallery-build-*/

@@ -56,7 +56,7 @@ Trong **[wedding-info.js](wedding-info.js)**, trường `wedding.mode` chọn ki
 
 **[wedding-info.js](wedding-info.js)** chứa tên, ngày, nhạc, lời mời, ảnh bìa và các bản dịch giao diện.
 
-**[images/manifest.json](images/manifest.json)** là **nơi duy nhất quản lý album ảnh**: danh sách ảnh, chế độ thêm/thay thế, thứ tự, chú thích và cấu hình tối ưu WebP. Không còn cấu hình album trùng trong `wedding-info.js` hoặc `gallery.js`.
+**[images/manifest.json](images/manifest.json)** là **nơi duy nhất quản lý album ảnh**: danh sách ảnh, thứ tự, chú thích và cấu hình tối ưu WebP. Không còn cấu hình album trùng trong `wedding-info.js` hoặc `gallery.js`.
 
 | Mục trong `wedding-info.js`        | Nội dung bạn đổi                                                       |
 | ---------------------------------- | ---------------------------------------------------------------------- |
@@ -95,7 +95,7 @@ Mẫu `{{couple.bride.short}}`, `{{parties.groom.dateDots}}`, `{{parties.bride.v
 - `ceremonyTime`, `ceremonyEnd`, `receptionTime`, `receptionEnd`: giờ 24h như `09:00`.
 - `site.timezone`: dạng `+07:00`. Countdown và lịch ICS đều đọc từ đó.
 - `music.src`: đường dẫn MP3 tương đối với trang thiệp, giữ nguyên tên file (kể cả dấu cách/Unicode). Vu Quy dùng `audio/bride.mp3`; Tân Hôn dùng `audio/groom.mp3`. Các file được giữ nguyên chất lượng âm thanh gốc.
-- Nhạc được tải trước và gọi phát trực tiếp khi chạm ổ khóa. Dùng âm thanh HTML, không tải YouTube/iframe nên không bật trình phát video. Tạm dừng giữ vị trí; Dừng đặt về đầu bài. Nếu trình duyệt chặn phát hoặc mất mạng, có thể thử lại trong Tùy chỉnh → Âm nhạc.
+- Nhạc chỉ được gán source và gọi phát trực tiếp khi chạm ổ khóa. Dùng âm thanh HTML, không tải YouTube/iframe nên không bật trình phát video. Tạm dừng giữ vị trí; Dừng đặt về đầu bài. Nếu trình duyệt chặn phát hoặc mất mạng, có thể thử lại trong Tùy chỉnh → Âm nhạc.
 
 ### Hình ảnh, QR và album
 
@@ -104,42 +104,50 @@ Chỉ thay chữ trong config không thể biến ảnh cưới cũ thành ảnh
 
 **Quan trọng với QR mừng cưới:** Khi thay `gift.bank`, `gift.accountNumber` hoặc `gift.accountHolder`, phải tạo lại mã QR cho **đúng tài khoản mới**, upload QR mới và cập nhật `gift.qrImage`. Thay số tài khoản hiển thị trong file thông tin **không tự sửa nội dung QR cũ**. Luôn thử quét mã và đối chiếu ngân hàng, số tài khoản, người nhận trước khi gửi thiệp cho khách.
 
-### Album ảnh — chỉ quản lý trong `images/manifest.json`
+### Tạo lại toàn bộ ảnh — clean rebuild bắt buộc
 
-```json
-{
-  "mode": "append",
-  "shuffle": true,
-  "optimization": { "maxSide": 960, "quality": 80 },
-  "captions": {
-    "vi": ["CHÚNG MÌNH", "BÊN NHAU"],
-    "en": ["US", "TOGETHER"]
-  },
-  "total": 2,
-  "photos": [
-    { "src": "images/optimized/album/anh-1.webp", "name": "Ảnh 1", "width": 640, "height": 960 },
-    { "src": "images/optimized/album/anh-2.webp", "name": "Ảnh 2", "width": 960, "height": 640 }
-  ]
-}
-```
+`python generate_gallery.py` luôn tạo mới **toàn bộ `images/optimized/` và danh sách `photos` trong `images/manifest.json`** từ ảnh gốc hiện có. Không dùng mtime, không giữ ảnh tối ưu cũ, không còn chế độ append. File dư trong cả `album/` lẫn `assets/` sẽ biến mất sau khi chạy thành công.
 
-- `mode: "append"`: giữ ảnh có trong `photos` và bổ sung ảnh gốc mới; `"replace"`: tạo danh sách chỉ từ ảnh gốc hiện có (nếu không còn ảnh gốc, album sẽ rỗng). Hãy để `append` khi chỉ thêm ảnh cưới mới.
-- `shuffle: true`: xáo ảnh mỗi lần mở album; `false`: hiển thị theo đúng thứ tự mảng `photos`.
-- `optimization`: giới hạn cạnh dài WebP (`maxSide`), chất lượng (`quality`). `total` do script cập nhật.
-- `captions.vi/en`: chú thích xoay vòng. Có thể đặt chú thích riêng từng ảnh trong `photos` bằng `"caption": {"vi": "Khoảnh khắc của chúng mình", "en": "Our moment"}`.
-- `photos`: danh sách **được website hiển thị**. Bạn có thể sắp thứ tự, thêm mục trỏ tới file WebP đã có, sửa chú thích, hoặc bỏ mục. Lưu ý nếu bỏ mục mà ảnh gốc cùng tên vẫn có trong thư mục gốc, chạy generator sẽ thêm ảnh đó lại; hãy chuyển/xóa file gốc tương ứng.
-- Các dòng chữ nút và bản dịch giao diện chung (ví dụ: "Đang tải album", "Xem toàn màn hình") vẫn ở `wedding-info.js` vì dùng chung hệ thống ngôn ngữ, không phải dữ liệu ảnh.
+- **Giữ đầy đủ bộ ảnh muốn sử dụng** trong `images/original/album/`. Muốn bỏ ảnh khỏi website, bỏ ảnh gốc tương ứng rồi chạy lại.
+- Album bắt buộc có ít nhất một ảnh. Ảnh hỏng/định dạng không hỗ trợ cũng làm lệnh thất bại.
+- `mode` phải là `"replace"`; `optimization` hiện là `{"maxSide": 1440, "quality": 84}`. Đây là cạnh dài tối đa; ảnh nhỏ không được phóng giả lên. Đổi thông số rồi chạy lại sẽ tái tạo mọi ảnh, dù mtime không đổi.
+- `shuffle`, chú thích chung và `caption` của ảnh vẫn còn trong nguồn được giữ. Danh sách ảnh được dựng lại theo tên file; khi `shuffle: false`, dùng tiền tố số nếu cần thứ tự cụ thể.
+- Ảnh gốc và audio **không bị xóa**. QR được sao chép nguyên byte, không resize/nén. Ảnh khóa có alpha được giữ nền trong suốt.
 
-**Thêm ảnh mới:** chép ảnh vào `images/original/album/` trên máy tính rồi chạy:
+**Ảnh bắt buộc:** đặt trong `images/original/assets/`, đúng chữ hoa/thường. Tên được suy ra từ `wedding-info.js`; bảng dưới là cấu hình hiện tại. Với tên có `.*`, chọn **đúng một** file có đuôi JPG/JPEG/PNG/WebP/AVIF/GIF/BMP/TIF/TIFF; phần tên trước đuôi phải khớp. Với tên có đuôi cụ thể, phải khớp cả tên và đuôi.
+
+| Loại             | Tên file gốc bắt buộc                                                                  |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| Hero             | `hero_bride.*`, `hero_groom.*`                                                         |
+| Ảnh kết          | `ending_bride.*`, `ending_groom.*`                                                     |
+| Chân dung cô dâu | `nga-1.*`, `nga-2.*`                                                                   |
+| Chân dung chú rể | `son-1.*`, `son-2.*`                                                                   |
+| Cổng và khóa     | `secret-garden-gate.*`, `secret-garden-lock.*` (nên dùng PNG/WebP trong suốt cho khóa) |
+| QR               | `gift-qr-bride.svg`, `gift-qr-groom.png` — sao chép nguyên byte                        |
+| Câu chuyện       | `NAK_5982.JPG`, `NAK_6143.JPG`, `NAK_6511.JPG`                                         |
+
+Ba tên ảnh câu chuyện lấy từ `story.images.*.sourceName`; script tự sinh toàn bộ bản responsive trong `variants`. `NAK_5982.JPG` cần rộng ít nhất 2000 px; hai ảnh còn lại ít nhất 1333 px sau xoay EXIF để srcset không khai báo kích thước giả. Hero/ảnh kết/chân dung/cổng được tạo lại theo giới hạn riêng của từng loại. Tất cả đường dẫn ảnh được khai báo trong config đều được kiểm tra, kể cả mẫu `parties.single`; những đường dẫn trùng nhau chỉ cần một ảnh gốc. Favicon ở thư mục gốc là template bắt buộc được build riêng.
 
 ```powershell
+# Cài dependency (lần đầu)
 python -m pip install -r requirements.txt
+
+# Xem tên bắt buộc theo config hiện tại
+python generate_gallery.py --list-required
+
+# Kiểm tra, chưa thay đổi bộ ảnh đang dùng
+python generate_gallery.py --check
+
+# Tạo lại toàn bộ bộ ảnh tối ưu
 python generate_gallery.py
+npx prettier --write images/manifest.json
 ```
 
-Script sẽ tối ưu ảnh mới vào `images/optimized/album/` và tự cập nhật **chính `images/manifest.json`**, giữ các mục ảnh cũ và chú thích chỉnh tay khi `mode: "append"`.
+**Nếu thiếu/sai tên/ảnh hỏng:** script báo `FAILED`, liệt kê lỗi và thoát với mã `1`. Bộ ảnh tối ưu và manifest đang dùng giữ nguyên. Script tạo bộ mới trong thư mục tạm trước khi thay thế; nếu ghi manifest thất bại thì khôi phục bộ ảnh cũ. Không chạy đồng thời nhiều tiến trình; lock bảo vệ việc ghi. Nếu máy bị tắt đột ngột trong lúc publish, cần kiểm tra thư mục `.gallery-build-*`/lock trước khi chạy lại; không cam kết atomic cho mất điện giữa hai thao tác filesystem.
 
-Sau đó **commit/push `images/manifest.json` và ảnh mới trong `images/optimized/`** để website được cập nhật. Ảnh gốc `images/original/` được Git ignore nên không bị đẩy lên GitHub. Workflow deploy hiện **không tự chạy** `generate_gallery.py`; phải chạy local trước hoặc tự khai báo ảnh WebP đã tối ưu trong manifest.
+Sau khi thành công, dùng **`git add -A images/optimized images/manifest.json`**, kiểm tra diff, commit và push — cần stage cả file đã xóa. `images/original/` được Git ignore, không push ảnh gốc. Workflow deploy **không tự chạy generator** vì repository không chứa ảnh gốc; nó chỉ kiểm tra/build các ảnh tối ưu đã commit.
+
+Thay đổi cấu hình 1440/84 không tự tăng nét 30 ảnh WebP đã commit: cần chạy generator với bộ ảnh gốc đầy đủ trên máy rồi push kết quả. Không dùng ảnh WebP 960 px cũ làm nguồn nếu muốn có thêm chi tiết.
 
 ## Các file khác chỉ là template / engine
 
@@ -244,8 +252,10 @@ Lưới dùng kích thước nội dung để tự đổi số cột. Album nộ
 | `docs/`                           | Kiến trúc, kết quả review và giới hạn kiểm chứng         |
 | `dist/`                           | Website sinh tự động, không commit                       |
 
-Chạy `npm run format` trước khi commit; `npm run format:check` kiểm tra cùng phiên bản Prettier đã khóa trong lockfile. Python dùng `python3 -m black generate_gallery.py scripts/build-social-preview.py` (Black 25.9.0). EditorConfig thống nhất UTF-8, LF và thụt dòng.
+Chạy `npm run format` trước khi commit; `npm run format:check` kiểm tra cùng phiên bản Prettier đã khóa trong lockfile. Python dùng `python3 -m black generate_gallery.py scripts/build-social-preview.py tests/test_generate_gallery.py` (Black 25.9.0). EditorConfig thống nhất UTF-8, LF và thụt dòng.
 
 Nhạc MP3 chỉ được gán source khi khách mở thiệp/bật nhạc; `play()` vẫn chạy trực tiếp trong click để giữ user activation trên iOS. Album chỉ duyệt các thẻ gần camera cộng các thẻ vừa rời vùng nhìn ở mỗi frame. Không giảm kích thước, chất lượng hay số lượng ảnh; nguồn fullscreen giữ nguyên.
 
 Xem [review kỹ thuật](docs/source-review.md) để biết phạm vi, bằng chứng và các bước tiếp theo.
+
+Kiểm tra pipeline ảnh riêng: `python -m unittest discover -s tests -p "test_*.py"`. Test dùng ảnh giả trong thư mục tạm, không cần ảnh gốc riêng tư và không sửa bộ ảnh thật. CI chạy bộ test này trước khi build.

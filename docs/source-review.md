@@ -37,7 +37,7 @@ Luồng dữ liệu: `wedding-info.js` → preferences/i18n → các component. 
 
 - `style.css` vẫn có nhiều lớp override lịch sử. Chuyển sang CSS layers hoặc tách component sâu hơn cần visual snapshots làm chuẩn; đợt này format nhưng giữ cascade.
 - Trang đang chủ động chặn pinch zoom bằng viewport, touch-action và event handler. Đây là hạn chế accessibility cho khách cần phóng lớn; nên thống nhất hành vi zoom trước khi đổi interaction toàn trang.
-- `generate_gallery.py` dùng mtime để bỏ qua ảnh đã tối ưu. Thay quality/maxSide có thể không tái sinh ảnh cũ nếu file nguồn không mới hơn; cân nhắc fingerprint cả nguồn và thông số khi triển khai pipeline ảnh tiếp theo. Không regenerate trong đợt review để tránh thay chất lượng.
+- **Đã xử lý ở đợt clean rebuild tiếp theo:** `generate_gallery.py` luôn tạo lại từ ảnh gốc đầy đủ, bắt buộc đủ tài nguyên, không dùng mtime. Cấu hình album mới là 1440 px/quality 84; bộ ảnh cũ chỉ đổi sau khi chủ repo chạy với ảnh gốc và commit kết quả.
 - Cache ảnh ngoài album vẫn đổi theo build SHA; có thể chuyển sang content hash để tái sử dụng cache qua các lần chỉ sửa chữ. Cần một asset resolver chung cho cả preload/CSS/JS để tránh tải hai URL cho một ảnh.
 - Google Fonts và bản đồ là dependency ngoài; cần thử mạng yếu/đứt mạng và trình duyệt Zalo thật. Có thể self-host font sau khi xác nhận license và subset tiếng Việt đầy đủ.
 - Công cụ tạo link là giao diện public, không phải admin authentication. Không đưa dữ liệu riêng tư hoặc secret vào config/frontend.

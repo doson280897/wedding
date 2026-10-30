@@ -34,6 +34,7 @@ jobs:
         run: |
           npm run format:check
           npm test
+          python3 -m unittest discover -s tests -p "test_*.py"
           python3 -m py_compile generate_gallery.py scripts/build-social-preview.py
       - name: Build the actual public artifact
         run: npm run build
