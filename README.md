@@ -258,7 +258,12 @@ Nhạc MP3 chỉ được gán source khi khách mở thiệp/bật nhạc; `pla
 
 Xem [review kỹ thuật](docs/source-review.md) để biết phạm vi, bằng chứng và các bước tiếp theo.
 
-### Căn khuôn mặt trong khung chân dung
-
-`parties.bride/groom.portraitPosition.main` và `.secondary` trong `wedding-info.js` đặt `object-position` cho từng ảnh. Ví dụ `"50% 0%"` giữ phần trên ảnh, `"50% 25%"` cắt nhẹ từ phía trên khi khung rộng. Căn giữa mặc định `50% 50%` có thể cắt đầu đối với ảnh toàn thân. Khi đổi ảnh, chỉnh vị trí ở đây; không cần crop/nén lại ảnh gốc. Khung vòm và ảnh chồng vẫn giữ nguyên.
 Kiểm tra pipeline ảnh riêng: `python -m unittest discover -s tests -p "test_*.py"`. Test dùng ảnh giả trong thư mục tạm, không cần ảnh gốc riêng tư và không sửa bộ ảnh thật. CI chạy bộ test này trước khi build.
+
+### Tự động căn khuôn mặt trong khung chân dung
+
+Sau khi thay ảnh gốc đúng tên bắt buộc, chạy `python3 generate_gallery.py`. Script dùng OpenCV YuNet để tìm khuôn mặt ngay trên máy, rồi tạo `images/optimized/portrait-focus.json` cùng bộ ảnh mới. Commit cả metadata và ảnh được tạo. Website đọc metadata, tự căn lại khi kích thước khung hoặc thiết bị thay đổi; không tải mô hình AI trên trình duyệt, không gửi ảnh đến dịch vụ ngoài và không crop lại file ảnh.
+
+Cài dependency bằng `python3 -m pip install -r requirements.txt`. Model đã đi kèm trong `scripts/models/` và được kiểm tra SHA-256. Không cần tải model mỗi lần chạy. Thiếu model hoặc lỗi xử lý sẽ dừng trước khi thay bộ ảnh cũ. `--check` chỉ kiểm tra đầu vào, chưa chạy nhận diện.
+
+Nếu không thấy mặt, script cảnh báo và website dùng `parties.bride/groom.portraitPosition.main` / `.secondary` trong `wedding-info.js` làm vị trí dự phòng. Nếu thấy nhiều mặt, website căn vùng chứa tất cả; nếu vùng mặt quá lớn so với khung, dùng `contain` để tránh cắt mặt (có thể xuất hiện khoảng trống). Nhận diện không đảm bảo đúng với mọi ảnh, nhất là mặt bị che hoặc quay nghiêng; nên xem lại giao diện sau khi đổi ảnh. Metadata thiếu hoặc không tải được cũng dùng vị trí dự phòng. Không sửa ảnh trực tiếp trong `optimized/`: luôn chạy lại script để tọa độ khớp ảnh mới.
