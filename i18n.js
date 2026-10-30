@@ -128,6 +128,12 @@
       if (scope && scope !== document.documentElement.dataset.party) return;
       const src = getInfo(node.dataset.infoSrc);
       if (!src) return;
+      const position = node.dataset.infoPosition && getInfo(node.dataset.infoPosition);
+      if (node.dataset.infoPosition) {
+        // Each portrait has its own framing; never crop every face at 50%/50%.
+        node.style.objectPosition =
+          position && CSS.supports("object-position", position) ? position : "50% 0%";
+      }
       const url = withVersion(src);
       // Story photos retain their full-size fallback. Let the browser select
       // a correctly sized source before assigning src, avoiding a large first

@@ -258,4 +258,7 @@ Nhạc MP3 chỉ được gán source khi khách mở thiệp/bật nhạc; `pla
 
 Xem [review kỹ thuật](docs/source-review.md) để biết phạm vi, bằng chứng và các bước tiếp theo.
 
+### Căn khuôn mặt trong khung chân dung
+
+`parties.bride/groom.portraitPosition.main` và `.secondary` trong `wedding-info.js` đặt `object-position` cho từng ảnh. Ví dụ `"50% 0%"` giữ phần trên ảnh, `"50% 25%"` cắt nhẹ từ phía trên khi khung rộng. Căn giữa mặc định `50% 50%` có thể cắt đầu đối với ảnh toàn thân. Khi đổi ảnh, chỉnh vị trí ở đây; không cần crop/nén lại ảnh gốc. Khung vòm và ảnh chồng vẫn giữ nguyên.
 Kiểm tra pipeline ảnh riêng: `python -m unittest discover -s tests -p "test_*.py"`. Test dùng ảnh giả trong thư mục tạm, không cần ảnh gốc riêng tư và không sửa bộ ảnh thật. CI chạy bộ test này trước khi build.
