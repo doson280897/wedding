@@ -1,6 +1,8 @@
 """Exercise the real image pipeline in disposable trees, never production images."""
 
 import copy
+from contextlib import redirect_stderr
+import io
 import importlib.util
 import json
 import os
@@ -119,6 +121,47 @@ class RebuildTests(unittest.TestCase):
         before = self.snapshot()
         with self.assertRaisesRegex(ValueError, message):
             gallery.rebuild(self.root)
+        self.assertEqual(before, self.snapshot())
+
+    def test_live_progress_is_flushed_before_encoding_and_finishes_after_publish(self):
+        stream = io.StringIO()
+        encode = gallery.encode
+
+        def observe(*args, **kwargs):
+            # The current filename must already be visible before expensive work starts.
+            self.assertIn("Đang xử lý:", stream.getvalue().splitlines()[-1])
+            self.assertGreater(flush.call_count, 0)
+            return encode(*args, **kwargs)
+
+        with redirect_stderr(stream), mock.patch.object(
+            stream, "flush", wraps=stream.flush
+        ) as flush, mock.patch.object(gallery, "encode", side_effect=observe):
+            gallery.rebuild(self.root)
+        log = stream.getvalue()
+        phases = [log.index(f"Bước {index}/4") for index in range(1, 5)]
+        self.assertEqual(phases, sorted(phases))
+        self.assertIn("Kiểm tra ảnh tĩnh: images/static/qr.png", log)
+        self.assertIn("Kiểm tra album [1/1]: Ảnh 01.jpg", log)
+        self.assertIn("[1/1] Xong 100%: Ảnh 01.jpg", log)
+        self.assertIn("HOÀN TẤT:", log.splitlines()[-1])
+        self.assertTrue((self.output / "album/Ảnh 01.jpg.webp").exists())
+
+    def test_check_progress_and_failed_build_never_report_published_success(self):
+        stream = io.StringIO()
+        before = self.snapshot()
+        with redirect_stderr(stream):
+            gallery.rebuild(self.root, check=True)
+        self.assertIn("HOÀN TẤT kiểm tra", stream.getvalue())
+        self.assertNotIn("Bước 2/4", stream.getvalue())
+        self.assertEqual(before, self.snapshot())
+        stream = io.StringIO()
+        with redirect_stderr(stream), mock.patch.object(
+            gallery, "publish", side_effect=OSError("disk full")
+        ):
+            with self.assertRaisesRegex(OSError, "disk full"):
+                gallery.rebuild(self.root)
+        self.assertIn("Bước 4/4", stream.getvalue())
+        self.assertNotIn("HOÀN TẤT", stream.getvalue())
         self.assertEqual(before, self.snapshot())
 
     def test_replaces_all_old_outputs_and_regenerates_after_settings_change(self):

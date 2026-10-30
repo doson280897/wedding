@@ -145,6 +145,8 @@ python generate_gallery.py
 npx prettier --write images/manifest.json
 ```
 
+**Theo dõi tiến độ:** Khi chạy generator (kể cả `--check`), terminal hiển thị ngay từng giai đoạn, tên ảnh đang kiểm tra/xử lý, số ảnh đã xong/tổng số, phần trăm của từng nhóm ảnh và thời gian đã chạy. Mỗi ảnh tối ưu có thời gian xử lý riêng. Log được đẩy ra ngay qua stderr để xem được cả trong PowerShell và khi chuyển hướng log, không cần thêm `python -u`. Chỉ hiện `HOÀN TẤT` sau khi cập nhật đầu ra thành công; `--list-required` vẫn chỉ in danh sách tên file.
+
 **Nếu thiếu/sai tên/ảnh hỏng:** script báo `FAILED`, liệt kê lỗi và thoát với mã `1`. Bộ ảnh tối ưu và manifest đang dùng giữ nguyên. Script tạo bộ mới trong thư mục tạm trước khi thay thế; nếu ghi manifest thất bại thì khôi phục bộ ảnh cũ. Không chạy đồng thời nhiều tiến trình; lock bảo vệ việc ghi. Nếu máy bị tắt đột ngột trong lúc publish, cần kiểm tra thư mục `.gallery-build-*`/lock trước khi chạy lại; không cam kết atomic cho mất điện giữa hai thao tác filesystem.
 
 Sau khi thành công, dùng **`git add -A images/optimized images/manifest.json`**, kiểm tra diff, commit và push — cần stage cả file đã xóa. `images/original/` được Git ignore, không push ảnh gốc. Workflow deploy **không tự chạy generator** vì repository không chứa ảnh gốc; nó chỉ kiểm tra/build các ảnh tối ưu đã commit.

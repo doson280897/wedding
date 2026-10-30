@@ -11,6 +11,7 @@ import re
 import shutil
 import sys
 import tempfile
+import time
 from urllib.parse import quote, unquote, urlsplit
 import xml.etree.ElementTree as ET
 
@@ -31,6 +32,25 @@ SUPPORTED_EXTENSIONS = {
     ".tif",
     ".tiff",
 }
+
+
+class Progress:
+    """Plain, flushed lines work in Windows terminals and redirected logs alike."""
+
+    def __init__(self):
+        self.started = time.monotonic()
+
+    def log(self, message):
+        elapsed = time.monotonic() - self.started
+        print(f"[{elapsed:6.1f}s] {message}", file=sys.stderr, flush=True)
+
+    def run(self, label, operation, *args, index, total, **kwargs):
+        self.log(f"[{index}/{total}] Đang xử lý: {label}")
+        started = time.monotonic()
+        result = operation(*args, **kwargs)
+        elapsed = time.monotonic() - started
+        self.log(f"[{index}/{total}] Xong {index / total:.0%}: {label} ({elapsed:.1f}s)")
+        return result
 
 
 def read_wedding_info(root: Path) -> dict:
@@ -194,11 +214,14 @@ def natural_key(value):
     ]
 
 
-def preflight(root, info, manifest, plan):
+def preflight(root, info, manifest, plan, progress=None):
+    progress = progress or Progress()
+    progress.log("Bước 1/4 — Kiểm tra đầu vào")
     errors = []
     resolved = {}
     sizes = {}
-    for output, rule in plan.items():
+    for index, (output, rule) in enumerate(plan.items(), 1):
+        progress.log(f"Ảnh cấu hình [{index}/{len(plan)}]: {source_label(rule)}")
         try:
             source = resolve_source(root, rule)
             if source not in sizes:
@@ -215,7 +238,8 @@ def preflight(root, info, manifest, plan):
         except (OSError, ValueError, SyntaxError) as error:
             errors.append(str(error))
     # Validate static artwork, but never encode, copy, or publish it here.
-    for value in set(image_references(info, "images/static/")):
+    for value in sorted(set(image_references(info, "images/static/"))):
+        progress.log("Kiểm tra ảnh tĩnh: " + value)
         try:
             relative = local_path(value)
             path = root / relative
@@ -236,13 +260,20 @@ def preflight(root, info, manifest, plan):
     album_root = root / "images/original/album"
     album = []
     targets = set()
-    for path in sorted(
-        album_root.rglob("*"), key=lambda p: natural_key(p.relative_to(album_root))
-    ):
-        if not path.is_file() or any(
+    progress.log("Đang quét thư mục ảnh album...")
+    candidates = [
+        path
+        for path in sorted(
+            album_root.rglob("*"), key=lambda p: natural_key(p.relative_to(album_root))
+        )
+        if path.is_file() and not any(
             part.startswith(".") for part in path.relative_to(album_root).parts
-        ):
-            continue
+        )
+    ]
+    for index, path in enumerate(candidates, 1):
+        progress.log(
+            f"Kiểm tra album [{index}/{len(candidates)}]: {path.relative_to(album_root)}"
+        )
         try:
             if path.is_symlink() or not path.resolve().is_relative_to(
                 album_root.resolve()
@@ -279,6 +310,9 @@ def preflight(root, info, manifest, plan):
         raise ValueError(
             "Kiểm tra đầu vào thất bại:\n- " + "\n- ".join(dict.fromkeys(errors))
         )
+    progress.log(
+        f"Kiểm tra xong: {len(set(resolved.values()))} ảnh gốc, {len(album)} ảnh album; ảnh tĩnh hợp lệ."
+    )
     return resolved, album
 
 
@@ -319,7 +353,9 @@ def publish(root, stage):
         raise
 
 
-def rebuild(root=ROOT, *, check=False):
+def rebuild(root=ROOT, *, check=False, progress=None):
+    progress = progress or Progress()
+    progress.log("Bắt đầu kiểm tra ảnh" if check else "Bắt đầu tạo lại bộ ảnh")
     root = Path(root)
     image_root = root / "images"
     # Refuse concurrent writers and symlinked generated destinations.
@@ -340,45 +376,62 @@ def rebuild(root=ROOT, *, check=False):
             (image_root / "manifest.json").read_text(encoding="utf-8")
         )
         plan = asset_plan(info)
-        resolved, album = preflight(root, info, manifest, plan)
+        resolved, album = preflight(root, info, manifest, plan, progress)
         if check:
-            print(
-                f"Đủ đầu vào: {len(set(resolved.values()))} ảnh bắt buộc, {len(album)} ảnh album."
-            )
+            progress.log("HOÀN TẤT kiểm tra — chưa thay đổi bộ ảnh đang dùng.")
             return
         with tempfile.TemporaryDirectory(
             prefix=".gallery-build-", dir=image_root
         ) as temporary:
             stage = Path(temporary)
-            for output, rule in plan.items():
+            progress.log("Bước 2/4 — Tạo ảnh cấu hình và các kích thước responsive")
+            for index, (output, rule) in enumerate(plan.items(), 1):
                 target = stage / "optimized" / output
                 target.parent.mkdir(parents=True, exist_ok=True)
                 if rule["copy"]:
-                    shutil.copyfile(resolved[output], target)
+                    progress.run(
+                        output.as_posix(),
+                        shutil.copyfile,
+                        resolved[output],
+                        target,
+                        index=index,
+                        total=len(plan),
+                    )
                 else:
-                    encode(
+                    progress.run(
+                        output.as_posix(),
+                        encode,
                         resolved[output],
                         target,
                         quality=84,
+                        index=index,
+                        total=len(plan),
                         max_side=rule["max_side"],
                         width=rule["width"],
                     )
             from scripts.portrait_focus import generate_focus
 
+            progress.log("Đang phân tích khuôn mặt để căn khung chân dung...")
             generate_focus(stage / "optimized", info)
+            progress.log("Đã căn khung chân dung.")
             previous = {
                 item.get("src"): item
                 for item in manifest["photos"]
                 if isinstance(item, dict)
             }
             photos = []
-            for source in album:
+            progress.log("Bước 3/4 — Tối ưu ảnh album")
+            for index, source in enumerate(album, 1):
                 relative = source.relative_to(root / "images/original/album")
                 output = Path("album") / relative.parent / (relative.name + ".webp")
                 target = stage / "optimized" / output
-                width, height = encode(
+                width, height = progress.run(
+                    relative.as_posix(),
+                    encode,
                     source,
                     target,
+                    index=index,
+                    total=len(album),
                     quality=manifest["optimization"]["quality"],
                     max_side=manifest["optimization"]["maxSide"],
                 )
@@ -394,6 +447,7 @@ def rebuild(root=ROOT, *, check=False):
                 if "caption" in previous.get(src, {}):
                     photo["caption"] = previous[src]["caption"]
                 photos.append(photo)
+            progress.log("Bước 4/4 — Ghi manifest và thay bộ ảnh đã tạo")
             manifest["photos"] = photos
             manifest["total"] = len(photos)
             (stage / "manifest.json").write_text(
@@ -401,8 +455,8 @@ def rebuild(root=ROOT, *, check=False):
                 encoding="utf-8",
             )
             publish(root, stage)
-        print(
-            f"Đã tạo mới toàn bộ images/optimized/: {len(plan)} tài nguyên, {len(photos)} ảnh album. Không giữ file tối ưu cũ."
+        progress.log(
+            f"HOÀN TẤT: {len(plan)} tài nguyên, {len(photos)} ảnh album. Đã cập nhật images/optimized/ và manifest."
         )
     finally:
         lock.unlink()
@@ -428,7 +482,7 @@ def main():
         else:
             rebuild(check=args.check)
     except (OSError, ValueError, SyntaxError, KeyError, TypeError) as error:
-        print("FAILED: " + str(error), file=sys.stderr)
+        print("FAILED: " + str(error), file=sys.stderr, flush=True)
         return 1
     return 0
 
