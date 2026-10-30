@@ -1,9 +1,9 @@
 {
-  "mode": "append",
+  "mode": "replace",
   "shuffle": true,
   "optimization": {
-    "maxSide": 960,
-    "quality": 80
+    "maxSide": 1440,
+    "quality": 84
   },
   "captions": {
     "vi": ["CHÚNG MÌNH", "BÊN NHAU", "NHỮNG NGÀY YÊU", "MỘT LỜI HẸN ƯỚC", "MÃI VỀ SAU"],

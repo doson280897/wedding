@@ -146,7 +146,7 @@ test("one shared floating language control and one data script", () => {
 test("album settings, captions and photo list live only in images/manifest.json", () => {
   assert.equal(info.gallery, undefined, "Do not duplicate album config in wedding-info.js");
   const manifest = JSON.parse(read("images/manifest.json"));
-  assert.ok(["append", "replace"].includes(manifest.mode));
+  assert.equal(manifest.mode, "replace");
   assert.equal(typeof manifest.shuffle, "boolean");
   assert.ok(manifest.optimization.maxSide >= 160);
   assert.ok(manifest.optimization.quality >= 1 && manifest.optimization.quality <= 100);
@@ -165,7 +165,7 @@ test("album settings, captions and photo list live only in images/manifest.json"
   const generator = read("generate_gallery.py");
   const renderer = read("gallery.js");
   assert.ok(generator.includes('MANIFEST_FILE = IMAGE_ROOT / "manifest.json"'));
-  assert.ok(generator.includes('ALBUM_MODE == "append"'));
+
   assert.ok(!generator.includes('WEDDING_INFO.get("gallery"'));
   assert.ok(renderer.includes('new URL("images/manifest.json", document.baseURI)'));
   assert.ok(!renderer.includes("WEDDING_INFO?.gallery"));

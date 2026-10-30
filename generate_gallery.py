@@ -1,70 +1,25 @@
+"""Validate originals, rebuild every optimized image, then publish as one batch."""
+
 from __future__ import annotations
 
-from pathlib import Path
-from urllib.parse import quote
+import argparse
 import hashlib
 import json
+import os
+from pathlib import Path
 import re
+import shutil
+import sys
+import tempfile
+from urllib.parse import quote, unquote, urlsplit
+import xml.etree.ElementTree as ET
 
-from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL import Image, ImageOps
 import pillow_avif  # noqa: F401
 
 ROOT = Path(__file__).resolve().parent
 IMAGE_ROOT = ROOT / "images"
-
-ORIGINAL_ROOT = IMAGE_ROOT / "original"
-ORIGINAL_ASSETS = ORIGINAL_ROOT / "assets"
-ORIGINAL_ALBUM = ORIGINAL_ROOT / "album"
-
-OPTIMIZED_ROOT = IMAGE_ROOT / "optimized"
-OPTIMIZED_ASSETS = OPTIMIZED_ROOT / "assets"
-OPTIMIZED_ALBUM = OPTIMIZED_ROOT / "album"
-
-
-def read_wedding_info() -> dict:
-    """Read the JSON object stored inside the one editable wedding-info.js file."""
-    source = (ROOT / "wedding-info.js").read_text(encoding="utf-8")
-    marker = "window.WEDDING_INFO = "
-    if marker not in source:
-        raise ValueError("Không tìm thấy window.WEDDING_INFO trong wedding-info.js")
-    value, _ = json.JSONDecoder().raw_decode(source.split(marker, 1)[1].lstrip())
-    return value
-
-
-WEDDING_INFO = read_wedding_info()
 MANIFEST_FILE = IMAGE_ROOT / "manifest.json"
-
-
-def read_album_manifest() -> dict:
-    """Read the only album config/photo list, never a second gallery config."""
-    if not MANIFEST_FILE.is_file():
-        raise FileNotFoundError(
-            "Thiếu images/manifest.json: hãy tạo file cấu hình album trước."
-        )
-    data = json.loads(MANIFEST_FILE.read_text(encoding="utf-8"))
-    if not isinstance(data, dict) or not isinstance(data.get("photos"), list):
-        raise ValueError("images/manifest.json phải là object với photos là một mảng")
-    return data
-
-
-ALBUM_MANIFEST = read_album_manifest()
-ALBUM_MODE = ALBUM_MANIFEST.get("mode")
-if ALBUM_MODE not in ("append", "replace"):
-    raise ValueError("images/manifest.json: mode phải là append hoặc replace")
-if not isinstance(ALBUM_MANIFEST.get("shuffle"), bool):
-    raise ValueError("images/manifest.json: shuffle phải là true hoặc false")
-
-optimization = ALBUM_MANIFEST.get("optimization")
-if not isinstance(optimization, dict):
-    raise ValueError("images/manifest.json: cần khai báo optimization")
-ALBUM_MAX_SIDE = optimization.get("maxSide")
-ALBUM_QUALITY = optimization.get("quality")
-if type(ALBUM_MAX_SIDE) is not int or not 160 <= ALBUM_MAX_SIDE <= 4096:
-    raise ValueError("images/manifest.json: optimization.maxSide phải từ 160 đến 4096")
-if type(ALBUM_QUALITY) is not int or not 1 <= ALBUM_QUALITY <= 100:
-    raise ValueError("images/manifest.json: optimization.quality phải từ 1 đến 100")
-
-
 SUPPORTED_EXTENSIONS = {
     ".jpg",
     ".jpeg",
@@ -77,199 +32,382 @@ SUPPORTED_EXTENSIONS = {
     ".tiff",
 }
 
-# Read portrait / hero / ending filenames from wedding-info.js.
-# Changing the couple's photo filenames does not require editing this script.
-ASSET_SIZES = {}
-for party in WEDDING_INFO["parties"].values():
-    images = party["images"]
-    for key, max_side in (
-        ("hero", 1920),
-        ("ending", 1600),
-        ("portraitMain", 1000),
-        ("portraitSecondary", 900),
-    ):
-        asset_name = Path(images[key]).stem
-        ASSET_SIZES[asset_name] = max_side
 
-BACKGROUND = (16, 20, 25)
+def read_wedding_info(root: Path) -> dict:
+    source = (root / "wedding-info.js").read_text(encoding="utf-8")
+    marker = "window.WEDDING_INFO = "
+    if marker not in source:
+        raise ValueError("Không tìm thấy window.WEDDING_INFO trong wedding-info.js")
+    return json.JSONDecoder().raw_decode(source.split(marker, 1)[1].lstrip())[0]
 
 
-def natural_key(value: str):
+def local_path(value: str) -> Path | None:
+    parsed = urlsplit(value)
+    if parsed.scheme in ("https", "http"):
+        return None
+    path = Path(unquote(parsed.path))
+    if parsed.scheme or parsed.netloc or path.is_absolute() or ".." in path.parts:
+        raise ValueError("Đường dẫn ảnh không an toàn: " + value)
+    return path
+
+
+def image_references(node):
+    if isinstance(node, dict):
+        for value in node.values():
+            yield from image_references(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from image_references(value)
+    elif isinstance(node, str) and node.startswith("images/optimized/"):
+        yield node
+
+
+def asset_plan(info: dict) -> dict:
+    """Map each configured output to a mandatory original and its conversion."""
+    plan = {}
+
+    def add(value, *, max_side=None, width=None, source_name=None, copy=False):
+        relative = local_path(value)
+        if relative is None:
+            return
+        if relative.parts[:3] != ("images", "optimized", "assets"):
+            raise ValueError(
+                "Ảnh cấu hình phải nằm trong images/optimized/assets/: " + value
+            )
+        output = relative.relative_to("images/optimized")
+        source = Path(source_name) if source_name else output.relative_to("assets")
+        if source.is_absolute() or ".." in source.parts:
+            raise ValueError("Tên ảnh gốc không an toàn: " + str(source))
+        exact = copy or source_name is not None
+        if not exact:
+            source = source.with_suffix("")
+        rule = {
+            "source": source,
+            "exact": exact,
+            "copy": copy,
+            "max_side": max_side,
+            "width": width,
+        }
+        previous = plan.get(output)
+        if previous and previous != rule:
+            raise ValueError("Hai quy tắc ảnh xung đột: " + str(output))
+        plan[output] = rule
+
+    for party in info["parties"].values():
+        for key, size in (
+            ("hero", 1920),
+            ("ending", 1600),
+            ("portraitMain", 1000),
+            ("portraitSecondary", 900),
+        ):
+            add(party["images"][key], max_side=size)
+        # QR pixels and SVG vectors must not be resized or recompressed.
+        add(party["gift"]["qrImage"], copy=True)
+    entrance = info["site"]["entrance"]
+    add(entrance["image"], max_side=2400)
+    add(entrance["lock"], max_side=1200)
+    for image in info.get("story", {}).get("images", {}).values():
+        source_name = image.get("sourceName")
+        if not source_name:
+            raise ValueError("Ảnh story cần sourceName trong wedding-info.js")
+        outputs = {image["src"]: image["width"]}
+        for variant in image.get("variants", []):
+            if (
+                variant["src"] in outputs
+                and outputs[variant["src"]] != variant["width"]
+            ):
+                raise ValueError("Chiều rộng srcset xung đột: " + variant["src"])
+            outputs[variant["src"]] = variant["width"]
+        for src, width in outputs.items():
+            if type(width) is not int or not 1 <= width <= 8192:
+                raise ValueError("Chiều rộng story không hợp lệ: " + str(width))
+            add(src, width=width, source_name=source_name)
+    # Cover custom images too; no configured optimized asset may disappear.
+    for value in image_references(info):
+        relative = local_path(value).relative_to("images/optimized")
+        if relative not in plan:
+            add(value, copy=True)
+    return plan
+
+
+def source_label(rule):
+    suffix = "" if rule["exact"] else ".{jpg,jpeg,png,webp,avif,gif,bmp,tif,tiff}"
+    return "images/original/assets/" + rule["source"].as_posix() + suffix
+
+
+def required_sources(plan):
+    return sorted({source_label(rule) for rule in plan.values()})
+
+
+def resolve_source(root, rule):
+    folder = root / "images/original/assets"
+    expected = rule["source"]
+    parent = folder / expected.parent
+    matches = []
+    if parent.is_dir():
+        for item in parent.iterdir():
+            match = (
+                item.name == expected.name
+                if rule["exact"]
+                else (
+                    item.stem == expected.name
+                    and item.suffix.lower() in SUPPORTED_EXTENSIONS
+                )
+            )
+            if match and item.is_file():
+                if item.is_symlink() or not item.resolve().is_relative_to(
+                    folder.resolve()
+                ):
+                    raise ValueError("Không dùng symlink cho ảnh gốc: " + str(item))
+                matches.append(item)
+    if len(matches) != 1:
+        detail = "Thiếu" if not matches else "Trùng tên (chỉ giữ một định dạng)"
+        raise ValueError(detail + ": " + source_label(rule))
+    return matches[0]
+
+
+def inspect_image(path):
+    if path.suffix.lower() == ".svg":
+        root = ET.parse(path).getroot()
+        if root.tag.split("}")[-1] != "svg":
+            raise ValueError("File không phải SVG: " + str(path))
+        return None
+    with Image.open(path) as image:
+        image.verify()
+    with Image.open(path) as image:
+        image = ImageOps.exif_transpose(image)
+        image.load()
+        return image.size
+
+
+def natural_key(value):
     return [
         int(part) if part.isdigit() else part.casefold()
-        for part in re.split(r"(\d+)", value)
+        for part in re.split(r"(\d+)", str(value))
     ]
 
 
-def safe_display_name(path: Path) -> str:
-    return path.stem.replace("_", " ").replace("-", " ").strip()
-
-
-def ensure_dirs():
-    for path in (ORIGINAL_ASSETS, ORIGINAL_ALBUM, OPTIMIZED_ASSETS, OPTIMIZED_ALBUM):
-        path.mkdir(parents=True, exist_ok=True)
-
-
-def optimized_album_target(source: Path) -> Path:
-    rel = source.relative_to(ORIGINAL_ALBUM)
-    return OPTIMIZED_ALBUM / rel.parent / f"{rel.name}.webp"
-
-
-def prepare_rgb(original: Image.Image, max_side: int) -> Image.Image:
-    try:
-        original.seek(0)
-    except Exception:
-        pass
-
-    image = ImageOps.exif_transpose(original)
-    image.thumbnail((max_side, max_side), Image.Resampling.LANCZOS)
-
-    if image.mode in ("RGBA", "LA") or (
-        image.mode == "P" and "transparency" in image.info
+def preflight(root, info, manifest, plan):
+    errors = []
+    resolved = {}
+    sizes = {}
+    for output, rule in plan.items():
+        try:
+            source = resolve_source(root, rule)
+            if source not in sizes:
+                sizes[source] = inspect_image(source)
+            if not rule["copy"] and sizes[source] is None:
+                raise ValueError("Cần ảnh raster: " + str(source))
+            if rule["width"] and sizes[source][0] < rule["width"]:
+                raise ValueError(
+                    f"Ảnh {source.name} cần chiều rộng ít nhất {rule['width']} px sau xoay EXIF"
+                )
+            if not rule["copy"] and output.suffix.lower() != ".webp":
+                raise ValueError("Ảnh tối ưu phải có đuôi .webp: " + str(output))
+            resolved[output] = source
+        except (OSError, ValueError, SyntaxError) as error:
+            errors.append(str(error))
+    # Favicons are built separately; require their configured templates to exist.
+    for party in info["parties"].values():
+        path = local_path(party["images"]["favicon"])
+        if path is not None and not (root / path).is_file():
+            errors.append("Thiếu favicon template: " + str(path))
+    album_root = root / "images/original/album"
+    album = []
+    targets = set()
+    for path in sorted(
+        album_root.rglob("*"), key=lambda p: natural_key(p.relative_to(album_root))
     ):
-        rgba = image.convert("RGBA")
-        background = Image.new("RGBA", rgba.size, BACKGROUND + (255,))
-        background.alpha_composite(rgba)
-        return background.convert("RGB")
+        if not path.is_file() or any(
+            part.startswith(".") for part in path.relative_to(album_root).parts
+        ):
+            continue
+        try:
+            if path.is_symlink() or not path.resolve().is_relative_to(
+                album_root.resolve()
+            ):
+                raise ValueError("Không dùng symlink cho ảnh album: " + str(path))
+            if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
+                raise ValueError("Định dạng album không hỗ trợ: " + str(path))
+            inspect_image(path)
+            target = (path.relative_to(album_root).as_posix() + ".webp").casefold()
+            if target in targets:
+                raise ValueError("Tên ảnh album trùng trên Windows: " + str(path))
+            targets.add(target)
+            album.append(path)
+        except (OSError, ValueError, SyntaxError) as error:
+            errors.append(str(error))
+    if not album:
+        errors.append(
+            "images/original/album/ phải có ít nhất một ảnh; không xóa album khi đầu vào rỗng."
+        )
+    if manifest.get("mode") != "replace":
+        errors.append(
+            'images/manifest.json: mode phải là "replace"; append không còn được hỗ trợ.'
+        )
+    if not isinstance(manifest.get("shuffle"), bool) or not isinstance(
+        manifest.get("photos"), list
+    ):
+        errors.append("Manifest cần shuffle boolean và photos array.")
+    optimization = manifest.get("optimization", {})
+    for key, low, high in (("maxSide", 160, 4096), ("quality", 1, 100)):
+        value = optimization.get(key)
+        if type(value) is not int or not low <= value <= high:
+            errors.append(f"optimization.{key} phải từ {low} đến {high}.")
+    if errors:
+        raise ValueError(
+            "Kiểm tra đầu vào thất bại:\n- " + "\n- ".join(dict.fromkeys(errors))
+        )
+    return resolved, album
 
-    return image.convert("RGB")
 
-
-def build_album_image(source: Path, target: Path):
+def encode(source, target, *, quality, max_side=None, width=None):
     target.parent.mkdir(parents=True, exist_ok=True)
     with Image.open(source) as original:
-        image = prepare_rgb(original, ALBUM_MAX_SIDE)
-        image.save(target, "WEBP", quality=ALBUM_QUALITY, method=6)
-
-
-def discover_album_images() -> list[Path]:
-    images = [
-        path
-        for path in ORIGINAL_ALBUM.rglob("*")
-        if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS
-    ]
-    images.sort(
-        key=lambda path: natural_key(path.relative_to(ORIGINAL_ALBUM).as_posix())
-    )
-    return images
-
-
-def find_asset_source(name: str) -> Path | None:
-    candidates = sorted(
-        (
-            path
-            for path in ORIGINAL_ASSETS.iterdir()
-            if path.is_file()
-            and path.stem.lower() == name
-            and path.suffix.lower() in SUPPORTED_EXTENSIONS
-        ),
-        key=lambda path: (path.suffix.lower() != ".jpg", path.name.lower()),
-    )
-    return candidates[0] if candidates else None
-
-
-def optimize_assets():
-    """Build main website WebP assets from images/original/assets/."""
-    ensure_dirs()
-
-    for name, max_side in ASSET_SIZES.items():
-        source = find_asset_source(name)
-        target = OPTIMIZED_ASSETS / f"{name}.webp"
-
-        if source is None:
-            state = (
-                "giữ file tối ưu hiện có" if target.exists() else "chưa có file tối ưu"
+        image = ImageOps.exif_transpose(original)
+        if width:
+            image = image.resize(
+                (width, max(1, round(image.height * width / image.width))),
+                Image.Resampling.LANCZOS,
             )
-            print(f"Thiếu ảnh gốc images/original/assets/{name}.* — {state}.")
-            continue
-
-        if target.exists() and target.stat().st_mtime_ns >= source.stat().st_mtime_ns:
-            continue
-
-        try:
-            with Image.open(source) as original:
-                image = prepare_rgb(original, max_side)
-                quality = 80 if name.startswith(("hero", "ending")) else 82
-                image.save(target, "WEBP", quality=quality, method=6)
-            print(
-                f"Asset: {source.name} -> "
-                f"images/optimized/assets/{name}.webp "
-                f"({target.stat().st_size // 1024} KB)"
-            )
-        except (OSError, ValueError, UnidentifiedImageError) as exc:
-            print(f"Không tối ưu được {source.name}: {exc}")
-            print("Giữ nguyên file tối ưu cũ nếu đang có.")
-
-
-def generate_manifest():
-    """Add new optimized photos without erasing manifest settings or captions."""
-    ensure_dirs()
-    found = discover_album_images()
-
-    # Preserve all manual options and per-photo custom metadata. In append
-    # mode the original heavy images may be absent (they are gitignored);
-    # their existing optimized photos must remain in the published manifest.
-    manifest = dict(ALBUM_MANIFEST)
-    previous = [
-        dict(item)
-        for item in manifest["photos"]
-        if isinstance(item, dict) and isinstance(item.get("src"), str) and item["src"]
-    ]
-    photos = list(previous) if ALBUM_MODE == "append" else []
-    indexes = {photo["src"]: index for index, photo in enumerate(photos)}
-
-    for source in found:
-        target = optimized_album_target(source)
-        try:
-            if (
-                not target.exists()
-                or source.stat().st_mtime_ns > target.stat().st_mtime_ns
-            ):
-                build_album_image(source, target)
-                print(f"Optimized: {source.relative_to(ROOT).as_posix()}")
-            digest = hashlib.sha1(target.read_bytes()).hexdigest()[:10]
-            with Image.open(target) as optimized:
-                width, height = optimized.size
-        except (OSError, ValueError, UnidentifiedImageError) as exc:
-            print(f"Skipped {source.relative_to(ROOT).as_posix()}: {exc}")
-            continue
-
-        generated = {
-            "src": quote(target.relative_to(ROOT).as_posix(), safe="/"),
-            "name": safe_display_name(source),
-            "v": digest,
-            "width": width,
-            "height": height,
-        }
-        path = generated["src"]
-        if path in indexes:
-            # Retain hand-edited 'caption' and unknown future metadata.
-            photos[indexes[path]].update(generated)
         else:
-            indexes[path] = len(photos)
-            photos.append(generated)
+            image.thumbnail((max_side, max_side), Image.Resampling.LANCZOS)
+        # Preserve alpha for gate/lock artwork; never flatten onto a dark square.
+        alpha = image.mode in ("RGBA", "LA") or "transparency" in image.info
+        image = image.convert("RGBA" if alpha else "RGB")
+        image.save(target, "WEBP", quality=quality, method=6)
+        return image.size
 
-    unique = []
-    seen = set()
-    for item in photos:
-        if item["src"] in seen:
-            continue
-        seen.add(item["src"])
-        unique.append(item)
 
-    manifest["photos"] = unique
-    manifest["total"] = len(unique)
-    MANIFEST_FILE.write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+def publish(root, stage):
+    """Replace generated files only, with rollback on publication errors."""
+    optimized = root / "images/optimized"
+    manifest = root / "images/manifest.json"
+    backup = stage / "previous-optimized"
+    had_previous = optimized.exists()
+    if had_previous:
+        os.replace(optimized, backup)
+    try:
+        os.replace(stage / "optimized", optimized)
+        os.replace(stage / "manifest.json", manifest)
+    except BaseException:
+        if optimized.exists():
+            shutil.rmtree(optimized)
+        if had_previous:
+            os.replace(backup, optimized)
+        raise
+
+
+def rebuild(root=ROOT, *, check=False):
+    root = Path(root)
+    image_root = root / "images"
+    # Refuse concurrent writers and symlinked generated destinations.
+    for path in (image_root, image_root / "optimized", image_root / "manifest.json"):
+        if path.is_symlink():
+            raise ValueError("Không dùng symlink cho đầu ra: " + str(path))
+    lock = image_root / ".gallery.lock"
+    try:
+        descriptor = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    except FileExistsError:
+        raise ValueError(
+            "Đang có tiến trình tạo ảnh (.gallery.lock). Nếu tiến trình trước bị dừng đột ngột, kiểm tra rồi xóa lock để chạy lại."
+        ) from None
+    os.close(descriptor)
+    try:
+        info = read_wedding_info(root)
+        manifest = json.loads(
+            (image_root / "manifest.json").read_text(encoding="utf-8")
+        )
+        plan = asset_plan(info)
+        resolved, album = preflight(root, info, manifest, plan)
+        if check:
+            print(
+                f"Đủ đầu vào: {len(set(resolved.values()))} ảnh bắt buộc, {len(album)} ảnh album."
+            )
+            return
+        with tempfile.TemporaryDirectory(
+            prefix=".gallery-build-", dir=image_root
+        ) as temporary:
+            stage = Path(temporary)
+            for output, rule in plan.items():
+                target = stage / "optimized" / output
+                target.parent.mkdir(parents=True, exist_ok=True)
+                if rule["copy"]:
+                    shutil.copyfile(resolved[output], target)
+                else:
+                    encode(
+                        resolved[output],
+                        target,
+                        quality=84,
+                        max_side=rule["max_side"],
+                        width=rule["width"],
+                    )
+            previous = {
+                item.get("src"): item
+                for item in manifest["photos"]
+                if isinstance(item, dict)
+            }
+            photos = []
+            for source in album:
+                relative = source.relative_to(root / "images/original/album")
+                output = Path("album") / relative.parent / (relative.name + ".webp")
+                target = stage / "optimized" / output
+                width, height = encode(
+                    source,
+                    target,
+                    quality=manifest["optimization"]["quality"],
+                    max_side=manifest["optimization"]["maxSide"],
+                )
+                src = quote("images/optimized/" + output.as_posix(), safe="/")
+                photo = {
+                    "src": src,
+                    "name": source.stem.replace("_", " ").replace("-", " ").strip(),
+                    "v": hashlib.sha256(target.read_bytes()).hexdigest()[:12],
+                    "width": width,
+                    "height": height,
+                }
+                # Keep authored captions only for photos still present in originals.
+                if "caption" in previous.get(src, {}):
+                    photo["caption"] = previous[src]["caption"]
+                photos.append(photo)
+            manifest["photos"] = photos
+            manifest["total"] = len(photos)
+            (stage / "manifest.json").write_text(
+                json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            publish(root, stage)
+        print(
+            f"Đã tạo mới toàn bộ images/optimized/: {len(plan)} tài nguyên, {len(photos)} ảnh album. Không giữ file tối ưu cũ."
+        )
+    finally:
+        lock.unlink()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--check",
+        action="store_true",
+        help="Chỉ kiểm tra đầy đủ đầu vào; không thay đầu ra",
     )
-    if not found and ALBUM_MODE == "append":
-        print("Không có ảnh gốc mới; giữ nguyên danh sách ảnh và tùy chỉnh.")
-    elif not found:
-        print("Replace mode: không có ảnh gốc nên album mới rỗng.")
-    print(f"Hoàn tất: {manifest['total']} ảnh trong images/manifest.json.")
+    group.add_argument(
+        "--list-required",
+        action="store_true",
+        help="Liệt kê chính xác tên ảnh bắt buộc từ config",
+    )
+    args = parser.parse_args()
+    try:
+        if args.list_required:
+            print("\n".join(required_sources(asset_plan(read_wedding_info(ROOT)))))
+        else:
+            rebuild(check=args.check)
+    except (OSError, ValueError, SyntaxError, KeyError, TypeError) as error:
+        print("FAILED: " + str(error), file=sys.stderr)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    generate_manifest()
-    optimize_assets()
+    sys.exit(main())
