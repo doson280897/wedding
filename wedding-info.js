@@ -114,6 +114,10 @@ window.WEDDING_INFO = {
         "portraitMain": "images/optimized/assets/nga-2.webp",
         "portraitSecondary": "images/optimized/assets/nga-1.webp"
       },
+      "portraitPosition": {
+        "main": "50% 25%",
+        "secondary": "50% 15%"
+      },
       "gift": {
         "bank": "MB",
         "accountHolder": "{{couple.bride.fullUpper}}",
@@ -176,6 +180,10 @@ window.WEDDING_INFO = {
         "portraitMain": "images/optimized/assets/son-2.webp",
         "portraitSecondary": "images/optimized/assets/son-1.webp"
       },
+      "portraitPosition": {
+        "main": "50% 0%",
+        "secondary": "50% 10%"
+      },
       "gift": {
         "bank": "TPBank",
         "accountHolder": "{{couple.groom.fullUpper}}",
@@ -230,6 +238,10 @@ window.WEDDING_INFO = {
         "favicon": "favicon-groom.svg",
         "portraitMain": "images/optimized/assets/nga-2.webp",
         "portraitSecondary": "images/optimized/assets/nga-1.webp"
+      },
+      "portraitPosition": {
+        "main": "50% 25%",
+        "secondary": "50% 15%"
       },
       "gift": {
         "bank": "MB",

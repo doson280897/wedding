@@ -249,3 +249,7 @@ Chạy `npm run format` trước khi commit; `npm run format:check` kiểm tra c
 Nhạc MP3 chỉ được gán source khi khách mở thiệp/bật nhạc; `play()` vẫn chạy trực tiếp trong click để giữ user activation trên iOS. Album chỉ duyệt các thẻ gần camera cộng các thẻ vừa rời vùng nhìn ở mỗi frame. Không giảm kích thước, chất lượng hay số lượng ảnh; nguồn fullscreen giữ nguyên.
 
 Xem [review kỹ thuật](docs/source-review.md) để biết phạm vi, bằng chứng và các bước tiếp theo.
+
+### Căn khuôn mặt trong khung chân dung
+
+`parties.bride/groom.portraitPosition.main` và `.secondary` trong `wedding-info.js` đặt `object-position` cho từng ảnh. Ví dụ `"50% 0%"` giữ phần trên ảnh, `"50% 25%"` cắt nhẹ từ phía trên khi khung rộng. Căn giữa mặc định `50% 50%` có thể cắt đầu đối với ảnh toàn thân. Khi đổi ảnh, chỉnh vị trí ở đây; không cần crop/nén lại ảnh gốc. Khung vòm và ảnh chồng vẫn giữ nguyên.
