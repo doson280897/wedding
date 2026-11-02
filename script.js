@@ -220,7 +220,7 @@
   };
   // Hold the standalone invitation after passing through the gate,
   // then crossfade the night sky and the real hero together.
-  const GATE_UNLOCK_MS = 1400;
+  const GATE_UNLOCK_MS = 700;
   const GATE_AWAKEN_MS = 180;
   const GATE_DOOR_MS = 2400;
   const GATE_REVEAL_BEAT_MS = 2000;
