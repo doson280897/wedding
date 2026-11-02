@@ -21,7 +21,7 @@
       "FOREVER"
     ]
   },
-  "total": 54,
+  "total": 64,
   "photos": [
     {
       "src": "images/optimized/album/1_01.jpg.webp",
@@ -118,6 +118,76 @@
       "src": "images/optimized/album/1_14.jpg.webp",
       "name": "1 14",
       "v": "220f5fd1500f",
+      "width": 1440,
+      "height": 1008
+    },
+    {
+      "src": "images/optimized/album/2_01.jpg.webp",
+      "name": "2 01",
+      "v": "955e9b5c4f04",
+      "width": 1440,
+      "height": 1008
+    },
+    {
+      "src": "images/optimized/album/2_02.jpg.webp",
+      "name": "2 02",
+      "v": "317fe7011979",
+      "width": 1440,
+      "height": 1008
+    },
+    {
+      "src": "images/optimized/album/2_03.jpg.webp",
+      "name": "2 03",
+      "v": "faffcf103fe7",
+      "width": 1440,
+      "height": 1008
+    },
+    {
+      "src": "images/optimized/album/2_04.jpg.webp",
+      "name": "2 04",
+      "v": "12dfd7e87742",
+      "width": 1440,
+      "height": 1008
+    },
+    {
+      "src": "images/optimized/album/2_05.jpg.webp",
+      "name": "2 05",
+      "v": "d62638d8f132",
+      "width": 1440,
+      "height": 1008
+    },
+    {
+      "src": "images/optimized/album/2_06.jpg.webp",
+      "name": "2 06",
+      "v": "19531ceb7b93",
+      "width": 1440,
+      "height": 1008
+    },
+    {
+      "src": "images/optimized/album/2_07.jpg.webp",
+      "name": "2 07",
+      "v": "5485c35c684e",
+      "width": 1440,
+      "height": 1008
+    },
+    {
+      "src": "images/optimized/album/2_08.jpg.webp",
+      "name": "2 08",
+      "v": "a4a13814f31b",
+      "width": 1440,
+      "height": 1008
+    },
+    {
+      "src": "images/optimized/album/2_09.jpg.webp",
+      "name": "2 09",
+      "v": "9b0bc38d0011",
+      "width": 1440,
+      "height": 1008
+    },
+    {
+      "src": "images/optimized/album/2_10.jpg.webp",
+      "name": "2 10",
+      "v": "bf06d7c2e520",
       "width": 1440,
       "height": 1008
     },
